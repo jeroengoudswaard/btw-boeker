@@ -1,0 +1,16 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+
+[*.{cs,xaml}]
+indent_size = 4
+
+[*.{csproj,props,targets,json,yml,xml}]
+indent_size = 2
+
+# Door EF Core gegenereerde migraties niet analyseren.
+[**/Migraties/*.cs]
+generated_code = true

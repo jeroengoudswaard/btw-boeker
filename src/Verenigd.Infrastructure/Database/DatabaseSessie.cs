@@ -1,0 +1,60 @@
+using System.IO.Compression;
+using System.Security.Cryptography;
+using Microsoft.Data.Sqlite;
+using Verenigd.Application.Administraties;
+using Verenigd.Application.Database;
+
+namespace Verenigd.Infrastructure.Database;
+
+internal sealed class DatabaseSessie : IDatabaseSessie
+{
+    private readonly byte[] _databasesleutel;
+
+    public DatabaseSessie(string pad, byte[] databasesleutel)
+    {
+        Pad = pad;
+        _databasesleutel = databasesleutel;
+        Administraties = new AdministratieRepository(MaakContext);
+    }
+
+    public string Pad { get; }
+
+    public IAdministratieRepository Administraties { get; }
+
+    public async Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
+    {
+        var werkmap = Directory.CreateTempSubdirectory("verenigd-backup-");
+        try
+        {
+            // SQLite online-backup: consistent, ook terwijl de database open is. De kopie houdt dezelfde sleutel.
+            var kopie = Path.Combine(werkmap.FullName, DatabaseBeheer.BackupDatabaseNaam);
+            using (var bron = new SqliteConnection(DatabaseBeheer.Verbindingstekst(Pad, _databasesleutel)))
+            using (var doel = new SqliteConnection(DatabaseBeheer.Verbindingstekst(kopie, _databasesleutel)))
+            {
+                await bron.OpenAsync(annulering).ConfigureAwait(false);
+                await doel.OpenAsync(annulering).ConfigureAwait(false);
+                bron.BackupDatabase(doel);
+            }
+
+            File.Copy(DatabaseBeheer.SleutelPad(Pad), Path.Combine(werkmap.FullName, DatabaseBeheer.BackupSleutelNaam));
+
+            var tijdelijk = doelPad + ".tmp";
+            File.Delete(tijdelijk);
+            await ZipFile.CreateFromDirectoryAsync(
+                werkmap.FullName, tijdelijk, CompressionLevel.Optimal, includeBaseDirectory: false, annulering).ConfigureAwait(false);
+            File.Move(tijdelijk, doelPad, overwrite: true);
+        }
+        finally
+        {
+            werkmap.Delete(recursive: true);
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        CryptographicOperations.ZeroMemory(_databasesleutel);
+        return ValueTask.CompletedTask;
+    }
+
+    private VerenigdDbContext MaakContext() => DatabaseBeheer.MaakContext(Pad, _databasesleutel);
+}

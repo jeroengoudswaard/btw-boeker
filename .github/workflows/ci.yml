@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  bouwen-en-testen:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Herstellen
+        run: dotnet restore
+
+      - name: Bouwen (waarschuwingen = fouten)
+        run: dotnet build --no-restore --configuration Release
+
+      # UI-tests (FlaUI) vereisen een interactieve sessie en draaien lokaal; zie README.
+      - name: Testen
+        run: dotnet test --no-build --configuration Release --filter "Categorie!=UI" --logger trx --results-directory TestResults
+
+      - name: Testresultaten bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testresultaten
+          path: TestResults

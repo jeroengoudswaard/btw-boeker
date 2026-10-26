@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Verenigd.App/Verenigd.App.csproj" />
+    <Project Path="src/Verenigd.Application/Verenigd.Application.csproj" />
+    <Project Path="src/Verenigd.Domain/Verenigd.Domain.csproj" />
+    <Project Path="src/Verenigd.Infrastructure/Verenigd.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Verenigd.App.Tests/Verenigd.App.Tests.csproj" />
+    <Project Path="tests/Verenigd.Application.Tests/Verenigd.Application.Tests.csproj" />
+    <Project Path="tests/Verenigd.Domain.Tests/Verenigd.Domain.Tests.csproj" />
+    <Project Path="tests/Verenigd.Infrastructure.Tests/Verenigd.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,184 @@
+<Window x:Class="Verenigd.App.Views.ShellWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Verenigd.App.ViewModels"
+        xmlns:views="clr-namespace:Verenigd.App.Views"
+        xmlns:inst="clr-namespace:Verenigd.Application.Instellingen;assembly=Verenigd.Application"
+        xmlns:mod="clr-namespace:Verenigd.Application.Modules;assembly=Verenigd.Application"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
+        Title="{Binding Venstertitel}"
+        Width="1200" Height="760" MinWidth="800" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        AutomationProperties.AutomationId="Hoofdvenster">
+
+    <Window.Resources>
+
+        <!-- Inhoud per soort tabblad -->
+        <DataTemplate DataType="{x:Type vm:OverzichtViewModel}">
+            <views:OverzichtView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InstellingenViewModel}">
+            <views:InstellingenView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
+                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Module.Pictogram}" FontSize="48"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <TextBlock Text="{Binding Module.Titel}" Style="{StaticResource Sectietitel}" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Melding}" Style="{StaticResource Toelichting}" TextAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="ModuleMenuItemStijl" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+            <Setter Property="Header" Value="{Binding Titel}" />
+            <Setter Property="Command" Value="{Binding Opdracht}" />
+            <Setter Property="CommandParameter" Value="{Binding Parameter}" />
+            <Setter Property="InputGestureText" Value="{Binding Sneltoets}" />
+            <Setter Property="ItemsSource" Value="{Binding Kinderen}" />
+            <Setter Property="AutomationProperties.AutomationId" Value="{Binding Titel, StringFormat=Menu_{0}}" />
+        </Style>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding NieuweDatabaseCommand}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding OpslaanCommand}" />
+        <KeyBinding Gesture="Ctrl+W" Command="{Binding SluitTabbladCommand}" />
+        <KeyBinding Gesture="Ctrl+F4" Command="{Binding SluitTabbladCommand}" />
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding VolgendTabbladCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding VorigTabbladCommand}" />
+        <KeyBinding Key="OemComma" Modifiers="Ctrl" Command="{Binding OpenModuleCommand}" CommandParameter="{x:Static vm:ModuleVerzoek.Instellingen}" />
+        <KeyBinding Gesture="Ctrl+D1" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="1" />
+        <KeyBinding Gesture="Ctrl+D2" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="2" />
+        <KeyBinding Gesture="Ctrl+D3" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="3" />
+        <KeyBinding Gesture="Ctrl+D4" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="4" />
+        <KeyBinding Gesture="Ctrl+D5" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="5" />
+        <KeyBinding Gesture="Ctrl+D6" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="6" />
+    </Window.InputBindings>
+
+    <DockPanel>
+        <!-- ===== Menubalk ===== -->
+        <Menu DockPanel.Dock="Top" AutomationProperties.AutomationId="Menubalk">
+            <MenuItem Header="_Bestand" AutomationProperties.AutomationId="Menu_Bestand">
+                <MenuItem Header="_Nieuwe database..." InputGestureText="Ctrl+N" Command="{Binding NieuweDatabaseCommand}" />
+                <MenuItem Header="_Openen..." InputGestureText="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
+                <MenuItem Header="_Sluiten" Command="{Binding SluitDatabaseCommand}" />
+                <Separator />
+                <MenuItem Header="Op_slaan" InputGestureText="Ctrl+S" Command="{Binding OpslaanCommand}" />
+                <Separator />
+                <MenuItem Header="_Back-up maken..." Command="{Binding MaakBackupCommand}" />
+                <MenuItem Header="Back-up _terugzetten..." Command="{Binding HerstelBackupCommand}" />
+                <Separator />
+                <MenuItem Header="_Afsluiten" InputGestureText="Alt+F4" Click="Afsluiten_Click" />
+            </MenuItem>
+            <MenuItem Header="Be_werken" AutomationProperties.AutomationId="Menu_Bewerken">
+                <MenuItem Header="_Ongedaan maken" Command="ApplicationCommands.Undo" />
+                <MenuItem Header="_Opnieuw" Command="ApplicationCommands.Redo" />
+                <Separator />
+                <MenuItem Header="K_nippen" Command="ApplicationCommands.Cut" />
+                <MenuItem Header="_Kopiëren" Command="ApplicationCommands.Copy" />
+                <MenuItem Header="_Plakken" Command="ApplicationCommands.Paste" />
+            </MenuItem>
+            <MenuItem Header="Bee_ld" AutomationProperties.AutomationId="Menu_Beeld">
+                <MenuItem Header="_Thema">
+                    <MenuItem Header="_Systeem (volgt Windows)" Command="{Binding KiesThemaCommand}" CommandParameter="{x:Static inst:Thema.Systeem}"
+                              IsChecked="{Binding Thema, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Thema.Systeem}}" />
+                    <MenuItem Header="_Licht" Command="{Binding KiesThemaCommand}" CommandParameter="{x:Static inst:Thema.Licht}"
+                              IsChecked="{Binding Thema, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Thema.Licht}}" />
+                    <MenuItem Header="_Donker" Command="{Binding KiesThemaCommand}" CommandParameter="{x:Static inst:Thema.Donker}"
+                              IsChecked="{Binding Thema, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Thema.Donker}}" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="_Volgend tabblad" InputGestureText="Ctrl+Tab" Command="{Binding VolgendTabbladCommand}" />
+                <MenuItem Header="Vo_rig tabblad" InputGestureText="Ctrl+Shift+Tab" Command="{Binding VorigTabbladCommand}" />
+                <MenuItem Header="Tabblad _sluiten" InputGestureText="Ctrl+W" Command="{Binding SluitTabbladCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Modules" AutomationProperties.AutomationId="Menu_Modules"
+                      ItemsSource="{Binding ModuleMenu}" ItemContainerStyle="{StaticResource ModuleMenuItemStijl}" />
+            <MenuItem Header="E_xtra" AutomationProperties.AutomationId="Menu_Extra">
+                <MenuItem Header="_Instellingen" InputGestureText="Ctrl+," Command="{Binding OpenModuleCommand}"
+                          CommandParameter="{x:Static vm:ModuleVerzoek.Instellingen}" />
+            </MenuItem>
+            <MenuItem Header="_Help" AutomationProperties.AutomationId="Menu_Help">
+                <MenuItem Header="_Logbestanden openen" Click="LogbestandenOpenen_Click" />
+                <Separator />
+                <MenuItem Header="_Over Verenigd" Click="Over_Click" />
+            </MenuItem>
+        </Menu>
+
+        <!-- ===== Statusbalk ===== -->
+        <StatusBar DockPanel.Dock="Bottom" AutomationProperties.AutomationId="Statusbalk">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" Margin="0,0,6,0" VerticalAlignment="Center"
+                               Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}"
+                               ToolTip="Versleuteld" />
+                    <TextBlock Text="{Binding DatabaseNaam, TargetNullValue='Geen database geopend'}" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Visibility="{Binding ActieveAdministratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
+            <StatusBarItem Visibility="{Binding ActieveAdministratie, Converter={StaticResource NietNullNaarZichtbaar}}"
+                           AutomationProperties.AutomationId="StatusAdministratie">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="10" Height="10" Margin="0,0,6,0" VerticalAlignment="Center"
+                             Fill="{Binding ActieveAdministratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
+                    <TextBlock Text="{Binding ActieveAdministratieNaam}" FontWeight="SemiBold" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
+            <StatusBarItem Content="{Binding Boekjaartekst}"
+                           Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
+            <StatusBarItem HorizontalAlignment="Right" Content="{Binding Statusmelding}" />
+        </StatusBar>
+
+        <!-- ===== Tabbladen ===== -->
+        <TabControl x:Name="Tabbladen" ItemsSource="{Binding Tabbladen}" SelectedItem="{Binding GeselecteerdTabblad}"
+                    AutomationProperties.AutomationId="Tabbladen" Margin="4,4,4,0">
+            <TabControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
+                    <Grid Background="Transparent" AutomationProperties.Name="{Binding Titel}">
+                        <Grid.InputBindings>
+                            <MouseBinding Gesture="MiddleClick"
+                                          Command="{Binding DataContext.SluitTabbladCommand, RelativeSource={RelativeSource AncestorType=TabControl}}"
+                                          CommandParameter="{Binding}" />
+                        </Grid.InputBindings>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="4" Height="16" RadiusX="2" RadiusY="2" Margin="0,0,8,0" VerticalAlignment="Center"
+                                       Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}"
+                                       Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                            <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Module.Pictogram}"
+                                       Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Titel}" VerticalAlignment="Center" />
+                            <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE711;" FontSize="10"
+                                    Padding="6,4" Margin="8,0,-4,0" Background="Transparent" BorderThickness="0"
+                                    VerticalAlignment="Center" Focusable="False"
+                                    ToolTip="Sluiten (Ctrl+W)" AutomationProperties.Name="Tabblad sluiten"
+                                    Visibility="{Binding KanSluiten, Converter={StaticResource BoolNaarZichtbaar}}"
+                                    Command="{Binding DataContext.SluitTabbladCommand, RelativeSource={RelativeSource AncestorType=TabControl}}"
+                                    CommandParameter="{Binding}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
+                    <DockPanel>
+                        <!-- Gekleurde band: altijd zichtbaar in welke administratie u werkt. -->
+                        <Border DockPanel.Dock="Top" Padding="24,8"
+                                Background="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}"
+                                Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                            <TextBlock FontWeight="SemiBold" AutomationProperties.AutomationId="AdministratieBand"
+                                       Foreground="{Binding Administratie.Tekstkleur, Converter={StaticResource KleurNaarBrush}}">
+                                <Run Text="{Binding Module.Titel, Mode=OneWay}" /><Run Text="  —  " /><Run Text="{Binding Administratie.Naam, Mode=OneWay}" />
+                            </TextBlock>
+                        </Border>
+                        <ContentControl Content="{Binding}" Focusable="False" />
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+    </DockPanel>
+</Window>
