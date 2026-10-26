@@ -62,13 +62,15 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
 | 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
 | 26 | Status SOL3 | Export bevat alleen "Actief"; onbekende waarden geven een waarschuwing |
+| 27 | Contactpersoon-ID | Behandeld als persoons-ID; de import waarschuwt als het niet 1-op-1 met het lidnummer is. Huishouden-ID komt uit export 2 |
+| 28 | Datumnotatie | Altijd dag-maand-jaar, met `-` of `/` als scheidingsteken; onleesbare datum geeft waarschuwing per regel |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
 - **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
-- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums komen voor als `1-12-2026` én `1/3/2026` (dag-maandvolgorde nog bevestigen). Contactpersoon-ID: persoon of huishouden nog onbekend. Wachten op kopregels van export 2–4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
+- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums en Contactpersoon-ID: zie besluiten 27–28. Wachten op kopregels van export 2–4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
 
 ## Privacy
 
