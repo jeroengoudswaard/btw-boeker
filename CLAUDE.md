@@ -57,20 +57,22 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 19 | SOL3-import | De gebruiker levert eerst de kolomnamen van de SOL3-export (geen echte gegevens) |
 | 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
 | 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
-| 22 | IBAN/machtiging | IBAN komt uit SOL3; de SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
+| 22 | IBAN/machtiging | IBAN uit SOL3 als het gevuld is, anders in Verenigd ingevuld; verschil tussen beide geeft een waarschuwing (gewijzigd na export 2: IBAN-kolommen bleken leeg). De SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
 | 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 | 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
 | 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
 | 26 | Status SOL3 | Export bevat alleen "Actief"; onbekende waarden geven een waarschuwing |
 | 27 | Contactpersoon-ID | Behandeld als persoons-ID; de import waarschuwt als het niet 1-op-1 met het lidnummer is. Huishouden-ID komt uit export 2 |
 | 28 | Datumnotatie | Altijd dag-maand-jaar, met `-` of `/` als scheidingsteken; onleesbare datum geeft waarschuwing per regel |
+| 29 | Huishouden | Gekoppeld via een account-ID-kolom die de gebruiker aan export 2 toevoegt (niet afgeleid uit adres) |
+| 30 | SOL3-ID's | Salesforce-ID's (15 tekens) zijn hoofdlettergevoelig: ordinaal vergelijken, `COLLATE BINARY` |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
 - **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
-- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums en Contactpersoon-ID: zie besluiten 27–28. Wachten op kopregels van export 2–4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
+- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums en Contactpersoon-ID: zie besluiten 27–28. Export 2 (Huishouden) ontvangen: `Lidnummer;Contactpersoon-ID;Lid straat;Lid huisnummer;Lid huisnr.toev.;Postcode;Lid plaats;Land;Betaalprofiel IBAN;Betaalprofiel rekeningshoudersnaam;Organisatie naam;Organisatie plaats;Naam organisatie eenheid` — gebruiker voegt nog een account-ID-kolom toe (naam volgt). Wachten op kopregels van export 3–4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
 
 ## Privacy
 
