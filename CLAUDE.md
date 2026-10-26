@@ -57,14 +57,14 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 19 | SOL3-import | De gebruiker levert eerst de kolomnamen van de SOL3-export (geen echte gegevens) |
 | 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
 | 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
-| 22 | IBAN/machtiging | IBAN uit SOL3 als het gevuld is, anders in Verenigd ingevuld; verschil tussen beide geeft een waarschuwing (gewijzigd na export 2: IBAN-kolommen bleken leeg). De SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
-| 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
+| 22 | IBAN/machtiging | IBAN uit SOL3 als het gevuld is, anders in Verenigd ingevuld; verschil tussen beide geeft een waarschuwing (gewijzigd na export 2: IBAN-kolommen bleken leeg). IBAN en SEPA-machtiging (datum, kenmerk) horen bij de Betaler, niet bij de Persoon |
+| 23 | Ledenmodel | Betaler (IBAN) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen huishouden (zie 29). Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 | 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
 | 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
 | 26 | Status SOL3 | Export bevat alleen "Actief"; onbekende waarden geven een waarschuwing |
 | 27 | Contactpersoon-ID | Behandeld als persoons-ID; de import waarschuwt als het niet 1-op-1 met het lidnummer is. Huishouden-ID komt uit export 2 |
 | 28 | Datumnotatie | Altijd dag-maand-jaar, met `-` of `/` als scheidingsteken; onleesbare datum geeft waarschuwing per regel |
-| 29 | Huishouden | SOL3 heeft geen huishouden-ID. Verenigd leidt het huishouden af: leden die een voogd-e-mailadres delen (voogd 1 of 2, zonder hoofdletter- of spatieverschil) horen bij hetzelfde huishouden. Het huishouden is daarmee een Verenigd-gegeven, geen SOL3-gegeven. Het eigen e-mailadres van een lid telt mee (ouder-leider komt bij de kinderen). Koppeling is transitief. Handmatige correcties (samenvoegen/splitsen) worden als aparte regels bewaard en bij elke import opnieuw toegepast. Waarschuwingen: verschillende adressen binnen één huishouden, meer dan 5 leden, zelfde adres + achternaam in verschillende huishoudens |
+| 29 | Betaler i.p.v. huishouden | Geen huishouden-entiteit (SOL3 heeft geen huishouden-ID; afleiden uit voogd-e-mail is vervallen). De **Betaler** (IBAN, rekeninghouder, machtiging) groepeert leden: zelfde IBAN = één betaler = één incasso per run. Gezinskorting (fase 3) geldt alleen voor leden van dezelfde betaler. IBAN vergelijken zonder spaties en hoofdletterongevoelig; ongeldig controlegetal geeft waarschuwing |
 | 30 | SOL3-ID's | Salesforce-ID's (15 tekens) zijn hoofdlettergevoelig: ordinaal vergelijken, `COLLATE BINARY` |
 
 ## Stand van zaken (bijwerken na elke sessie)
