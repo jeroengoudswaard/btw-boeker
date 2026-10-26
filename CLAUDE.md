@@ -55,13 +55,17 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 17 | Sneltoetsen financiële modules | Openen voor de administratie van het actieve tabblad, anders de Vereniging |
 | 18 | Sleutelbestand | `<naam>.vdb.sleutel` staat naast de database; een back-up (`.vbak`) bevat beide |
 | 19 | SOL3-import | De gebruiker levert eerst de kolomnamen van de SOL3-export (geen echte gegevens) |
+| 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
+| 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
+| 22 | IBAN/machtiging | IBAN komt uit SOL3; de SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
+| 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
 - **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
-- **Open punt: Fase 2 (Leden).** SOL3 levert **CSV-bestanden**; de gebruiker gebruikt **meerdere soorten exports** (bijvoorbeeld leden en functies apart). Wachten op de **kopregels (alleen kolomnamen) van elke export**, met per export de naam en het doel. Daarna eerst een voorstel ter goedkeuring (ledenmodel, koppeling tussen exports, importscherm, teststrategie), pas dan code.
+- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Wachten op de **kopregels van de vier eigen exports** (besluit 20). Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
 
 ## Privacy
 
