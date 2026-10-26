@@ -60,7 +60,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
-- **Open punt: GitHub.** Na `gh auth login` door de gebruiker maakt Claude de privé-repository `verenigd` aan en pusht de bestaande commits.
+- **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
 - **Open punt: Fase 2 (Leden).** SOL3 levert **CSV-bestanden**; de gebruiker gebruikt **meerdere soorten exports** (bijvoorbeeld leden en functies apart). Wachten op de **kopregels (alleen kolomnamen) van elke export**, met per export de naam en het doel. Daarna eerst een voorstel ter goedkeuring (ledenmodel, koppeling tussen exports, importscherm, teststrategie), pas dan code.
 
 ## Privacy
