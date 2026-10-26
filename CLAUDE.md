@@ -58,10 +58,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
 | 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
 | 22 | IBAN/machtiging | IBAN komt uit SOL3; de SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
+| 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 | 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
 | 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
 | 26 | Status SOL3 | Export bevat alleen "Actief"; onbekende waarden geven een waarschuwing |
-| 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
