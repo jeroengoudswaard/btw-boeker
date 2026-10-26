@@ -15,7 +15,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - Instellingen: naam en accentkleur per administratie, met kleurvoorstellen en live voorbeeld.
 - Open tabbladen worden bij de volgende start hersteld.
 - Logging naar `%LOCALAPPDATA%\Verenigd\logs` zonder persoonsgegevens.
-- 117 geautomatiseerde tests (unit, integratie, UI) en een CI-pipeline (GitHub Actions).
+- Contributie is alleen beschikbaar voor de Vereniging; het menu toont geen keuze en Ctrl+3 opent altijd de Vereniging.
+- 124 geautomatiseerde tests (unit, integratie, UI) en een CI-pipeline (GitHub Actions).
 
 ### Nog niet functioneel
 - De modules Leden, Contributie, Boekhouding, Begroting en E-mail tonen een plaatshouder. Ze volgen in fase 2 t/m 6.

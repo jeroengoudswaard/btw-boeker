@@ -41,6 +41,20 @@ public class ModuleCatalogusTests
     }
 
     [Fact]
+    public void Contributie_is_alleen_voor_de_vereniging()
+    {
+        Assert.Equal(Domain.Administraties.AdministratieSoort.Vereniging, ModuleCatalogus.Geef(ModuleSoort.Contributie).AlleenVoor);
+    }
+
+    [Theory]
+    [InlineData(ModuleSoort.Boekhouding)]
+    [InlineData(ModuleSoort.Begroting)]
+    public void Boekhouding_en_begroting_zijn_voor_beide_administraties(ModuleSoort soort)
+    {
+        Assert.Null(ModuleCatalogus.Geef(soort).AlleenVoor);
+    }
+
+    [Fact]
     public void Alleen_overzicht_kan_niet_gesloten_worden()
     {
         Assert.Equal([ModuleSoort.Overzicht], ModuleCatalogus.Alle.Where(m => !m.KanSluiten).Select(m => m.Soort));

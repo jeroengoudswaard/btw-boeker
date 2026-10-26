@@ -51,6 +51,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 13 | Accentkleur | Per administratie instelbaar door de gebruiker (Instellingen) |
 | 14 | Wachtwoord vergeten | Bij het aanmaken toont de app een herstelsleutel |
 | 15 | Boekjaar | Kalenderjaar, voor beide administraties |
+| 16 | Contributie | Alleen voor de Vereniging (de Stichting heeft geen contributie) |
+| 17 | Sneltoetsen financiële modules | Openen voor de administratie van het actieve tabblad, anders de Vereniging |
+| 18 | Sleutelbestand | `<naam>.vdb.sleutel` staat naast de database; een back-up (`.vbak`) bevat beide |
+| 19 | SOL3-import | De gebruiker levert eerst de kolomnamen van de SOL3-export (geen echte gegevens) |
 
 ## Privacy
 

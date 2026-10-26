@@ -228,6 +228,57 @@ public sealed class ShellViewModelTests
     }
 
     [Fact]
+    public async Task Contributie_kan_niet_voor_de_stichting_geopend_worden()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+
+        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Stichting)));
+        Assert.True(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging)));
+    }
+
+    [Fact]
+    public async Task Sneltoets_contributie_vanuit_stichting_opent_contributie_van_vereniging()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
+
+        shell.OpenModuleViaSneltoetsCommand.Execute("3");
+
+        Assert.Equal(ModuleSoort.Contributie, shell.GeselecteerdTabblad!.Module.Soort);
+        Assert.Equal(AdministratieSoort.Vereniging, shell.GeselecteerdTabblad.Administratie!.Soort);
+    }
+
+    [Fact]
+    public async Task Modulemenu_toont_contributie_zonder_keuze_en_boekhouding_met_keuze()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+
+        var contributie = shell.ModuleMenu.Single(m => m.Titel == "Contributie");
+        var boekhouding = shell.ModuleMenu.Single(m => m.Titel == "Boekhouding");
+
+        Assert.Empty(contributie.Kinderen);
+        Assert.Equal(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging), contributie.Parameter);
+        Assert.Equal(2, boekhouding.Kinderen.Count);
+    }
+
+    [Fact]
+    public async Task Bewaard_tabblad_contributie_stichting_wordt_niet_hersteld()
+    {
+        _beheer.Voeg(Pad, Wachtwoord);
+        _instellingen.Instellingen = new GebruikersInstellingen
+        {
+            LaatsteDatabase = Pad,
+            OpenTabbladen = [new OpenTabblad(ModuleSoort.Contributie, AdministratieSoort.Stichting)],
+        };
+        _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
+        var shell = MaakShell();
+
+        await shell.InitialiseerAsync();
+
+        Assert.Single(shell.Tabbladen);
+    }
+
+    [Fact]
     public async Task Tabblad_sluiten_selecteert_buurman()
     {
         var shell = await MaakShellMetOpenDatabase();

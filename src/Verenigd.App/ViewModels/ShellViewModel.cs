@@ -278,6 +278,7 @@ public sealed partial class ShellViewModel : ObservableObject
         var definitie = ModuleCatalogus.Geef(verzoek.Module);
         return IsDatabaseOpen
             && definitie.PerAdministratie == verzoek.Administratie.HasValue
+            && (definitie.AlleenVoor is null || definitie.AlleenVoor == verzoek.Administratie)
             && (verzoek.Administratie is null || Administraties.Any(a => a.Soort == verzoek.Administratie));
     }
 
@@ -293,7 +294,9 @@ public sealed partial class ShellViewModel : ObservableObject
 
         var verzoek = new ModuleVerzoek(
             definitie.Soort,
-            definitie.PerAdministratie ? ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging : null);
+            definitie.PerAdministratie
+                ? definitie.AlleenVoor ?? ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging
+                : null);
         if (KanModuleOpenen(verzoek))
         {
             OpenModule(verzoek);
@@ -525,7 +528,12 @@ public sealed partial class ShellViewModel : ObservableObject
         foreach (var definitie in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
         {
             var sneltoets = $"Ctrl+{definitie.Sneltoetsnummer}";
-            if (definitie.PerAdministratie && Administraties.Count > 0)
+            if (definitie.AlleenVoor is { } vast)
+            {
+                ModuleMenu.Add(new ModuleMenuItem(
+                    definitie.Titel, definitie.Pictogram, sneltoets, OpenModuleCommand, new ModuleVerzoek(definitie.Soort, vast), []));
+            }
+            else if (definitie.PerAdministratie && Administraties.Count > 0)
             {
                 var kinderen = Administraties
                     .Select(a => ModuleMenuItem.VoorAdministratie(a, OpenModuleCommand, new ModuleVerzoek(definitie.Soort, a.Soort)))
