@@ -58,6 +58,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
 | 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
 | 22 | IBAN/machtiging | IBAN komt uit SOL3; de SEPA-machtiging (datum, kenmerk) wordt in Verenigd vastgelegd |
+| 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
+| 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
+| 26 | Status SOL3 | Export bevat alleen "Actief"; onbekende waarden geven een waarschuwing |
 | 23 | Ledenmodel | Huishouden (SOL3-account) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 
 ## Stand van zaken (bijwerken na elke sessie)
@@ -65,7 +68,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
 - **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
-- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Wachten op de **kopregels van de vier eigen exports** (besluit 20). Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
+- **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums komen voor als `1-12-2026` én `1/3/2026` (dag-maandvolgorde nog bevestigen). Contactpersoon-ID: persoon of huishouden nog onbekend. Wachten op kopregels van export 2–4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
 
 ## Privacy
 
