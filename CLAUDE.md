@@ -79,14 +79,19 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 41 | Dubbele functies | Zelfde persoon, rol en groep met verschillende startdatum en zonder einddatum = één functie met de vroegste startdatum |
 | 42 | Lidtype | `Role Membership Type` (Kaderlid/Jeugdlid) hoort bij de functie; jeugdlid én kaderlid tegelijk is toegestaan. De contributiecategorie blijft een eigen veld (besluit 21); de app stelt Jeugdlid voor zodra er een actieve jeugdlidfunctie is |
 | 43 | Groepsindeling | Instelbare lijst: per groep kiest de gebruiker het soort (speltak, bestuur, technisch, overig), eenmalig in de importwizard. Een nieuwe groep in een import geeft een melding |
-| 44 | Contributie-opbouw | Tarief per speltak; standaardcategorieën (Jeugdlid, Leiding, Vrijgesteld) waarvan de gebruiker zelf de bedragen invult. Uitwerking (speltak × categorie) nog open |
+| 44 | Contributie-opbouw | De categorie bepaalt het tarief: *Jeugdlid <speltak>* per speltak, *Leiding* en *Vrijgesteld*. Leiding betaalt geen contributie. De gebruiker vult de bedragen zelf in (zie 52) |
 | 45 | Incassofrequentie | Elke maand een incassorun |
 | 46 | Gezinskorting | Geen. Wel één incassopost per betaler per run (besluit 29) |
-| 47 | In- en uitstroom | Geen berekening naar rato: wie in een maand lid is, betaalt de hele maand; bij uitschrijving loopt de contributie tot het einde van de lopende maand |
+| 47 | In- en uitstroom | Geen berekening naar rato. Een maand wordt gerekend als het lid op de 1e van die maand ingeschreven is: een nieuw lid betaalt vanaf de maand ná de start, bij uitschrijving loopt de contributie tot het einde van de lopende maand |
 | 48 | Machtigingen | IBAN, rekeninghouder, mandaatkenmerk en ondertekeningsdatum worden handmatig in Verenigd ingevoerd (geen CSV-import) |
 | 49 | Zonder machtiging | Lid zonder geldige machtiging valt buiten de run en komt op een lijst "zelf te innen" (CSV) |
 | 50 | Incassobestand | De Vereniging heeft een Rabobank-incassocontract en Incassant-ID; bestandsformaat pain.008.001.08 (2019). Het Incassant-ID staat in de versleutelde database, niet in Git |
 | 51 | Afdracht Scouting Nederland | Niet in fase 3; volgt in fase 4 (boekhouding) |
+| 52 | Categorie per lid | De app stelt *Jeugdlid <speltak>* voor op basis van de actieve jeugdlidfunctie (besluit 42); de gebruiker kan per lid afwijken. Tarieven per boekjaar |
+| 53 | Bedrag | Het tarief is een maandbedrag (in centen), dat elke maand wordt geïncasseerd |
+| 54 | Categoriewisseling | Een categorie heeft een ingangsdatum (historie). Voor een maand geldt de categorie op de 1e van die maand |
+| 55 | Gemiste maanden | Worden in de eerstvolgende run met terugwerkende kracht meegenomen, als aparte regel per maand. Een maand wordt nooit twee keer geïncasseerd |
+| 56 | Incassodag | Vaste dag, instelbaar; valt die niet op een bankwerkdag, dan schuift de uitvoerdatum op. De app controleert of het bestand op tijd klaar is |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -98,7 +103,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Kopregels van de vier SOL3-exports: zie `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Export 4 heeft het lidnummer als laatste kolom; de import zoekt kolommen op naam (aanvulling op besluit 20).
   - Tests: 313 in totaal. Gebouwd in een Linux-cloudsessie: Domain, Application, Infrastructure en Architectuur (238) groen; de ViewModel-tests (71) via een tijdelijk net10.0-project, waarvan 2 bestaande tests alleen op Linux falen (Windows-paden). **Nog op Windows te draaien:** de volledige suite, inclusief de 4 FlaUI-UI-tests (`dotnet test`, dan `--filter Categorie=UI`).
   - Bekende beperkingen: IBAN invullen in Verenigd, machtiging en contributiecategorie volgen in fase 3; de groepsindeling kan alleen bij een import worden gekozen.
-- **Fase 3 (Contributie & SEPA): voorstel in bespreking.** Besluiten 44–51 vastgesteld (2026-10-27); open vragen over tarief per speltak, maandbedrag, categoriewisseling, startmaand, naheffing en incassodag. Daarna definitief ontwerp ter goedkeuring, pas dan code.
+- **Fase 3 (Contributie & SEPA): voorstel in bespreking.** Besluiten 44–56 vastgesteld (2026-10-27). Definitief ontwerp ter goedkeuring voorgelegd, pas dan code.
 
 ## Privacy
 
