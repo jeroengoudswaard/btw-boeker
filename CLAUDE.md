@@ -124,6 +124,16 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 86 | Bijlagen bekijken | Voorbeeld in de app (PDF en afbeeldingen), plus een optie om de bijlage te exporteren (opslaan als bestand) |
 | 87 | Planning bijlagen | In stap 4c, samen met debiteuren/crediteuren en verkoopfacturen |
 | 88 | Uitgaven zonder bon | Filter "zonder bon" op uitgaven boven een instelbaar bedrag |
+| 89 | Opdeling 4c | 4c-1 Contributie (run boeken, afletteren, storneringen) → 4c-2 Relaties, openstaande posten en verkoopfacturen → 4c-3 Bijlagen; elk een eigen pull request |
+| 90 | Rekeningen debiteuren/crediteuren | 1300 *Debiteuren contributie*, 1310 *Debiteuren overig*, 1600 *Crediteuren*; de app maakt ze aan als ze nog niet bestaan |
+| 91 | Boekdatum incassorun | De uitvoerdatum van de incasso |
+| 92 | Stornering | De post blijft openstaan (Contributie › Openstaand) met de reden; per post een knop "Opnieuw incasseren in de volgende run" |
+| 93 | Crediteuren | Eenvoudig: betalingen gaan direct naar een kostenrekening met de bon als bijlage; crediteuren alleen voor facturen die op 31-12 openstaan (memoriaal) |
+| 94 | Btw | De Vereniging is niet btw-plichtig; verkoopfacturen zonder btw |
+| 95 | PDF verkoopfactuur | PDFsharp/MigraDoc (MIT-licentie) |
+| 96 | Postvak bonnen | De app leest datum en bedrag uit de tekst van een PDF; lukt dat niet (bijvoorbeeld een foto), dan vult de gebruiker ze in |
+| 97 | Limieten bijlagen | Maximaal 10 MB per bijlage; drempel "zonder bon" € 10 (later instelbaar) |
+| 98 | Afdracht Scouting Nederland | Een gewone betaling met een boekingsregel; geen aparte functie |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -147,6 +157,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Analyse echte Rabobank-bestanden (betaal- en spaarrekening, 2025 en 2026; niet bewaard, niet in Git): camt.053.001.08, één afschrift per dag; de afschriftdatum is de datum van CLBD (PRCD draagt de vorige dag); saldi sluiten overal aan; eindsaldo 31-12-2025 = Excel 1100 (betaal) en 1150 (spaar), dus het verschil van € 7,24 zit niet in de bank. Rente op de spaarrekening heeft alleen eigen code Rabobank 1025 en geen bankreferentie. De eigen incasso staat als één batchregel (IDDT-ESDD); storneringen als IDDT-UPDD.
     - Tests: 565 in totaal. In de Linux-cloudsessie groen: Domain 190, Application 193, Infrastructure 50, Architectuur 7; ViewModel-tests 117/119 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte afschriften.
     - Volgende stap: 4c Contributie & relaties, inclusief bijlagen (besluiten 83–88).
+  - **4c: in ontwerp.** Besluiten 89–98 vastgesteld (2026-10-27). Analyse CAMT: de eigen incassobatch draagt `Btch/PmtInfId` (= kenmerk van de run + "-1"); een stornering (IDDT-UPDD) draagt EndToEndId, mandaat, tegen-IBAN en redencode (`RtrInf/Rsn/Cd`, bijvoorbeeld AM04). Het Excel-rekeningschema heeft geen debiteuren- of crediteurenrekening, wel 1400/1700.
 
 ## Privacy
 
