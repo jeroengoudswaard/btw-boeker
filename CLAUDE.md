@@ -66,6 +66,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 28 | Datumnotatie | Altijd dag-maand-jaar, met `-` of `/` als scheidingsteken; onleesbare datum geeft waarschuwing per regel |
 | 29 | Betaler i.p.v. huishouden | Geen huishouden-entiteit (SOL3 heeft geen huishouden-ID; afleiden uit voogd-e-mail is vervallen). De **Betaler** (IBAN, rekeninghouder, machtiging) groepeert leden: zelfde IBAN = één betaler = één incasso per run. Gezinskorting (fase 3) geldt alleen voor leden van dezelfde betaler. IBAN vergelijken zonder spaties en hoofdletterongevoelig; ongeldig controlegetal geeft waarschuwing |
 | 30 | SOL3-ID's | Salesforce-ID's (15 tekens) zijn hoofdlettergevoelig: ordinaal vergelijken, `COLLATE BINARY` |
+| 31 | Voogden | Per lid opgeslagen (max. 2), geen gedeelde entiteit; ontdubbelen op e-mail gebeurt pas bij versturen. Naam als één veld zoals SOL3 het levert. Plaatsvervangers ("Voogd 1", "Voogd 2", "Voogd <naam>") = naam onbekend, via configureerbare patronenlijst. Telefoon én mobiel bewaard |
+| 32 | Telefoonnummers | Opslaan als `+31612345678`, tonen als `06 12345678`; onherkenbaar nummer ongewijzigd bewaren met waarschuwing. Eigen normalisatiefunctie (NL/BE), geen libphonenumber |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
