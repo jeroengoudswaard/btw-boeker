@@ -104,6 +104,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 66 | Debiteuren/crediteuren | Openstaande posten én verkoopfacturen maken (bijv. verhuur), in stap 4c; de vorm (PDF) wordt in het ontwerp van 4c bepaald |
 | 67 | Overzichten en export | Afdrukken via Windows (ook naar PDF) en exporteren naar CSV én Excel (.xlsx, ClosedXML, MIT-licentie) |
 | 68 | Opdeling fase 4 | 4a Grootboek → 4b Bank → 4c Contributie & relaties, elk een eigen pull request |
+| 69 | Indeling balans en W&V | In 4a per rubriek uit het rekeningschema; een instelbare jaarrekeningindeling (met kolom begroot) volgt in fase 5 |
+| 70 | Memoriaal en kruisposten | Rekening 9990 Memoriaal wordt niet overgenomen (memoriaal is een dagboek; saldo ≠ 0 geeft een waarschuwing); 1298 Kruisposten wordt een tussenrekening voor overboekingen tussen eigen rekeningen |
+| 71 | Conceptposten | Journaalposten zijn *Concept* of *Geboekt*; alleen geboekte posten tellen in rapporten; een boekjaar kan pas worden afgesloten zonder concepten. Een geboekte post is onveranderlijk (corrigeren via tegenboeken) |
+| 72 | Ctrl+N in Boekhouding | Binnen het tabblad Boekhouding betekent Ctrl+N "Nieuwe post"; "Nieuwe database" blijft via het menu Bestand |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -119,7 +123,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Toevoeging op het ontwerp: instelling *eerste incassomaand* (eerdere maanden zijn nooit verschuldigd via Verenigd), zodat de eerste run geen jaren aan naheffing bevat. Concept-runs worden niet opgeslagen; een run bestaat pas als hij definitief is.
   - Tests: 443 in totaal. In de Linux-cloudsessie groen: Domain 159, Application 139, Infrastructure 41, Architectuur 7; ViewModel-tests 90/92 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 5 FlaUI-UI-tests.
   - Bekende beperkingen: het verschil tussen het IBAN uit SOL3 en een in Verenigd ingevoerd IBAN (besluit 22) wordt nog niet apart gesignaleerd; de SOL3-import overschrijft de betalerkoppeling als SOL3 een IBAN levert (nu zijn de SOL3-IBAN-kolommen leeg). Boeken, storneringen en afdracht volgen in fase 4.
-- **Fase 4 (Bankimport & boekhouding): in ontwerp.** Besluiten 61–68 vastgesteld (2026-10-27), na analyse van de huidige Excel-boekhouding van de Vereniging (59 rekeningen, 4-cijferig, T-rekeningen per tabblad, bank in maandtotalen, contributie per speltak 8020–8060, kruisposten 1298, overlopende posten 1400/1700, geen btw). Detailontwerp 4a ter goedkeuring.
+- **Fase 4 (Bankimport & boekhouding): in ontwerp.** Besluiten 61–68 vastgesteld (2026-10-27), na analyse van de huidige Excel-boekhouding van de Vereniging (59 rekeningen, 4-cijferig, T-rekeningen per tabblad, bank in maandtotalen, contributie per speltak 8020–8060, kruisposten 1298, overlopende posten 1400/1700, geen btw). Ontwerp 4a goedgekeurd (besluiten 69–72): rekeningschema met rubrieken, dagboeken Memoriaal/Kas, journaalposten concept → geboekt met tegenboeken, Excel-import van schema en beginbalans 2026, grootboekkaart, saldibalans, balans, W&V, jaarafsluiting, afdrukken en export (CSV/xlsx via ClosedXML). Bouw 4a in uitvoering.
 
 ## Privacy
 
