@@ -219,3 +219,27 @@ Openstaand: Contributievorderingen.Bereken(stand) = som van de effectieve mutati
   - Application: run boeken (en weigeren zonder opbrengstrekening), batch met juist en afwijkend bedrag, stornering, handmatige betaling, afletteren van meerdere posten, oninbaar, herincasso in de volgende run, annuleren met tegenboeking, concept verwijderen.
   - Infrastructure: de hele keten op een echte versleutelde database.
   - App: opbrengstrekeningen, de wizard die automatisch boekt, Openstaand, afletteren in Bank. De FlaUI-test opent Openstaand.
+
+## Relaties en verkoopfacturen (fase 4c-2)
+
+```
+Relatie (gedeeld, los van leden) ◄── Verkoopfactuur (concept: vrij te wijzigen)
+FactuurDienst.MaakDefinitiefAsync ──► nummer V/S<jaar>-<nnn> + VRK-post 1310 (D) aan opbrengst (C) + Debiteurmutatie "Vordering" op het nummer
+Creditfactuur (CreditVan) ──► VRK-post omgekeerd + Debiteurmutatie "Creditering" op het oorspronkelijke nummer
+Bankmutatie ──► Bankherkenning: contributie → factuur (nummer in omschrijving, of IBAN relatie + bedrag van één open factuur) → kruisposten → boekingsregels
+Factuuroverzicht.Bereken(stand, vandaag) = saldo per factuurnummer uit de effectieve Debiteurmutaties (zelfde model als 4c-1)
+IFactuurPdfMaker (Application) ◄── FactuurPdfMaker (Infrastructure: MigraDoc + QRCoder)
+```
+
+- **Eén vorderingenmodel.** Facturen gebruiken dezelfde `Debiteurmutatie` als contributie; `Vordering` is het factuurnummer en `BetalerId` het Id van de relatie. Tegenboeken of een concept verwijderen maakt een aflettering dus vanzelf ongedaan.
+- **Nummering.** Het volgnummer wordt pas bij *Definitief maken* bepaald, binnen dezelfde transactie als de boeking. Een unieke index op (administratie, jaar, volgnummer) bewaakt dat er geen dubbele nummers ontstaan.
+- **Onveranderlijk.** Bij *Definitief maken* worden naam en adres van de relatie vastgelegd in `Ontvanger`, zodat een latere adreswijziging de factuur niet verandert.
+- **PDF.**
+  - PDFsharp heeft buiten Windows geen eigen lettertypen. Een eigen `IFontResolver` gebruikt Segoe UI (of Arial) uit `C:\Windows\Fonts`, en op Linux (tests) Liberation Sans of DejaVu Sans.
+  - De 1-bits PNG van QRCoder kan PDFsharp niet lezen. Daarom schrijft `FactuurPdfMaker.QrPng` de QR-matrix zelf weg als 8-bits grijswaarden-PNG.
+  - De QR-inhoud volgt EPC069-12 versie 002 (`EpcQr.Inhoud`): naam, IBAN, bedrag en het factuurnummer als omschrijving. Een creditfactuur krijgt geen QR-code.
+- **Teststrategie 4c-2:**
+  - Domain: relatie (IBAN, e-mail, rol), factuurregels en afronding, concept → definitief, creditfactuur, logo-controle, EPC-QR-inhoud.
+  - Application: definitief maken en boeken, doornummeren, creditfactuur (één keer), vervallen, herkenning op nummer en op IBAN, afletteren met meerdere facturen, instellingen.
+  - Infrastructure: opslag op een echte versleutelde database, de PDF (met en zonder logo, credit) en de QR-PNG. Handmatig gecontroleerd: de QR-code in de PDF wordt gelezen als de juiste EPC-inhoud.
+  - App: relaties, factuur maken tot en met PDF, creditfactuur, concept verwijderen, Ctrl+N, afletteren in Bank, Instellingen › Facturen. De FlaUI-test opent Relaties en Facturen.

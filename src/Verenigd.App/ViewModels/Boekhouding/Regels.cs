@@ -22,6 +22,8 @@ public enum BoekhoudingSubtab
     Journaal,
     Bank,
     Boekingsregels,
+    Facturen,
+    Relaties,
     Rekeningschema,
     Grootboekkaart,
     Rapporten,

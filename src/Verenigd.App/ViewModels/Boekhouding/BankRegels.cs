@@ -41,12 +41,31 @@ public sealed record MutatieRegel(Bankmutatie Mutatie, MutatieStatus Statuswaard
 }
 
 /// <summary>Een open contributiepost om een ontvangst mee af te letteren.</summary>
-public sealed partial class AfletterKeuze(Application.Debiteuren.Vorderingstand stand) : ObservableObject
+/// <summary>Een open contributiepost of een open verkoopfactuur waarmee een ontvangst kan worden afgeletterd.</summary>
+public sealed partial class AfletterKeuze : ObservableObject
 {
-    public string Vordering => stand.Vordering;
-    public long Saldo => stand.Saldo;
-    public string Tekst => $"{stand.Post.Rekeninghouder} · {stand.Run.Maand} · {new Bedrag(stand.Saldo)}"
-        + (stand.Redentekst is { } reden ? $" · {reden}" : string.Empty);
+    public AfletterKeuze(Application.Debiteuren.Vorderingstand stand)
+    {
+        Vordering = stand.Vordering;
+        Saldo = stand.Saldo;
+        Tekst = $"{stand.Post.Rekeninghouder} · {stand.Run.Maand} · {new Bedrag(stand.Saldo)}"
+            + (stand.Redentekst is { } reden ? $" · {reden}" : string.Empty);
+    }
+
+    public AfletterKeuze(Application.Facturen.Factuurstand stand)
+    {
+        Vordering = stand.Factuur.Nummer!;
+        Saldo = stand.Saldo;
+        FactuurId = stand.Factuur.Id;
+        Tekst = $"{stand.Factuur.Nummer} · {stand.Relatie?.Naam} · {new Bedrag(stand.Saldo)}";
+    }
+
+    public string Vordering { get; }
+    public long Saldo { get; }
+    public string Tekst { get; }
+
+    /// <summary>Gevuld bij een verkoopfactuur; leeg bij contributie.</summary>
+    public Guid? FactuurId { get; }
 
     [ObservableProperty]
     public partial bool IsGekozen { get; set; }

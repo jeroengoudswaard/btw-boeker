@@ -71,6 +71,12 @@ public interface IDialoogService
 
     string? KiesXlsxDoel(string voorgesteldeNaam);
 
+    /// <summary>Waar een PDF-factuur wordt opgeslagen.</summary>
+    string? KiesPdfDoel(string voorgesteldeNaam);
+
+    /// <summary>Een logo (PNG of JPG) voor de facturen.</summary>
+    string? KiesAfbeelding();
+
     /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
     bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
 }

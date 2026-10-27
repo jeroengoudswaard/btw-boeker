@@ -144,6 +144,69 @@
                         </Grid>
                     </Border>
                 </StackPanel>
+
+                <!-- ===== Facturen (stap 4c-2, besluiten 107 en 112) ===== -->
+                <StackPanel DataContext="{Binding Facturen}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" Margin="0,24,0,0"
+                            AutomationProperties.AutomationId="InstellingenFacturen">
+                    <TextBlock Text="Facturen (Vereniging)" Style="{StaticResource Sectietitel}" />
+                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16" TextWrapping="Wrap"
+                               Text="De afzender op de verkoopfactuur. Het IBAN komt ook in de betaal-QR-code; het logo wordt in de versleutelde database bewaard." />
+                    <Border Style="{StaticResource Kaart}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Content="Naam _vereniging" Target="{Binding ElementName=FactuurNaamVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurNaamVeld" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.AutomationId="FactuurAfzender" />
+                            <Label Grid.Row="1" Content="_Straat en nummer" Target="{Binding ElementName=FactuurStraatVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurStraatVeld" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Straat, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Row="2" Content="_Postcode en plaats" Target="{Binding ElementName=FactuurPostcodeVeld}" VerticalAlignment="Center" />
+                            <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,8">
+                                <TextBox x:Name="FactuurPostcodeVeld" Width="90" MaxLength="10" Margin="0,0,8,0" Text="{Binding Postcode, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Postcode" />
+                                <TextBox MaxLength="100" Text="{Binding Plaats, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Plaats" />
+                            </DockPanel>
+                            <Label Grid.Row="3" Content="_KvK-nummer" Target="{Binding ElementName=FactuurKvkVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurKvkVeld" Grid.Row="3" Grid.Column="1" Width="140" HorizontalAlignment="Left" Margin="0,0,0,8" MaxLength="20"
+                                     Text="{Binding Kvk, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Row="4" Content="IBAN voor betalin_gen" Target="{Binding ElementName=FactuurIbanVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurIbanVeld" Grid.Row="4" Grid.Column="1" Margin="0,0,0,8" FontFamily="Consolas" MaxLength="42"
+                                     Text="{Binding Iban, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="FactuurIban" />
+                            <Label Grid.Row="5" Content="E-mai_l" Target="{Binding ElementName=FactuurEmailVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurEmailVeld" Grid.Row="5" Grid.Column="1" Margin="0,0,0,8" MaxLength="254" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Row="6" Content="_Telefoon" Target="{Binding ElementName=FactuurTelefoonVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurTelefoonVeld" Grid.Row="6" Grid.Column="1" Width="200" HorizontalAlignment="Left" Margin="0,0,0,8" MaxLength="20"
+                                     Text="{Binding Telefoon, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Row="7" Content="Betaalte_rmijn (dagen)" Target="{Binding ElementName=FactuurTermijnVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurTermijnVeld" Grid.Row="7" Grid.Column="1" Width="80" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                     Text="{Binding Termijn, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Row="8" Content="Tekst onder de _factuur" Target="{Binding ElementName=FactuurVoetVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="FactuurVoetVeld" Grid.Row="8" Grid.Column="1" Margin="0,0,0,8" MaxLength="500" Text="{Binding Voettekst, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Grid.Row="9" Text="Logo" VerticalAlignment="Center" Margin="5,0,0,0" />
+                            <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock Text="{Binding Logotekst}" VerticalAlignment="Center" Margin="0,0,12,0" AutomationProperties.AutomationId="FactuurLogo" />
+                                <Button Content="Logo kie_zen..." Command="{Binding KiesLogoCommand}" Margin="0,0,8,0" ToolTip="PNG of JPG, maximaal 2 MB" />
+                                <Button Content="Logo _wissen" Command="{Binding WisLogoCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
+                               Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                </StackPanel>
                 <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}"
                            Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
             </StackPanel>

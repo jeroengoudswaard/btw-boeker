@@ -13,7 +13,8 @@ public sealed partial class InstellingenViewModel : TabbladViewModel
     private readonly IAdministratieRepository _repository;
 
     public InstellingenViewModel(
-        IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null)
+        IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null,
+        Boekhouding.FactuurInstellingenViewModel? facturen = null)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
@@ -21,6 +22,12 @@ public sealed partial class InstellingenViewModel : TabbladViewModel
         if (incasso is not null)
         {
             incasso.PropertyChanged += RegelGewijzigd;
+        }
+
+        Facturen = facturen;
+        if (facturen is not null)
+        {
+            facturen.PropertyChanged += RegelGewijzigd;
         }
 
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
@@ -36,15 +43,19 @@ public sealed partial class InstellingenViewModel : TabbladViewModel
     /// <summary>Incassogegevens van de Vereniging (fase 3).</summary>
     public IncassoInstellingenViewModel? Incasso { get; }
 
+    /// <summary>Gegevens op de verkoopfactuur van de Vereniging (stap 4c-2).</summary>
+    public Boekhouding.FactuurInstellingenViewModel? Facturen { get; }
+
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
     public IAsyncRelayCommand OpslaanCommand { get; }
 
-    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true;
+    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen?.IsGewijzigd == true;
 
     public override bool KanOpslaan =>
-        HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null);
+        HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null)
+        && (Facturen is not { IsGewijzigd: true } || Facturen.Fout is null);
 
     public override async Task<bool> BewaarAsync()
     {
@@ -71,6 +82,19 @@ public sealed partial class InstellingenViewModel : TabbladViewModel
             }
         }
 
+        if (Facturen is { IsGewijzigd: true })
+        {
+            try
+            {
+                await Facturen.BewaarAsync();
+            }
+            catch (ArgumentException ex)
+            {
+                Foutmelding = ex.Message;
+                return false;
+            }
+        }
+
         Foutmelding = null;
         return true;
     }
@@ -85,6 +109,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel
         if (Incasso is not null)
         {
             Incasso.PropertyChanged -= RegelGewijzigd;
+        }
+
+        if (Facturen is not null)
+        {
+            Facturen.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();

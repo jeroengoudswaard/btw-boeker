@@ -157,13 +157,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd);
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null);
+        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
+        && FacturenGeldig;
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
     public RapportTabel? Afdruktabel => Subtab == BoekhoudingSubtab.Grootboekkaart && KaartTabel is not null ? KaartTabel : Rapport;
@@ -191,6 +192,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
             }
 
             await BewaarRegelsAsync();
+            var factuur = await BewaarFacturenAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
             {
@@ -199,6 +201,11 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
             Foutmelding = null;
             await LaadAsync(selectie);
+            if (factuur is not null)
+            {
+                PasFactuurfilterToe(factuur);
+            }
+
             return true;
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
@@ -217,6 +224,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     {
         KoppelEditor(null);
         KoppelRekeningen(false);
+        KoppelRelaties(false);
         base.Opruimen();
     }
 
@@ -277,6 +285,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BerekenRapport();
         BerekenKaart();
         LaadBank();
+        LaadFacturen(null);
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -751,5 +760,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         SluitBoekjaarCommand.NotifyCanExecuteChanged();
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
         BankCommandsVernieuwen();
+        FactuurCommandsVernieuwen();
     }
 }

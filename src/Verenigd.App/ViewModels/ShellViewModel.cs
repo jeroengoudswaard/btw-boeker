@@ -383,7 +383,8 @@ public sealed partial class ShellViewModel : ObservableObject
         TabbladViewModel tab = verzoek.Module switch
         {
             ModuleSoort.Instellingen => new InstellingenViewModel(
-                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd)),
+                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
+                new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen)),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
@@ -402,8 +403,9 @@ public sealed partial class ShellViewModel : ObservableObject
             case BoekhoudingViewModel boekhouding:
                 boekhouding.VernieuwCommand.Execute(null);
                 break;
-            case InstellingenViewModel { Incasso: { } incasso }:
-                incasso.LaadCommand.Execute(null);
+            case InstellingenViewModel instellingen:
+                instellingen.Incasso?.LaadCommand.Execute(null);
+                instellingen.Facturen?.LaadCommand.Execute(null);
                 break;
         }
     }

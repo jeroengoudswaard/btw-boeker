@@ -409,6 +409,13 @@ public sealed partial class BoekhoudingViewModel
                 keuze.PropertyChanged += AfletterkeuzeGewijzigd;
                 Afletterkeuzes.Add(keuze);
             }
+
+            foreach (var factuur in Application.Facturen.Factuuroverzicht.Bereken(_stand, Vandaag).Where(f => f.IsOpen).OrderBy(f => f.Factuur.Nummer, StringComparer.Ordinal))
+            {
+                var keuze = new AfletterKeuze(factuur);
+                keuze.PropertyChanged += AfletterkeuzeGewijzigd;
+                Afletterkeuzes.Add(keuze);
+            }
         }
 
         OnPropertyChanged(nameof(KanAfletteren));
@@ -424,18 +431,26 @@ public sealed partial class BoekhoudingViewModel
     private bool KanAfletterenUitvoeren() =>
         !IsBezig && GeselecteerdeMutatie is { IsTeVerwerken: true } mutatie
         && Afletterkeuzes.Any(k => k.IsGekozen)
+        && Afletterkeuzes.Where(k => k.IsGekozen).Select(k => k.FactuurId is null).Distinct().Count() == 1 // contributie en facturen niet samen
         && Afletterkeuzes.Where(k => k.IsGekozen).Sum(k => k.Saldo) == mutatie.Mutatie.Bedrag.Centen;
 
-    /// <summary>Een ontvangst afletteren met de gekozen open contributieposten (besluit 102).</summary>
+    /// <summary>Een ontvangst afletteren met de gekozen open contributieposten (besluit 102) of verkoopfacturen.</summary>
     [RelayCommand(CanExecute = nameof(KanAfletterenUitvoeren))]
     private Task AfletterenAsync()
     {
         var mutatie = GeselecteerdeMutatie!;
-        var gekozen = Afletterkeuzes.Where(k => k.IsGekozen).Select(k => k.Vordering).ToList();
+        var gekozen = Afletterkeuzes.Where(k => k.IsGekozen).ToList();
         var volgende = Mutaties.SkipWhile(m => m.Id != mutatie.Id).Skip(1).FirstOrDefault()?.Id;
         return VoerUitAsync(async () =>
         {
-            await new Application.Debiteuren.ContributieboekingDienst(_sessie, _tijd).LetterAfAsync(mutatie.Id, gekozen);
+            if (gekozen[0].FactuurId is null)
+            {
+                await new Application.Debiteuren.ContributieboekingDienst(_sessie, _tijd).LetterAfAsync(mutatie.Id, [.. gekozen.Select(k => k.Vordering)]);
+            }
+            else
+            {
+                await Factuurdienst.LetterAfAsync(Soort, mutatie.Id, [.. gekozen.Select(k => k.FactuurId!.Value)]);
+            }
             await LaadAsync(Editor?.Id);
             KiesMutatie(volgende);
         }, null);

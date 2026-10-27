@@ -53,6 +53,18 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesXlsxDoel(string voorgesteldeNaam) => XlsxDoel;
 
+    public string? PdfDoel { get; set; }
+    public string? PdfVoorstel { get; private set; }
+    public string? Afbeelding { get; set; }
+
+    public string? KiesPdfDoel(string voorgesteldeNaam)
+    {
+        PdfVoorstel = voorgesteldeNaam;
+        return PdfDoel;
+    }
+
+    public string? KiesAfbeelding() => Afbeelding;
+
     public bool ToonBoekhoudingImport(ViewModels.Boekhouding.BoekhoudingImportViewModel wizard) =>
         BoekhoudingImport is not null && BoekhoudingImport(wizard).GetAwaiter().GetResult();
 
@@ -464,6 +476,10 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
             Debiteurmutaties = [.. lijst.OfType<Domain.Financien.Debiteuren.Debiteurmutatie>().OrderBy(m => m.Datum)],
             Incassoruns = administratie == AdministratieSoort.Vereniging && contributie is not null ? [.. contributie.Runs] : [],
             Herincassos = administratie == AdministratieSoort.Vereniging && contributie is not null ? [.. contributie.Herincassos] : [],
+            // Relaties zijn gedeeld door beide administraties (besluit 105).
+            Relaties = [.. _gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Relaties.Relatie>().OrderBy(r => r.Naam, StringComparer.CurrentCulture)],
+            Verkoopfacturen = [.. lijst.OfType<Domain.Financien.Facturen.Verkoopfactuur>()],
+            Factuurinstellingen = lijst.OfType<Domain.Financien.Facturen.Factuurinstellingen>().SingleOrDefault(),
         };
     }
 }
@@ -471,7 +487,20 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
 /// <summary>Leest een vooraf klaargezet werkblad.</summary>
 internal static class FakeBoekhouding
 {
-    public static BoekhoudingHulpmiddelen Hulpmiddelen() => new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst());
+    public static BoekhoudingHulpmiddelen Hulpmiddelen() => new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst(), new FakeFactuurPdfMaker());
+}
+
+internal sealed class FakeFactuurPdfMaker : Verenigd.Application.Facturen.IFactuurPdfMaker
+{
+    public static readonly byte[] Inhoud = "%PDF-nep"u8.ToArray();
+
+    public List<Domain.Financien.Facturen.Verkoopfactuur> Gemaakt { get; } = [];
+
+    public byte[] Maak(Domain.Financien.Facturen.Verkoopfactuur factuur, Domain.Financien.Facturen.Factuurinstellingen instellingen)
+    {
+        Gemaakt.Add(factuur);
+        return Inhoud;
+    }
 }
 
 internal sealed class FakeWerkbladLezer : Verenigd.Application.Boekhouding.IWerkbladLezer

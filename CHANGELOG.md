@@ -2,6 +2,32 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.3] - 2026-10-28: Fase 4c-2 "Relaties en verkoopfacturen"
+
+### Toegevoegd
+- **Subtabblad Boekhouding › Relaties** (besluiten 105 en 108):
+  - Huurders, sponsors en andere relaties met adres, e-mail, telefoon, IBAN en notitie; debiteur, crediteur of allebei.
+  - Gedeeld door beide administraties en los van de leden. Een ongeldig IBAN-controlegetal wordt direct gemeld. Opslaan met Ctrl+S.
+- **Subtabblad Boekhouding › Facturen** (besluiten 66, 94, 106, 107, 109 en 111):
+  - Conceptfactuur met regels (omschrijving, aantal, prijs, opbrengstrekening), factuurdatum en betaaltermijn. Geen btw.
+  - *Definitief maken* kent het nummer toe (`V2026-001`, per administratie en jaar, zonder gaten) en boekt de factuur in het nieuwe dagboek *VRK Verkoop*: 1310 *Debiteuren overig* aan de opbrengst.
+  - Een definitieve factuur is onveranderlijk; corrigeren gaat met een **creditfactuur**, die eerst als concept verschijnt.
+  - Filter *Open*, *Vervallen*, *Concept* en *Alle*; vervallen facturen staan vet.
+  - Een nieuwe factuur alleen via de knop; Ctrl+N blijft *Nieuwe post*.
+- **PDF-factuur** (besluiten 95, 110 en 112): logo, afzender, ontvanger, regels, "geen btw", betaalinstructie en een betaal-QR-code (EPC-QR, "girocode") die bankapps herkennen.
+- **Instellingen › Facturen:** naam, adres, KvK-nummer, IBAN, e-mail, telefoon, standaard betaaltermijn (14 dagen), tekst onder de factuur en een logo (PNG of JPG, maximaal 2 MB, in de versleutelde database).
+- **Betalingen herkennen in de bank:** een ontvangst met het factuurnummer in de omschrijving, of van het IBAN van de relatie met precies het bedrag van één open factuur, wordt een conceptpost op 1310.
+- **Afletteren in de bank** kan nu ook met een of meer open facturen (niet samen met contributie in één keer).
+- 623 geautomatiseerde tests (was 596).
+
+### Gewijzigd
+- PDFsharp-MigraDoc is vastgezet op 6.2.4, de laatste versie met de MIT-licentie (besluit 95). Versie 6.5 is AGPL-3.0 en vraagt een licentie.
+
+### Nog niet functioneel
+- Bijlagen (bonnen en facturen): stap 4c-3.
+- Herinneringen voor vervallen facturen per e-mail: fase 6.
+- Facturen en boekhouding voor de Stichting (besluiten 61 en 107).
+
 ## [0.4.2] - 2026-10-28: Fase 4c-1 "Contributie in de boekhouding"
 
 ### Toegevoegd

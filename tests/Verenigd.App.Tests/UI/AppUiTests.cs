@@ -219,7 +219,7 @@ public sealed class AppUiTests : IDisposable
         Bewaar(venster, "10-boekhouding-leeg");
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
-        foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabBoekingsregels", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBoekjaren" })
+        foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabBoekingsregels", "SubtabFacturen", "SubtabRelaties", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBoekjaren" })
         {
             Zoek(venster, subtab);
         }
@@ -233,6 +233,13 @@ public sealed class AppUiTests : IDisposable
         Bewaar(venster, "13-boekhouding-bank");
         Zoek(venster, "SubtabBoekingsregels").AsTabItem().Select();
         Zoek(venster, "Boekingsregels");
+        Zoek(venster, "SubtabRelaties").AsTabItem().Select();
+        Zoek(venster, "NieuweRelatie").AsButton().Invoke();
+        Zoek(venster, "RelatieNaam");
+        Zoek(venster, "SubtabFacturen").AsTabItem().Select();
+        Zoek(venster, "NieuweFactuur").AsButton().Invoke();
+        Zoek(venster, "FactuurEditor");
+        Bewaar(venster, "14-boekhouding-factuur");
         Zoek(venster, "SubtabRapporten").AsTabItem().Select();
         Zoek(venster, "Rapport");
         Bewaar(venster, "12-boekhouding-rapport");
