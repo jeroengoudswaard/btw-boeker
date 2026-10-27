@@ -156,4 +156,20 @@ public sealed class BankDienstTests : IAsyncDisposable
         await _bank.VerwijderRegelAsync(Ver, eerste);
         Assert.Single(_data.Boekingsregels);
     }
+
+    [Fact]
+    public async Task Opnieuw_inlezen_vult_batchkenmerk_en_retourreden_aan()
+    {
+        var rabo = _data.Bankdagboek("RABO", CamtVoorbeeld.Betaal);
+        var storno = new VbTransactie(-1000, "IDDT", "UPDD", "631", Ref: "S9", Reden: "MD06");
+        var bestand = Bestand(storno);
+        var sleutel = BankimportPlanner.Sleutel(bestand.Afschriften[0].Iban, bestand.Afschriften[0].Transacties[0]);
+        var oud = new Bankmutatie(Ver, rabo, sleutel, new DateOnly(2026, 2, 3), new Bedrag(1000), false, default, null, null, null, null, null, null);
+        _data.Bankmutaties.Add(oud);
+
+        await _bank.ImporteerAsync(Ver, BankimportPlanner.Plan(_data.Stand, [bestand]), new Dictionary<string, NieuweBankrekening>());
+
+        Assert.Equal("MD06", oud.Retourreden);
+        Assert.Single(_data.Bankmutaties);
+    }
 }

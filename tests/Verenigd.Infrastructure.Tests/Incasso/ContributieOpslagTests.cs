@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Verenigd.Application.Bank;
+using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Database;
+using Verenigd.Application.Debiteuren;
+using Verenigd.Application.Tests.Bank;
 using Verenigd.Application.Import;
 using Verenigd.Application.Incasso;
 using Verenigd.Domain.Financien;
@@ -73,6 +77,51 @@ public sealed class ContributieOpslagTests : IAsyncLifetime, IDisposable
         await Repo.BewaarBetalerAsync(new BetalerInvoer(
             null, IbanA, "P. Test", "VER-0001", new DateOnly(2019, 7, 1), null, [Lidnummer.Parse("100000001"), Lidnummer.Parse("100000002")]));
         return new IncassoDienst(_sessie, _tijd);
+    }
+
+    [Fact]
+    public async Task Run_boeken_ontvangst_stornering_en_herincasso_worden_bewaard()
+    {
+        var incasso = await VolledigIngerichtAsync();
+        var boekhouding = new BoekhoudingDienst(_sessie, _tijd);
+        await boekhouding.RichtInAsync(Domain.Administraties.AdministratieSoort.Vereniging);
+        const Domain.Administraties.AdministratieSoort ver = Domain.Administraties.AdministratieSoort.Vereniging;
+        var bankId = await boekhouding.BewaarRekeningAsync(ver, new RekeningInvoer(null, 1100, "Bank", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+        await boekhouding.BewaarRekeningAsync(ver, new RekeningInvoer(null, 8020, "Contributie Welpen", null, Domain.Financien.Boekhouding.RekeningSoort.Resultaat, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+        var stand = await boekhouding.LaadAsync(ver);
+        var welpen = (await Repo.LaadAsync()).Categorieen.Single(c => c.Naam == "Jeugdlid Welpen");
+        await Repo.BewaarOpbrengstrekeningenAsync(new Dictionary<int, int?> { [welpen.Id] = stand.Rekeningen.Single(r => r.Nummer == 8020).Id });
+        Assert.NotNull((await Repo.LaadAsync()).Categorieen.Single(c => c.Id == welpen.Id).OpbrengstrekeningId);
+
+        var run = await incasso.MaakDefinitiefAsync(await incasso.BerekenAsync(Maart));
+        var dienst = new ContributieboekingDienst(_sessie, _tijd);
+        await dienst.BoekRunAsync(run.Id);
+        var post = run.Posten.Single();
+
+        var bank = new BankDienst(_sessie, _tijd);
+        var bestand = Camt053Lezer.Lees(CamtVoorbeeld.Stroom(CamtVoorbeeld.Xml(CamtVoorbeeld.Betaal, "08",
+            new VbAfschrift(new DateOnly(2027, 3, 2), 0,
+                new VbTransactie(run.Totaal.Centen, "IDDT", "ESDD", "680", Ref: "B1", Batch: 1, BatchId: run.Kenmerk + "-1", TegenIban: null, Naam: null, Omschrijving: null),
+                new VbTransactie(-post.Bedrag.Centen, "IDDT", "UPDD", "631", Ref: "S1", E2e: post.EndToEndId, TegenIban: IbanA, Reden: "AM04", NtryRef: "2")))));
+        var resultaat = await bank.ImporteerAsync(ver, BankimportPlanner.Plan(await boekhouding.LaadAsync(ver), [bestand]),
+            new Dictionary<string, NieuweBankrekening> { [CamtVoorbeeld.Betaal] = new(bankId, "RABO", "Rabobank") });
+        Assert.Equal(2, resultaat.Herkend);
+
+        stand = await boekhouding.LaadAsync(ver);
+        var vordering = Assert.Single(Contributievorderingen.Bereken(stand));
+        Assert.Equal(Vorderingstatus.Gestorneerd, vordering.Status);
+        Assert.Equal("AM04", vordering.Reden);
+        Assert.Equal("AM04", stand.Bankmutaties.Single(m => !m.IsBij).Retourreden);
+
+        await dienst.VraagHerincassoAanAsync(vordering.Vordering);
+        var april = await incasso.MaakDefinitiefAsync(await incasso.BerekenAsync(new Maand(2027, 4)));
+        Assert.Contains(april.Posten, p => p.HerincassoVan == post.EndToEndId);
+        var herincasso = (await Repo.LaadAsync()).Herincassos.Single();
+        Assert.Equal(april.Id, herincasso.RunId);
+        Assert.Contains(april.Posten.SelectMany(p => p.Regels), r => r.IsHerincasso && r.Maand == Maart);
+
+        await dienst.AnnuleerRunAsync(april.Id);
+        Assert.True((await Repo.LaadAsync()).Herincassos.Single().IsOpen);
     }
 
     [Fact]

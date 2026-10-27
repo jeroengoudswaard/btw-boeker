@@ -53,7 +53,7 @@ public sealed class Bankmutatie
     public Bankmutatie(
         AdministratieSoort administratie, Dagboek dagboek, string sleutel, DateOnly boekdatum, Bedrag bedrag, bool isBij,
         BankTransactiecode code, string? tegenIban, string? tegennaam, string? omschrijving, string? endToEndId, string? mandaatId,
-        int? batchAantal)
+        int? batchAantal, string? batchKenmerk = null, string? retourreden = null)
     {
         ArgumentNullException.ThrowIfNull(dagboek);
         ArgumentException.ThrowIfNullOrWhiteSpace(sleutel);
@@ -81,6 +81,8 @@ public sealed class Bankmutatie
         EndToEndId = Kort(endToEndId);
         MandaatId = Kort(mandaatId);
         BatchAantal = batchAantal;
+        BatchKenmerk = Kort(batchKenmerk);
+        Retourreden = Kort(retourreden);
     }
 
     public Guid Id { get; private set; }
@@ -102,6 +104,12 @@ public sealed class Bankmutatie
 
     /// <summary>Het aantal posten van een batch (bijvoorbeeld de eigen incasso), die als één regel op het afschrift staat.</summary>
     public int? BatchAantal { get; private set; }
+
+    /// <summary>Het batchkenmerk (<c>PmtInfId</c>); bij een eigen incasso het kenmerk van de run plus <c>-1</c>.</summary>
+    public string? BatchKenmerk { get; private set; }
+
+    /// <summary>De SEPA-redencode van een stornering, zoals <c>AM04</c>.</summary>
+    public string? Retourreden { get; private set; }
 
     public Guid? PostId { get; private set; }
 
@@ -154,6 +162,13 @@ public sealed class Bankmutatie
     }
 
     public void Ontkoppel() => PostId = null;
+
+    /// <summary>Vult velden aan die bij een eerdere import nog niet werden bewaard; bestaande waarden blijven staan.</summary>
+    public void Verrijk(string? batchKenmerk, string? retourreden)
+    {
+        BatchKenmerk ??= Kort(batchKenmerk);
+        Retourreden ??= Kort(retourreden);
+    }
 
     private static string? Kort(string? tekst)
     {

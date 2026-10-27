@@ -22,6 +22,14 @@ public sealed partial class BoekhoudingViewModel
 
     public ObservableCollection<BoekingsregelRegel> Boekingsregels { get; } = [];
 
+    /// <summary>Open contributieposten voor de geselecteerde ontvangst (stap 4c-1).</summary>
+    public ObservableCollection<AfletterKeuze> Afletterkeuzes { get; } = [];
+
+    [ObservableProperty]
+    public partial string Afletterentotaal { get; private set; } = Bedrag.Nul.ToString();
+
+    public bool KanAfletteren => Afletterkeuzes.Count > 0;
+
     public IReadOnlyList<MutatieFilterKeuze> Bankfilters { get; } =
     [
         new(MutatieFilter.TeVerwerken, "Te verwerken"), new(MutatieFilter.Concept, "Concept"), new(MutatieFilter.Geboekt, "Geboekt"), new(MutatieFilter.Alle, "Alle"),
@@ -193,6 +201,7 @@ public sealed partial class BoekhoudingViewModel
     partial void OnGeselecteerdeMutatieChanged(MutatieRegel? value)
     {
         ToewijzenCommand.NotifyCanExecuteChanged();
+        VulAfletterkeuzes(value);
         if (_mutatieWordtGezet)
         {
             return;
@@ -384,9 +393,58 @@ public sealed partial class BoekhoudingViewModel
         }
     }
 
+    private void VulAfletterkeuzes(MutatieRegel? regel)
+    {
+        foreach (var keuze in Afletterkeuzes)
+        {
+            keuze.PropertyChanged -= AfletterkeuzeGewijzigd;
+        }
+
+        Afletterkeuzes.Clear();
+        if (_stand is not null && regel is { IsTeVerwerken: true, Mutatie.IsBij: true })
+        {
+            foreach (var stand in Application.Debiteuren.Contributievorderingen.Bereken(_stand).Where(v => v.Saldo > 0))
+            {
+                var keuze = new AfletterKeuze(stand);
+                keuze.PropertyChanged += AfletterkeuzeGewijzigd;
+                Afletterkeuzes.Add(keuze);
+            }
+        }
+
+        OnPropertyChanged(nameof(KanAfletteren));
+        AfletterkeuzeGewijzigd(null, new PropertyChangedEventArgs(null));
+    }
+
+    private void AfletterkeuzeGewijzigd(object? sender, PropertyChangedEventArgs e)
+    {
+        Afletterentotaal = new Bedrag(Afletterkeuzes.Where(k => k.IsGekozen).Sum(k => k.Saldo)).ToString();
+        AfletterenCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool KanAfletterenUitvoeren() =>
+        !IsBezig && GeselecteerdeMutatie is { IsTeVerwerken: true } mutatie
+        && Afletterkeuzes.Any(k => k.IsGekozen)
+        && Afletterkeuzes.Where(k => k.IsGekozen).Sum(k => k.Saldo) == mutatie.Mutatie.Bedrag.Centen;
+
+    /// <summary>Een ontvangst afletteren met de gekozen open contributieposten (besluit 102).</summary>
+    [RelayCommand(CanExecute = nameof(KanAfletterenUitvoeren))]
+    private Task AfletterenAsync()
+    {
+        var mutatie = GeselecteerdeMutatie!;
+        var gekozen = Afletterkeuzes.Where(k => k.IsGekozen).Select(k => k.Vordering).ToList();
+        var volgende = Mutaties.SkipWhile(m => m.Id != mutatie.Id).Skip(1).FirstOrDefault()?.Id;
+        return VoerUitAsync(async () =>
+        {
+            await new Application.Debiteuren.ContributieboekingDienst(_sessie, _tijd).LetterAfAsync(mutatie.Id, gekozen);
+            await LaadAsync(Editor?.Id);
+            KiesMutatie(volgende);
+        }, null);
+    }
+
     private void BankCommandsVernieuwen()
     {
         ToewijzenCommand.NotifyCanExecuteChanged();
+        AfletterenCommand.NotifyCanExecuteChanged();
         RegelOmhoogCommand.NotifyCanExecuteChanged();
         RegelOmlaagCommand.NotifyCanExecuteChanged();
     }

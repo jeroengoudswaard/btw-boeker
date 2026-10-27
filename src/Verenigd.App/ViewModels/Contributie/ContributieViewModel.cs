@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
 using Verenigd.Application.Database;
+using Verenigd.Application.Debiteuren;
 using Verenigd.Application.Incasso;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Financien;
@@ -23,6 +24,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel
     private readonly TimeProvider _tijd;
     private readonly ILogger _logger;
     private readonly IncassoDienst _dienst;
+    private readonly ContributieboekingDienst _boeking;
     private readonly Dictionary<int, List<TariefRegel>> _tarievenPerJaar = [];
     private List<LidCategorieRegel> _alleLeden = [];
     private IncassoStand? _stand;
@@ -36,6 +38,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel
         _tijd = tijd;
         _logger = logger;
         _dienst = new IncassoDienst(sessie, tijd);
+        _boeking = new ContributieboekingDienst(sessie, tijd);
         VernieuwCommand = new AsyncRelayCommand(VernieuwAsync);
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
         Boekjaar = Vandaag.Year;
@@ -87,7 +90,8 @@ public sealed partial class ContributieViewModel : TabbladViewModel
     public override bool HeeftOnopgeslagenWijzigingen =>
         _alleLeden.Exists(l => l.IsGewijzigd)
         || _tarievenPerJaar.Values.SelectMany(t => t).Any(t => t.IsGewijzigd)
-        || Betaler?.IsGewijzigd == true;
+        || Betaler?.IsGewijzigd == true
+        || Opbrengstrekeningen.Any(o => o.IsGewijzigd);
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
@@ -123,6 +127,12 @@ public sealed partial class ContributieViewModel : TabbladViewModel
                 {
                     await _sessie.Contributie.BewaarTarievenAsync(jaar, bedragen);
                 }
+            }
+
+            var opbrengst = Opbrengstrekeningen.Where(o => o.IsGewijzigd).ToDictionary(o => o.CategorieId, o => o.GekozenRekening?.Id);
+            if (opbrengst.Count > 0)
+            {
+                await _sessie.Contributie.BewaarOpbrengstrekeningenAsync(opbrengst);
             }
 
             Guid? betalerId = null;
@@ -229,11 +239,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel
         _tarievenPerJaar.Clear();
         ToonTarieven();
 
-        Runs.Clear();
-        foreach (var run in _stand.Runs)
-        {
-            Runs.Add(new RunRegel(run));
-        }
+        await LaadBoekhoudingAsync();
 
         GeselecteerdeBetaler = Betalers.FirstOrDefault(b => b.Id == betalerSelectie);
         if (GeselecteerdeBetaler is null)
@@ -290,7 +296,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel
             return;
         }
 
-        var wizard = new IncassoWizardViewModel(_dienst, _dialogen, _tijd);
+        var wizard = new IncassoWizardViewModel(_dienst, _dialogen, _tijd, _boeking);
         _dialogen.ToonIncassoWizard(wizard);
         if (wizard.Resultaat is { } run)
         {
@@ -334,7 +340,17 @@ public sealed partial class ContributieViewModel : TabbladViewModel
             return;
         }
 
-        await _dienst.AnnuleerAsync(regel.Run);
+        try
+        {
+            // Een geboekte run wordt tegengeboekt; na uitvoering door de bank kan annuleren niet meer.
+            await _boeking.AnnuleerRunAsync(regel.Run.Id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _dialogen.ToonFout("Run annuleren", ex.Message);
+            return;
+        }
+
         ShellLog.IncassorunGeannuleerd(_logger, regel.Run.Maand.Code);
         await LaadAsync(Betaler?.Id);
     }

@@ -124,6 +124,22 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 86 | Bijlagen bekijken | Voorbeeld in de app (PDF en afbeeldingen), plus een optie om de bijlage te exporteren (opslaan als bestand) |
 | 87 | Planning bijlagen | In stap 4c, samen met debiteuren/crediteuren en verkoopfacturen |
 | 88 | Uitgaven zonder bon | Filter "zonder bon" op uitgaven boven een instelbaar bedrag |
+| 89 | Opdeling 4c | 4c-1 Contributie (run boeken, afletteren, storneringen) → 4c-2 Relaties, openstaande posten en verkoopfacturen → 4c-3 Bijlagen; elk een eigen pull request |
+| 90 | Rekeningen debiteuren/crediteuren | 1300 *Debiteuren contributie*, 1310 *Debiteuren overig*, 1600 *Crediteuren*; de app maakt ze aan als ze nog niet bestaan |
+| 91 | Boekdatum incassorun | De uitvoerdatum van de incasso |
+| 92 | Stornering | De post blijft openstaan (Contributie › Openstaand) met de reden; per post een knop "Opnieuw incasseren in de volgende run" |
+| 93 | Crediteuren | Eenvoudig: betalingen gaan direct naar een kostenrekening met de bon als bijlage; crediteuren alleen voor facturen die op 31-12 openstaan (memoriaal) |
+| 94 | Btw | De Vereniging is niet btw-plichtig; verkoopfacturen zonder btw |
+| 95 | PDF verkoopfactuur | PDFsharp/MigraDoc (MIT-licentie) |
+| 96 | Postvak bonnen | De app leest datum en bedrag uit de tekst van een PDF; lukt dat niet (bijvoorbeeld een foto), dan vult de gebruiker ze in |
+| 97 | Limieten bijlagen | Maximaal 10 MB per bijlage; drempel "zonder bon" € 10 (later instelbaar) |
+| 98 | Afdracht Scouting Nederland | Een gewone betaling met een boekingsregel; geen aparte functie |
+| 99 | Run boeken | Automatisch als geboekte post bij *Definitief maken*; ontbreekt een opbrengstrekening per categorie, dan een melding en later de knop *Boeken* |
+| 100 | Omschrijving herincasso | `Contributie Scouting <maand jaar> (herincasso) – <voornamen>`; geen nieuwe opbrengst (de vordering staat al op 1300) |
+| 101 | Oninbaar | Knop *Afboeken als oninbaar*: gekozen kostenrekening aan 1300 |
+| 102 | Handmatige betaling open post | Automatisch concept als IBAN van de betaler én bedrag precies passen bij één open post; anders via de afletterdialoog |
+| 103 | Incasso's van vóór Verenigd | Incasso's van januari–oktober 2026 (oude systeem) via een boekingsregel direct op contributie, zoals in Excel; eventueel per speltak splitsen in het Journaal; geen debiteuren |
+| 104 | Herincasso als aparte post | Een herincasso is een aparte post in de run, naast een eventuele gewone post van dezelfde betaler (uitzondering op besluit 46), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -147,6 +163,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Analyse echte Rabobank-bestanden (betaal- en spaarrekening, 2025 en 2026; niet bewaard, niet in Git): camt.053.001.08, één afschrift per dag; de afschriftdatum is de datum van CLBD (PRCD draagt de vorige dag); saldi sluiten overal aan; eindsaldo 31-12-2025 = Excel 1100 (betaal) en 1150 (spaar), dus het verschil van € 7,24 zit niet in de bank. Rente op de spaarrekening heeft alleen eigen code Rabobank 1025 en geen bankreferentie. De eigen incasso staat als één batchregel (IDDT-ESDD); storneringen als IDDT-UPDD.
     - Tests: 565 in totaal. In de Linux-cloudsessie groen: Domain 190, Application 193, Infrastructure 50, Architectuur 7; ViewModel-tests 117/119 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte afschriften.
     - Volgende stap: 4c Contributie & relaties, inclusief bijlagen (besluiten 83–88).
+  - **4c: in ontwerp.** Besluiten 89–98 vastgesteld (2026-10-27). Analyse CAMT: de eigen incassobatch draagt `Btch/PmtInfId` (= kenmerk van de run + "-1"); een stornering (IDDT-UPDD) draagt EndToEndId, mandaat, tegen-IBAN en redencode (`RtrInf/Rsn/Cd`, bijvoorbeeld AM04). Het Excel-rekeningschema heeft geen debiteuren- of crediteurenrekening, wel 1400/1700. Ontwerp 4c-1 voorgelegd; besluiten 99–103 vastgesteld.
+  - **4c-1 Contributie: gereed**, v0.4.2 (2026-10-28). Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Run boeken (automatisch), herkenning van batch, stornering en handmatige betaling, afletteren in de bank, subtabblad Openstaand met herincasso en oninbaar, opbrengstrekening per categorie.
+    - Uitwerking: een herincasso is een **aparte post** in de run (naast een eventuele gewone post van dezelfde betaler), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is; dit is een uitzondering op "één post per betaler per run" (besluit 46), bevestigd als besluit 104.
+    - Tests: 596 in totaal. In de Linux-cloudsessie groen: Domain 200, Application 207, Infrastructure 51, Architectuur 7; ViewModel-tests 123/125 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
+    - Volgende stap: ontwerp 4c-2 Relaties, openstaande posten en verkoopfacturen.
 
 ## Privacy
 

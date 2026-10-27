@@ -9,7 +9,8 @@ namespace Verenigd.Application.Bank;
 /// <summary>Eén transactie (<c>Ntry</c>) uit een afschrift.</summary>
 public sealed record CamtTransactie(
     string? Bankreferentie, string? Regelreferentie, DateOnly Boekdatum, Bedrag Bedrag, bool IsBij, BankTransactiecode Code,
-    string? TegenIban, string? Tegennaam, string? Omschrijving, string? EndToEndId, string? MandaatId, int? BatchAantal);
+    string? TegenIban, string? Tegennaam, string? Omschrijving, string? EndToEndId, string? MandaatId, int? BatchAantal,
+    string? BatchKenmerk = null, string? Retourreden = null);
 
 /// <summary>Eén (dag)afschrift (<c>Stmt</c>); saldi in centen, positief is een tegoed.</summary>
 public sealed record CamtAfschrift(Iban Iban, string Nummer, DateOnly Datum, long Beginsaldo, long Eindsaldo, IReadOnlyList<CamtTransactie> Transacties);
@@ -146,7 +147,9 @@ public static class Camt053Lezer
             omschrijving,
             enkel is null ? null : Leeg(Tekst(enkel, "Refs", "EndToEndId")),
             enkel is null ? null : Tekst(enkel, "Refs", "MndtId"),
-            batchAantal);
+            batchAantal,
+            batch is null ? null : Tekst(batch, "PmtInfId"),
+            enkel is null ? null : Tekst(enkel, "RtrInf", "Rsn", "Cd"));
     }
 
     private static BankTransactiecode Code(XElement? code)

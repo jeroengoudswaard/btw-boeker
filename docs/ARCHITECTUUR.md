@@ -188,3 +188,34 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
   - Infrastructure: import, herkenning en boeken op een echte versleutelde database, plus de unieke index.
   - App: ViewModel-tests voor wizard, subtabbladen en shell. De FlaUI-test opent de subtabbladen Bank en Boekingsregels.
   - Echte afschriften zijn alleen lokaal gecontroleerd op aantallen en aansluiting, en niet bewaard.
+
+## Contributie in de boekhouding (fase 4c-1)
+
+```
+Incassorun (contributiekant) ──► ContributieboekingDienst.BoekRunAsync ──► MEM-post 1300 (D) aan 80xx (C) + Debiteurmutatie "Vordering" per post
+Bankmutatie ──► Bankherkenning ──► Contributievorderingen.Herken:
+                  batch (PmtInfId = kenmerk-1, bedrag = totaal)  → Ontvangst per post
+                  stornering (EndToEndId van een post)           → Stornering (+ redencode)
+                  ontvangst van IBAN + bedrag van één open post  → Betaling
+                ──► conceptpost Bank ↔ 1300 + de bijbehorende Debiteurmutaties (zelfde PostId)
+Openstaand: Contributievorderingen.Bereken(stand) = som van de effectieve mutaties per vordering (EndToEndId)
+```
+
+- **Twee kanten, één bestand.** Runs en herincasso's horen bij de contributiekant (`IContributieRepository`); posten en `Debiteurmutaties` bij de boekhouding (`IBoekhoudingRepository`).
+  - De boekhouding leest runs en herincasso's alleen.
+  - Een categorie verwijst naar haar opbrengstrekening met een Id, zonder databasekoppeling.
+  - Boeken na *Definitief maken* is een tweede stap. Mislukt die, dan blijft de run ongeboekt en kan hij later worden geboekt (besluit 99).
+- **Effectieve mutaties.** Een `Debiteurmutatie` telt alleen als haar journaalpost bestaat en niet is tegengeboekt.
+  - Een concept verwijderen maakt de aflettering daardoor vanzelf ongedaan; de app verwijdert de mutaties ook (cascade).
+  - Tegenboeken maakt haar vanzelf ongedaan.
+  - Annuleren van een geboekte run = de runpost tegenboeken.
+- **Status van een vordering.** Saldo 0 is *Betaald*, of *Afgeboekt* als er een oninbaar-mutatie is. Saldo groter dan 0 is *Gestorneerd* als er een stornering is, anders *Verwacht*.
+- **Herincasso.**
+  - Een `Herincasso` wacht tot de volgende run. `ContributieRekenaar` maakt er een aparte `VoorstelPost` van, met `HerincassoVan` = het EndToEndId van de oorspronkelijke post.
+  - De postregels krijgen `IsHerincasso`. De unieke index op (lid, maand) slaat ze over (`IsGeannuleerd = 0 AND IsHerincasso = 0`).
+  - De runboeking telt herincasso's niet als opbrengst. Ontvangst en stornering van een herincasso gaan via `Incassopost.Vordering` naar de oorspronkelijke vordering.
+- **Teststrategie 4c-1:**
+  - Domain: herincassopost, opbrengstrekening, verrijken van een bankmutatie, redencodes, debiteurmutatie, herincasso.
+  - Application: run boeken (en weigeren zonder opbrengstrekening), batch met juist en afwijkend bedrag, stornering, handmatige betaling, afletteren van meerdere posten, oninbaar, herincasso in de volgende run, annuleren met tegenboeking, concept verwijderen.
+  - Infrastructure: de hele keten op een echte versleutelde database.
+  - App: opbrengstrekeningen, de wizard die automatisch boekt, Openstaand, afletteren in Bank. De FlaUI-test opent Openstaand.

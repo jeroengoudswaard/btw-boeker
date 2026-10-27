@@ -41,6 +41,14 @@ public sealed class Contributiecategorie
     /// <summary>Alleen jeugdleden betalen contributie.</summary>
     public bool HeeftTarief => Soort == CategorieSoort.Jeugdlid;
 
+    /// <summary>
+    /// Id van de grootboekrekening voor de opbrengst, zoals 8020 Contributie Welpen (besluit 63). Een verwijzing naar de
+    /// boekhouding zonder databasekoppeling, zodat contributie en grootboek los van elkaar te laden zijn.
+    /// </summary>
+    public int? OpbrengstrekeningId { get; private set; }
+
+    public void KoppelOpbrengstrekening(int? rekeningId) => OpbrengstrekeningId = rekeningId;
+
     public void WijzigNaam(string naam)
     {
         var schoon = naam?.Trim();

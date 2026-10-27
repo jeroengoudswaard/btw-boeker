@@ -2,6 +2,39 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.2] - 2026-10-28: Fase 4c-1 "Contributie in de boekhouding"
+
+### Toegevoegd
+- **Run boeken** (besluiten 63, 91 en 99):
+  - Bij *Definitief maken* boekt de app de run automatisch op de uitvoerdatum: 1300 *Debiteuren contributie* aan *Contributie <speltak>*.
+  - Ontbreekt een opbrengstrekening, dan meldt de wizard dat. Bij *Incassoruns* kunt u de run later alsnog boeken (knop *Boeken*).
+  - De kolommen *Geboekt* en *Ontvangen* tonen de stand per run.
+  - Rekeningen 1300, 1310 en 1600 worden aangemaakt als ze nog niet bestaan (besluit 90).
+- **Opbrengstrekening per categorie** in *Contributie › Tarieven*.
+- **Herkenning in de bank**, vóór kruisposten en boekingsregels:
+  - **Eigen incassobatch:** herkend aan het batchkenmerk (`PmtInfId`) en het bedrag. De ontvangst boekt 1300 af en markeert alle posten van de run als betaald.
+  - **Stornering:** herkend aan het transactiekenmerk (EndToEndId) van een post. De vordering staat weer open, met een leesbare reden, bijvoorbeeld "Onvoldoende saldo (AM04)".
+  - **Handmatige betaling:** herkend als IBAN en bedrag precies passen bij één open post (besluit 102).
+- **Afletteren in de bank:** in het detailvenster kiest u voor een ontvangst een of meer open posten. Samen moeten ze precies het ontvangen bedrag zijn.
+- **Subtabblad Contributie › Openstaand:**
+  - Vorderingen per betaler met de status *Verwacht*, *Betaald*, *Gestorneerd* of *Afgeboekt*, de reden en het totaal dat openstaat.
+  - *Opnieuw incasseren in volgende run* (besluit 92).
+  - *Afboeken als oninbaar* op een kostenrekening (besluit 101).
+- **Herincasso:**
+  - De volgende run neemt de gestorneerde post mee als aparte post, met "(herincasso)" in de omschrijving (besluit 100).
+  - De herincasso levert geen nieuwe opbrengst op en telt niet mee voor "nooit twee keer".
+  - Wordt de run geannuleerd, dan wacht de herincasso weer op de volgende run.
+- **Run annuleren:** een geboekte run wordt automatisch tegengeboekt. Heeft de bank de batch al uitgekeerd, dan kan annuleren niet meer.
+- Bij het opnieuw inlezen van een afschrift vult de app het batchkenmerk en de retourreden aan bij transacties die al bekend zijn.
+- 596 geautomatiseerde tests (was 565).
+
+### Opgelost
+- Een nieuwe rekening gaf bij het opslaan haar Id niet terug (altijd 0).
+
+### Nog niet functioneel
+- Relaties, openstaande posten buiten contributie en verkoopfacturen: stap 4c-2.
+- Bijlagen (bonnen en facturen): stap 4c-3.
+
 ## [0.4.1] - 2026-10-27: Fase 4b "Bank"
 
 Fase 4 wordt in stappen opgeleverd (besluit 68); elke stap verhoogt het laatste cijfer.

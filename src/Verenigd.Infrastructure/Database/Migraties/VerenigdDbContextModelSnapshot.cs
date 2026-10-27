@@ -105,6 +105,10 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.Property<int?>("BatchAantal")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BatchKenmerk")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("Bedrag")
                         .HasColumnType("INTEGER");
 
@@ -135,6 +139,10 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Retourreden")
+                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Sleutel")
@@ -496,6 +504,9 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("OpbrengstrekeningId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Soort")
                         .HasColumnType("INTEGER");
 
@@ -509,6 +520,77 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .IsUnique();
 
                     b.ToTable("Contributiecategorieen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Debiteuren.Debiteurmutatie", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("BetalerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("IncassorunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Reden")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Saldo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Soort")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Vordering")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IncassorunId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("Administratie", "Vordering");
+
+                    b.ToTable("Debiteurmutaties", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Debiteuren.Herincasso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AangevraagdUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("RunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Vordering")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Vordering");
+
+                    b.ToTable("Herincassos", (string)null);
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Incassoinstellingen", b =>
@@ -560,6 +642,10 @@ namespace Verenigd.Infrastructure.Database.Migraties
 
                     b.Property<string>("EndToEndId")
                         .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HerincassoVan")
                         .HasMaxLength(35)
                         .HasColumnType("TEXT");
 
@@ -676,6 +762,9 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.Property<bool>("IsGeannuleerd")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHerincasso")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Lidnummer")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -695,7 +784,7 @@ namespace Verenigd.Infrastructure.Database.Migraties
 
                     b.HasIndex("Lidnummer", "Maand")
                         .IsUnique()
-                        .HasFilter("\"IsGeannuleerd\" = 0");
+                        .HasFilter("\"IsGeannuleerd\" = 0 AND \"IsHerincasso\" = 0");
 
                     b.ToTable("Postregels", (string)null);
                 });
@@ -1035,6 +1124,15 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .IsRequired();
 
                     b.Navigation("Rekening");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Debiteuren.Debiteurmutatie", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Journaalpost", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Incassopost", b =>

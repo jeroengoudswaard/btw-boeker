@@ -146,12 +146,65 @@ public sealed record LidKeuze(Lidnummer Lidnummer, string Naam)
     public override string ToString() => $"{Naam} ({Lidnummer.Waarde})";
 }
 
-public sealed record RunRegel(Incassorun Run)
+/// <summary>Eén incassorun; <paramref name="Postnummer"/> is de boeking (besluit 99), <paramref name="IsOntvangen"/> de uitkering door de bank.</summary>
+public sealed record RunRegel(Incassorun Run, string? Postnummer = null, bool IsOntvangen = false)
 {
+    public string Geboekt => Postnummer ?? "—";
+    public string Ontvangen => IsOntvangen ? "Ja" : "Nee";
+    public bool KanBoeken => IsDefinitief && Postnummer is null;
+
     public string Maand => Run.Maand.ToString();
     public string Uitvoerdatum => Weergave.Datum(Run.Uitvoerdatum);
     public string Statustekst => Run.Status == IncassorunStatus.Definitief ? "Definitief" : "Geannuleerd";
     public int AantalPosten => Run.AantalPosten;
     public string Totaal => Run.Totaal.ToString();
     public bool IsDefinitief => Run.Status == IncassorunStatus.Definitief;
+}
+
+/// <summary>De opbrengstrekening van één contributiecategorie (besluit 63).</summary>
+public sealed partial class OpbrengstRegel : ObservableObject
+{
+    private readonly int? _origineel;
+
+    public OpbrengstRegel(Contributiecategorie categorie, Domain.Financien.Boekhouding.Grootboekrekening? rekening)
+    {
+        ArgumentNullException.ThrowIfNull(categorie);
+        CategorieId = categorie.Id;
+        Categorie = categorie.Naam;
+        _origineel = categorie.OpbrengstrekeningId;
+        GekozenRekening = rekening;
+    }
+
+    public int CategorieId { get; }
+    public string Categorie { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
+    public partial Domain.Financien.Boekhouding.Grootboekrekening? GekozenRekening { get; set; }
+
+    public bool IsGewijzigd => GekozenRekening?.Id != _origineel;
+}
+
+/// <summary>Eén contributievordering op het subtabblad Openstaand.</summary>
+public sealed record VorderingRegel(Application.Debiteuren.Vorderingstand Stand)
+{
+    public string Vordering => Stand.Vordering;
+    public string Betaler => Stand.Post.Rekeninghouder;
+    public string Iban => Stand.Post.Iban.ToString();
+    public string Run => Stand.Run.Maand.ToString();
+    public string Maanden => Application.Incasso.ContributieRekenaar.MaandenTekst(Stand.Post.Regels.Select(r => r.Maand));
+    public string Bedrag => Stand.Bedrag.ToString();
+    public string Saldo => new Bedrag(Stand.Saldo).ToString();
+    public string? Reden => Stand.Redentekst;
+    public string Datum => Weergave.Datum(Stand.LaatsteDatum);
+    public bool HerincassoGepland => Stand.HerincassoGepland;
+    public bool IsOpen => Stand.Saldo > 0;
+
+    public string Status => Stand.Status switch
+    {
+        Application.Debiteuren.Vorderingstatus.Verwacht => "Verwacht",
+        Application.Debiteuren.Vorderingstatus.Betaald => "Betaald",
+        Application.Debiteuren.Vorderingstatus.Gestorneerd => HerincassoGepland ? "Gestorneerd · herincasso gepland" : "Gestorneerd",
+        _ => "Afgeboekt",
+    };
 }

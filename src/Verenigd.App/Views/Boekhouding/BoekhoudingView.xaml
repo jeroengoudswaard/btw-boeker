@@ -301,6 +301,24 @@
                                                 </TextBox.InputBindings>
                                             </TextBox>
                                         </StackPanel>
+                                        <Border Margin="0,0,0,12" Padding="8" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                                Visibility="{Binding KanAfletteren, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="Afletteren">
+                                            <StackPanel>
+                                                <TextBlock Text="Afletteren met openstaande contributie" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                                <ItemsControl ItemsSource="{Binding Afletterkeuzes}" Focusable="False">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type vm:AfletterKeuze}">
+                                                            <CheckBox IsChecked="{Binding IsGekozen}" Content="{Binding Tekst}" Margin="0,0,0,4" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <DockPanel Margin="0,4,0,0">
+                                                    <Button DockPanel.Dock="Right" Content="A_fletteren" Command="{Binding AfletterenCommand}"
+                                                            ToolTip="De gekozen posten moeten samen precies het ontvangen bedrag zijn" AutomationProperties.AutomationId="AfletterenKnop" />
+                                                    <TextBlock VerticalAlignment="Center"><Run Text="Gekozen: " /><Run Text="{Binding Afletterentotaal, Mode=OneWay}" FontWeight="SemiBold" /></TextBlock>
+                                                </DockPanel>
+                                            </StackPanel>
+                                        </Border>
                                         <StackPanel Orientation="Horizontal">
                                             <Button Content="_Toewijzen" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}"
                                                     ToolTip="Maakt een conceptpost (Enter)" AutomationProperties.AutomationId="Toewijzen"

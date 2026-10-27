@@ -115,8 +115,23 @@ internal static class BoekhoudingConfiguratie
             b.Property(x => x.Omschrijving).HasMaxLength(Bankmutatie.MaximaleTekstLengte);
             b.Property(x => x.EndToEndId).HasMaxLength(Bankmutatie.MaximaleTekstLengte);
             b.Property(x => x.MandaatId).HasMaxLength(Bankmutatie.MaximaleTekstLengte);
+            b.Property(x => x.BatchKenmerk).HasMaxLength(Bankmutatie.MaximaleTekstLengte);
+            b.Property(x => x.Retourreden).HasMaxLength(10);
             b.Ignore(x => x.Saldo);
             b.Ignore(x => x.Standaardomschrijving);
+        });
+
+        modelBuilder.Entity<Domain.Financien.Debiteuren.Debiteurmutatie>(b =>
+        {
+            b.ToTable("Debiteurmutaties");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Id).ValueGeneratedNever();
+            b.Property(x => x.Vordering).IsRequired().HasMaxLength(35).UseCollation("BINARY");
+            b.Property(x => x.Reden).HasMaxLength(10);
+            b.HasIndex(x => new { x.Administratie, x.Vordering });
+            b.HasIndex(x => x.IncassorunId);
+            // Een mutatie hoort bij haar journaalpost: verwijderen van een concept neemt haar mee.
+            b.HasOne<Journaalpost>().WithMany().HasForeignKey(x => x.PostId).IsRequired().OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Boekingsregel>(b =>

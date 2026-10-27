@@ -65,6 +65,21 @@ public class Camt053LezerTests
     }
 
     [Fact]
+    public void Batchkenmerk_en_retourreden_worden_gelezen()
+    {
+        var xml = CamtVoorbeeld.Xml(CamtVoorbeeld.Betaal, "08", new VbAfschrift(new DateOnly(2026, 11, 2), 0,
+            new VbTransactie(2500, "IDDT", "ESDD", "680", Ref: "B1", Batch: 2, BatchId: "VERABC-1", Omschrijving: null),
+            new VbTransactie(-1000, "IDDT", "UPDD", "631", Ref: "S1", E2e: "VERABC-0001", Mandaat: "VER-0", Reden: "AM04", NtryRef: "2")));
+
+        var t = Lees(xml).Afschriften.Single().Transacties;
+
+        Assert.Equal("VERABC-1", t[0].BatchKenmerk);
+        Assert.Null(t[0].Retourreden);
+        Assert.Equal("AM04", t[1].Retourreden);
+        Assert.Equal("VERABC-0001", t[1].EndToEndId);
+    }
+
+    [Fact]
     public void Niet_geboekte_transacties_worden_overgeslagen_met_melding()
     {
         var xml = CamtVoorbeeld.Xml(CamtVoorbeeld.Betaal, "08", new VbAfschrift(new DateOnly(2026, 3, 1), 0,

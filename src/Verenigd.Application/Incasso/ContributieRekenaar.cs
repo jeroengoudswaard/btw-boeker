@@ -102,7 +102,48 @@ public static class ContributieRekenaar
                 regels));
         }
 
+        posten.AddRange(Herincassos(stand, instellingen, uitvoerdatum, meldingen));
         return new IncassoVoorstel(maand, uitvoerdatum, posten, zelfTeInnen.Regels(), meldingen);
+    }
+
+    /// <summary>
+    /// Besluiten 92 en 100: een aangevraagde herincasso wordt een aparte post met dezelfde maanden en bedragen als de
+    /// gestorneerde post, en de omschrijving "(herincasso)". Zonder geldige machtiging blijft hij wachten, met een melding.
+    /// </summary>
+    private static IEnumerable<VoorstelPost> Herincassos(IncassoStand stand, Incassoinstellingen instellingen, DateOnly uitvoerdatum, List<string> meldingen)
+    {
+        var posten = stand.Runs.Where(r => r.Status == IncassorunStatus.Definitief).SelectMany(r => r.Posten).ToDictionary(p => p.EndToEndId, StringComparer.Ordinal);
+        var personen = stand.Personen.ToDictionary(p => p.Lidnummer);
+        foreach (var herincasso in stand.Herincassos.Where(h => h.IsOpen).OrderBy(h => h.AangevraagdUtc))
+        {
+            if (!posten.TryGetValue(herincasso.Vordering, out var oorspronkelijk))
+            {
+                meldingen.Add($"Een herincasso verwijst naar een onbekende post ({herincasso.Vordering}) en wordt overgeslagen.");
+                continue;
+            }
+
+            var betaler = stand.Betalers.FirstOrDefault(b => b.Id == oorspronkelijk.BetalerId);
+            if (betaler is null || !betaler.Iban.ControlegetalGeldig || !betaler.HeeftActieveMachtiging(uitvoerdatum))
+            {
+                meldingen.Add($"De herincasso voor {oorspronkelijk.Rekeninghouder} kan niet mee: geen geldige machtiging op de uitvoerdatum.");
+                continue;
+            }
+
+            var regels = oorspronkelijk.Regels
+                .Select(r =>
+                {
+                    var persoon = personen.GetValueOrDefault(r.Lidnummer);
+                    return new VoorstelRegel(r.Lidnummer, persoon?.VolledigeNaam ?? r.Lidnummer.Waarde, persoon?.Voornaam ?? string.Empty, r.Maand, r.Categorie, r.Bedrag, false);
+                })
+                .ToList();
+            var omschrijving = instellingen.Omschrijvingssjabloon
+                .Replace("{maanden}", MaandenTekst(regels.Select(r => r.Maand)) + " (herincasso)", StringComparison.Ordinal)
+                .Replace("{voornamen}", string.Join(", ", regels.Select(r => r.Voornaam).Where(v => v.Length > 0).Distinct()), StringComparison.Ordinal);
+            yield return new VoorstelPost(betaler, betaler.Rekeninghouder ?? oorspronkelijk.Rekeninghouder, SepaTekst.Normaliseer(omschrijving, 140), regels)
+            {
+                HerincassoVan = herincasso.Vordering,
+            };
+        }
     }
 
     /// <summary>Bijvoorbeeld <c>maart 2027</c>, of <c>jan, feb en mrt 2027</c> bij meerdere maanden.</summary>

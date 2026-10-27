@@ -170,8 +170,10 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
 internal sealed class FakeSessie(
     string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden, InMemoryContributieOpslag? contributie = null) : IDatabaseSessie
 {
-    public IContributieRepository Contributie { get; } = contributie ?? new InMemoryContributieOpslag { Leden = leden };
-    public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding { get; } = new InMemoryBoekhoudingOpslag();
+    private readonly InMemoryContributieOpslag _contributie = contributie ?? new InMemoryContributieOpslag { Leden = leden };
+
+    public IContributieRepository Contributie => _contributie;
+    public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding => field ??= new InMemoryBoekhoudingOpslag(_contributie);
     public string Pad { get; } = pad;
     public IAdministratieRepository Administraties { get; } = administraties;
     public ILedenRepository Leden { get; } = leden;
@@ -260,12 +262,29 @@ internal sealed class InMemoryContributieOpslag : IContributieRepository
     public List<Betaler> Betalers { get; } = [];
     public List<Domain.Financien.BetalerLid> Koppelingen { get; } = [];
     public List<Incassorun> Runs { get; } = [];
+    public List<Domain.Financien.Debiteuren.Herincasso> Herincassos { get; } = [];
     public Incassoinstellingen? Instellingen { get; set; }
 
     public Task<IncassoStand> LaadAsync(CancellationToken annulering = default) =>
         Task.FromResult(new IncassoStand(
             Leden.Stand.Personen.ToList(), Categorieen.ToList(), Tarieven.ToList(), LidCategorieen.ToList(), Betalers.ToList(),
-            Koppelingen.ToList(), Runs.ToList(), Instellingen));
+            Koppelingen.ToList(), Runs.ToList(), Instellingen) { Herincassos = Herincassos.ToList() });
+
+    public Task VraagHerincassoAanAsync(Domain.Financien.Debiteuren.Herincasso herincasso, CancellationToken annulering = default)
+    {
+        Herincassos.Add(herincasso);
+        return Task.CompletedTask;
+    }
+
+    public Task BewaarOpbrengstrekeningenAsync(IReadOnlyDictionary<int, int?> perCategorie, CancellationToken annulering = default)
+    {
+        foreach (var (id, rekening) in perCategorie)
+        {
+            Categorieen.Single(c => c.Id == id).KoppelOpbrengstrekening(rekening);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public Task VoegCategorieenToeAsync(IReadOnlyList<Contributiecategorie> categorieen, CancellationToken annulering = default)
     {
@@ -382,12 +401,17 @@ internal sealed class InMemoryContributieOpslag : IContributieRepository
             run.Annuleer(nuUtc);
         }
 
+        foreach (var herincasso in Herincassos.Where(h => h.RunId == runId))
+        {
+            herincasso.GeefVrij();
+        }
+
         return Task.CompletedTask;
     }
 }
 
 /// <summary>Grootboek in het geheugen, per administratie; ID's worden uitgedeeld zoals de database dat doet.</summary>
-internal sealed class InMemoryBoekhoudingOpslag : Verenigd.Application.Boekhouding.IBoekhoudingRepository
+internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contributie = null) : Verenigd.Application.Boekhouding.IBoekhoudingRepository
 {
     private readonly Dictionary<AdministratieSoort, List<object>> _gegevens = [];
     private int _id = 1;
@@ -437,6 +461,9 @@ internal sealed class InMemoryBoekhoudingOpslag : Verenigd.Application.Boekhoudi
             Bankafschriften = [.. lijst.OfType<Domain.Financien.Bank.Bankafschrift>().OrderBy(a => a.Datum)],
             Bankmutaties = [.. lijst.OfType<Domain.Financien.Bank.Bankmutatie>().OrderBy(m => m.Boekdatum)],
             Boekingsregels = [.. lijst.OfType<Domain.Financien.Bank.Boekingsregel>().OrderBy(r => r.Volgorde).ThenBy(r => r.Id)],
+            Debiteurmutaties = [.. lijst.OfType<Domain.Financien.Debiteuren.Debiteurmutatie>().OrderBy(m => m.Datum)],
+            Incassoruns = administratie == AdministratieSoort.Vereniging && contributie is not null ? [.. contributie.Runs] : [],
+            Herincassos = administratie == AdministratieSoort.Vereniging && contributie is not null ? [.. contributie.Herincassos] : [],
         };
     }
 }

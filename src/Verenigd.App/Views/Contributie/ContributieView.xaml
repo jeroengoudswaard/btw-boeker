@@ -162,7 +162,28 @@
                         <Button Content="_Kopiëren van vorig jaar" Command="{Binding KopieerVorigJaarCommand}" />
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
-                               Text="Het maandbedrag wordt elke maand geïncasseerd. Leiding en Vrijgesteld staan vast op € 0,00." />
+                               Text="Het maandbedrag wordt elke maand geïncasseerd. Leiding en Vrijgesteld staan vast op € 0,00. De opbrengstrekening geldt voor alle jaren; zonder opbrengstrekening wordt een run niet geboekt." />
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+                        <TextBlock Text="Opbrengstrekening per categorie" Style="{StaticResource Sectietitel}" />
+                        <TextBlock Text="Richt eerst de boekhouding in (tabblad Boekhouding) om opbrengstrekeningen te kiezen." Style="{StaticResource Toelichting}"
+                                   Visibility="{Binding IsBoekhoudingIngericht, Converter={StaticResource OnwaarNaarZichtbaar}}" />
+                        <DataGrid ItemsSource="{Binding Opbrengstrekeningen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                                  HeadersVisibility="Column" AutomationProperties.Name="Opbrengstrekeningen" AutomationProperties.AutomationId="Opbrengstrekeningen"
+                                  IsEnabled="{Binding IsBoekhoudingIngericht}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Categorie" Binding="{Binding Categorie}" IsReadOnly="True" Width="*" />
+                                <DataGridTemplateColumn Header="Opbrengstrekening" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:OpbrengstRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Opbrengstkeuzes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}" IsTextSearchEnabled="True"
+                                                      AutomationProperties.Name="{Binding Categorie, StringFormat=Opbrengstrekening {0}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
                     <DataGrid ItemsSource="{Binding Tarieven}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                               HeadersVisibility="Column" AutomationProperties.Name="Tarieven">
                         <DataGrid.Columns>
@@ -195,10 +216,16 @@
                             <DataGridTextColumn Header="Status" Binding="{Binding Statustekst}" Width="Auto" />
                             <DataGridTextColumn Header="Posten" Binding="{Binding AantalPosten}" Width="Auto" />
                             <DataGridTextColumn Header="Totaal" Binding="{Binding Totaal}" Width="Auto" />
+                            <DataGridTextColumn Header="Geboekt" Binding="{Binding Geboekt}" Width="Auto" />
+                            <DataGridTextColumn Header="Ontvangen" Binding="{Binding Ontvangen}" Width="Auto" />
                             <DataGridTemplateColumn Header="" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:RunRegel}">
                                         <StackPanel Orientation="Horizontal">
+                                            <Button Content="Boeken" Margin="0,0,8,0"
+                                                    Command="{Binding DataContext.BoekRunCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" Visibility="{Binding KanBoeken, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                    AutomationProperties.Name="{Binding Maand, StringFormat=Run {0} boeken}" />
                                             <Button Content="Bestand opslaan..." Margin="0,0,8,0" IsEnabled="{Binding IsDefinitief}"
                                                     Command="{Binding DataContext.BestandOpslaanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}" />
@@ -209,6 +236,47 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ===== Openstaand (stap 4c-1) ===== -->
+            <TabItem Header="Open_staand" AutomationProperties.AutomationId="SubtabOpenstaand">
+                <DockPanel Margin="0,12,0,0">
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <CheckBox Content="_Alleen openstaande posten" IsChecked="{Binding AlleenOpenstaand}" VerticalAlignment="Center" Margin="0,0,24,0"
+                                  AutomationProperties.AutomationId="AlleenOpenstaand" />
+                        <TextBlock VerticalAlignment="Center">
+                            <Run Text="Totaal openstaand " /><Run Text="{Binding TotaalOpenstaand, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                    </WrapPanel>
+                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Kaart}" Margin="0,12,0,0">
+                        <WrapPanel>
+                            <Button Content="Opnieuw incasseren in _volgende run" Command="{Binding HerincassoCommand}" Margin="0,0,24,0" VerticalAlignment="Center"
+                                    ToolTip="De gestorneerde post gaat mee in de volgende incassorun, met (herincasso) in de omschrijving"
+                                    AutomationProperties.AutomationId="Herincasso" />
+                            <Label Content="Kosten_rekening" Target="{Binding ElementName=Oninbaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Oninbaarkeuze" ItemsSource="{Binding Kostenrekeningen}" SelectedItem="{Binding Oninbaarrekening}" Width="240"
+                                      IsTextSearchEnabled="True" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <Button Content="Afboeken als _oninbaar..." Command="{Binding OninbaarCommand}" VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="Oninbaar" />
+                        </WrapPanel>
+                    </Border>
+                    <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                               Text="Een post is 'Verwacht' tot de bank de incasso uitkeert. Een betaling door de ouders lettert u af op het subtabblad Bank van de boekhouding." />
+                    <DataGrid ItemsSource="{Binding Vorderingen}" SelectedItem="{Binding GeselecteerdeVordering}" AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Openstaande contributie"
+                              AutomationProperties.AutomationId="Vorderingen">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Betaler" Binding="{Binding Betaler}" Width="2*" />
+                            <DataGridTextColumn Header="Run" Binding="{Binding Run}" Width="Auto" />
+                            <DataGridTextColumn Header="Maanden" Binding="{Binding Maanden}" Width="*" />
+                            <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedrag}" Width="Auto" />
+                            <DataGridTextColumn Header="Open" Binding="{Binding Saldo}" Width="Auto" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                            <DataGridTextColumn Header="Reden" Binding="{Binding Reden}" Width="2*" />
+                            <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

@@ -40,6 +40,18 @@ public sealed record MutatieRegel(Bankmutatie Mutatie, MutatieStatus Statuswaard
     };
 }
 
+/// <summary>Een open contributiepost om een ontvangst mee af te letteren.</summary>
+public sealed partial class AfletterKeuze(Application.Debiteuren.Vorderingstand stand) : ObservableObject
+{
+    public string Vordering => stand.Vordering;
+    public long Saldo => stand.Saldo;
+    public string Tekst => $"{stand.Post.Rekeninghouder} · {stand.Run.Maand} · {new Bedrag(stand.Saldo)}"
+        + (stand.Redentekst is { } reden ? $" · {reden}" : string.Empty);
+
+    [ObservableProperty]
+    public partial bool IsGekozen { get; set; }
+}
+
 public sealed record TransactiecodeKeuze(string Code, string Naam)
 {
     public override string ToString() => $"{Code} · {Naam}";

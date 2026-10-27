@@ -44,6 +44,15 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Nieuwe_rekening_geeft_haar_id_terug()
+    {
+        var id = await _dienst.BewaarRekeningAsync(Ver, new RekeningInvoer(null, 4116, "Water", null, RekeningSoort.Resultaat, RekeningRol.Geen, true));
+
+        Assert.NotEqual(0, id);
+        Assert.Equal(4116, _data.Rekeningen.Single(r => r.Id == id).Nummer);
+    }
+
+    [Fact]
     public async Task Volgend_boekjaar_openen_om_alvast_te_boeken()
     {
         await _dienst.OpenBoekjaarAsync(Ver, 2027);

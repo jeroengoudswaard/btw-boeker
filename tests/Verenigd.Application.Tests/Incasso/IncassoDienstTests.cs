@@ -113,7 +113,7 @@ public sealed class IncassoDienstTests : IAsyncDisposable
     }
 
     /// <summary>Werkt rechtstreeks op de testdata, alsof het de database is.</summary>
-    private sealed class FakeRepository(IncassoTestdata data) : IContributieRepository
+    internal sealed class FakeRepository(IncassoTestdata data) : IContributieRepository
     {
         public Task<IncassoStand> LaadAsync(CancellationToken annulering = default) => Task.FromResult(data.Stand);
 
@@ -135,6 +135,27 @@ public sealed class IncassoDienstTests : IAsyncDisposable
             if (run.Status == IncassorunStatus.Definitief)
             {
                 run.Annuleer(nuUtc);
+            }
+
+            foreach (var herincasso in data.Herincassos.Where(h => h.RunId == runId))
+            {
+                herincasso.GeefVrij();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task VraagHerincassoAanAsync(Domain.Financien.Debiteuren.Herincasso herincasso, CancellationToken annulering = default)
+        {
+            data.Herincassos.Add(herincasso);
+            return Task.CompletedTask;
+        }
+
+        public Task BewaarOpbrengstrekeningenAsync(IReadOnlyDictionary<int, int?> perCategorie, CancellationToken annulering = default)
+        {
+            foreach (var (id, rekening) in perCategorie)
+            {
+                data.Categorieen.Single(c => c.Id == id).KoppelOpbrengstrekening(rekening);
             }
 
             return Task.CompletedTask;

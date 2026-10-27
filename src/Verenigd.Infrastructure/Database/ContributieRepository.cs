@@ -167,8 +167,35 @@ internal sealed class ContributieRepository(Func<VerenigdDbContext> maakContext)
         if (run.Status == IncassorunStatus.Definitief)
         {
             run.Annuleer(nuUtc);
-            await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         }
+
+        foreach (var herincasso in await context.Herincassos.Where(h => h.RunId == runId).ToListAsync(annulering).ConfigureAwait(false))
+        {
+            herincasso.GeefVrij();
+        }
+
+        await context.SaveChangesAsync(annulering).ConfigureAwait(false);
+    }
+
+    public async Task VraagHerincassoAanAsync(Domain.Financien.Debiteuren.Herincasso herincasso, CancellationToken annulering = default)
+    {
+        ArgumentNullException.ThrowIfNull(herincasso);
+        await using var context = maakContext();
+        context.Herincassos.Add(herincasso);
+        await context.SaveChangesAsync(annulering).ConfigureAwait(false);
+    }
+
+    public async Task BewaarOpbrengstrekeningenAsync(IReadOnlyDictionary<int, int?> perCategorie, CancellationToken annulering = default)
+    {
+        ArgumentNullException.ThrowIfNull(perCategorie);
+        await using var context = maakContext();
+        var ids = perCategorie.Keys.ToList();
+        foreach (var categorie in await context.Contributiecategorieen.Where(c => ids.Contains(c.Id)).ToListAsync(annulering).ConfigureAwait(false))
+        {
+            categorie.KoppelOpbrengstrekening(perCategorie[categorie.Id]);
+        }
+
+        await context.SaveChangesAsync(annulering).ConfigureAwait(false);
     }
 
     private static async Task<IncassoStand> LaadAsync(VerenigdDbContext context, CancellationToken annulering)
@@ -182,8 +209,12 @@ internal sealed class ContributieRepository(Func<VerenigdDbContext> maakContext)
         var runs = await context.Incassoruns.Include(r => r.Posten).ThenInclude(p => p.Regels).AsSplitQuery()
             .ToListAsync(annulering).ConfigureAwait(false);
         var instellingen = await context.Incassoinstellingen.SingleOrDefaultAsync(annulering).ConfigureAwait(false);
+        var herincassos = await context.Herincassos.ToListAsync(annulering).ConfigureAwait(false);
         return new IncassoStand(
             personen, categorieen, tarieven, lidCategorieen, betalers, koppelingen,
-            [.. runs.OrderByDescending(r => r.Maand).ThenByDescending(r => r.DefinitiefUtc)], instellingen);
+            [.. runs.OrderByDescending(r => r.Maand).ThenByDescending(r => r.DefinitiefUtc)], instellingen)
+        {
+            Herincassos = herincassos,
+        };
     }
 }
