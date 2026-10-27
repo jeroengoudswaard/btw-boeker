@@ -199,7 +199,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Tests: 643 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 8; ViewModel-tests 137/139 (de 2 Windows-padtests). **Windows-test (2026-10-27, commit `b5c5e3e`): 643/643 geslaagd**, inclusief alle FlaUI-UI-tests.
     - Pull request: één PR voor v0.4.3 t/m v0.4.6 (4c-2, standaardinrichting en bugfixes), geopend na de geslaagde Windows-run.
     - Daarna: de gebruiker doet zelf de proefimport van de echte Excel-boekhouding en bankafschriften op Windows (de bestanden blijven buiten Git). Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
-    - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+  - **v0.4.7 (in uitvoering): bevindingen uit de proefimport.** De gebruiker test met de echte bestanden en verzamelt bevindingen; die worden samen opgelost in één PR (keuze 3A).
+    - Antwoord bij de proefimport: het boekjaar is 2026, omdat de eindbalans 2025 de openingsbalans 2026 wordt (besluit 62). Of 2025 zichtbaar moet worden in Verenigd, staat nog open.
+    - Opgelost: rapportkolommen (tekst `3*`, bedragen `1*`; de viewer las de vaste breedte als verhouding) en de underscore op 6 accentknoppen (DataTemplate `Toegangstekst` met AccessText; het Fluent-sjabloon `AccentButtonStyle` herkent geen toegangstoets). Beide met een test.
+    - Tests: 645 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 9; ViewModel-tests 137/139 (de 2 Windows-padtests). Nog op Windows te draaien: de nieuwe layouttest en een visuele controle van saldibalans, afdruk en de blauwe knoppen.
+    - Volgende stap daarna: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 

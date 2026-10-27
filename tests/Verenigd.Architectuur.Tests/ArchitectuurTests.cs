@@ -139,18 +139,9 @@ public class ArchitectuurTests
     [Fact]
     public void Xaml_zet_geen_AutomationId_op_een_element_zonder_automation_peer()
     {
-        var map = new DirectoryInfo(AppContext.BaseDirectory);
-        while (map is not null && !File.Exists(Path.Combine(map.FullName, "Verenigd.slnx")))
-        {
-            map = map.Parent;
-        }
-
-        Assert.NotNull(map);
         var zonderPeer = new[] { "Border", "StackPanel", "Grid", "DockPanel", "WrapPanel", "Canvas", "UniformGrid", "VirtualizingStackPanel" };
         var fouten = new List<string>();
-        foreach (var bestand in Directory.EnumerateFiles(Path.Combine(map.FullName, "src", "Verenigd.App"), "*.xaml", SearchOption.AllDirectories)
-                     .Where(b => !b.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
-                         && !b.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)))
+        foreach (var bestand in XamlBestanden())
         {
             var tekst = File.ReadAllText(bestand);
             foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(
@@ -164,5 +155,38 @@ public class ArchitectuurTests
         }
 
         Assert.True(fouten.Count == 0, "AutomationId op een element zonder peer: " + string.Join(", ", fouten));
+    }
+
+    /// <summary>
+    /// De accentknop van het Fluent-thema herkent geen toegangstoets en toont "_Boeken" letterlijk. Een knop met
+    /// AccentButtonStyle en een underscore in de tekst gebruikt daarom ContentTemplate Toegangstekst (App.xaml).
+    /// </summary>
+    [Fact]
+    public void Accentknop_met_toegangstoets_gebruikt_de_toegangstekst()
+    {
+        var fouten = new List<string>();
+        foreach (var bestand in XamlBestanden())
+        {
+            foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(bestand), "<Button\\b[^<>]*>"))
+            {
+                var tag = m.Value;
+                if (tag.Contains("AccentButtonStyle", StringComparison.Ordinal)
+                    && System.Text.RegularExpressions.Regex.Match(tag, "Content=\"([^\"]*)\"") is { Success: true } inhoud
+                    && inhoud.Groups[1].Value.Contains('_', StringComparison.Ordinal)
+                    && !tag.Contains("ContentTemplate=\"{StaticResource Toegangstekst}\"", StringComparison.Ordinal))
+                {
+                    fouten.Add($"{Path.GetFileName(bestand)}: {inhoud.Groups[1].Value}");
+                }
+            }
+        }
+
+        Assert.True(fouten.Count == 0, "Accentknop zonder Toegangstekst: " + string.Join(", ", fouten));
+    }
+
+    private static IEnumerable<string> XamlBestanden()
+    {
+        var scheiding = Path.DirectorySeparatorChar;
+        return Directory.EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.App"), "*.xaml", SearchOption.AllDirectories)
+            .Where(b => !b.Contains($"{scheiding}obj{scheiding}", StringComparison.Ordinal) && !b.Contains($"{scheiding}bin{scheiding}", StringComparison.Ordinal));
     }
 }

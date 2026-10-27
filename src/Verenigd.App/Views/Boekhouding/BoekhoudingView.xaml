@@ -43,7 +43,7 @@
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
                            Text="Begin met het standaardschema voor scoutinggroepen, met een sjabloon van een andere groep, met een overname uit de huidige Excel-boekhouding of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
                 <WrapPanel>
-                    <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}"
+                    <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                             Margin="0,0,8,8" ToolTip="Een compact rekeningschema met rubrieken, aan te passen vóór het inrichten"
                             AutomationProperties.AutomationId="StandaardInrichten" />
                     <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Margin="0,0,8,8"
@@ -144,7 +144,7 @@
                                     <TextBlock Text="{Binding Boekmelding}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0" AutomationProperties.AutomationId="PostBoekmelding"
                                                Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <Button Content="_Boeken" MinWidth="96" Margin="0,0,8,0" Style="{DynamicResource AccentButtonStyle}"
+                                        <Button Content="_Boeken" MinWidth="96" Margin="0,0,8,0" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                                                 Command="{Binding DataContext.BoekenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 ToolTip="Boeken (Ctrl+Enter). Een geboekte post kan niet meer worden gewijzigd." AutomationProperties.AutomationId="PostBoeken"
                                                 Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
@@ -225,7 +225,7 @@
                         </WrapPanel>
                         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
                             <Button Content="Bankafschrift _inlezen..." Command="{Binding BankInlezenCommand}" Margin="0,0,16,0"
-                                    Style="{DynamicResource AccentButtonStyle}" AutomationProperties.AutomationId="BankInlezen" />
+                                    Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="BankInlezen" />
                             <Label Content="_Tonen" Target="{Binding ElementName=Bankfilterkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
                             <ComboBox x:Name="Bankfilterkeuze" ItemsSource="{Binding Bankfilters}" SelectedValuePath="Filter" DisplayMemberPath="Naam"
                                       SelectedValue="{Binding Bankfilter}" Width="150" Margin="0,0,16,0" VerticalAlignment="Center"
@@ -326,7 +326,7 @@
                                             </StackPanel>
                                         </tg:Groepskader>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button Content="_Toewijzen" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}"
+                                            <Button Content="_Toewijzen" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                                                     ToolTip="Maakt een conceptpost (Enter)" AutomationProperties.AutomationId="Toewijzen"
                                                     Visibility="{Binding GeselecteerdeMutatie.IsTeVerwerken, Converter={StaticResource BoolNaarZichtbaar}}" />
                                             <Button Content="Regel _maken van deze boeking..." Command="{Binding RegelMakenCommand}"
@@ -549,7 +549,7 @@
                                     <TextBlock Text="{Binding Fouttekst}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0" AutomationProperties.AutomationId="FactuurFouten"
                                                Visibility="{Binding Fouttekst, Converter={StaticResource NietNullNaarZichtbaar}}" />
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <Button Content="Definitief ma_ken..." MinWidth="96" Style="{DynamicResource AccentButtonStyle}"
+                                        <Button Content="Definitief ma_ken..." MinWidth="96" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                                                 Command="{Binding DataContext.MaakFactuurDefinitiefCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 ToolTip="Nummer toekennen en boeken in het verkoopdagboek. Daarna kan de factuur niet meer worden gewijzigd."
                                                 AutomationProperties.AutomationId="FactuurDefinitief" />

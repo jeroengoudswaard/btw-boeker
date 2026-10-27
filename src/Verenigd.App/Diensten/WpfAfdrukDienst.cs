@@ -44,7 +44,9 @@ internal sealed class WpfAfdrukDienst : IAfdrukDienst
         var tabelBlok = new Table { CellSpacing = 0 };
         foreach (var kolom in tabel.Kolommen)
         {
-            tabelBlok.Columns.Add(new TableColumn { Width = kolom.IsBedrag ? new GridLength(110) : new GridLength(1, GridUnitType.Star) });
+            // Alleen verhoudingen: de FlowDocumentScrollViewer leest een vaste breedte (110) als verhouding, waardoor de
+            // tekstkolom één letter breed werd. Tekst 3 delen, elk bedrag 1 deel.
+            tabelBlok.Columns.Add(new TableColumn { Width = new GridLength(kolom.IsBedrag ? 1 : 3, GridUnitType.Star) });
         }
 
         var groep = new TableRowGroup();
