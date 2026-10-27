@@ -107,7 +107,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Kopregels van de vier SOL3-exports: zie `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Export 4 heeft het lidnummer als laatste kolom; de import zoekt kolommen op naam (aanvulling op besluit 20).
   - Tests: 313 in totaal. Gebouwd in een Linux-cloudsessie: Domain, Application, Infrastructure en Architectuur (238) groen; de ViewModel-tests (71) via een tijdelijk net10.0-project, waarvan 2 bestaande tests alleen op Linux falen (Windows-paden). **Nog op Windows te draaien:** de volledige suite, inclusief de 4 FlaUI-UI-tests (`dotnet test`, dan `--filter Categorie=UI`).
   - Bekende beperkingen: IBAN invullen in Verenigd, machtiging en contributiecategorie volgen in fase 3; de groepsindeling kan alleen bij een import worden gekozen.
-- **Fase 3 (Contributie & SEPA): voorstel in bespreking.** Besluiten 44–60 vastgesteld en ontwerp goedgekeurd (2026-10-27): rekenregel per maand, datamodel (categorieën, tarieven, LidCategorieen met historie, machtiging op Betaler, incassoruns met momentopname, uniek Lidnummer+Maand), tabblad Contributie met vier subtabbladen, incassowizard, pain.008.001.08 met XSD-validatie. Bouw in uitvoering.
+- **Fase 3 (Contributie & SEPA): gereed**, v0.3.0 (2026-10-27). Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Tabblad Contributie (Ctrl+3) met vier subtabbladen, incassowizard, pain.008.001.08 met XSD-controle, Instellingen › Incasso.
+  - Toevoeging op het ontwerp: instelling *eerste incassomaand* (eerdere maanden zijn nooit verschuldigd via Verenigd), zodat de eerste run geen jaren aan naheffing bevat. Concept-runs worden niet opgeslagen; een run bestaat pas als hij definitief is.
+  - Tests: 443 in totaal. In de Linux-cloudsessie groen: Domain 159, Application 139, Infrastructure 41, Architectuur 7; ViewModel-tests 90/92 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 5 FlaUI-UI-tests.
+  - Bekende beperkingen: het verschil tussen het IBAN uit SOL3 en een in Verenigd ingevoerd IBAN (besluit 22) wordt nog niet apart gesignaleerd; de SOL3-import overschrijft de betalerkoppeling als SOL3 een IBAN levert (nu zijn de SOL3-IBAN-kolommen leeg). Boeken, storneringen en afdracht volgen in fase 4.
+- **Volgende stap: Fase 4 (Bankimport & boekhouding).** Eerst voorstel ter goedkeuring.
 
 ## Privacy
 

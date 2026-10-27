@@ -3,9 +3,11 @@ using Verenigd.Application.Administraties;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
 using Verenigd.Application.Import;
+using Verenigd.Application.Incasso;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Leden;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien;
 using Verenigd.Domain.Leden;
 
 namespace Verenigd.App.Tests;
@@ -31,6 +33,16 @@ internal sealed class FakeDialoogService : IDialoogService
 
     /// <summary>Wat de "gebruiker" in de importwizard doet; standaard annuleren.</summary>
     public Func<ViewModels.Leden.ImportWizardViewModel, Task<bool>>? ImportWizard { get; set; }
+
+    public string? XmlDoel { get; set; }
+
+    /// <summary>Wat de "gebruiker" in de incassowizard doet; standaard annuleren.</summary>
+    public Func<ViewModels.Contributie.IncassoWizardViewModel, Task<bool>>? IncassoWizard { get; set; }
+
+    public string? KiesXmlDoel(string voorgesteldeNaam) => XmlDoel;
+
+    public bool ToonIncassoWizard(ViewModels.Contributie.IncassoWizardViewModel wizard) =>
+        IncassoWizard is not null && IncassoWizard(wizard).GetAwaiter().GetResult();
 
     public IReadOnlyList<string> KiesImportbestanden() => Importbestanden;
 
@@ -80,6 +92,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     public Herstelsleutel Herstelsleutel { get; } = Herstelsleutel.Genereer();
     public InMemoryAdministratieRepository Repository { get; } = new();
     public InMemoryLedenOpslag Leden { get; } = new();
+    public InMemoryContributieOpslag Contributie { get; } = new();
     public FakeSessie? LaatsteSessie { get; private set; }
     public List<(string Backup, string Doel)> Teruggezet { get; } = [];
 
@@ -110,7 +123,8 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
             throw new OngeldigeSleutelException();
         }
 
-        LaatsteSessie = new FakeSessie(pad, Repository, Leden);
+        Contributie.Leden = Leden;
+        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie);
         return Task.FromResult<IDatabaseSessie>(LaatsteSessie);
     }
 
@@ -133,8 +147,10 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     }
 }
 
-internal sealed class FakeSessie(string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden) : IDatabaseSessie
+internal sealed class FakeSessie(
+    string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden, InMemoryContributieOpslag? contributie = null) : IDatabaseSessie
 {
+    public IContributieRepository Contributie { get; } = contributie ?? new InMemoryContributieOpslag { Leden = leden };
     public string Pad { get; } = pad;
     public IAdministratieRepository Administraties { get; } = administraties;
     public ILedenRepository Leden { get; } = leden;
@@ -207,6 +223,144 @@ internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
         Stand = new ImportStand(
             [.. Stand.Personen, .. w.NieuwePersonen], [.. Stand.Groepen, .. w.NieuweGroepen],
             [.. Stand.Betalers, .. w.NieuweBetalers], [.. Stand.Koppelingen, .. w.NieuweKoppelingen]);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Contributie en incasso in het geheugen, met dezelfde regels als de echte opslag.</summary>
+internal sealed class InMemoryContributieOpslag : IContributieRepository
+{
+    private int _volgendId = 1;
+
+    public InMemoryLedenOpslag Leden { get; set; } = new();
+    public List<Contributiecategorie> Categorieen { get; } = [];
+    public List<Tarief> Tarieven { get; } = [];
+    public List<LidCategorie> LidCategorieen { get; } = [];
+    public List<Betaler> Betalers { get; } = [];
+    public List<Domain.Financien.BetalerLid> Koppelingen { get; } = [];
+    public List<Incassorun> Runs { get; } = [];
+    public Incassoinstellingen? Instellingen { get; set; }
+
+    public Task<IncassoStand> LaadAsync(CancellationToken annulering = default) =>
+        Task.FromResult(new IncassoStand(
+            Leden.Stand.Personen.ToList(), Categorieen.ToList(), Tarieven.ToList(), LidCategorieen.ToList(), Betalers.ToList(),
+            Koppelingen.ToList(), Runs.ToList(), Instellingen));
+
+    public Task VoegCategorieenToeAsync(IReadOnlyList<Contributiecategorie> categorieen, CancellationToken annulering = default)
+    {
+        foreach (var categorie in categorieen)
+        {
+            typeof(Contributiecategorie).GetProperty(nameof(Contributiecategorie.Id))!.SetValue(categorie, _volgendId++);
+            Categorieen.Add(categorie);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task BewaarTarievenAsync(int boekjaar, IReadOnlyDictionary<int, Bedrag> bedragen, CancellationToken annulering = default)
+    {
+        foreach (var (id, bedrag) in bedragen)
+        {
+            if (Tarieven.Find(t => t.Boekjaar == boekjaar && t.Categorie.Id == id) is { } tarief)
+            {
+                tarief.WijzigBedrag(bedrag);
+            }
+            else
+            {
+                Tarieven.Add(new Tarief(Categorieen.Single(c => c.Id == id), boekjaar, bedrag));
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task BewaarLidCategorieenAsync(IReadOnlyList<LidCategorieInvoer> invoer, CancellationToken annulering = default)
+    {
+        foreach (var regel in invoer)
+        {
+            LidCategorieen.RemoveAll(c => c.Lidnummer == regel.Lidnummer && c.Ingangsdatum == regel.Ingangsdatum);
+            LidCategorieen.Add(new LidCategorie(regel.Lidnummer, Categorieen.Single(c => c.Id == regel.CategorieId), regel.Ingangsdatum));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<Guid> BewaarBetalerAsync(BetalerInvoer invoer, CancellationToken annulering = default)
+    {
+        var fouten = invoer.Fouten(Betalers);
+        if (fouten.Count > 0)
+        {
+            throw new ArgumentException(string.Join(" ", fouten));
+        }
+
+        var iban = Domain.Financien.Iban.Maak(invoer.Iban);
+        var betaler = invoer.Id is { } id ? Betalers.Single(b => b.Id == id) : new Betaler(iban, invoer.Rekeninghouder);
+        if (invoer.Id is null)
+        {
+            Betalers.Add(betaler);
+        }
+
+        betaler.WijzigIban(iban);
+        betaler.WijzigRekeninghouder(invoer.Rekeninghouder);
+        if (string.IsNullOrWhiteSpace(invoer.Mandaatkenmerk))
+        {
+            betaler.VerwijderMachtiging();
+        }
+        else
+        {
+            betaler.RegistreerMachtiging(invoer.Mandaatkenmerk, invoer.OndertekendOp!.Value);
+            if (invoer.IngetrokkenOp is { } ingetrokken)
+            {
+                betaler.TrekMachtigingIn(ingetrokken);
+            }
+        }
+
+        Koppelingen.RemoveAll(k => k.BetalerId == betaler.Id && !invoer.Leden.Contains(k.Lidnummer));
+        foreach (var lidnummer in invoer.Leden)
+        {
+            if (Koppelingen.Find(k => k.Lidnummer == lidnummer) is { } koppeling)
+            {
+                koppeling.KoppelAan(betaler.Id);
+            }
+            else
+            {
+                Koppelingen.Add(new Domain.Financien.BetalerLid(lidnummer, betaler.Id));
+            }
+        }
+
+        return Task.FromResult(betaler.Id);
+    }
+
+    public Task BewaarInstellingenAsync(IncassoinstellingenInvoer invoer, CancellationToken annulering = default)
+    {
+        if (!IncassantId.TryMaak(invoer.IncassantId, out var id))
+        {
+            throw new ArgumentException("Het incassant-ID is ongeldig.");
+        }
+
+        var iban = Domain.Financien.Iban.Maak(invoer.Iban);
+        Instellingen ??= new Incassoinstellingen(id, invoer.Naam, iban, invoer.Incassodag, invoer.EersteIncassomaand);
+        Instellingen.Wijzig(id, invoer.Naam, iban, invoer.Incassodag, invoer.EersteIncassomaand, invoer.Omschrijvingssjabloon);
+        return Task.CompletedTask;
+    }
+
+    public async Task BewaarRunAsync(Func<IncassoStand, Incassorun> maakRun, CancellationToken annulering = default) =>
+        Runs.Add(maakRun(await LaadAsync(annulering)));
+
+    public Task LegBestandVastAsync(Guid runId, string hash, CancellationToken annulering = default)
+    {
+        Runs.Single(r => r.Id == runId).LegBestandVast(hash);
+        return Task.CompletedTask;
+    }
+
+    public Task AnnuleerRunAsync(Guid runId, DateTime nuUtc, CancellationToken annulering = default)
+    {
+        var run = Runs.Single(r => r.Id == runId);
+        if (run.Status == IncassorunStatus.Definitief)
+        {
+            run.Annuleer(nuUtc);
+        }
+
         return Task.CompletedTask;
     }
 }

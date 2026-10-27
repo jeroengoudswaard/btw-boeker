@@ -6,7 +6,7 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 |------|--------|--------|
 | 1 | Fundament: hoofdvenster met tabbladen, versleutelde database, herstelsleutel, back-up, thema's | ✅ Gereed (v0.1.0) |
 | 2 | Leden, met import uit SOL3 (scouting.nl) | ✅ Gereed (v0.2.0) |
-| 3 | Contributie en SEPA-incasso (pain.008, Rabobank) | Gepland |
+| 3 | Contributie en SEPA-incasso (pain.008, Rabobank) | ✅ Gereed (v0.3.0) |
 | 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | Gepland |
 | 5 | Jaarbegroting (vereniging) en meerjarenplan (stichting) | Gepland |
 | 6 | E-mail via Gmail | Gepland |

@@ -2,5 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
-
+  <ItemGroup>
+    <!-- Alleen voor vaste run-ID's in het voorbeeldbestand van de pain.008-tests -->
+    <InternalsVisibleTo Include="Verenigd.Application.Tests" />
+  </ItemGroup>
 </Project>

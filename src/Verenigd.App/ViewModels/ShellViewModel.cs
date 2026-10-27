@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
+using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
@@ -69,7 +70,7 @@ public sealed partial class ShellViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command))]
+        nameof(ImporteerSol3Command), nameof(NieuweIncassorunCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -237,6 +238,28 @@ public sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    /// <summary>Bestand › Nieuwe incassorun: opent Contributie · Vereniging en start de wizard.</summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task NieuweIncassorunAsync()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is ContributieViewModel contributie)
+        {
+            if (contributie.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await contributie.NieuweRunCommand.ExecuteAsync(null);
+        }
+    }
+
     [RelayCommand]
     private async Task HerstelBackupAsync()
     {
@@ -298,15 +321,25 @@ public sealed partial class ShellViewModel : ObservableObject
         var administratie = Administraties.FirstOrDefault(a => a.Soort == verzoek.Administratie);
         TabbladViewModel tab = verzoek.Module switch
         {
-            ModuleSoort.Instellingen => new InstellingenViewModel(_sessie!.Administraties, Administraties),
+            ModuleSoort.Instellingen => new InstellingenViewModel(
+                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd)),
+            ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         Tabbladen.Add(tab);
         GeselecteerdTabblad = tab;
-        if (tab is LedenViewModel leden)
+        switch (tab)
         {
-            leden.VernieuwCommand.Execute(null);
+            case LedenViewModel leden:
+                leden.VernieuwCommand.Execute(null);
+                break;
+            case ContributieViewModel contributie:
+                contributie.VernieuwCommand.Execute(null);
+                break;
+            case InstellingenViewModel { Incasso: { } incasso }:
+                incasso.LaadCommand.Execute(null);
+                break;
         }
     }
 

@@ -1,3 +1,4 @@
+using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 
@@ -53,4 +54,9 @@ public interface IDialoogService
 
     /// <returns><c>true</c> als de import is uitgevoerd.</returns>
     bool ToonImportWizard(ImportWizardViewModel wizard);
+
+    string? KiesXmlDoel(string voorgesteldeNaam);
+
+    /// <returns><c>true</c> als er een run definitief is gemaakt.</returns>
+    bool ToonIncassoWizard(IncassoWizardViewModel wizard);
 }

@@ -1,20 +1,28 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
 
 namespace Verenigd.App.ViewModels;
 
-public sealed class InstellingenViewModel : TabbladViewModel
+public sealed partial class InstellingenViewModel : TabbladViewModel
 {
     private readonly IAdministratieRepository _repository;
 
-    public InstellingenViewModel(IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties)
+    public InstellingenViewModel(
+        IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
+        Incasso = incasso;
+        if (incasso is not null)
+        {
+            incasso.PropertyChanged += RegelGewijzigd;
+        }
+
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
         Regels = administraties.Select(a => new AdministratieInstellingRegel(a)).ToList();
         foreach (var regel in Regels)
@@ -25,11 +33,18 @@ public sealed class InstellingenViewModel : TabbladViewModel
 
     public IReadOnlyList<AdministratieInstellingRegel> Regels { get; }
 
+    /// <summary>Incassogegevens van de Vereniging (fase 3).</summary>
+    public IncassoInstellingenViewModel? Incasso { get; }
+
+    [ObservableProperty]
+    public partial string? Foutmelding { get; private set; }
+
     public IAsyncRelayCommand OpslaanCommand { get; }
 
-    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd);
+    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true;
 
-    public override bool KanOpslaan => HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null);
+    public override bool KanOpslaan =>
+        HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null);
 
     public override async Task<bool> BewaarAsync()
     {
@@ -43,6 +58,20 @@ public sealed class InstellingenViewModel : TabbladViewModel
             await regel.BewaarAsync(_repository);
         }
 
+        if (Incasso is { IsGewijzigd: true })
+        {
+            try
+            {
+                await Incasso.BewaarAsync();
+            }
+            catch (ArgumentException ex)
+            {
+                Foutmelding = ex.Message;
+                return false;
+            }
+        }
+
+        Foutmelding = null;
         return true;
     }
 
@@ -51,6 +80,11 @@ public sealed class InstellingenViewModel : TabbladViewModel
         foreach (var regel in Regels)
         {
             regel.PropertyChanged -= RegelGewijzigd;
+        }
+
+        if (Incasso is not null)
+        {
+            Incasso.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();
