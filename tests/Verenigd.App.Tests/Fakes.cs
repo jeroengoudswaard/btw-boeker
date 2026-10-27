@@ -151,6 +151,7 @@ internal sealed class FakeSessie(
     string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden, InMemoryContributieOpslag? contributie = null) : IDatabaseSessie
 {
     public IContributieRepository Contributie { get; } = contributie ?? new InMemoryContributieOpslag { Leden = leden };
+    public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding => throw new NotSupportedException();
     public string Pad { get; } = pad;
     public IAdministratieRepository Administraties { get; } = administraties;
     public ILedenRepository Leden { get; } = leden;

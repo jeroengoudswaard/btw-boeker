@@ -12,6 +12,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
     <PackageVersion Include="SQLite3MC.PCLRaw.bundle" Version="2.6.1" />
+    <!-- Excel lezen (overname boekhouding) en schrijven (export), MIT-licentie -->
+    <PackageVersion Include="ClosedXML" Version="0.105.0" />
     <!-- Tests -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
