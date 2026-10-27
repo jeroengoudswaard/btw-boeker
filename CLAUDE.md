@@ -134,6 +134,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 96 | Postvak bonnen | De app leest datum en bedrag uit de tekst van een PDF; lukt dat niet (bijvoorbeeld een foto), dan vult de gebruiker ze in |
 | 97 | Limieten bijlagen | Maximaal 10 MB per bijlage; drempel "zonder bon" € 10 (later instelbaar) |
 | 98 | Afdracht Scouting Nederland | Een gewone betaling met een boekingsregel; geen aparte functie |
+| 99 | Run boeken | Automatisch als geboekte post bij *Definitief maken*; ontbreekt een opbrengstrekening per categorie, dan een melding en later de knop *Boeken* |
+| 100 | Omschrijving herincasso | `Contributie Scouting <maand jaar> (herincasso) – <voornamen>`; geen nieuwe opbrengst (de vordering staat al op 1300) |
+| 101 | Oninbaar | Knop *Afboeken als oninbaar*: gekozen kostenrekening aan 1300 |
+| 102 | Handmatige betaling open post | Automatisch concept als IBAN van de betaler én bedrag precies passen bij één open post; anders via de afletterdialoog |
+| 103 | Incasso's van vóór Verenigd | Incasso's van januari–oktober 2026 (oude systeem) via een boekingsregel direct op contributie, zoals in Excel; eventueel per speltak splitsen in het Journaal; geen debiteuren |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -157,7 +162,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Analyse echte Rabobank-bestanden (betaal- en spaarrekening, 2025 en 2026; niet bewaard, niet in Git): camt.053.001.08, één afschrift per dag; de afschriftdatum is de datum van CLBD (PRCD draagt de vorige dag); saldi sluiten overal aan; eindsaldo 31-12-2025 = Excel 1100 (betaal) en 1150 (spaar), dus het verschil van € 7,24 zit niet in de bank. Rente op de spaarrekening heeft alleen eigen code Rabobank 1025 en geen bankreferentie. De eigen incasso staat als één batchregel (IDDT-ESDD); storneringen als IDDT-UPDD.
     - Tests: 565 in totaal. In de Linux-cloudsessie groen: Domain 190, Application 193, Infrastructure 50, Architectuur 7; ViewModel-tests 117/119 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte afschriften.
     - Volgende stap: 4c Contributie & relaties, inclusief bijlagen (besluiten 83–88).
-  - **4c: in ontwerp.** Besluiten 89–98 vastgesteld (2026-10-27). Analyse CAMT: de eigen incassobatch draagt `Btch/PmtInfId` (= kenmerk van de run + "-1"); een stornering (IDDT-UPDD) draagt EndToEndId, mandaat, tegen-IBAN en redencode (`RtrInf/Rsn/Cd`, bijvoorbeeld AM04). Het Excel-rekeningschema heeft geen debiteuren- of crediteurenrekening, wel 1400/1700.
+  - **4c: in ontwerp.** Besluiten 89–98 vastgesteld (2026-10-27). Analyse CAMT: de eigen incassobatch draagt `Btch/PmtInfId` (= kenmerk van de run + "-1"); een stornering (IDDT-UPDD) draagt EndToEndId, mandaat, tegen-IBAN en redencode (`RtrInf/Rsn/Cd`, bijvoorbeeld AM04). Het Excel-rekeningschema heeft geen debiteuren- of crediteurenrekening, wel 1400/1700. Ontwerp 4c-1 voorgelegd; besluiten 99–103 vastgesteld.
 
 ## Privacy
 
