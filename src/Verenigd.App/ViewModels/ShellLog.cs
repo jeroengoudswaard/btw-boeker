@@ -46,6 +46,9 @@ internal static partial class ShellLog
     [LoggerMessage(14, LogLevel.Information, "Boekjaar {Jaar} van {Administratie} {Handeling}")]
     public static partial void BoekjaarGewijzigd(ILogger logger, int jaar, string administratie, string handeling);
 
+    [LoggerMessage(15, LogLevel.Information, "Bankafschriften {Administratie} ingelezen: {Nieuw} nieuw, {Herkend} herkend, {Werkvoorraad} in de werkvoorraad")]
+    public static partial void BankafschriftIngelezen(ILogger logger, string administratie, int nieuw, int herkend, int werkvoorraad);
+
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 }

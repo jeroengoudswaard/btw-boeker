@@ -134,8 +134,13 @@ public sealed class Dagboek
         Naam = null!;
     }
 
-    public Dagboek(AdministratieSoort administratie, DagboekSoort soort, string code, string naam, Grootboekrekening? rekening)
+    public Dagboek(AdministratieSoort administratie, DagboekSoort soort, string code, string naam, Grootboekrekening? rekening, Iban? iban = null)
     {
+        if (iban is not null && soort != DagboekSoort.Bank)
+        {
+            throw new ArgumentException("Alleen een bankdagboek heeft een IBAN.", nameof(iban));
+        }
+
         var schoon = code?.Trim().ToUpperInvariant();
         if (schoon is not { Length: >= 2 and <= 5 } || !schoon.All(char.IsAsciiLetterOrDigit))
         {
@@ -152,11 +157,15 @@ public sealed class Dagboek
         Code = schoon;
         Naam = string.IsNullOrWhiteSpace(naam) ? schoon : naam.Trim();
         Rekening = rekening;
+        Iban = iban;
     }
 
     public int Id { get; private set; }
     public AdministratieSoort Administratie { get; private set; }
     public DagboekSoort Soort { get; private set; }
+
+    /// <summary>De eigen bankrekening van een bankdagboek (besluit 76).</summary>
+    public Iban? Iban { get; private set; }
     public string Code { get; private set; }
     public string Naam { get; private set; }
     public Grootboekrekening? Rekening { get; private set; }

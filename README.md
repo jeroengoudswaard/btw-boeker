@@ -7,7 +7,7 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 | 1 | Fundament: hoofdvenster met tabbladen, versleutelde database, herstelsleutel, back-up, thema's | ✅ Gereed (v0.1.0) |
 | 2 | Leden, met import uit SOL3 (scouting.nl) | ✅ Gereed (v0.2.0) |
 | 3 | Contributie en SEPA-incasso (pain.008, Rabobank) | ✅ Gereed (v0.3.0) |
-| 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | 🔨 In uitvoering: 4a Grootboek gereed (v0.4.0), 4b Bank en 4c Contributie & relaties volgen |
+| 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | 🔨 In uitvoering: 4a Grootboek (v0.4.0) en 4b Bank (v0.4.1) gereed, 4c Contributie & relaties volgt |
 | 5 | Jaarbegroting (vereniging) en meerjarenplan (stichting) | Gepland |
 | 6 | E-mail via Gmail | Gepland |
 | 7 | Webapp voor groepsleiders (Supabase) | Gepland |
@@ -67,7 +67,7 @@ docs/
 | `%APPDATA%\Verenigd\instellingen.json` | Thema, laatst geopende database, open tabbladen |
 | `%LOCALAPPDATA%\Verenigd\logs\` | Logbestanden (30 dagen), zonder persoonsgegevens |
 
-SOL3-exports zijn echte persoonsgegevens: bewaar ze in `privé/` of buiten de repository. Hetzelfde geldt voor de Excel-boekhouding die u eenmalig overneemt. De tests gebruiken alleen verzonnen gegevens.
+SOL3-exports zijn echte persoonsgegevens: bewaar ze in `privé/` of buiten de repository. Hetzelfde geldt voor de Excel-boekhouding die u eenmalig overneemt en voor bankafschriften (CAMT.053). De tests gebruiken alleen verzonnen gegevens.
 
 Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`, sleutelbestanden en de mappen `voorbeelden/` en `privé/`.
 

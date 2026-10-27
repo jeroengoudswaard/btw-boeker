@@ -11,6 +11,7 @@
     <UserControl.InputBindings>
         <KeyBinding Key="F5" Command="{Binding VernieuwCommand}" />
         <KeyBinding Gesture="Ctrl+N" Command="{Binding NieuwePostCommand}" />
+        <KeyBinding Gesture="Ctrl+B" Command="{Binding ConceptenBoekenCommand}" />
     </UserControl.InputBindings>
     <UserControl.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Find" Executed="Zoeken_Executed" />
@@ -204,6 +205,232 @@
                             </DockPanel>
                         </Border>
                     </Grid>
+                </TabItem>
+
+                <!-- ===== Bank (besluiten 74–82) ===== -->
+                <TabItem Header="B_ank" AutomationProperties.AutomationId="SubtabBank">
+                    <DockPanel Margin="0,12,0,0">
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <Label Content="Bank_rekening" Target="{Binding ElementName=Bankkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Bankkeuze" ItemsSource="{Binding Bankrekeningen}" SelectedItem="{Binding GekozenBankrekening}" DisplayMemberPath="Naam"
+                                      Width="240" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="Bankrekeningkeuze" />
+                            <TextBlock Text="{Binding Banksaldotekst}" VerticalAlignment="Center" AutomationProperties.AutomationId="Banksaldo"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </WrapPanel>
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <Button Content="Bankafschrift _inlezen..." Command="{Binding BankInlezenCommand}" Margin="0,0,16,0"
+                                    Style="{DynamicResource AccentButtonStyle}" AutomationProperties.AutomationId="BankInlezen" />
+                            <Label Content="_Tonen" Target="{Binding ElementName=Bankfilterkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Bankfilterkeuze" ItemsSource="{Binding Bankfilters}" SelectedValuePath="Filter" DisplayMemberPath="Naam"
+                                      SelectedValue="{Binding Bankfilter}" Width="150" Margin="0,0,16,0" VerticalAlignment="Center"
+                                      AutomationProperties.AutomationId="Bankfilter" />
+                            <TextBlock Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0">
+                                <Run Text="{Binding AantalTeVerwerken, Mode=OneWay}" /><Run Text=" te verwerken · " /><Run Text="{Binding AantalConcept, Mode=OneWay}" /><Run Text=" concept" />
+                            </TextBlock>
+                            <Button Content="Regels _toepassen" Command="{Binding PasRegelsToeCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
+                                    ToolTip="De boekingsregels opnieuw toepassen op de werkvoorraad" />
+                            <Button Content="Concepten b_oeken" Command="{Binding ConceptenBoekenCommand}" VerticalAlignment="Center"
+                                    ToolTip="Alle bankconcepten boeken (Ctrl+B)" AutomationProperties.AutomationId="ConceptenBoeken" />
+                        </WrapPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="2*" MinWidth="340" />
+                            </Grid.ColumnDefinitions>
+                            <DataGrid ItemsSource="{Binding Mutaties}" SelectedItem="{Binding GeselecteerdeMutatie}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Banktransacties"
+                                      AutomationProperties.AutomationId="Banktransacties">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
+                                    <DataGridTextColumn Header="Tegenpartij" Binding="{Binding Tegenpartij}" Width="2*" />
+                                    <DataGridTextColumn Header="Omschrijving" Binding="{Binding Omschrijving}" Width="2*" />
+                                    <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedragtekst}" Width="Auto" />
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <TextBlock Grid.Column="2" Text="Selecteer een transactie." Style="{StaticResource Toelichting}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding GeselecteerdeMutatie, Converter={StaticResource NullNaarZichtbaar}}" />
+                            <Border Grid.Column="2" Style="{StaticResource Kaart}" AutomationProperties.AutomationId="Bankdetail"
+                                    Visibility="{Binding GeselecteerdeMutatie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource Sectietitel}">
+                                            <Run Text="{Binding GeselecteerdeMutatie.Datum, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding GeselecteerdeMutatie.Bedragtekst, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.Resources>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Margin" Value="0,0,12,4" />
+                                                    <Setter Property="TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </Grid.Resources>
+                                            <TextBlock Text="Tegenpartij" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding GeselecteerdeMutatie.Tegenpartij}" />
+                                            <TextBlock Grid.Row="1" Text="Rekening" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding GeselecteerdeMutatie.Tegenrekening}" FontFamily="Consolas" />
+                                            <TextBlock Grid.Row="2" Text="Omschrijving" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding GeselecteerdeMutatie.Omschrijving}" />
+                                            <TextBlock Grid.Row="3" Text="Soort" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding GeselecteerdeMutatie.Soort}" ToolTip="{Binding GeselecteerdeMutatie.Code}" />
+                                            <TextBlock Grid.Row="4" Text="Status" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Row="4" Grid.Column="1">
+                                                <Run Text="{Binding GeselecteerdeMutatie.Status, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding GeselecteerdeMutatie.Postnummer, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </Grid>
+                                        <StackPanel Visibility="{Binding GeselecteerdeMutatie.IsTeVerwerken, Converter={StaticResource BoolNaarZichtbaar}}">
+                                            <Label Content="Re_kening" Target="{Binding ElementName=Toewijsrekening}" Padding="0,0,0,4" />
+                                            <ComboBox x:Name="Toewijsrekening" ItemsSource="{Binding Toewijsrekeningen}" SelectedItem="{Binding ToewijsRekening}"
+                                                      IsTextSearchEnabled="True" Margin="0,0,0,8" AutomationProperties.AutomationId="Toewijsrekening" />
+                                            <Label Content="Om_schrijving (leeg = van de bank)" Target="{Binding ElementName=Toewijsomschrijving}" Padding="0,0,0,4" />
+                                            <TextBox x:Name="Toewijsomschrijving" Text="{Binding ToewijsOmschrijving, UpdateSourceTrigger=PropertyChanged}" MaxLength="200" Margin="0,0,0,12">
+                                                <TextBox.InputBindings>
+                                                    <KeyBinding Key="Enter" Command="{Binding ToewijzenCommand}" />
+                                                </TextBox.InputBindings>
+                                            </TextBox>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="_Toewijzen" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}"
+                                                    ToolTip="Maakt een conceptpost (Enter)" AutomationProperties.AutomationId="Toewijzen"
+                                                    Visibility="{Binding GeselecteerdeMutatie.IsTeVerwerken, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                            <Button Content="Regel _maken van deze boeking..." Command="{Binding RegelMakenCommand}"
+                                                    AutomationProperties.AutomationId="RegelMaken" />
+                                        </StackPanel>
+                                        <TextBlock Style="{StaticResource Toelichting}" Margin="0,12,0,0"
+                                                   Text="Een concept kunt u in het Journaal controleren, splitsen of verwijderen; de bankregel staat vast." />
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Grid>
+                    </DockPanel>
+                </TabItem>
+
+                <!-- ===== Boekingsregels ===== -->
+                <TabItem Header="Boekingsregel_s" AutomationProperties.AutomationId="SubtabBoekingsregels">
+                    <DockPanel Margin="0,12,0,0">
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <Button Content="_Nieuwe regel" Command="{Binding NieuweRegelCommand}" Margin="0,0,8,0" AutomationProperties.AutomationId="NieuweBoekingsregel" />
+                            <Button Content="_Verwijderen..." Command="{Binding VerwijderRegelCommand}" Margin="0,0,24,0" />
+                            <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE70E;" Padding="8,4" Margin="0,0,4,0" Command="{Binding RegelOmhoogCommand}"
+                                    ToolTip="Omhoog (Alt+↑)" AutomationProperties.Name="Regel omhoog" />
+                            <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE70D;" Padding="8,4" Margin="0,0,24,0" Command="{Binding RegelOmlaagCommand}"
+                                    ToolTip="Omlaag (Alt+↓)" AutomationProperties.Name="Regel omlaag" />
+                            <Button Content="Regels _toepassen op werkvoorraad" Command="{Binding PasRegelsToeCommand}" />
+                        </WrapPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                   Text="De eerste passende regel in deze volgorde wint. Lege voorwaarden doen niet mee. Overboekingen tussen eigen rekeningen gaan altijd via Kruisposten. Opslaan met Ctrl+S." />
+                        <DataGrid ItemsSource="{Binding Boekingsregels}" SelectedItem="{Binding GeselecteerdeRegel}" AutoGenerateColumns="False"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" HeadersVisibility="Column" SelectionMode="Single"
+                                  AutomationProperties.Name="Boekingsregels" AutomationProperties.AutomationId="Boekingsregels">
+                            <DataGrid.InputBindings>
+                                <KeyBinding Gesture="Alt+Up" Command="{Binding RegelOmhoogCommand}" />
+                                <KeyBinding Gesture="Alt+Down" Command="{Binding RegelOmlaagCommand}" />
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Naam" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Naam van de regel" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Tegen-IBAN" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding TegenIban, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" AutomationProperties.Name="Tegen-IBAN" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Naam bevat" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding NaamBevat, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Naam bevat" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Omschrijving bevat" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding OmschrijvingBevat, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Omschrijving bevat" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Bij/af" Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Richtingen, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding Richting, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Bij of af" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Bedrag van" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding BedragVanTekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Bedrag van" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="tot" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding BedragTotTekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Bedrag tot" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Transactiecode" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <ComboBox IsEditable="True" Text="{Binding Transactiecode, UpdateSourceTrigger=PropertyChanged}"
+                                                      ItemsSource="{Binding DataContext.Transactiecodekeuzes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      TextSearch.TextPath="Code" AutomationProperties.Name="Transactiecode">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type vm:TransactiecodeKeuze}">
+                                                        <TextBlock Text="{Binding}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Rekening" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Toewijsrekeningen, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}" IsTextSearchEnabled="True"
+                                                      AutomationProperties.Name="Rekening" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Omschrijving post" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <TextBox Text="{Binding Omschrijving, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Omschrijving van de post" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Actief" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
+                                            <CheckBox IsChecked="{Binding IsActief, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" AutomationProperties.Name="Actief" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Let op" Binding="{Binding Fout}" IsReadOnly="True" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
                 </TabItem>
 
                 <!-- ===== Rekeningschema ===== -->

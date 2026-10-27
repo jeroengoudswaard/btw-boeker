@@ -90,6 +90,9 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 throw new InvalidOperationException("Een geboekte post kan niet worden verwijderd; maak een tegenboeking.");
             }
 
+            // De banktransactie gaat terug naar de werkvoorraad (besluit 75).
+            stand.MutatieVan(post.Id)?.Ontkoppel();
+
             var wijziging = new BoekhoudingWijziging<bool>(true);
             wijziging.Verwijderen.Add(post);
             return wijziging;
@@ -101,6 +104,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         {
             ControleerOpenJaar(stand, datum);
             var tegen = Post(stand, postId).MaakTegenboeking(datum);
+            stand.MutatieVan(postId)?.Ontkoppel();
             tegen.Boek(VolgendNummer(stand, tegen), NuUtc);
             var wijziging = new BoekhoudingWijziging<string>(tegen.Nummer);
             wijziging.Toevoegen.Add(tegen);
@@ -383,8 +387,29 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         if (invoer.Id is { } id)
         {
             var bestaand = Post(stand, id);
+            if (stand.MutatieVan(id) is { } mutatie)
+            {
+                if (!ReferenceEquals(dagboek, mutatie.Dagboek) && dagboek.Id != mutatie.Dagboek.Id)
+                {
+                    throw new InvalidOperationException($"Deze post hoort bij een banktransactie en blijft in dagboek {mutatie.Dagboek.Naam}.");
+                }
+
+                // De bankregel staat vast; eerst op een proefpost controleren, zodat de post zelf ongewijzigd blijft.
+                var proef = new Journaalpost(administratie, dagboek, invoer.Datum, invoer.Omschrijving);
+                proef.Wijzig(dagboek, invoer.Datum, invoer.Omschrijving, regels);
+                if (mutatie.ControleerBankregel(proef) is { } fout)
+                {
+                    throw new InvalidOperationException(fout);
+                }
+            }
+
             bestaand.Wijzig(dagboek, invoer.Datum, invoer.Omschrijving, regels);
             return (bestaand, false);
+        }
+
+        if (dagboek.Soort == DagboekSoort.Bank)
+        {
+            throw new InvalidOperationException("Posten in een bankdagboek ontstaan uit het bankafschrift; gebruik het subtabblad Bank.");
         }
 
         var post = new Journaalpost(administratie, dagboek, invoer.Datum, invoer.Omschrijving);
@@ -395,7 +420,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
     private static Journaalpost Post(BoekhoudingStand stand, Guid id) =>
         stand.Posten.SingleOrDefault(p => p.Id == id) ?? throw new InvalidOperationException("De post bestaat niet meer.");
 
-    private static int VolgendNummer(BoekhoudingStand stand, Journaalpost post) =>
+    internal static int VolgendNummer(BoekhoudingStand stand, Journaalpost post) =>
         stand.Posten
             .Where(p => p.IsGeboekt && p.Datum.Year == post.Datum.Year && (ReferenceEquals(p.Dagboek, post.Dagboek) || (p.Dagboek.Id != 0 && p.Dagboek.Id == post.Dagboek.Id)))
             .Select(p => p.Volgnummer ?? 0)

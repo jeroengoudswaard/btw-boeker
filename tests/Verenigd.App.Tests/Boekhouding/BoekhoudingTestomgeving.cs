@@ -8,7 +8,7 @@ using Verenigd.Domain.Administraties;
 namespace Verenigd.App.Tests.Boekhouding;
 
 /// <summary>Tabblad Boekhouding op een in-memory grootboek, met een verzonnen Voorblad als Excel-bron.</summary>
-internal sealed class BoekhoudingTestomgeving
+internal sealed class BoekhoudingTestomgeving : IDisposable
 {
     public BoekhoudingTestomgeving()
     {
@@ -47,6 +47,37 @@ internal sealed class BoekhoudingTestomgeving
 
     public BoekhoudingViewModel Maak(AdministratieViewModel? administratie = null) =>
         new(Sessie, Dialogen, Tijd, administratie ?? Vereniging, Hulpmiddelen, NullLogger.Instance);
+
+    /// <summary>Schrijft een verzonnen CAMT.053-bestand naar een tijdelijk bestand; wordt bij <see cref="Dispose"/> opgeruimd.</summary>
+    public string CamtBestand(string iban, params Application.Tests.Bank.VbAfschrift[] afschriften)
+    {
+        var pad = Path.Combine(Path.GetTempPath(), $"camt-{Guid.NewGuid():N}.xml");
+        File.WriteAllText(pad, Application.Tests.Bank.CamtVoorbeeld.Xml(iban, "08", afschriften));
+        _bestanden.Add(pad);
+        return pad;
+    }
+
+    public void Dispose()
+    {
+        foreach (var pad in _bestanden)
+        {
+            File.Delete(pad);
+        }
+    }
+
+    private readonly List<string> _bestanden = [];
+
+    /// <summary>Ingericht met daarnaast 1150 Spaarrekening en 1298 Kruisposten.</summary>
+    public async Task<BoekhoudingViewModel> OpenMetBankrekeningenAsync()
+    {
+        var dienst = new BoekhoudingDienst(Sessie, Tijd);
+        await dienst.ImporteerAsync(AdministratieSoort.Vereniging, VoorbladInlezer.Lees(Voorblad()));
+        await dienst.BewaarRekeningAsync(AdministratieSoort.Vereniging, new RekeningInvoer(null, 1150, "Spaarrekening", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+        await dienst.BewaarRekeningAsync(AdministratieSoort.Vereniging, new RekeningInvoer(null, 1298, "Kruisposten", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Kruisposten, true));
+        var vm = Maak();
+        await vm.VernieuwCommand.ExecuteAsync(null);
+        return vm;
+    }
 
     public async Task<BoekhoudingViewModel> OpenIngerichtAsync()
     {

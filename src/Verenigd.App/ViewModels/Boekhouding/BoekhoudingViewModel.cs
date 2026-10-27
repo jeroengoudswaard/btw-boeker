@@ -19,6 +19,7 @@ namespace Verenigd.App.ViewModels.Boekhouding;
 /// </summary>
 public sealed partial class BoekhoudingViewModel : TabbladViewModel
 {
+    private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
     private readonly TimeProvider _tijd;
     private readonly BoekhoudingHulpmiddelen _hulpmiddelen;
@@ -33,6 +34,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BoekhoudingHulpmiddelen hulpmiddelen, ILogger logger)
         : base(ModuleCatalogus.Geef(ModuleSoort.Boekhouding), administratie)
     {
+        _sessie = sessie;
         _dialogen = dialogen;
         _tijd = tijd;
         _hulpmiddelen = hulpmiddelen;
@@ -154,12 +156,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     public string Aantaltekst => string.Create(CultureInfo.CurrentCulture,
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
-    public override bool HeeftOnopgeslagenWijzigingen => Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd);
+    public override bool HeeftOnopgeslagenWijzigingen =>
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd);
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
-        && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null);
+        && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
+        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null);
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
     public RapportTabel? Afdruktabel => Subtab == BoekhoudingSubtab.Grootboekkaart && KaartTabel is not null ? KaartTabel : Rapport;
@@ -186,6 +190,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
                 await _dienst.BewaarRekeningAsync(Soort, rekening.Invoer);
             }
 
+            await BewaarRegelsAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
             {
@@ -271,6 +276,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         StelKaartperiodeIn();
         BerekenRapport();
         BerekenKaart();
+        LaadBank();
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -464,7 +470,10 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         }
 
         var actieveRekeningen = _stand.Rekeningen.OrderBy(r => r.Nummer).ToList();
-        var dagboeken = _stand.Dagboeken.OrderBy(d => d.Soort).ThenBy(d => d.Code, StringComparer.Ordinal).ToList();
+        // Posten in een bankdagboek ontstaan alleen uit het afschrift (subtabblad Bank).
+        var dagboeken = _stand.Dagboeken
+            .Where(d => d.Soort != DagboekSoort.Bank || (post is not null && d.Id == post.Dagboek.Id))
+            .OrderBy(d => d.Soort).ThenBy(d => d.Code, StringComparer.Ordinal).ToList();
         var editor = new PostEditor(post, dagboeken, actieveRekeningen, Vandaag);
         KoppelEditor(editor);
         Editor = editor;
@@ -741,5 +750,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         TegenboekenCommand.NotifyCanExecuteChanged();
         SluitBoekjaarCommand.NotifyCanExecuteChanged();
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
+        BankCommandsVernieuwen();
     }
 }

@@ -277,14 +277,14 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         Assert.Equal(2026, Assert.Single(leeg.Boekjaren).Jaar);
     }
 
-    private sealed class VasteTijd(DateTimeOffset nu) : TimeProvider
+    internal sealed class VasteTijd(DateTimeOffset nu) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => nu.ToUniversalTime();
 
         public override TimeZoneInfo LocalTimeZone { get; } = TimeZoneInfo.CreateCustomTimeZone("test", nu.Offset, "test", "test");
     }
 
-    private sealed class FakeSessie(BoekhoudingTestdata data) : IDatabaseSessie
+    internal sealed class FakeSessie(BoekhoudingTestdata data) : IDatabaseSessie
     {
         public string Pad { get; } = Path.Combine(Path.GetTempPath(), "test.vdb");
         public List<string> Backups { get; } = [];

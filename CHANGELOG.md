@@ -2,6 +2,44 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.1] - 2026-10-27: Fase 4b "Bank"
+
+Fase 4 wordt in stappen opgeleverd (besluit 68); elke stap verhoogt het laatste cijfer.
+
+### Toegevoegd
+- **Bankafschriften inlezen** (*Bestand › Importeren › Bankafschrift (CAMT.053)…* of de knop op het subtabblad Bank).
+  - Formaat CAMT.053 (versie 001.02 en 001.08). Getest op de opbouw van Rabobank; ING volgt na een voorbeeldbestand (besluit 79).
+  - Meerdere bestanden tegelijk, en bestanden die elkaar overlappen. Een transactie wordt nooit twee keer ingelezen: de app vergelijkt een vast kenmerk en de database bewaakt dat met een unieke index.
+  - De wizard heeft drie stappen: Bestanden → Controleren → Klaar.
+    - Bij Controleren ziet u per eigen rekening hoeveel transacties nieuw zijn, al bekend zijn of buiten een open boekjaar vallen.
+    - Een nieuwe eigen rekening koppelt u daar aan een grootboekrekening, en u kiest de dagboekcode (bijvoorbeeld RABO).
+  - Controles op de saldi:
+    - Ontbreekt er een afschrift (het beginsaldo sluit niet aan op het vorige eindsaldo), dan geeft de app een waarschuwing.
+    - Het eerste beginsaldo wordt vergeleken met de beginbalans (besluit 80).
+  - Vooraf wordt een back-up gemaakt.
+- **Subtabblad Bank** in Boekhouding:
+  - Saldo van de bank tegenover het grootboek.
+  - De transacties per eigen rekening, te filteren op te verwerken, concept, geboekt of alle.
+  - Een detailvenster met *Toewijzen* (Enter) en *Regel maken van deze boeking*.
+  - *Concepten boeken* (Ctrl+B) boekt alle bankconcepten na een bevestiging.
+- **Herkenning:**
+  - Overboekingen tussen eigen rekeningen gaan automatisch via 1298 Kruisposten.
+  - Anders wint de eerste passende boekingsregel. Herkende transacties worden een concept (besluit 74), de rest blijft in de werkvoorraad (besluit 75).
+- **Subtabblad Boekingsregels:**
+  - Een regel kan letten op tegen-IBAN, tekst in naam of omschrijving, bij of af, bedrag van–tot en transactiecode, ook de eigen bankcode zoals Rabobank 1025 (besluit 78).
+  - De regels hebben een vaste volgorde, te wijzigen met Alt+↑/↓.
+  - Met *Regels toepassen* werkt u de werkvoorraad bij.
+- **Bankposten in het Journaal:**
+  - Een bankconcept kunt u controleren en de tegenregel splitsen. De bankregel staat vast op het bedrag van het afschrift.
+  - Verwijdert u een concept of boekt u een geboekte bankpost tegen, dan gaat de transactie terug naar de werkvoorraad.
+  - Een nieuwe post in een bankdagboek kan niet met de hand worden gemaakt.
+- Het logboek bevat alleen aantallen; nooit IBAN's, namen of omschrijvingen.
+- 565 geautomatiseerde tests (was 512).
+
+### Nog niet functioneel
+- Afletteren van de contributie-incasso en storneringen per betaler: stap 4c (de incasso staat op het afschrift als één regel met het totaal).
+- ING: na een (geanonimiseerd) voorbeeldbestand.
+
 ## [0.4.0] - 2026-10-27: Fase 4a "Grootboek"
 
 ### Toegevoegd

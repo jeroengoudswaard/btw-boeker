@@ -33,7 +33,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
 
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         await transactie.CommitAsync(annulering).ConfigureAwait(false);
-        return resultaat.Waarde;
+        return resultaat.Uitkomst();
     }
 
     private static async Task<BoekhoudingStand> LaadAsync(VerenigdDbContext context, AdministratieSoort administratie, CancellationToken annulering)
@@ -52,7 +52,18 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             .Where(p => p.Administratie == administratie)
             .AsSplitQuery()
             .ToListAsync(annulering).ConfigureAwait(false);
+        var afschriften = await context.Bankafschriften.Include(a => a.Dagboek).Where(a => a.Administratie == administratie)
+            .OrderBy(a => a.Datum).ToListAsync(annulering).ConfigureAwait(false);
+        var mutaties = await context.Bankmutaties.Include(m => m.Dagboek).Where(m => m.Administratie == administratie)
+            .OrderBy(m => m.Boekdatum).ToListAsync(annulering).ConfigureAwait(false);
+        var regels = await context.Boekingsregels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
+            .OrderBy(r => r.Volgorde).ThenBy(r => r.Id).ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
-            [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)]);
+            [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
+        {
+            Bankafschriften = afschriften,
+            Bankmutaties = mutaties,
+            Boekingsregels = regels,
+        };
     }
 }

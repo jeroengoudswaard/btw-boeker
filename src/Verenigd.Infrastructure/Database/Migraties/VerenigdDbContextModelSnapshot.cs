@@ -60,6 +60,170 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         });
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankafschrift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Beginsaldo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DagboekId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Eindsaldo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nummer")
+                        .IsRequired()
+                        .HasMaxLength(35)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DagboekId", "Datum", "Nummer")
+                        .IsUnique();
+
+                    b.ToTable("Bankafschriften", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankmutatie", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BatchAantal")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Bedrag")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Boekdatum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DagboekId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EndToEndId")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsBij")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("MandaatId")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Omschrijving")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sleutel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.Property<string>("TegenIban")
+                        .HasMaxLength(34)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tegennaam")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DagboekId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("Administratie", "Sleutel")
+                        .IsUnique();
+
+                    b.ToTable("Bankmutaties", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Boekingsregel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("BedragTot")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("BedragVan")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActief")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Naam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NaamBevat")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Omschrijving")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OmschrijvingBevat")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RekeningId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Richting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TegenIban")
+                        .HasMaxLength(34)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Transactiecode")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Volgorde")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RekeningId");
+
+                    b.HasIndex("Administratie", "Volgorde");
+
+                    b.ToTable("Boekingsregels", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Betaler", b =>
                 {
                     b.Property<Guid>("Id")
@@ -149,6 +313,10 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasMaxLength(5)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Iban")
+                        .HasMaxLength(34)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Naam")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -166,6 +334,10 @@ namespace Verenigd.Infrastructure.Database.Migraties
 
                     b.HasIndex("Administratie", "Code")
                         .IsUnique();
+
+                    b.HasIndex("Administratie", "Iban")
+                        .IsUnique()
+                        .HasFilter("\"Iban\" IS NOT NULL");
 
                     b.ToTable("Dagboeken", (string)null);
                 });
@@ -768,6 +940,44 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .IsUnique();
 
                     b.ToTable("Voogden", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankafschrift", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Dagboek", "Dagboek")
+                        .WithMany()
+                        .HasForeignKey("DagboekId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Dagboek");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankmutatie", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Dagboek", "Dagboek")
+                        .WithMany()
+                        .HasForeignKey("DagboekId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Journaalpost", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Dagboek");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Boekingsregel", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Grootboekrekening", "Rekening")
+                        .WithMany()
+                        .HasForeignKey("RekeningId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rekening");
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.BetalerLid", b =>
