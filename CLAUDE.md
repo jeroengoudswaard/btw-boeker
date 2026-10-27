@@ -109,6 +109,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 71 | Conceptposten | Journaalposten zijn *Concept* of *Geboekt*; alleen geboekte posten tellen in rapporten; een boekjaar kan pas worden afgesloten zonder concepten. Een geboekte post is onveranderlijk (corrigeren via tegenboeken) |
 | 72 | Ctrl+N in Boekhouding | Binnen het tabblad Boekhouding betekent Ctrl+N "Nieuwe post"; "Nieuwe database" blijft via het menu Bestand |
 | 73 | Verschil in beginbalans | Een beginbalans die niet in evenwicht is wordt standaard geweigerd. Als bewuste uitzondering kan de gebruiker in de importwizard het verschil op een tussenrekening boeken (standaard nieuwe rekening *1299 Te onderzoeken verschillen*); dat staat als aparte regel op de openingsbalans en in het logboek. De huidige Excel-boekhouding 2025 heeft een verschil van € 7,24 (activa € 23.563,88, passiva € 23.556,64) |
+| 74 | Herkende banktransacties | Een transactie die een boekingsregel herkent wordt een *concept*post in het bankdagboek; de gebruiker boekt de concepten na controle in één keer |
+| 75 | Niet-herkende banktransacties | Blijven in de werkvoorraad "Te verwerken" tot de gebruiker een rekening kiest (geen tussenrekening) |
+| 76 | Eigen bankrekeningen | Vereniging: Rabobank-betaalrekening en Rabobank-spaarrekening, elk een eigen bankdagboek |
+| 77 | Incassobatch tot 4c | De ontvangen contributie-incasso (één regel met het totaal) wordt via een boekingsregel op *Debiteuren contributie* geboekt; afletteren per betaler volgt in 4c |
+| 78 | Criteria boekingsregels | Tegen-IBAN, tekst in naam of omschrijving, bij/af, bedragbereik en banktransactiecode; de eerste passende regel in de volgorde wint |
+| 79 | ING | ING wordt pas officieel ondersteund na een test met een (geanonimiseerd) ING-bestand van de gebruiker |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -128,7 +134,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **4a Grootboek: gereed**, v0.4.0 (2026-10-27). Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Tabblad Boekhouding (Ctrl+4) met subtabbladen Journaal, Rekeningschema, Grootboekkaart, Rapporten en Boekjaren; importwizard *Bestand › Importeren › Boekhouding uit Excel*; *Bestand › Afdrukken* (Ctrl+P); export naar CSV en xlsx.
   - Toevoegingen op het ontwerp: *Volgend boekjaar openen* (alvast boeken in het nieuwe jaar); afsluitposten en openingsbalansen kunnen niet worden tegengeboekt (dat gaat via heropenen van het boekjaar).
   - Tests: 512 in totaal. In de Linux-cloudsessie groen: Domain 172, Application 171, Infrastructure 47, Architectuur 7; ViewModel-tests 107/109 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte Excel-boekhouding (verwacht: 1299 met € 7,24).
-  - Volgende stap: 4b Bank (CAMT.053 Rabobank/ING; vraag eerst geanonimiseerde voorbeeldbestanden).
+  - **4b Bank: in ontwerp.** Besluiten 74–79 vastgesteld (2026-10-27) na analyse van een Rabobank-CAMT.053 (camt.053.001.08, één afschrift per kalenderdag met begin-/eindsaldo, één TxDtls per Ntry; de eigen incasso staat als één batchregel met alleen het totaal). Het bestand is niet bewaard en komt niet in Git.
 
 ## Privacy
 
