@@ -139,6 +139,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 101 | Oninbaar | Knop *Afboeken als oninbaar*: gekozen kostenrekening aan 1300 |
 | 102 | Handmatige betaling open post | Automatisch concept als IBAN van de betaler én bedrag precies passen bij één open post; anders via de afletterdialoog |
 | 103 | Incasso's van vóór Verenigd | Incasso's van januari–oktober 2026 (oude systeem) via een boekingsregel direct op contributie, zoals in Excel; eventueel per speltak splitsen in het Journaal; geen debiteuren |
+| 104 | Herincasso als aparte post | Een herincasso is een aparte post in de run, naast een eventuele gewone post van dezelfde betaler (uitzondering op besluit 46), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -164,7 +165,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Volgende stap: 4c Contributie & relaties, inclusief bijlagen (besluiten 83–88).
   - **4c: in ontwerp.** Besluiten 89–98 vastgesteld (2026-10-27). Analyse CAMT: de eigen incassobatch draagt `Btch/PmtInfId` (= kenmerk van de run + "-1"); een stornering (IDDT-UPDD) draagt EndToEndId, mandaat, tegen-IBAN en redencode (`RtrInf/Rsn/Cd`, bijvoorbeeld AM04). Het Excel-rekeningschema heeft geen debiteuren- of crediteurenrekening, wel 1400/1700. Ontwerp 4c-1 voorgelegd; besluiten 99–103 vastgesteld.
   - **4c-1 Contributie: gereed**, v0.4.2 (2026-10-28). Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Run boeken (automatisch), herkenning van batch, stornering en handmatige betaling, afletteren in de bank, subtabblad Openstaand met herincasso en oninbaar, opbrengstrekening per categorie.
-    - Uitwerking: een herincasso is een **aparte post** in de run (naast een eventuele gewone post van dezelfde betaler), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is; dit is een uitzondering op "één post per betaler per run" (besluit 46) — ter bevestiging voorgelegd.
+    - Uitwerking: een herincasso is een **aparte post** in de run (naast een eventuele gewone post van dezelfde betaler), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is; dit is een uitzondering op "één post per betaler per run" (besluit 46), bevestigd als besluit 104.
     - Tests: 596 in totaal. In de Linux-cloudsessie groen: Domain 200, Application 207, Infrastructure 51, Architectuur 7; ViewModel-tests 123/125 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
     - Volgende stap: ontwerp 4c-2 Relaties, openstaande posten en verkoopfacturen.
 
