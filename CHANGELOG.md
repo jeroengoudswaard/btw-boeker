@@ -2,6 +2,17 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.6] - 2026-10-28: Toegankelijkheid van groepen
+
+### Opgelost
+- Dertien groepen in de schermen waren onzichtbaar voor schermlezers en UI Automation, waaronder de editors *Journaalpost*, *Factuur*, *Relatie* en *Betaler*, de bankdetails, *Afletteren*, de startkaart van de boekhouding en de secties Incasso en Facturen in Instellingen. Een `Border` of panel heeft in WPF geen automation peer, dus hun AutomationId en naam kwamen niet door. Gevonden door de FlaUI-test op Windows (`PostEditor` niet gevonden).
+  - Deze containers zijn nu een `Groepskader`, `Groepspaneel` of `Groepsraster` (`Views/Toegankelijkheid`): dezelfde opmaak, maar voor schermlezers een groep met een Nederlandse naam, zoals "Journaalpost" of "Factuur".
+
+### Toegevoegd
+- Een architectuurtest die faalt zodra een AutomationId op een element zonder automation peer staat.
+- Een test die de peers van de groepscontainers controleert (alleen op Windows).
+- 642 geautomatiseerde tests (was 640).
+
 ## [0.4.5] - 2026-10-28: Bugfixes na de Windows-test
 
 ### Opgelost

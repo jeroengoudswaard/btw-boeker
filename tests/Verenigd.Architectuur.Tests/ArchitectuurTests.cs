@@ -131,4 +131,38 @@ public class ArchitectuurTests
 
         return map?.FullName ?? throw new InvalidOperationException("Repositorymap niet gevonden.");
     }
+
+    /// <summary>
+    /// Een AutomationId op een element zonder automation peer (Border, panels) is onzichtbaar voor UI Automation en voor
+    /// schermlezers (huisregel 2). Gebruik Groepskader, Groepspaneel of Groepsraster (Verenigd.App.Views.Toegankelijkheid).
+    /// </summary>
+    [Fact]
+    public void Xaml_zet_geen_AutomationId_op_een_element_zonder_automation_peer()
+    {
+        var map = new DirectoryInfo(AppContext.BaseDirectory);
+        while (map is not null && !File.Exists(Path.Combine(map.FullName, "Verenigd.slnx")))
+        {
+            map = map.Parent;
+        }
+
+        Assert.NotNull(map);
+        var zonderPeer = new[] { "Border", "StackPanel", "Grid", "DockPanel", "WrapPanel", "Canvas", "UniformGrid", "VirtualizingStackPanel" };
+        var fouten = new List<string>();
+        foreach (var bestand in Directory.EnumerateFiles(Path.Combine(map.FullName, "src", "Verenigd.App"), "*.xaml", SearchOption.AllDirectories)
+                     .Where(b => !b.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                         && !b.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)))
+        {
+            var tekst = File.ReadAllText(bestand);
+            foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(
+                         tekst, "<([\\w:.]+)\\b[^<>]*?AutomationProperties\\.AutomationId=\"([^\"]+)\""))
+            {
+                if (zonderPeer.Contains(m.Groups[1].Value))
+                {
+                    fouten.Add($"{Path.GetFileName(bestand)}: {m.Groups[1].Value} {m.Groups[2].Value}");
+                }
+            }
+        }
+
+        Assert.True(fouten.Count == 0, "AutomationId op een element zonder peer: " + string.Join(", ", fouten));
+    }
 }

@@ -1,6 +1,7 @@
 <Window x:Class="Verenigd.App.Views.Boekhouding.BoekhoudingImportVenster"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
@@ -118,7 +119,7 @@
                     </TextBlock>
                     <TextBlock Text="De beginbalans is in evenwicht." Margin="0,8,0,0" Foreground="{DynamicResource SystemFillColorSuccessBrush}"
                                Visibility="{Binding IsInEvenwicht, Converter={StaticResource BoolNaarZichtbaar}}" />
-                    <Border Style="{StaticResource Kaart}" Margin="0,8,0,0" AutomationProperties.AutomationId="BeginbalansVerschil"
+                    <tg:Groepskader Style="{StaticResource Kaart}" Margin="0,8,0,0" AutomationProperties.Name="Verschil in de beginbalans" AutomationProperties.AutomationId="BeginbalansVerschil"
                             Visibility="{Binding IsInEvenwicht, Converter={StaticResource OnwaarNaarZichtbaar}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource Foutmelding}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite">
@@ -136,7 +137,7 @@
                             <TextBlock Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                        Text="Het verschil komt als aparte regel op de openingsbalans en in het logboek. Zoek het daarna uit en boek het met een memoriaalpost weg." />
                         </StackPanel>
-                    </Border>
+                    </tg:Groepskader>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Beginbalans}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                           AutomationProperties.Name="Beginbalans">

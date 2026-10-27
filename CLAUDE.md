@@ -193,7 +193,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-27, Windows 11, commit `a054e08`):** build zonder waarschuwingen; 637/638 geslaagd, inclusief alle FlaUI-UI-tests. De 2 Windows-padtests slagen op Windows. Eén echte bug gevonden: de startkaart van een lege boekhouding verscheen niet (`IsGeladen` gaf geen melding voor `IsLeeg`, aanwezig sinds v0.4.0).
   - **v0.4.5 (2026-10-28): bugfixes.** `IsLeeg` en de kolom *Soort* bij Relaties (`Rol`) melden zich nu, elk met een regressietest. Een controle van alle berekende eigenschappen vond geen andere gebonden gevallen.
     - Tests: 640 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 137/139 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 640/640).
-    - Pull request: 4c-2, de standaardinrichting en deze bugfixes staan samen op de branch; `main` staat nog op v0.4.2. Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
+    - **Windows-test (2026-10-27, commit `ae25a91`):** build zonder waarschuwingen; 639/640 geslaagd. De fix voor `IsLeeg` werkt. Eén test faalde: `PostEditor` werd niet gevonden, omdat een `Border` geen automation peer heeft (testprobleem, dat ook voor schermlezers gold).
+  - **v0.4.6 (2026-10-28): toegankelijkheid van groepen.** 13 containers met een AutomationId op een Border of panel zijn nu `Groepskader`, `Groepspaneel` of `Groepsraster` (peer van het type Group, met Nederlandse naam). Een architectuurtest bewaakt dit en een Windows-test controleert de peers.
+    - Tests: 642 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 8; ViewModel-tests 137/139 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 642/642).
+    - Pull request: 4c-2, de standaardinrichting en de bugfixes (v0.4.3 t/m v0.4.6) staan samen op de branch; `main` staat nog op v0.4.2. Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
     - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy

@@ -1,6 +1,7 @@
 <Window x:Class="Verenigd.App.Views.Boekhouding.StandaardinrichtingVenster"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
@@ -127,7 +128,7 @@
                                Visibility="{Binding Rekeningfout, Converter={StaticResource NietNullNaarZichtbaar}}" />
                     <TextBlock Text="De beginsaldi zijn in evenwicht." Margin="0,8,0,0" Foreground="{DynamicResource SystemFillColorSuccessBrush}"
                                Visibility="{Binding IsInEvenwicht, Converter={StaticResource BoolNaarZichtbaar}}" />
-                    <Border Style="{StaticResource Kaart}" Margin="0,8,0,0" AutomationProperties.AutomationId="BeginsaldiVerschil"
+                    <tg:Groepskader Style="{StaticResource Kaart}" Margin="0,8,0,0" AutomationProperties.Name="Verschil in de beginsaldi" AutomationProperties.AutomationId="BeginsaldiVerschil"
                             Visibility="{Binding IsInEvenwicht, Converter={StaticResource OnwaarNaarZichtbaar}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource Foutmelding}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite">
@@ -143,7 +144,7 @@
                             <TextBlock Text="{Binding Verschilfout}" Style="{StaticResource Foutmelding}" Margin="24,4,0,0"
                                        Visibility="{Binding Verschilfout, Converter={StaticResource NietNullNaarZichtbaar}}" />
                         </StackPanel>
-                    </Border>
+                    </tg:Groepskader>
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Balansrekeningen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserSortColumns="False" HeadersVisibility="Column" AutomationProperties.Name="Beginsaldi" AutomationProperties.AutomationId="Beginsaldi">

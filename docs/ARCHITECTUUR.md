@@ -244,6 +244,12 @@ IFactuurPdfMaker (Application) ◄── FactuurPdfMaker (Infrastructure: MigraD
   - Infrastructure: opslag op een echte versleutelde database, de PDF (met en zonder logo, credit) en de QR-PNG. Handmatig gecontroleerd: de QR-code in de PDF wordt gelezen als de juiste EPC-inhoud.
   - App: relaties, factuur maken tot en met PDF, creditfactuur, concept verwijderen, Ctrl+N, afletteren in Bank, Instellingen › Facturen. De FlaUI-test opent Relaties en Facturen.
 
+## Toegankelijkheid van groepen (v0.4.6)
+
+- Een `Border` en de panels (`StackPanel`, `Grid`, `DockPanel` enz.) hebben in WPF geen automation peer. Een AutomationId of Name daarop is onzichtbaar voor schermlezers en voor FlaUI.
+- Gebruik voor een herkenbare groep (editorkaart, sectie) `tg:Groepskader` (Border), `tg:Groepspaneel` (StackPanel) of `tg:Groepsraster` (Grid) uit `Verenigd.App.Views.Toegankelijkheid`, met `AutomationProperties.Name`.
+- De architectuurtest `Xaml_zet_geen_AutomationId_op_een_element_zonder_automation_peer` bewaakt dit in alle XAML-bestanden.
+
 ## Standaardinrichting en sjablonen (besluiten 114–121)
 
 ```
