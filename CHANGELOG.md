@@ -10,8 +10,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ### Toegevoegd
 - Een architectuurtest die faalt zodra een AutomationId op een element zonder automation peer staat.
-- Een test die de peers van de groepscontainers controleert (alleen op Windows).
-- 642 geautomatiseerde tests (was 640).
+- Een test die de peers van de groepscontainers controleert (alleen op Windows). Het element staat daarbij in een getoond venster buiten beeld, omdat WPF `IsControlElement` laat afhangen van `IsVisible`. Een tweede test bevestigt dat een ingeklapte groep geen control-element is voor schermlezers.
+- 643 geautomatiseerde tests (was 640).
 
 ## [0.4.5] - 2026-10-28: Bugfixes na de Windows-test
 
