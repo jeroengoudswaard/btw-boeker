@@ -96,6 +96,19 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 58 | Naheffing | Hooguit tot het begin van het lopende boekjaar; oudere gemiste maanden komen op de lijst "zelf te innen" |
 | 59 | Uitvoerdatum | Valt de incassodag niet op een TARGET-werkdag, dan schuift de uitvoerdatum naar de volgende werkdag |
 | 60 | Run annuleren | Een definitieve run die de bank niet heeft uitgevoerd kan na bevestiging worden geannuleerd: status *Geannuleerd*, de maanden komen weer vrij, de run blijft in de historie |
+| 61 | Boekhouding Stichting | Voorlopig alleen de Vereniging; de Stichting volgt later (het model blijft per administratie) |
+| 62 | Overname huidige boekhouding | Eenmalig het rekeningschema en de eindbalans 2025 uit de huidige Excel-boekhouding inlezen als beginbalans 2026 (importwizard met voorbeeldoverzicht en controle debet = credit). Het Excel-bestand wordt niet bewaard en komt nooit in Git |
+| 63 | Contributie boeken | Baten-lastenstelsel: de incassorun boekt *Debiteuren contributie* aan *Contributie <speltak>*; de bankontvangst boekt de debiteuren af; een stornering zet de vordering weer open |
+| 64 | Banktransacties | Elke transactie uit CAMT.053 apart boeken, met boekingsregels (tegenrekening/omschrijving → grootboekrekening) |
+| 65 | Kas | Kasboek in Verenigd met handmatige ontvangsten en uitgaven |
+| 66 | Debiteuren/crediteuren | Openstaande posten én verkoopfacturen maken (bijv. verhuur), in stap 4c; de vorm (PDF) wordt in het ontwerp van 4c bepaald |
+| 67 | Overzichten en export | Afdrukken via Windows (ook naar PDF) en exporteren naar CSV én Excel (.xlsx, ClosedXML, MIT-licentie) |
+| 68 | Opdeling fase 4 | 4a Grootboek → 4b Bank → 4c Contributie & relaties, elk een eigen pull request |
+| 69 | Indeling balans en W&V | In 4a per rubriek uit het rekeningschema; een instelbare jaarrekeningindeling (met kolom begroot) volgt in fase 5 |
+| 70 | Memoriaal en kruisposten | Rekening 9990 Memoriaal wordt niet overgenomen (memoriaal is een dagboek; saldo ≠ 0 geeft een waarschuwing); 1298 Kruisposten wordt een tussenrekening voor overboekingen tussen eigen rekeningen |
+| 71 | Conceptposten | Journaalposten zijn *Concept* of *Geboekt*; alleen geboekte posten tellen in rapporten; een boekjaar kan pas worden afgesloten zonder concepten. Een geboekte post is onveranderlijk (corrigeren via tegenboeken) |
+| 72 | Ctrl+N in Boekhouding | Binnen het tabblad Boekhouding betekent Ctrl+N "Nieuwe post"; "Nieuwe database" blijft via het menu Bestand |
+| 73 | Verschil in beginbalans | Een beginbalans die niet in evenwicht is wordt standaard geweigerd. Als bewuste uitzondering kan de gebruiker in de importwizard het verschil op een tussenrekening boeken (standaard nieuwe rekening *1299 Te onderzoeken verschillen*); dat staat als aparte regel op de openingsbalans en in het logboek. De huidige Excel-boekhouding 2025 heeft een verschil van € 7,24 (activa € 23.563,88, passiva € 23.556,64) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -111,7 +124,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Toevoeging op het ontwerp: instelling *eerste incassomaand* (eerdere maanden zijn nooit verschuldigd via Verenigd), zodat de eerste run geen jaren aan naheffing bevat. Concept-runs worden niet opgeslagen; een run bestaat pas als hij definitief is.
   - Tests: 443 in totaal. In de Linux-cloudsessie groen: Domain 159, Application 139, Infrastructure 41, Architectuur 7; ViewModel-tests 90/92 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 5 FlaUI-UI-tests.
   - Bekende beperkingen: het verschil tussen het IBAN uit SOL3 en een in Verenigd ingevoerd IBAN (besluit 22) wordt nog niet apart gesignaleerd; de SOL3-import overschrijft de betalerkoppeling als SOL3 een IBAN levert (nu zijn de SOL3-IBAN-kolommen leeg). Boeken, storneringen en afdracht volgen in fase 4.
-- **Volgende stap: Fase 4 (Bankimport & boekhouding).** Eerst voorstel ter goedkeuring.
+- **Fase 4 (Bankimport & boekhouding): in ontwerp.** Besluiten 61–68 vastgesteld (2026-10-27), na analyse van de huidige Excel-boekhouding van de Vereniging (59 rekeningen, 4-cijferig, T-rekeningen per tabblad, bank in maandtotalen, contributie per speltak 8020–8060, kruisposten 1298, overlopende posten 1400/1700, geen btw). Ontwerp 4a goedgekeurd (besluiten 69–72): rekeningschema met rubrieken, dagboeken Memoriaal/Kas, journaalposten concept → geboekt met tegenboeken, Excel-import van schema en beginbalans 2026, grootboekkaart, saldibalans, balans, W&V, jaarafsluiting, afdrukken en export (CSV/xlsx via ClosedXML).
+  - **4a Grootboek: gereed**, v0.4.0 (2026-10-27). Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Tabblad Boekhouding (Ctrl+4) met subtabbladen Journaal, Rekeningschema, Grootboekkaart, Rapporten en Boekjaren; importwizard *Bestand › Importeren › Boekhouding uit Excel*; *Bestand › Afdrukken* (Ctrl+P); export naar CSV en xlsx.
+  - Toevoegingen op het ontwerp: *Volgend boekjaar openen* (alvast boeken in het nieuwe jaar); afsluitposten en openingsbalansen kunnen niet worden tegengeboekt (dat gaat via heropenen van het boekjaar).
+  - Tests: 512 in totaal. In de Linux-cloudsessie groen: Domain 172, Application 171, Infrastructure 47, Architectuur 7; ViewModel-tests 107/109 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte Excel-boekhouding (verwacht: 1299 met € 7,24).
+  - Volgende stap: 4b Bank (CAMT.053 Rabobank/ING; vraag eerst geanonimiseerde voorbeeldbestanden).
 
 ## Privacy
 

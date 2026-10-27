@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Input;
@@ -194,6 +194,43 @@ public sealed class AppUiTests : IDisposable
         Bewaar(wizard, "09-incassowizard");
         Zoek(wizard, "IncassoAnnuleren").AsButton().Invoke();
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
+    }
+
+    [Fact]
+    public async Task Boekhouding_leeg_beginnen_toont_subtabbladen_en_nieuwe_post()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Zoek(venster, "BoekhoudingTabblad");
+        Zoek(venster, "OvernemenUitExcel");
+        Bewaar(venster, "10-boekhouding-leeg");
+        Zoek(venster, "LeegBeginnen").AsButton().Invoke();
+
+        foreach (var subtab in new[] { "SubtabJournaal", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBoekjaren" })
+        {
+            Zoek(venster, subtab);
+        }
+
+        Zoek(venster, "NieuwePost").AsButton().Invoke();
+        Zoek(venster, "PostEditor");
+        Zoek(venster, "PostOmschrijving");
+        Bewaar(venster, "11-boekhouding-nieuwe-post");
+        Zoek(venster, "SubtabRapporten").AsTabItem().Select();
+        Zoek(venster, "Rapport");
+        Bewaar(venster, "12-boekhouding-rapport");
 
         Sluit(venster);
     }

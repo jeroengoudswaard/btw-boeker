@@ -71,3 +71,34 @@ public sealed class NietConverter : IValueConverter
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
 }
+
+/// <summary>Enum naar index en terug, bijvoorbeeld voor <c>TabControl.SelectedIndex</c>.</summary>
+public sealed class EnumNaarIndexConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is Enum waarde ? System.Convert.ToInt32(waarde, CultureInfo.InvariantCulture) : -1;
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is int index && index >= 0 && targetType.IsEnum ? Enum.ToObject(targetType, index) : Binding.DoNothing;
+}
+
+/// <summary>Toont een rapport als <see cref="System.Windows.Documents.FlowDocument"/>, gelijk aan de afdruk.</summary>
+public sealed class RapportNaarDocumentConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not Application.Boekhouding.RapportTabel tabel)
+        {
+            return null;
+        }
+
+        var document = Diensten.WpfAfdrukDienst.MaakDocument(tabel);
+        document.PagePadding = new Thickness(0);
+        document.Background = Brushes.Transparent;
+        document.SetResourceReference(System.Windows.Documents.FlowDocument.ForegroundProperty, "TextFillColorPrimaryBrush");
+        return document;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}

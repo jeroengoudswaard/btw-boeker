@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
+using Verenigd.Domain.Financien.Boekhouding;
 using Verenigd.Domain.Leden;
 using Verenigd.Infrastructure.Database.Financien;
 using Verenigd.Infrastructure.Database.Leden;
@@ -20,6 +21,11 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<LidCategorie> LidCategorieen => Set<LidCategorie>();
     public DbSet<Incassoinstellingen> Incassoinstellingen => Set<Incassoinstellingen>();
     public DbSet<Incassorun> Incassoruns => Set<Incassorun>();
+    public DbSet<Rubriek> Rubrieken => Set<Rubriek>();
+    public DbSet<Grootboekrekening> Grootboekrekeningen => Set<Grootboekrekening>();
+    public DbSet<Dagboek> Dagboeken => Set<Dagboek>();
+    public DbSet<Boekjaar> Boekjaren => Set<Boekjaar>();
+    public DbSet<Journaalpost> Journaalposten => Set<Journaalpost>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,5 +61,6 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
         LedenConfiguratie.Configureer(modelBuilder);
         FinancienConfiguratie.Configureer(modelBuilder);
         IncassoConfiguratie.Configureer(modelBuilder);
+        BoekhoudingConfiguratie.Configureer(modelBuilder);
     }
 }

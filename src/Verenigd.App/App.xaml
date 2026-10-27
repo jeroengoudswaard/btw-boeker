@@ -14,6 +14,8 @@
             <conv:GelijkAanParameterConverter x:Key="GelijkAan" />
             <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
             <conv:NietConverter x:Key="Niet" />
+            <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
+            <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
 
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 

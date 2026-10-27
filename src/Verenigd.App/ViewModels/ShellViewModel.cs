@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
+using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
@@ -29,6 +30,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly IInstellingenOpslag _opslag;
     private readonly IDialoogService _dialogen;
     private readonly IThemaService _thema;
+    private readonly BoekhoudingHulpmiddelen _boekhouding;
     private readonly TimeProvider _tijd;
     private readonly ILogger<ShellViewModel> _logger;
     private readonly OverzichtViewModel _overzicht;
@@ -40,6 +42,7 @@ public sealed partial class ShellViewModel : ObservableObject
         IInstellingenOpslag opslag,
         IDialoogService dialogen,
         IThemaService thema,
+        BoekhoudingHulpmiddelen boekhouding,
         TimeProvider tijd,
         ILogger<ShellViewModel> logger)
     {
@@ -47,6 +50,7 @@ public sealed partial class ShellViewModel : ObservableObject
         _opslag = opslag;
         _dialogen = dialogen;
         _thema = thema;
+        _boekhouding = boekhouding;
         _tijd = tijd;
         _logger = logger;
         _overzicht = new OverzichtViewModel(this);
@@ -63,14 +67,14 @@ public sealed partial class ShellViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
-    [NotifyCanExecuteChangedFor(nameof(SluitTabbladCommand), nameof(OpslaanCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SluitTabbladCommand), nameof(OpslaanCommand), nameof(AfdrukkenCommand))]
     public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command), nameof(NieuweIncassorunCommand))]
+        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(NieuweIncassorunCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -238,6 +242,38 @@ public sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Bestand › Importeren › Boekhouding uit Excel (besluit 62): opent Boekhouding voor de administratie van het actieve
+    /// tabblad, anders de Vereniging (besluit 17), en start de importwizard.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task ImporteerBoekhoudingAsync()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        {
+            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await boekhouding.OvernemenUitExcelCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>Bestand › Afdrukken (Ctrl+P): het rapport of de grootboekkaart van het tabblad Boekhouding.</summary>
+    [RelayCommand(CanExecute = nameof(KanAfdrukken))]
+    private Task AfdrukkenAsync() =>
+        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.AfdrukkenCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    private bool KanAfdrukken() => GeselecteerdTabblad is BoekhoudingViewModel;
+
     /// <summary>Bestand › Nieuwe incassorun: opent Contributie · Vereniging en start de wizard.</summary>
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
     private async Task NieuweIncassorunAsync()
@@ -325,6 +361,7 @@ public sealed partial class ShellViewModel : ObservableObject
                 _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd)),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
+            ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         Tabbladen.Add(tab);
@@ -336,6 +373,9 @@ public sealed partial class ShellViewModel : ObservableObject
                 break;
             case ContributieViewModel contributie:
                 contributie.VernieuwCommand.Execute(null);
+                break;
+            case BoekhoudingViewModel boekhouding:
+                boekhouding.VernieuwCommand.Execute(null);
                 break;
             case InstellingenViewModel { Incasso: { } incasso }:
                 incasso.LaadCommand.Execute(null);

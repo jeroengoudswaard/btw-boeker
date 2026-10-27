@@ -35,6 +35,18 @@ internal sealed class FakeDialoogService : IDialoogService
     public Func<ViewModels.Leden.ImportWizardViewModel, Task<bool>>? ImportWizard { get; set; }
 
     public string? XmlDoel { get; set; }
+    public string? ExcelBestand { get; set; }
+    public string? XlsxDoel { get; set; }
+
+    /// <summary>Wat de "gebruiker" in de importwizard van de boekhouding doet; standaard annuleren.</summary>
+    public Func<ViewModels.Boekhouding.BoekhoudingImportViewModel, Task<bool>>? BoekhoudingImport { get; set; }
+
+    public string? KiesExcelBestand() => ExcelBestand;
+
+    public string? KiesXlsxDoel(string voorgesteldeNaam) => XlsxDoel;
+
+    public bool ToonBoekhoudingImport(ViewModels.Boekhouding.BoekhoudingImportViewModel wizard) =>
+        BoekhoudingImport is not null && BoekhoudingImport(wizard).GetAwaiter().GetResult();
 
     /// <summary>Wat de "gebruiker" in de incassowizard doet; standaard annuleren.</summary>
     public Func<ViewModels.Contributie.IncassoWizardViewModel, Task<bool>>? IncassoWizard { get; set; }
@@ -151,6 +163,7 @@ internal sealed class FakeSessie(
     string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden, InMemoryContributieOpslag? contributie = null) : IDatabaseSessie
 {
     public IContributieRepository Contributie { get; } = contributie ?? new InMemoryContributieOpslag { Leden = leden };
+    public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding { get; } = new InMemoryBoekhoudingOpslag();
     public string Pad { get; } = pad;
     public IAdministratieRepository Administraties { get; } = administraties;
     public ILedenRepository Leden { get; } = leden;
@@ -362,6 +375,88 @@ internal sealed class InMemoryContributieOpslag : IContributieRepository
         }
 
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>Grootboek in het geheugen, per administratie; ID's worden uitgedeeld zoals de database dat doet.</summary>
+internal sealed class InMemoryBoekhoudingOpslag : Verenigd.Application.Boekhouding.IBoekhoudingRepository
+{
+    private readonly Dictionary<AdministratieSoort, List<object>> _gegevens = [];
+    private int _id = 1;
+
+    public List<object> Van(AdministratieSoort administratie) =>
+        _gegevens.TryGetValue(administratie, out var lijst) ? lijst : _gegevens[administratie] = [];
+
+    public Task<Verenigd.Application.Boekhouding.BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default) =>
+        Task.FromResult(Stand(administratie));
+
+    public Task<T> PasToeAsync<T>(
+        AdministratieSoort administratie,
+        Func<Verenigd.Application.Boekhouding.BoekhoudingStand, Verenigd.Application.Boekhouding.BoekhoudingWijziging<T>> wijziging,
+        CancellationToken annulering = default)
+    {
+        var resultaat = wijziging(Stand(administratie));
+        var lijst = Van(administratie);
+        foreach (var item in resultaat.Verwijderen)
+        {
+            lijst.Remove(item);
+        }
+
+        foreach (var item in resultaat.Toevoegen)
+        {
+            var id = item.GetType().GetProperty("Id")!;
+            if (id.PropertyType == typeof(int) && (int)id.GetValue(item)! == 0)
+            {
+                id.SetValue(item, _id++);
+            }
+
+            lijst.Add(item);
+        }
+
+        return Task.FromResult(resultaat.Waarde);
+    }
+
+    private Verenigd.Application.Boekhouding.BoekhoudingStand Stand(AdministratieSoort administratie)
+    {
+        var lijst = Van(administratie);
+        return new(administratie,
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Rubriek>().OrderBy(r => r.Volgorde)],
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Grootboekrekening>().OrderBy(r => r.Nummer)],
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Dagboek>().OrderBy(d => d.Soort)],
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Boekjaar>().OrderBy(b => b.Jaar)],
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Journaalpost>().OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)]);
+    }
+}
+
+/// <summary>Leest een vooraf klaargezet werkblad.</summary>
+internal static class FakeBoekhouding
+{
+    public static BoekhoudingHulpmiddelen Hulpmiddelen() => new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst());
+}
+
+internal sealed class FakeWerkbladLezer : Verenigd.Application.Boekhouding.IWerkbladLezer
+{
+    public Verenigd.Application.Boekhouding.Werkblad? Blad { get; set; }
+
+    public Verenigd.Application.Boekhouding.Werkblad Lees(string pad, string werkblad) =>
+        Blad ?? throw new InvalidOperationException("Het Excel-bestand kan niet worden gelezen.");
+}
+
+internal sealed class FakeSpreadsheetSchrijver : Verenigd.Application.Boekhouding.ISpreadsheetSchrijver
+{
+    public List<(Verenigd.Application.Boekhouding.RapportTabel Tabel, string Pad)> Geschreven { get; } = [];
+
+    public void Schrijf(Verenigd.Application.Boekhouding.RapportTabel tabel, string pad) => Geschreven.Add((tabel, pad));
+}
+
+internal sealed class FakeAfdrukDienst : IAfdrukDienst
+{
+    public List<Verenigd.Application.Boekhouding.RapportTabel> Afgedrukt { get; } = [];
+
+    public bool Druk(Verenigd.Application.Boekhouding.RapportTabel tabel)
+    {
+        Afgedrukt.Add(tabel);
+        return true;
     }
 }
 

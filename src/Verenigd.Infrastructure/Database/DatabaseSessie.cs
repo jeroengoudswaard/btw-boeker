@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using Microsoft.Data.Sqlite;
 using Verenigd.Application.Administraties;
+using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Database;
 using Verenigd.Application.Import;
 using Verenigd.Application.Incasso;
@@ -22,6 +23,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         Leden = new LedenRepository(MaakContext);
         LedenImport = new LedenImportOpslag(MaakContext);
         Contributie = new ContributieRepository(MaakContext);
+        Boekhouding = new BoekhoudingRepository(MaakContext);
     }
 
     public string Pad { get; }
@@ -33,6 +35,8 @@ internal sealed class DatabaseSessie : IDatabaseSessie
     public ILedenImportOpslag LedenImport { get; }
 
     public IContributieRepository Contributie { get; }
+
+    public IBoekhoudingRepository Boekhouding { get; }
 
     public async Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
     {

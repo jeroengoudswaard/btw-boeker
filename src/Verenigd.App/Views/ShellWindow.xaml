@@ -9,6 +9,8 @@
         xmlns:leden="clr-namespace:Verenigd.App.Views.Leden"
         xmlns:contributievm="clr-namespace:Verenigd.App.ViewModels.Contributie"
         xmlns:contributie="clr-namespace:Verenigd.App.Views.Contributie"
+        xmlns:boekhoudingvm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
+        xmlns:boekhouding="clr-namespace:Verenigd.App.Views.Boekhouding"
         xmlns:inst="clr-namespace:Verenigd.Application.Instellingen;assembly=Verenigd.Application"
         xmlns:mod="clr-namespace:Verenigd.Application.Modules;assembly=Verenigd.Application"
         mc:Ignorable="d"
@@ -33,6 +35,9 @@
         <DataTemplate DataType="{x:Type contributievm:ContributieViewModel}">
             <contributie:ContributieView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type boekhoudingvm:BoekhoudingViewModel}">
+            <boekhouding:BoekhoudingView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
                 <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Module.Pictogram}" FontSize="48"
@@ -56,6 +61,7 @@
         <KeyBinding Gesture="Ctrl+N" Command="{Binding NieuweDatabaseCommand}" />
         <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding OpslaanCommand}" />
+        <KeyBinding Gesture="Ctrl+P" Command="{Binding AfdrukkenCommand}" />
         <KeyBinding Gesture="Ctrl+W" Command="{Binding SluitTabbladCommand}" />
         <KeyBinding Gesture="Ctrl+F4" Command="{Binding SluitTabbladCommand}" />
         <KeyBinding Gesture="Ctrl+Tab" Command="{Binding VolgendTabbladCommand}" />
@@ -82,9 +88,14 @@
                 <MenuItem Header="_Importeren" AutomationProperties.AutomationId="Menu_Importeren">
                     <MenuItem Header="SOL3-_leden..." Command="{Binding ImporteerSol3Command}"
                               AutomationProperties.AutomationId="Menu_ImporteerSol3" />
+                    <MenuItem Header="_Boekhouding uit Excel..." Command="{Binding ImporteerBoekhoudingCommand}"
+                              AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                 </MenuItem>
                 <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
                           AutomationProperties.AutomationId="Menu_NieuweIncassorun" />
+                <Separator />
+                <MenuItem Header="_Afdrukken..." InputGestureText="Ctrl+P" Command="{Binding AfdrukkenCommand}"
+                          AutomationProperties.AutomationId="Menu_Afdrukken" />
                 <Separator />
                 <MenuItem Header="_Back-up maken..." Command="{Binding MaakBackupCommand}" />
                 <MenuItem Header="Back-up _terugzetten..." Command="{Binding HerstelBackupCommand}" />

@@ -119,3 +119,33 @@ IncassoStand (leden + financiën, alleen-lezen) ──► ContributieRekenaar �
   - `Bankwerkdagen` volgt de TARGET-kalender, met de paasdatum berekend.
   - `Bedrag` rekent in hele centen en heeft een eigen notatie, die op elk systeem gelijk is.
 - **Voorbeeldbestand.** `tests/Verenigd.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld. Bijwerken na een bewuste wijziging: draai de test met `VERENIGD_VOORBEELDEN_BIJWERKEN=1` en controleer het verschil voordat u het commit.
+
+## Grootboek (fase 4a)
+
+```
+Excel (Voorblad) ──► IWerkbladLezer (ClosedXML) ──► VoorbladInlezer ──► VoorbladVoorstel ──► wizard (soort, overslaan, verschil)
+                                                                                                │  back-up + één transactie
+BoekhoudingDienst ──► IBoekhoudingRepository.PasToeAsync(stand → wijziging) ──► rubrieken, rekeningen, dagboeken, boekjaren, posten
+        │
+Grootboek (pure functies: saldo, saldibalans, balans, W&V, kaart) ──► Rapporten ──► RapportTabel ──► scherm / afdruk / CSV / xlsx
+```
+
+- **Domein** (`Domain.Financien.Boekhouding`):
+  - `Journaalpost` bewaakt de regels: minstens twee regels, debet = credit, geen inactieve rekening, en een kas- of bankdagboek moet een regel op zijn eigen rekening hebben.
+  - Boeken geeft een volgnummer per dagboek en jaar; de database bewaakt de uniekheid met een gefilterde unieke index.
+  - Een geboekte post is onveranderlijk (besluit 71). `MaakTegenboeking` maakt het spiegelbeeld.
+  - Een boekjaar is open of afgesloten. In een afgesloten jaar kan niets worden geboekt.
+- **Wijzigen in één transactie.** `PasToeAsync` laadt de gevolgde stand en geeft die aan een functie. Die functie wijzigt bestaande objecten en noemt wat moet worden toegevoegd of verwijderd; daarna wordt alles in één transactie opgeslagen. Controles en wijzigingen gebeuren zo altijd op dezelfde, actuele stand.
+- **Rapporten** rekenen alleen met geboekte posten. De W&V laat de afsluitpost buiten beschouwing; de balans telt het resultaat van het lopende jaar mee bij de passiva. `RapportTabel` is de gemeenschappelijke vorm voor scherm (FlowDocument), afdruk (`PrintDialog`, ook naar PDF), CSV en xlsx.
+- **Jaarafsluiting.** De afsluitpost boekt de resultaatrekeningen naar de reserve (rol *Reserve*). De openingsbalans van het volgende jaar ontstaat uit de balansrekeningen. Heropenen verwijdert beide posten weer. Vooraf wordt altijd een back-up gemaakt.
+- **Overname uit Excel** (besluit 62):
+  - Kolom A is het rekeningnummer, B de naam. G/H zijn W&V, I/J de balans per 31-12. Kopregels zonder nummer worden rubrieken, en de `SUM`-regel sluit het schema af.
+  - 9990 Memoriaal wordt overgeslagen (besluit 70). De rollen Reserve, Kruisposten en Kas worden herkend aan de naam.
+  - Een beginbalans die niet in evenwicht is wordt geweigerd, tenzij de gebruiker het verschil bewust op een balansrekening boekt (besluit 73). Een resultaatrekening wordt daarvoor geweigerd.
+- **Tabblad.** `BoekhoudingViewModel` met `PostEditor` (concept of alleen-lezen) en het rekeningschema als bewerkbare regels. Ctrl+N is binnen het tabblad "Nieuwe post" (besluit 72). Ctrl+Enter boekt; de view vangt die toets eerder af dan het DataGrid. Ctrl+S slaat het concept en gewijzigde rekeningen op.
+- **Teststrategie 4a:**
+  - Domein: posten, boeken, tegenboeken en het rekeningschema.
+  - Application: saldi en rapporten op vaste testdata, de Voorblad-inlezer op synthetische werkbladen (met en zonder verschil), en de dienst (nummering, afsluiten/heropenen, import, verschilrekening).
+  - Infrastructure: opslag op een echte versleutelde database en ClosedXML-lezen/schrijven op een gegenereerd xlsx-bestand.
+  - App: ViewModel-tests voor tabblad, wizard en shell. Eén FlaUI-test opent het tabblad en maakt een nieuwe post.
+  - Er wordt nooit een echte boekhouding gebruikt.

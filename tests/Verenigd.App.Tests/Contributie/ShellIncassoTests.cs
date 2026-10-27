@@ -19,7 +19,7 @@ public sealed class ShellIncassoTests
         _beheer.Voeg(Pad, Wachtwoord);
         _dialogen.BestaandDatabasebestand = Pad;
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, HerstelGevraagd: false));
-        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(),
+        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(), FakeBoekhouding.Hulpmiddelen(),
             new VasteTijd(new DateTimeOffset(2027, 2, 20, 12, 0, 0, TimeSpan.Zero)), NullLogger<ShellViewModel>.Instance);
         await shell.InitialiseerAsync();
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
