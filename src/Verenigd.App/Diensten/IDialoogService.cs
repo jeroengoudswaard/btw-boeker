@@ -71,6 +71,20 @@ public interface IDialoogService
 
     string? KiesXlsxDoel(string voorgesteldeNaam);
 
+    /// <summary>Waar een PDF-factuur wordt opgeslagen.</summary>
+    string? KiesPdfDoel(string voorgesteldeNaam);
+
+    /// <summary>Een logo (PNG of JPG) voor de facturen.</summary>
+    string? KiesAfbeelding();
+
+    /// <summary>Een rekeningschema-sjabloon (.vsjabloon) om mee in te richten.</summary>
+    string? KiesSjabloonbestand();
+
+    string? KiesSjabloonDoel(string voorgesteldeNaam);
+
+    /// <returns><c>true</c> als de administratie is ingericht.</returns>
+    bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard);
+
     /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
     bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
 }

@@ -140,6 +140,23 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 102 | Handmatige betaling open post | Automatisch concept als IBAN van de betaler én bedrag precies passen bij één open post; anders via de afletterdialoog |
 | 103 | Incasso's van vóór Verenigd | Incasso's van januari–oktober 2026 (oude systeem) via een boekingsregel direct op contributie, zoals in Excel; eventueel per speltak splitsen in het Journaal; geen debiteuren |
 | 104 | Herincasso als aparte post | Een herincasso is een aparte post in de run, naast een eventuele gewone post van dezelfde betaler (uitzondering op besluit 46), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is |
+| 105 | Plaats relaties en facturen | Subtabbladen *Relaties* en *Facturen* in Boekhouding; relaties zijn gedeeld door beide administraties |
+| 106 | Factuurnummer | Per administratie en jaar met voorvoegsel: `V2026-001` (Vereniging), `S2026-001` (Stichting) |
+| 107 | Factureren voor | Voorlopig alleen de Vereniging (besluit 61); de Stichting volgt later |
+| 108 | Relatie en lid | Relaties staan los van leden (geen koppeling via lidnummer) |
+| 109 | Vervallen facturen | Filter en markering *Vervallen*; herinneringen per e-mail volgen in fase 6 |
+| 110 | QR-code | EPC-QR ("girocode") op de PDF-factuur |
+| 111 | Ctrl+N bij facturen | Blijft "Nieuwe post" (besluit 72); een nieuwe factuur alleen via de knop |
+| 112 | Logo | PNG of JPG bij Instellingen › Facturen, opgeslagen in de database |
+| 113 | QR-code genereren | QRCoder (MIT-licentie) |
+| 114 | Standaardinrichting | Naast *Overnemen uit Excel* en *Leeg beginnen* een ingebouwd standaardschema, zodat andere scoutinggroepen zonder eigen Excel kunnen starten. Het rekeningschema nu (v0.4.4, vóór 4c-3); de begrotingsindeling volgt in fase 5 als uitbreiding van hetzelfde sjabloon |
+| 115 | Inhoud standaardschema | Een nieuw, compact minimumschema dat Claude voorstelt en de gebruiker controleert (niet afgeleid van de eigen Excel-boekhouding) |
+| 116 | Delen van sjablonen | Ingebouwd in de app, plus exporteren en importeren van een rekeningschema als sjabloonbestand (alleen nummers, namen, rubrieken en rollen; geen bedragen of persoonsgegevens) |
+| 117 | Sjabloon Stichting | Ook een eigen standaardschema voor de Stichting (o.a. gebouw, afschrijvingen, huur) |
+| 118 | Inhoud standaardschema's | Goedgekeurd zoals voorgesteld (2026-10-28): Vereniging ±32 rekeningen (0600 reserve, 1000 kas, 1100/1150 bank, 1298, 1300/1310/1400/1600/1700, 8010… contributie per speltak, 84xx–89xx overige baten, 4000 afdracht, 41xx activiteiten, 42xx huisvesting, 43xx organisatie); Stichting ±25 rekeningen (0200/0210 gebouw, 0300/0310 inventaris, 0800 leningen, 8100 huur van de Vereniging, 4200–4410 onderhoud, OZB en afschrijvingen). Dagboeken MEM, VRK (en KAS bij de Vereniging) |
+| 119 | Speltakken in de wizard | Standaard Bevers, Welpen, Scouts, Explorers en Roverscouts; aanvinken wat de groep heeft, eigen namen toe te voegen |
+| 120 | Beginsaldi | Een wizardstap "Beginsaldi" per balansrekening met de controle debet = credit; een verschil kan net als bij de Excel-import bewust op een tussenrekening (besluit 73) |
+| 121 | PDF-bibliotheek | PDFsharp/MigraDoc vast op 6.2.4, de laatste MIT-versie (het NuGet-pakket 6.5 meldt AGPL-3.0 en heeft een licentiecontrole). Pkcs vastgezet op een gepatchte versie. Overstappen (bijv. QuestPDF) kan later door alleen `IFactuurPdfMaker` te vervangen |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -168,6 +185,21 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerking: een herincasso is een **aparte post** in de run (naast een eventuele gewone post van dezelfde betaler), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is; dit is een uitzondering op "één post per betaler per run" (besluit 46), bevestigd als besluit 104.
     - Tests: 596 in totaal. In de Linux-cloudsessie groen: Domain 200, Application 207, Infrastructure 51, Architectuur 7; ViewModel-tests 123/125 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
     - Volgende stap: ontwerp 4c-2 Relaties, openstaande posten en verkoopfacturen.
+  - **4c-2 Relaties en verkoopfacturen: gereed**, v0.4.3 (2026-10-28). Besluiten 105–113. Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Subtabbladen Facturen en Relaties in Boekhouding, dagboek VRK (1310 aan opbrengst), creditfactuur, PDF met EPC-QR, Instellingen › Facturen met logo, herkenning en afletteren van factuurbetalingen in de bank.
+    - Uitwerking: PDFsharp-MigraDoc staat vast op 6.2.4, de laatste MIT-versie (6.5 is AGPL-3.0 met licentiecontrole), zodat besluit 95 blijft gelden; System.Security.Cryptography.Pkcs is vastgezet op een gepatchte versie. De QR-code wordt als 8-bits PNG weggeschreven (PDFsharp leest de 1-bits PNG van QRCoder niet); gecontroleerd met een QR-lezer.
+    - Tests: 623 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 215, Infrastructure 56, Architectuur 7; ViewModel-tests 130/132 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een PDF-factuur met Segoe UI bekijken en de QR-code met een bankapp scannen.
+  - **Standaardinrichting en sjablonen: gereed**, v0.4.4 (2026-10-28). Besluiten 114–121. Standaardschema's Vereniging en Stichting (JSON, ingebouwd), wizard Speltakken → Rekeningen → Beginsaldi → Klaar (zelfde route als de Excel-overname), export en import als `.vsjabloon`, vier keuzes op het startscherm van een lege boekhouding.
+    - Tests: 638 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 135/137 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
+    - **Windows-test (2026-10-27, Windows 11, commit `a054e08`):** build zonder waarschuwingen; 637/638 geslaagd, inclusief alle FlaUI-UI-tests. De 2 Windows-padtests slagen op Windows. Eén echte bug gevonden: de startkaart van een lege boekhouding verscheen niet (`IsGeladen` gaf geen melding voor `IsLeeg`, aanwezig sinds v0.4.0).
+  - **v0.4.5 (2026-10-28): bugfixes.** `IsLeeg` en de kolom *Soort* bij Relaties (`Rol`) melden zich nu, elk met een regressietest. Een controle van alle berekende eigenschappen vond geen andere gebonden gevallen.
+    - Tests: 640 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 137/139 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 640/640).
+    - **Windows-test (2026-10-27, commit `ae25a91`):** build zonder waarschuwingen; 639/640 geslaagd. De fix voor `IsLeeg` werkt. Eén test faalde: `PostEditor` werd niet gevonden, omdat een `Border` geen automation peer heeft (testprobleem, dat ook voor schermlezers gold).
+  - **v0.4.6 (2026-10-28): toegankelijkheid van groepen.** 13 containers met een AutomationId op een Border of panel zijn nu `Groepskader`, `Groepspaneel` of `Groepsraster` (peer van het type Group, met Nederlandse naam). Een architectuurtest bewaakt dit en een Windows-test controleert de peers.
+    - **Windows-test (2026-10-27, commit `9d83d85`):** build zonder waarschuwingen; 641/642 geslaagd. Alle FlaUI-UI-tests slagen, ook `PostEditor` en `FactuurEditor`. De nieuwe peertest faalde, omdat `IsControlElement` in WPF `IsVisible` volgt en het element niet getoond werd (testprobleem). Opgelost: de test toont het element in een venster buiten beeld, en een extra test controleert dat een ingeklapte groep geen control-element is. `IsControlElementCore` blijft bewust ongewijzigd.
+    - Tests: 643 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 8; ViewModel-tests 137/139 (de 2 Windows-padtests). **Windows-test (2026-10-27, commit `b5c5e3e`): 643/643 geslaagd**, inclusief alle FlaUI-UI-tests.
+    - Pull request: één PR voor v0.4.3 t/m v0.4.6 (4c-2, standaardinrichting en bugfixes), geopend na de geslaagde Windows-run.
+    - Daarna: de gebruiker doet zelf de proefimport van de echte Excel-boekhouding en bankafschriften op Windows (de bestanden blijven buiten Git). Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
+    - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 

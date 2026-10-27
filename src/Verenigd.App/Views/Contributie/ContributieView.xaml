@@ -1,6 +1,7 @@
 <UserControl x:Class="Verenigd.App.Views.Contributie.ContributieView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Contributie"
@@ -102,8 +103,8 @@
                     <TextBlock Grid.Column="2" Text="Selecteer een betaler of kies Nieuwe betaler." Style="{StaticResource Toelichting}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Visibility="{Binding Betaler, Converter={StaticResource NullNaarZichtbaar}}" />
-                    <Border Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding Betaler}" d:DataContext="{d:DesignInstance Type=vm:BetalerEditor}"
-                            Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.AutomationId="BetalerEditor">
+                    <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding Betaler}" d:DataContext="{d:DesignInstance Type=vm:BetalerEditor}"
+                            Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.Name="Betaler" AutomationProperties.AutomationId="BetalerEditor">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <Label Content="_IBAN" Target="{Binding ElementName=IbanVeld}" Padding="0,0,0,4" />
@@ -149,7 +150,7 @@
                                 <TextBlock Text="Opslaan met Ctrl+S." Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                             </StackPanel>
                         </ScrollViewer>
-                    </Border>
+                    </tg:Groepskader>
                 </Grid>
             </TabItem>
 

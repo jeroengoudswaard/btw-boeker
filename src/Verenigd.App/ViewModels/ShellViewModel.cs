@@ -67,14 +67,14 @@ public sealed partial class ShellViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
-    [NotifyCanExecuteChangedFor(nameof(SluitTabbladCommand), nameof(OpslaanCommand), nameof(AfdrukkenCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SluitTabbladCommand), nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand))]
     public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(NieuweIncassorunCommand))]
+        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(NieuweIncassorunCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -292,6 +292,36 @@ public sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Bestand › Importeren › Rekeningschema-sjabloon (besluit 116): opent Boekhouding voor de administratie van het actieve
+    /// tabblad, anders de Vereniging (besluit 17), en richt in met een sjabloonbestand.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task ImporteerSjabloonAsync()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        {
+            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await boekhouding.SjabloonInlezenCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon, van het actieve tabblad Boekhouding.</summary>
+    [RelayCommand(CanExecute = nameof(KanAfdrukken))]
+    private Task ExporteerSjabloonAsync() =>
+        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerSjabloonCommand.ExecuteAsync(null) : Task.CompletedTask;
+
     /// <summary>Bestand › Afdrukken (Ctrl+P): het rapport of de grootboekkaart van het tabblad Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task AfdrukkenAsync() =>
@@ -383,7 +413,8 @@ public sealed partial class ShellViewModel : ObservableObject
         TabbladViewModel tab = verzoek.Module switch
         {
             ModuleSoort.Instellingen => new InstellingenViewModel(
-                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd)),
+                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
+                new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen)),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
@@ -402,8 +433,9 @@ public sealed partial class ShellViewModel : ObservableObject
             case BoekhoudingViewModel boekhouding:
                 boekhouding.VernieuwCommand.Execute(null);
                 break;
-            case InstellingenViewModel { Incasso: { } incasso }:
-                incasso.LaadCommand.Execute(null);
+            case InstellingenViewModel instellingen:
+                instellingen.Incasso?.LaadCommand.Execute(null);
+                instellingen.Facturen?.LaadCommand.Execute(null);
                 break;
         }
     }

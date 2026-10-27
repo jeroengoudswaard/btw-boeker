@@ -94,6 +94,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     public partial bool IsIngericht { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLeeg))]
     public partial bool IsGeladen { get; private set; }
 
     public bool IsLeeg => IsGeladen && !IsIngericht;
@@ -157,13 +158,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd);
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null);
+        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
+        && FacturenGeldig;
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
     public RapportTabel? Afdruktabel => Subtab == BoekhoudingSubtab.Grootboekkaart && KaartTabel is not null ? KaartTabel : Rapport;
@@ -191,6 +193,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
             }
 
             await BewaarRegelsAsync();
+            var factuur = await BewaarFacturenAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
             {
@@ -199,6 +202,11 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
             Foutmelding = null;
             await LaadAsync(selectie);
+            if (factuur is not null)
+            {
+                PasFactuurfilterToe(factuur);
+            }
+
             return true;
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
@@ -217,6 +225,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     {
         KoppelEditor(null);
         KoppelRekeningen(false);
+        KoppelRelaties(false);
         base.Opruimen();
     }
 
@@ -277,6 +286,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BerekenRapport();
         BerekenKaart();
         LaadBank();
+        LaadFacturen(null);
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -351,6 +361,70 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         }
 
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+    }
+
+    /// <summary>Inrichten met het ingebouwde standaardschema van deze administratie (besluiten 114 en 118).</summary>
+    [RelayCommand]
+    private Task StandaardInrichtenAsync() => RichtInMetSjabloonAsync(() => Rekeningsjablonen.Standaard(Soort));
+
+    /// <summary>Bestand › Importeren › Rekeningschema-sjabloon (besluit 116).</summary>
+    [RelayCommand]
+    private Task SjabloonInlezenAsync()
+    {
+        if (IsIngericht)
+        {
+            _dialogen.ToonInformatie("Rekeningschema-sjabloon", $"De boekhouding van {Administratienaam} is al ingericht; een sjabloon kan alleen in een lege administratie.");
+            return Task.CompletedTask;
+        }
+
+        return _dialogen.KiesSjabloonbestand() is { } pad
+            ? RichtInMetSjabloonAsync(() => Rekeningsjablonen.Lees(File.ReadAllText(pad)))
+            : Task.CompletedTask;
+    }
+
+    private async Task RichtInMetSjabloonAsync(Func<Rekeningsjabloon> sjabloon)
+    {
+        if (IsIngericht)
+        {
+            return;
+        }
+
+        StandaardinrichtingViewModel wizard;
+        try
+        {
+            wizard = new StandaardinrichtingViewModel(_dienst, Soort, sjabloon(), Vandaag.Year);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            Foutmelding = ex is InvalidOperationException ? ex.Message : "Het sjabloonbestand kan niet worden gelezen.";
+            return;
+        }
+
+        Foutmelding = null;
+        if (!_dialogen.ToonStandaardinrichting(wizard) || !wizard.IsKlaar)
+        {
+            return;
+        }
+
+        ShellLog.BoekhoudingOvergenomen(_logger, Soort.ToString(), wizard.AantalIngericht);
+        await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+    }
+
+    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon: alleen nummers, namen, rubrieken en rollen (besluit 116).</summary>
+    [RelayCommand]
+    private Task ExporteerSjabloonAsync()
+    {
+        if (_stand is not { IsIngericht: true } stand
+            || _dialogen.KiesSjabloonDoel($"rekeningschema-{Administratienaam.ToLowerInvariant().Replace(' ', '-')}{Rekeningsjablonen.Extensie}") is not { } doel)
+        {
+            return Task.CompletedTask;
+        }
+
+        return VoerUitAsync(async () =>
+        {
+            await File.WriteAllTextAsync(doel, Rekeningsjablonen.Schrijf(Rekeningsjablonen.UitStand(stand, $"Rekeningschema {Administratienaam}")));
+            Melding = $"Rekeningschema opgeslagen als {Path.GetFileName(doel)}. Het bevat geen bedragen of persoonsgegevens.";
+        }, null);
     }
 
     // ---- Journaal ---------------------------------------------------------------------------
@@ -751,5 +825,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         SluitBoekjaarCommand.NotifyCanExecuteChanged();
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
         BankCommandsVernieuwen();
+        FactuurCommandsVernieuwen();
     }
 }

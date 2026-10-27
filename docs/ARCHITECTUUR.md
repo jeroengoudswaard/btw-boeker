@@ -219,3 +219,56 @@ Openstaand: Contributievorderingen.Bereken(stand) = som van de effectieve mutati
   - Application: run boeken (en weigeren zonder opbrengstrekening), batch met juist en afwijkend bedrag, stornering, handmatige betaling, afletteren van meerdere posten, oninbaar, herincasso in de volgende run, annuleren met tegenboeking, concept verwijderen.
   - Infrastructure: de hele keten op een echte versleutelde database.
   - App: opbrengstrekeningen, de wizard die automatisch boekt, Openstaand, afletteren in Bank. De FlaUI-test opent Openstaand.
+
+## Relaties en verkoopfacturen (fase 4c-2)
+
+```
+Relatie (gedeeld, los van leden) ◄── Verkoopfactuur (concept: vrij te wijzigen)
+FactuurDienst.MaakDefinitiefAsync ──► nummer V/S<jaar>-<nnn> + VRK-post 1310 (D) aan opbrengst (C) + Debiteurmutatie "Vordering" op het nummer
+Creditfactuur (CreditVan) ──► VRK-post omgekeerd + Debiteurmutatie "Creditering" op het oorspronkelijke nummer
+Bankmutatie ──► Bankherkenning: contributie → factuur (nummer in omschrijving, of IBAN relatie + bedrag van één open factuur) → kruisposten → boekingsregels
+Factuuroverzicht.Bereken(stand, vandaag) = saldo per factuurnummer uit de effectieve Debiteurmutaties (zelfde model als 4c-1)
+IFactuurPdfMaker (Application) ◄── FactuurPdfMaker (Infrastructure: MigraDoc + QRCoder)
+```
+
+- **Eén vorderingenmodel.** Facturen gebruiken dezelfde `Debiteurmutatie` als contributie; `Vordering` is het factuurnummer en `BetalerId` het Id van de relatie. Tegenboeken of een concept verwijderen maakt een aflettering dus vanzelf ongedaan.
+- **Nummering.** Het volgnummer wordt pas bij *Definitief maken* bepaald, binnen dezelfde transactie als de boeking. Een unieke index op (administratie, jaar, volgnummer) bewaakt dat er geen dubbele nummers ontstaan.
+- **Onveranderlijk.** Bij *Definitief maken* worden naam en adres van de relatie vastgelegd in `Ontvanger`, zodat een latere adreswijziging de factuur niet verandert.
+- **PDF.**
+  - PDFsharp heeft buiten Windows geen eigen lettertypen. Een eigen `IFontResolver` gebruikt Segoe UI (of Arial) uit `C:\Windows\Fonts`, en op Linux (tests) Liberation Sans of DejaVu Sans.
+  - De 1-bits PNG van QRCoder kan PDFsharp niet lezen. Daarom schrijft `FactuurPdfMaker.QrPng` de QR-matrix zelf weg als 8-bits grijswaarden-PNG.
+  - De QR-inhoud volgt EPC069-12 versie 002 (`EpcQr.Inhoud`): naam, IBAN, bedrag en het factuurnummer als omschrijving. Een creditfactuur krijgt geen QR-code.
+- **Teststrategie 4c-2:**
+  - Domain: relatie (IBAN, e-mail, rol), factuurregels en afronding, concept → definitief, creditfactuur, logo-controle, EPC-QR-inhoud.
+  - Application: definitief maken en boeken, doornummeren, creditfactuur (één keer), vervallen, herkenning op nummer en op IBAN, afletteren met meerdere facturen, instellingen.
+  - Infrastructure: opslag op een echte versleutelde database, de PDF (met en zonder logo, credit) en de QR-PNG. Handmatig gecontroleerd: de QR-code in de PDF wordt gelezen als de juiste EPC-inhoud.
+  - App: relaties, factuur maken tot en met PDF, creditfactuur, concept verwijderen, Ctrl+N, afletteren in Bank, Instellingen › Facturen. De FlaUI-test opent Relaties en Facturen.
+
+## Toegankelijkheid van groepen (v0.4.6)
+
+- Een `Border` en de panels (`StackPanel`, `Grid`, `DockPanel` enz.) hebben in WPF geen automation peer. Een AutomationId of Name daarop is onzichtbaar voor schermlezers en voor FlaUI.
+- Gebruik voor een herkenbare groep (editorkaart, sectie) `tg:Groepskader` (Border), `tg:Groepspaneel` (StackPanel) of `tg:Groepsraster` (Grid) uit `Verenigd.App.Views.Toegankelijkheid`, met `AutomationProperties.Name`.
+- De architectuurtest `Xaml_zet_geen_AutomationId_op_een_element_zonder_automation_peer` bewaakt dit in alle XAML-bestanden.
+
+## Standaardinrichting en sjablonen (besluiten 114–121)
+
+```
+Sjablonen/vereniging.json, stichting.json (embedded resource) ─┐
+.vsjabloon van een andere groep ──────────────────────────────┴► Rekeningsjablonen.Lees (controles)
+   ► Rekeningsjablonen.Rekeningen(sjabloon, speltakken) ► wizard (aan/uit, namen, beginsaldi)
+   ► Rekeningsjablonen.Voorstel ► VoorbladVoorstel { Herkomst = "standaardinrichting", MetVerkoopboek }
+   ► BoekhoudingDienst.ImporteerAsync (dezelfde route als de Excel-overname: back-up, rubrieken, rekeningen, dagboeken, boekjaar, openingsbalans)
+Ingerichte administratie ► Rekeningsjablonen.UitStand ► Schrijf ► .vsjabloon
+```
+
+- **Formaat.** JSON met `formaat: "verenigd-rekeningschema"` en `versie: 1`. Een nieuwere versie wordt geweigerd met de melding de app bij te werken. Daardoor kan fase 5 de begrotingsindeling toevoegen zonder oude bestanden te breken.
+- **Controles bij het lezen:**
+  - Unieke nummers (1–99999), een naam per rekening en bestaande rubrieken.
+  - Een rol alleen op een balansrekening, precies één reserverekening, en hooguit één kas- en één kruispostenrekening.
+  - Een geldige regel voor de speltakrekeningen.
+- **Speltakken.** `speltakken: { rubriek, vanaf, stap, naam: "Contributie {speltak}", standaard: [...] }`. Dubbele en lege namen worden overgeslagen. Valt een nummer samen met een bestaande rekening, dan wordt geweigerd.
+- **Privacy.** Een sjabloon bevat alleen nummers, namen, rubrieken en rollen. Een export uit de eigen administratie bevat dus geen saldi.
+- **Teststrategie:**
+  - Application: geldige ingebouwde sjablonen, speltakrekeningen, schrijven en lezen zonder verlies, weigeren van ongeldige bestanden, inrichten met beginsaldi en terug exporteren.
+  - App: de wizard voor Vereniging en Stichting (speltak toevoegen, verplichte reserve, ongeldig bedrag, verschilrekening), een waarschuwing bij een sjabloon voor de andere administratie, inrichten en exporteren vanuit het tabblad, een ongeldig sjabloonbestand.
+  - FlaUI: de wizard opent vanuit het startscherm.

@@ -7,7 +7,7 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 | 1 | Fundament: hoofdvenster met tabbladen, versleutelde database, herstelsleutel, back-up, thema's | ✅ Gereed (v0.1.0) |
 | 2 | Leden, met import uit SOL3 (scouting.nl) | ✅ Gereed (v0.2.0) |
 | 3 | Contributie en SEPA-incasso (pain.008, Rabobank) | ✅ Gereed (v0.3.0) |
-| 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | 🔨 In uitvoering: 4a Grootboek (v0.4.0), 4b Bank (v0.4.1) en 4c-1 Contributie (v0.4.2) gereed; 4c-2 Relaties en facturen en 4c-3 Bijlagen volgen |
+| 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | 🔨 In uitvoering: 4a Grootboek (v0.4.0), 4b Bank (v0.4.1) en 4c-1 Contributie (v0.4.2) en 4c-2 Relaties en facturen (v0.4.3) en de standaardinrichting (v0.4.4) gereed; 4c-3 Bijlagen volgt |
 | 5 | Jaarbegroting (vereniging) en meerjarenplan (stichting) | Gepland |
 | 6 | E-mail via Gmail | Gepland |
 | 7 | Webapp voor groepsleiders (Supabase) | Gepland |
@@ -80,6 +80,9 @@ Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`,
 | Microsoft.EntityFrameworkCore.Sqlite.Core | ORM en migraties |
 | SQLite3MC.PCLRaw.bundle | SQLite met versleuteling |
 | ClosedXML (MIT) | Excel lezen (overname boekhouding) en schrijven (export rapporten) |
+| PDFsharp-MigraDoc 6.2.4 (MIT) | PDF van de verkoopfactuur. Bewust de laatste MIT-versie: vanaf 6.5 is de licentie AGPL-3.0 |
+| QRCoder (MIT) | Betaal-QR-code (EPC-QR, "girocode") op de factuur |
+| System.Security.Cryptography.Pkcs | Vastgezet op een gepatchte versie; PDFsharp 6.2.4 trekt anders een kwetsbare versie mee |
 | Serilog (+ Extensions.Hosting, Sinks.File) | Logging naar bestand |
 | xUnit, FlaUI.UIA3 | Unit- en UI-tests |
 

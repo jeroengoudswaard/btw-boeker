@@ -115,6 +115,35 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
+    public string? KiesPdfDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog { Title = "Factuur opslaan als PDF", Filter = "PDF-document (*.pdf)|*.pdf", DefaultExt = ".pdf", FileName = voorgesteldeNaam };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public string? KiesAfbeelding()
+    {
+        var dialoog = new OpenFileDialog { Title = "Logo kiezen", Filter = "Afbeelding (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg", CheckFileExists = true };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public string? KiesSjabloonbestand()
+    {
+        var dialoog = new OpenFileDialog { Title = "Rekeningschema-sjabloon kiezen", Filter = "Sjabloon Verenigd (*.vsjabloon)|*.vsjabloon", CheckFileExists = true };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public string? KiesSjabloonDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog
+        {
+            Title = "Rekeningschema exporteren als sjabloon", Filter = "Sjabloon Verenigd (*.vsjabloon)|*.vsjabloon", DefaultExt = ".vsjabloon", FileName = voorgesteldeNaam,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard) => ToonModaal(new StandaardinrichtingVenster(wizard));
+
     public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
 
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)

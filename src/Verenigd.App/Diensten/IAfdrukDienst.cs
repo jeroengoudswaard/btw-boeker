@@ -10,4 +10,4 @@ public interface IAfdrukDienst
 }
 
 /// <summary>Wat het tabblad Boekhouding nodig heeft van buiten de ViewModels.</summary>
-public sealed record BoekhoudingHulpmiddelen(IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk);
+public sealed record BoekhoudingHulpmiddelen(IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, Application.Facturen.IFactuurPdfMaker Pdf);

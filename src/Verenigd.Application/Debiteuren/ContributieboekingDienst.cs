@@ -48,6 +48,13 @@ public static class Debiteurenrekeningen
 
         return contributie;
     }
+
+    /// <summary>Als <see cref="Zorg"/>, maar geeft 1310 Debiteuren overig (verkoopfacturen).</summary>
+    internal static Grootboekrekening Overige(BoekhoudingStand stand, AdministratieSoort administratie, List<object> toevoegen)
+    {
+        Zorg(stand, administratie, toevoegen);
+        return stand.Rekeningen.Concat(toevoegen.OfType<Grootboekrekening>()).First(r => r.Nummer == Overig);
+    }
 }
 
 /// <summary>

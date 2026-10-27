@@ -333,6 +333,11 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 wijziging.Toevoegen.Add(new Dagboek(administratie, DagboekSoort.Kas, "KAS", "Kas", kas));
             }
 
+            if (voorstel.MetVerkoopboek && !stand.Dagboeken.Any(d => d.Soort == DagboekSoort.Verkoop))
+            {
+                wijziging.Toevoegen.Add(new Dagboek(administratie, DagboekSoort.Verkoop, "VRK", "Verkoop", null));
+            }
+
             if (stand.Boekjaar(voorstel.Beginjaar) is null)
             {
                 wijziging.Toevoegen.Add(new Boekjaar(administratie, voorstel.Beginjaar));
@@ -353,7 +358,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             if (saldi.Count > 0)
             {
                 var opening = new Journaalpost(administratie, memoriaal, new DateOnly(voorstel.Beginjaar, 1, 1),
-                    $"Openingsbalans {VoorbladInlezer.Jaar(voorstel.Beginjaar)} (overgenomen uit Excel)", PostSoort.Openingsbalans);
+                    $"Openingsbalans {VoorbladInlezer.Jaar(voorstel.Beginjaar)} ({voorstel.Herkomst})", PostSoort.Openingsbalans);
                 var regels = saldi.Select(s =>
                 {
                     var saldo = s.Bron.Debet.Centen - s.Bron.Credit.Centen;
@@ -362,7 +367,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 if (verschilrekening is not null)
                 {
                     var verschilbedrag = voorstel.TotaalDebet.Centen - voorstel.TotaalCredit.Centen;
-                    regels.Add(new RegelInvoer(verschilrekening, "Onverklaard verschil uit de Excel-overname (te onderzoeken)",
+                    regels.Add(new RegelInvoer(verschilrekening, $"Onverklaard verschil in de beginbalans, {voorstel.Herkomst} (te onderzoeken)",
                         verschilbedrag < 0 ? new Bedrag(-verschilbedrag) : Bedrag.Nul, verschilbedrag > 0 ? new Bedrag(verschilbedrag) : Bedrag.Nul));
                 }
 

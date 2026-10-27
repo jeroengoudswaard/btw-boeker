@@ -1,6 +1,7 @@
 <UserControl x:Class="Verenigd.App.Views.Boekhouding.BoekhoudingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
@@ -35,19 +36,24 @@
         </DockPanel>
 
         <!-- ===== Nog niet ingericht ===== -->
-        <Border DockPanel.Dock="Top" Style="{StaticResource Kaart}" MaxWidth="640" HorizontalAlignment="Left"
-                Visibility="{Binding IsLeeg, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="BoekhoudingLeeg">
+        <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" MaxWidth="640" HorizontalAlignment="Left"
+                Visibility="{Binding IsLeeg, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.Name="Boekhouding inrichten" AutomationProperties.AutomationId="BoekhoudingLeeg">
             <StackPanel>
                 <TextBlock Text="Deze administratie heeft nog geen boekhouding" Style="{StaticResource Sectietitel}" />
-                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12"
-                           Text="Neem het rekeningschema en de eindbalans eenmalig over uit de huidige Excel-boekhouding, of begin met een leeg rekeningschema." />
-                <StackPanel Style="{StaticResource Knoppenbalk}" HorizontalAlignment="Left">
-                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}" Style="{DynamicResource AccentButtonStyle}"
-                            Margin="0,0,8,0" AutomationProperties.AutomationId="OvernemenUitExcel" />
-                    <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" AutomationProperties.AutomationId="LeegBeginnen" />
-                </StackPanel>
+                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
+                           Text="Begin met het standaardschema voor scoutinggroepen, met een sjabloon van een andere groep, met een overname uit de huidige Excel-boekhouding of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
+                <WrapPanel>
+                    <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}"
+                            Margin="0,0,8,8" ToolTip="Een compact rekeningschema met rubrieken, aan te passen vóór het inrichten"
+                            AutomationProperties.AutomationId="StandaardInrichten" />
+                    <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Margin="0,0,8,8"
+                            ToolTip="Een rekeningschema-sjabloon (.vsjabloon) van een andere groep" AutomationProperties.AutomationId="SjabloonInlezen" />
+                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}"
+                            Margin="0,0,8,8" AutomationProperties.AutomationId="OvernemenUitExcel" />
+                    <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" Margin="0,0,8,8" AutomationProperties.AutomationId="LeegBeginnen" />
+                </WrapPanel>
             </StackPanel>
-        </Border>
+        </tg:Groepskader>
 
         <DockPanel Visibility="{Binding IsIngericht, Converter={StaticResource BoolNaarZichtbaar}}">
             <!-- ===== Boekjaar en uitvoer ===== -->
@@ -101,8 +107,8 @@
                         <TextBlock Grid.Column="2" Text="Selecteer een post of kies Nieuwe post (Ctrl+N)." Style="{StaticResource Toelichting}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Visibility="{Binding Editor, Converter={StaticResource NullNaarZichtbaar}}" />
-                        <Border Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding Editor}" d:DataContext="{d:DesignInstance Type=vm:PostEditor}"
-                                Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.AutomationId="PostEditor">
+                        <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding Editor}" d:DataContext="{d:DesignInstance Type=vm:PostEditor}"
+                                Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.Name="Journaalpost" AutomationProperties.AutomationId="PostEditor">
                             <DockPanel>
                                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource Sectietitel}">
                                     <Run Text="{Binding Nummer, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Statustekst, Mode=OneWay}" />
@@ -203,7 +209,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </DockPanel>
-                        </Border>
+                        </tg:Groepskader>
                     </Grid>
                 </TabItem>
 
@@ -252,7 +258,7 @@
 
                             <TextBlock Grid.Column="2" Text="Selecteer een transactie." Style="{StaticResource Toelichting}" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Visibility="{Binding GeselecteerdeMutatie, Converter={StaticResource NullNaarZichtbaar}}" />
-                            <Border Grid.Column="2" Style="{StaticResource Kaart}" AutomationProperties.AutomationId="Bankdetail"
+                            <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" AutomationProperties.Name="Banktransactie" AutomationProperties.AutomationId="Bankdetail"
                                     Visibility="{Binding GeselecteerdeMutatie, Converter={StaticResource NietNullNaarZichtbaar}}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
@@ -301,8 +307,8 @@
                                                 </TextBox.InputBindings>
                                             </TextBox>
                                         </StackPanel>
-                                        <Border Margin="0,0,0,12" Padding="8" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                                                Visibility="{Binding KanAfletteren, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="Afletteren">
+                                        <tg:Groepskader Margin="0,0,0,12" Padding="8" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                                Visibility="{Binding KanAfletteren, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.Name="Afletteren" AutomationProperties.AutomationId="Afletteren">
                                             <StackPanel>
                                                 <TextBlock Text="Afletteren met openstaande contributie" FontWeight="SemiBold" Margin="0,0,0,8" />
                                                 <ItemsControl ItemsSource="{Binding Afletterkeuzes}" Focusable="False">
@@ -318,7 +324,7 @@
                                                     <TextBlock VerticalAlignment="Center"><Run Text="Gekozen: " /><Run Text="{Binding Afletterentotaal, Mode=OneWay}" FontWeight="SemiBold" /></TextBlock>
                                                 </DockPanel>
                                             </StackPanel>
-                                        </Border>
+                                        </tg:Groepskader>
                                         <StackPanel Orientation="Horizontal">
                                             <Button Content="_Toewijzen" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}"
                                                     ToolTip="Maakt een conceptpost (Enter)" AutomationProperties.AutomationId="Toewijzen"
@@ -330,7 +336,7 @@
                                                    Text="Een concept kunt u in het Journaal controleren, splitsen of verwijderen; de bankregel staat vast." />
                                     </StackPanel>
                                 </ScrollViewer>
-                            </Border>
+                            </tg:Groepskader>
                         </Grid>
                     </DockPanel>
                 </TabItem>
@@ -449,6 +455,245 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>
+                </TabItem>
+
+                <!-- ===== Facturen (stap 4c-2, besluiten 66 en 105–112) ===== -->
+                <TabItem Header="_Facturen" AutomationProperties.AutomationId="SubtabFacturen">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="3*" MinWidth="460" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel>
+                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Button Content="Nieu_we factuur" Command="{Binding NieuweFactuurCommand}" Margin="0,0,16,0"
+                                        ToolTip="Een nieuwe verkoopfactuur (Ctrl+N blijft Nieuwe post)" AutomationProperties.AutomationId="NieuweFactuur" />
+                                <Label Content="T_onen" Target="{Binding ElementName=Factuurfilterkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                                <ComboBox x:Name="Factuurfilterkeuze" ItemsSource="{Binding Factuurfilters}" SelectedItem="{Binding Factuurfilter}" Width="120"
+                                          VerticalAlignment="Center" AutomationProperties.AutomationId="Factuurfilter" />
+                            </WrapPanel>
+                            <WrapPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                <TextBlock Text="{Binding Factuuraantaltekst}" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                                <Button Command="{Binding FactuurPdfCommand}" Margin="0,0,8,0" ToolTip="De factuur opslaan als PDF met betaal-QR-code"
+                                        AutomationProperties.AutomationId="FactuurPdf">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xEA90;" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <AccessText Text="Als PDF opslaa_n..." />
+                                    </StackPanel>
+                                </Button>
+                                <Button Content="Cred_itfactuur..." Command="{Binding CreditfactuurCommand}" Margin="0,0,8,0"
+                                        ToolTip="Een definitieve factuur corrigeren of intrekken" AutomationProperties.AutomationId="Creditfactuur" />
+                                <Button Content="Concept _verwijderen" Command="{Binding VerwijderFactuurconceptCommand}" AutomationProperties.AutomationId="FactuurconceptVerwijderen" />
+                            </WrapPanel>
+                            <DataGrid ItemsSource="{Binding Facturen}" SelectedItem="{Binding GeselecteerdeFactuur}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Verkoopfacturen"
+                                      AutomationProperties.AutomationId="Verkoopfacturen">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsVervallen}" Value="True">
+                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                <Setter Property="ToolTip" Value="Vervallen: de betaaltermijn is verstreken" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" Width="Auto" />
+                                    <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
+                                    <DataGridTextColumn Header="Relatie" Binding="{Binding Relatie}" Width="*" />
+                                    <DataGridTextColumn Header="Totaal" Binding="{Binding Totaal}" Width="Auto" />
+                                    <DataGridTextColumn Header="Open" Binding="{Binding Open}" Width="Auto" />
+                                    <DataGridTextColumn Header="Vervalt" Binding="{Binding Vervaldatum}" Width="Auto" />
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <TextBlock Grid.Column="2" Style="{StaticResource Toelichting}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"
+                                   Text="Selecteer een conceptfactuur of kies Nieuwe factuur. Een definitieve factuur is onveranderlijk; corrigeren gaat met een creditfactuur."
+                                   Visibility="{Binding FactuurEditor, Converter={StaticResource NullNaarZichtbaar}}" />
+                        <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding FactuurEditor}" d:DataContext="{d:DesignInstance Type=vm:FactuurEditor}"
+                                Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.Name="Factuur" AutomationProperties.AutomationId="FactuurEditor">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="{Binding Titel}" Style="{StaticResource Sectietitel}" />
+                                <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Content="Rela_tie" Target="{Binding ElementName=Factuurrelatie}" Padding="0,0,0,4" />
+                                    <ComboBox x:Name="Factuurrelatie" Grid.Row="1" ItemsSource="{Binding Relatiekeuzes}" SelectedItem="{Binding Relatie}" DisplayMemberPath="Naam"
+                                              IsTextSearchEnabled="True" IsEnabled="{Binding IsCreditfactuur, Converter={StaticResource Niet}}"
+                                              AutomationProperties.AutomationId="FactuurRelatie" />
+                                    <Label Grid.Column="2" Content="Factuurdat_um" Target="{Binding ElementName=Factuurdatum}" Padding="0,0,0,4" />
+                                    <DatePicker x:Name="Factuurdatum" Grid.Column="2" Grid.Row="1" SelectedDate="{Binding Datum}" Width="140"
+                                                AutomationProperties.AutomationId="FactuurDatum" />
+                                    <Label Grid.Column="4" Content="Ter_mijn (dagen)" Target="{Binding ElementName=Factuurtermijn}" Padding="0,0,0,4" />
+                                    <TextBox x:Name="Factuurtermijn" Grid.Column="4" Grid.Row="1" Width="80" Text="{Binding Termijn, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.AutomationId="FactuurTermijn" />
+                                </Grid>
+
+                                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                    <TextBlock>
+                                        <Run Text="Totaal " /><Run Text="{Binding Totaaltekst, Mode=OneWay}" FontWeight="SemiBold" /><Run Text="  ·  geen btw" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Fouttekst}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0" AutomationProperties.AutomationId="FactuurFouten"
+                                               Visibility="{Binding Fouttekst, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                        <Button Content="Definitief ma_ken..." MinWidth="96" Style="{DynamicResource AccentButtonStyle}"
+                                                Command="{Binding DataContext.MaakFactuurDefinitiefCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                ToolTip="Nummer toekennen en boeken in het verkoopdagboek. Daarna kan de factuur niet meer worden gewijzigd."
+                                                AutomationProperties.AutomationId="FactuurDefinitief" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button DockPanel.Dock="Bottom" Content="E_xtra regel" HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding RegelToevoegenCommand}"
+                                        AutomationProperties.AutomationId="FactuurregelToevoegen" />
+                                <DataGrid ItemsSource="{Binding Regels}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                                          CanUserSortColumns="False" HeadersVisibility="Column"
+                                          AutomationProperties.Name="Factuurregels" AutomationProperties.AutomationId="Factuurregels">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Omschrijving" Width="3*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
+                                                    <TextBox Text="{Binding Omschrijving, UpdateSourceTrigger=PropertyChanged}" MaxLength="200" AutomationProperties.Name="Omschrijving" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Aantal" Width="70">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
+                                                    <TextBox Text="{Binding Aantal, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Aantal" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Prijs" Width="90">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
+                                                    <TextBox Text="{Binding Prijs, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Prijs" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Opbrengstrekening" Width="2*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
+                                                    <ComboBox ItemsSource="{Binding DataContext.Rekeningkeuzes, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                              SelectedItem="{Binding Rekening, UpdateSourceTrigger=PropertyChanged}"
+                                                              IsTextSearchEnabled="True" AutomationProperties.Name="Opbrengstrekening" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedragtekst}" IsReadOnly="True" Width="Auto" />
+                                        <DataGridTemplateColumn Width="Auto">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
+                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" ToolTip="Regel verwijderen"
+                                                            AutomationProperties.Name="Regel verwijderen"
+                                                            Command="{Binding DataContext.RegelVerwijderenCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </tg:Groepskader>
+                    </Grid>
+                </TabItem>
+
+                <!-- ===== Relaties (gedeeld door beide administraties, besluiten 105 en 108) ===== -->
+                <TabItem Header="Re_laties" AutomationProperties.AutomationId="SubtabRelaties">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="3*" MinWidth="420" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel>
+                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Button Content="Nieu_we relatie" Command="{Binding NieuweRelatieCommand}" AutomationProperties.AutomationId="NieuweRelatie" />
+                            </WrapPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
+                                       Text="Relaties (zoals huurders en sponsors) gelden voor beide administraties en staan los van de leden. Opslaan met Ctrl+S." />
+                            <DataGrid ItemsSource="{Binding Relaties}" SelectedItem="{Binding GeselecteerdeRelatie}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Relaties"
+                                      AutomationProperties.AutomationId="Relaties">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*" />
+                                    <DataGridTextColumn Header="Plaats" Binding="{Binding Plaats}" Width="Auto" />
+                                    <DataGridTextColumn Header="Soort" Binding="{Binding Rol}" Width="Auto" />
+                                    <DataGridCheckBoxColumn Header="Actief" Binding="{Binding IsActief}" Width="Auto" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <TextBlock Grid.Column="2" Text="Selecteer een relatie of kies Nieuwe relatie." Style="{StaticResource Toelichting}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding GeselecteerdeRelatie, Converter={StaticResource NullNaarZichtbaar}}" />
+                        <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding GeselecteerdeRelatie}" d:DataContext="{d:DesignInstance Type=vm:RelatieRegel}"
+                                Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.Name="Relatie" AutomationProperties.AutomationId="RelatieEditor">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Content="_Naam" Target="{Binding ElementName=RelatieNaam}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieNaam" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.AutomationId="RelatieNaam" />
+                                <Label Grid.Row="1" Content="C_ontactpersoon" Target="{Binding ElementName=RelatieContact}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieContact" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Contactpersoon, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Grid.Row="2" Content="Straat en n_ummer" Target="{Binding ElementName=RelatieStraat}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieStraat" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Straat, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Grid.Row="3" Content="Pos_tcode en plaats" Target="{Binding ElementName=RelatiePostcode}" VerticalAlignment="Center" />
+                                <DockPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,8">
+                                    <TextBox x:Name="RelatiePostcode" Width="90" MaxLength="10" Margin="0,0,8,0" Text="{Binding Postcode, UpdateSourceTrigger=PropertyChanged}"
+                                             AutomationProperties.Name="Postcode" />
+                                    <TextBox MaxLength="100" Text="{Binding Plaats, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Plaats" />
+                                </DockPanel>
+                                <Label Grid.Row="4" Content="E-_mail" Target="{Binding ElementName=RelatieEmail}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieEmail" Grid.Row="4" Grid.Column="1" Margin="0,0,0,8" MaxLength="254" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Grid.Row="5" Content="Telefoon" Target="{Binding ElementName=RelatieTelefoon}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieTelefoon" Grid.Row="5" Grid.Column="1" Margin="0,0,0,8" MaxLength="20" Text="{Binding Telefoon, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Grid.Row="6" Content="_IBAN" Target="{Binding ElementName=RelatieIban}" VerticalAlignment="Center" />
+                                <TextBox x:Name="RelatieIban" Grid.Row="6" Grid.Column="1" Margin="0,0,0,8" FontFamily="Consolas" MaxLength="42"
+                                         Text="{Binding Iban, UpdateSourceTrigger=PropertyChanged}" ToolTip="Wordt gebruikt om betalingen in de bank te herkennen"
+                                         AutomationProperties.AutomationId="RelatieIban" />
+                                <TextBlock Grid.Row="7" Text="Soort" VerticalAlignment="Center" Margin="5,0,0,8" />
+                                <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+                                    <CheckBox Content="Debiteur" IsChecked="{Binding IsDebiteur}" Margin="0,0,16,0" />
+                                    <CheckBox Content="Crediteur" IsChecked="{Binding IsCrediteur}" Margin="0,0,16,0" />
+                                    <CheckBox Content="Actief" IsChecked="{Binding IsActief}" />
+                                </StackPanel>
+                                <Label Grid.Row="8" Content="Notitie" Target="{Binding ElementName=RelatieNotitie}" VerticalAlignment="Top" />
+                                <TextBox x:Name="RelatieNotitie" Grid.Row="8" Grid.Column="1" Margin="0,0,0,8" MinHeight="60" AcceptsReturn="True" TextWrapping="Wrap"
+                                         MaxLength="2000" Text="{Binding Notitie, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding Fout}" Style="{StaticResource Foutmelding}" AutomationProperties.AutomationId="RelatieFout"
+                                           Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                            </Grid>
+                        </tg:Groepskader>
+                    </Grid>
                 </TabItem>
 
                 <!-- ===== Rekeningschema ===== -->

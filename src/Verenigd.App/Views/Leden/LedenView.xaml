@@ -1,6 +1,7 @@
 <UserControl x:Class="Verenigd.App.Views.Leden.LedenView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Leden"
@@ -94,8 +95,8 @@
                            Visibility="{Binding GeselecteerdLid, Converter={StaticResource NullNaarZichtbaar}}" />
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                               Visibility="{Binding GeselecteerdLid, Converter={StaticResource NietNullNaarZichtbaar}}">
-                    <Grid DataContext="{Binding GeselecteerdLid}" d:DataContext="{d:DesignInstance Type=vm:LidRegel}"
-                          AutomationProperties.AutomationId="Lidgegevens">
+                    <tg:Groepsraster DataContext="{Binding GeselecteerdLid}" d:DataContext="{d:DesignInstance Type=vm:LidRegel}"
+                          AutomationProperties.Name="Lidgegevens" AutomationProperties.AutomationId="Lidgegevens">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="16" />
@@ -178,7 +179,7 @@
                                          AutomationProperties.Name="Notities" AutomationProperties.AutomationId="LidNotities" />
                             </DockPanel>
                         </Border>
-                    </Grid>
+                    </tg:Groepsraster>
                 </ScrollViewer>
             </Grid>
         </Grid>

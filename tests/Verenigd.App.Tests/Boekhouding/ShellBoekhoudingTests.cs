@@ -22,7 +22,7 @@ public sealed class ShellBoekhoudingTests
         _dialogen.BestaandDatabasebestand = Pad;
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, HerstelGevraagd: false));
         var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(),
-            new BoekhoudingHulpmiddelen(_lezer, new FakeSpreadsheetSchrijver(), _afdruk),
+            new BoekhoudingHulpmiddelen(_lezer, new FakeSpreadsheetSchrijver(), _afdruk, new FakeFactuurPdfMaker()),
             new VasteTijd(new DateTimeOffset(2026, 10, 27, 12, 0, 0, TimeSpan.Zero)), NullLogger<ShellViewModel>.Instance);
         await shell.InitialiseerAsync();
         await shell.OpenDatabaseCommand.ExecuteAsync(null);

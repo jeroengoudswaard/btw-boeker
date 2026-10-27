@@ -2,6 +2,76 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.6] - 2026-10-28: Toegankelijkheid van groepen
+
+### Opgelost
+- Dertien groepen in de schermen waren onzichtbaar voor schermlezers en UI Automation, waaronder de editors *Journaalpost*, *Factuur*, *Relatie* en *Betaler*, de bankdetails, *Afletteren*, de startkaart van de boekhouding en de secties Incasso en Facturen in Instellingen. Een `Border` of panel heeft in WPF geen automation peer, dus hun AutomationId en naam kwamen niet door. Gevonden door de FlaUI-test op Windows (`PostEditor` niet gevonden).
+  - Deze containers zijn nu een `Groepskader`, `Groepspaneel` of `Groepsraster` (`Views/Toegankelijkheid`): dezelfde opmaak, maar voor schermlezers een groep met een Nederlandse naam, zoals "Journaalpost" of "Factuur".
+
+### Toegevoegd
+- Een architectuurtest die faalt zodra een AutomationId op een element zonder automation peer staat.
+- Een test die de peers van de groepscontainers controleert (alleen op Windows). Het element staat daarbij in een getoond venster buiten beeld, omdat WPF `IsControlElement` laat afhangen van `IsVisible`. Een tweede test bevestigt dat een ingeklapte groep geen control-element is voor schermlezers.
+- 643 geautomatiseerde tests (was 640).
+
+## [0.4.5] - 2026-10-28: Bugfixes na de Windows-test
+
+### Opgelost
+- In een lege boekhouding toonde het tabblad Boekhouding de startkaart niet, dus ook niet de knoppen *Standaardschema gebruiken*, *Sjabloonbestand*, *Overnemen uit Excel* en *Leeg beginnen*. Alleen *Bestand › Importeren* werkte. Oorzaak: `IsLeeg` gaf geen melding als het laden klaar was. Dit speelde sinds v0.4.0 en is gevonden door de FlaUI-test op Windows.
+- De kolom *Soort* in Boekhouding › Relaties werkte pas na herladen bij als *Debiteur* of *Crediteur* werd aangevinkt.
+- Beide met een regressietest. Bij een controle van alle berekende eigenschappen in de ViewModels kwamen geen andere gebonden gevallen naar voren.
+- 640 geautomatiseerde tests (was 638).
+
+## [0.4.4] - 2026-10-28: Standaardinrichting en sjablonen
+
+### Toegevoegd
+- **Standaardschema voor scoutinggroepen** (besluiten 114, 115, 117 en 118), zodat een groep zonder eigen Excel-boekhouding kan beginnen:
+  - Vereniging: 27 rekeningen in 9 rubrieken, plus een contributierekening per speltak (vanaf 8010).
+  - Stichting: 27 rekeningen in 8 rubrieken, met gebouw, inventaris, afschrijvingen en huur van de Vereniging.
+  - De dagboeken Memoriaal en Verkoop worden aangemaakt, en bij de Vereniging ook Kas.
+- **Wizard *Boekhouding inrichten met een sjabloon*:**
+  - **Speltakken:** Bevers, Welpen, Scouts, Explorers en Roverscouts staan klaar; vink aan wat uw groep heeft en voeg eigen speltakken toe (besluit 119).
+  - **Rekeningen:** zet rekeningen aan of uit en pas namen aan. De reserverekening blijft altijd aan, want de jaarafsluiting heeft haar nodig.
+  - **Beginsaldi:** per balansrekening, met de controle debet = credit. Een verschil kan net als bij de Excel-overname alleen bewust op een tussenrekening (besluiten 73 en 120).
+  - Vooraf wordt een back-up gemaakt; daarna is het boekjaar open.
+- **Sjablonen delen met andere groepen** (besluit 116):
+  - *Bestand › Exporteren › Rekeningschema als sjabloon* maakt een `.vsjabloon`-bestand.
+  - *Bestand › Importeren › Rekeningschema-sjabloon* en de knop *Sjabloonbestand...* richten een lege administratie ermee in.
+  - Een sjabloon bevat alleen nummers, namen, rubrieken en rollen, nooit bedragen of persoonsgegevens.
+- Het startscherm van een lege boekhouding biedt nu vier keuzes: *Standaardschema gebruiken*, *Sjabloonbestand*, *Overnemen uit Excel* en *Leeg beginnen*.
+- 638 geautomatiseerde tests (was 623).
+
+### Gewijzigd
+- PDFsharp-MigraDoc 6.2.4 vastgelegd als besluit 121.
+
+### Nog niet functioneel
+- De begrotingsindeling in het sjabloon volgt in fase 5 (besluit 114).
+
+## [0.4.3] - 2026-10-28: Fase 4c-2 "Relaties en verkoopfacturen"
+
+### Toegevoegd
+- **Subtabblad Boekhouding › Relaties** (besluiten 105 en 108):
+  - Huurders, sponsors en andere relaties met adres, e-mail, telefoon, IBAN en notitie; debiteur, crediteur of allebei.
+  - Gedeeld door beide administraties en los van de leden. Een ongeldig IBAN-controlegetal wordt direct gemeld. Opslaan met Ctrl+S.
+- **Subtabblad Boekhouding › Facturen** (besluiten 66, 94, 106, 107, 109 en 111):
+  - Conceptfactuur met regels (omschrijving, aantal, prijs, opbrengstrekening), factuurdatum en betaaltermijn. Geen btw.
+  - *Definitief maken* kent het nummer toe (`V2026-001`, per administratie en jaar, zonder gaten) en boekt de factuur in het nieuwe dagboek *VRK Verkoop*: 1310 *Debiteuren overig* aan de opbrengst.
+  - Een definitieve factuur is onveranderlijk; corrigeren gaat met een **creditfactuur**, die eerst als concept verschijnt.
+  - Filter *Open*, *Vervallen*, *Concept* en *Alle*; vervallen facturen staan vet.
+  - Een nieuwe factuur alleen via de knop; Ctrl+N blijft *Nieuwe post*.
+- **PDF-factuur** (besluiten 95, 110 en 112): logo, afzender, ontvanger, regels, "geen btw", betaalinstructie en een betaal-QR-code (EPC-QR, "girocode") die bankapps herkennen.
+- **Instellingen › Facturen:** naam, adres, KvK-nummer, IBAN, e-mail, telefoon, standaard betaaltermijn (14 dagen), tekst onder de factuur en een logo (PNG of JPG, maximaal 2 MB, in de versleutelde database).
+- **Betalingen herkennen in de bank:** een ontvangst met het factuurnummer in de omschrijving, of van het IBAN van de relatie met precies het bedrag van één open factuur, wordt een conceptpost op 1310.
+- **Afletteren in de bank** kan nu ook met een of meer open facturen (niet samen met contributie in één keer).
+- 623 geautomatiseerde tests (was 596).
+
+### Gewijzigd
+- PDFsharp-MigraDoc is vastgezet op 6.2.4, de laatste versie met de MIT-licentie (besluit 95). Versie 6.5 is AGPL-3.0 en vraagt een licentie.
+
+### Nog niet functioneel
+- Bijlagen (bonnen en facturen): stap 4c-3.
+- Herinneringen voor vervallen facturen per e-mail: fase 6.
+- Facturen en boekhouding voor de Stichting (besluiten 61 en 107).
+
 ## [0.4.2] - 2026-10-28: Fase 4c-1 "Contributie in de boekhouding"
 
 ### Toegevoegd
