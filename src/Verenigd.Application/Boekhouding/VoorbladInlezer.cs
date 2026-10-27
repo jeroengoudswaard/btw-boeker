@@ -43,6 +43,12 @@ public sealed record VoorbladVoorstel(int Jaar, IReadOnlyList<VoorbladRekening> 
 
     /// <summary>De beginbalans geldt voor het jaar ná het jaar van het Excel-bestand.</summary>
     public int Beginjaar => Jaar + 1;
+
+    /// <summary>Komt in de omschrijving van de openingsbalans, bijvoorbeeld "Openingsbalans 2026 (overgenomen uit Excel)".</summary>
+    public string Herkomst { get; init; } = "overgenomen uit Excel";
+
+    /// <summary>Ook het verkoopdagboek VRK aanmaken (standaardinrichting, besluit 118).</summary>
+    public bool MetVerkoopboek { get; init; }
 }
 
 /// <summary>
