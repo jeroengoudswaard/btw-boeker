@@ -118,6 +118,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 80 | Startpunt bankimport | Bankafschriften worden ingelezen vanaf 1-1-2026; de app waarschuwt als het eerste beginsaldo niet gelijk is aan het grootboeksaldo per 31-12-2025 |
 | 81 | Startregels | De lijst boekingsregels begint leeg; regels ontstaan vooral via "Regel maken van deze boeking" |
 | 82 | Bediening bank | Subtabbladen *Bank* en *Boekingsregels* in Boekhouding; *Bestand › Importeren › Bankafschrift (CAMT.053)…*; Ctrl+B = concepten boeken (Ctrl+Enter blijft "deze post boeken") |
+| 83 | Bijlagen (bonnen/facturen) | Bijlagen horen bij een journaalpost (bank, kas en memoriaal); bij een banktransactie hangen ze aan de post die eruit ontstaat |
+| 84 | Opslag bijlagen | In de versleutelde database (mee in de back-up), met een maximum per bestand |
+| 85 | Bijlagen toevoegen | Per post (knop of slepen) én via een "postvak bonnen": eerst uploaden, de app stelt een koppeling voor op datum en bedrag |
+| 86 | Bijlagen bekijken | Voorbeeld in de app (PDF en afbeeldingen), plus een optie om de bijlage te exporteren (opslaan als bestand) |
+| 87 | Planning bijlagen | In stap 4c, samen met debiteuren/crediteuren en verkoopfacturen |
+| 88 | Uitgaven zonder bon | Filter "zonder bon" op uitgaven boven een instelbaar bedrag |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -140,7 +146,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **4b Bank: gereed**, v0.4.1 (2026-10-27). Besluiten 74–82. Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Bankimport CAMT.053 (wizard), subtabbladen Bank en Boekingsregels, kruisposten automatisch, Ctrl+B.
     - Analyse echte Rabobank-bestanden (betaal- en spaarrekening, 2025 en 2026; niet bewaard, niet in Git): camt.053.001.08, één afschrift per dag; de afschriftdatum is de datum van CLBD (PRCD draagt de vorige dag); saldi sluiten overal aan; eindsaldo 31-12-2025 = Excel 1100 (betaal) en 1150 (spaar), dus het verschil van € 7,24 zit niet in de bank. Rente op de spaarrekening heeft alleen eigen code Rabobank 1025 en geen bankreferentie. De eigen incasso staat als één batchregel (IDDT-ESDD); storneringen als IDDT-UPDD.
     - Tests: 565 in totaal. In de Linux-cloudsessie groen: Domain 190, Application 193, Infrastructure 50, Architectuur 7; ViewModel-tests 117/119 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een proefimport van de echte afschriften.
-    - Volgende stap: 4c Contributie & relaties.
+    - Volgende stap: 4c Contributie & relaties, inclusief bijlagen (besluiten 83–88).
 
 ## Privacy
 
