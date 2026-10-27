@@ -153,6 +153,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 115 | Inhoud standaardschema | Een nieuw, compact minimumschema dat Claude voorstelt en de gebruiker controleert (niet afgeleid van de eigen Excel-boekhouding) |
 | 116 | Delen van sjablonen | Ingebouwd in de app, plus exporteren en importeren van een rekeningschema als sjabloonbestand (alleen nummers, namen, rubrieken en rollen; geen bedragen of persoonsgegevens) |
 | 117 | Sjabloon Stichting | Ook een eigen standaardschema voor de Stichting (o.a. gebouw, afschrijvingen, huur) |
+| 118 | Inhoud standaardschema's | Goedgekeurd zoals voorgesteld (2026-10-28): Vereniging ±32 rekeningen (0600 reserve, 1000 kas, 1100/1150 bank, 1298, 1300/1310/1400/1600/1700, 8010… contributie per speltak, 84xx–89xx overige baten, 4000 afdracht, 41xx activiteiten, 42xx huisvesting, 43xx organisatie); Stichting ±25 rekeningen (0200/0210 gebouw, 0300/0310 inventaris, 0800 leningen, 8100 huur van de Vereniging, 4200–4410 onderhoud, OZB en afschrijvingen). Dagboeken MEM, VRK (en KAS bij de Vereniging) |
+| 119 | Speltakken in de wizard | Standaard Bevers, Welpen, Scouts, Explorers en Roverscouts; aanvinken wat de groep heeft, eigen namen toe te voegen |
+| 120 | Beginsaldi | Een wizardstap "Beginsaldi" per balansrekening met de controle debet = credit; een verschil kan net als bij de Excel-import bewust op een tussenrekening (besluit 73) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
