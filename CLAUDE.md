@@ -37,12 +37,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | # | Onderwerp | Besluit |
 |---|-----------|---------|
 | 1 | Tech-stack | C# / .NET 10 (LTS) + WPF met Fluent-thema, MVVM (CommunityToolkit.Mvvm) |
-| 2 | Gebruikers | Eén gebruiker op één pc |
-| 3 | Opslag | Versleuteld SQLite-bestand (wachtwoord), vanwege de AVG (minderjarigen, IBAN's) |
+| 2 | Gebruikers | Eén beheerder op één pc (desktop-app). Groepsleiders gebruiken alleen de webapp (zie 33) |
+| 3 | Opslag | Versleuteld SQLite-bestand (wachtwoord), vanwege de AVG (minderjarigen, IBAN's). Leidend voor leden én financiën; de server bevat alleen een kopie van ledengegevens (zie 35–37) |
 | 4 | Entiteiten | Eén app met twee administraties (Vereniging en Stichting) en gedeelde leden/relaties |
 | 5 | Boekhouding | Volledig dubbel boekhouden (grootboek, balans, W&V, debiteuren/crediteuren, memoriaal) |
 | 6 | Bankformaten | CAMT.053 (XML) van Rabobank en ING |
-| 7 | Bouwvolgorde | 1 Fundament → 2 Leden (SOL3-import) → 3 Contributie & SEPA (pain.008, Rabobank) → 4 Bankimport & boekhouding → 5 Begroting (jaar vereniging) & meerjarenplan (stichting) → 6 E-mail via Gmail |
+| 7 | Bouwvolgorde | 1 Fundament → 2 Leden (SOL3-import) → 3 Contributie & SEPA (pain.008, Rabobank) → 4 Bankimport & boekhouding → 5 Begroting (jaar vereniging) & meerjarenplan (stichting) → 6 E-mail via Gmail → 7 Webapp groepsleiders (Supabase) |
 | 8 | Versiebeheer | Lokale Git-repository + privé GitHub-repository |
 | 9 | Navigatie | Tabbladen (geen navigatiepaneel) + klassieke menubalk; modules via menu *Modules* / Ctrl+1…6 |
 | 10 | Tab-context | Elk tabblad hoort bij één administratie; dezelfde module kan voor Vereniging én Stichting open staan. Altijd zichtbaar via tabtitel, gekleurde band en statusbalk |
@@ -57,7 +57,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 19 | SOL3-import | De gebruiker levert eerst de kolomnamen van de SOL3-export (geen echte gegevens) |
 | 20 | SOL3-exports | Vier eigen exports, elk beginnend met het lidmaatschapsnummer: 1 Leden-basis, 2 Huishouden (adres, IBAN), 3 Voogden, 4 Functies. Max. 16 kolommen per export (aanname, limiet onbekend) |
 | 21 | Bron leidend | SOL3 is leidend: een nieuwe import werkt SOL3-velden bij; Verenigd voegt alleen eigen velden toe (contributiecategorie, notities, machtiging) |
-| 22 | IBAN/machtiging | IBAN uit SOL3 als het gevuld is, anders in Verenigd ingevuld; verschil tussen beide geeft een waarschuwing (gewijzigd na export 2: IBAN-kolommen bleken leeg). IBAN en SEPA-machtiging (datum, kenmerk) horen bij de Betaler, niet bij de Persoon |
+| 22 | IBAN/machtiging | IBAN uit SOL3 als het gevuld is, anders in Verenigd ingevuld; verschil tussen beide geeft een waarschuwing (gewijzigd na export 2: IBAN-kolommen bleken leeg). IBAN en SEPA-machtiging (datum, kenmerk) horen bij de Betaler, niet bij de Persoon. De Betaler hoort bij de financiële gegevens (zie 35) |
 | 23 | Ledenmodel | Betaler (IBAN) 1─* Persoon (lidnummer) 1─* Functie *─1 Groep; Persoon 0..2 Voogd. Geen huishouden (zie 29). Geen automatische samenvoeging van mogelijke dubbele personen, wel waarschuwing |
 | 24 | Lid sinds | Afgeleid: vroegste *Startdatum functie* van de persoon |
 | 25 | Uit import verdwenen | Lid wordt *uitgeschreven* met de importdatum als einddatum, na bevestiging in het voorbeeldoverzicht; nooit verwijderen |
@@ -68,12 +68,19 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 30 | SOL3-ID's | Salesforce-ID's (15 tekens) zijn hoofdlettergevoelig: ordinaal vergelijken, `COLLATE BINARY` |
 | 31 | Voogden | Per lid opgeslagen (max. 2), geen gedeelde entiteit; ontdubbelen op e-mail gebeurt pas bij versturen. Naam als één veld zoals SOL3 het levert. Plaatsvervangers ("Voogd 1", "Voogd 2", "Voogd <naam>") = naam onbekend, via configureerbare patronenlijst. Telefoon én mobiel bewaard |
 | 32 | Telefoonnummers | Opslaan als `+31612345678`, tonen als `06 12345678`; onherkenbaar nummer ongewijzigd bewaren met waarschuwing. Eigen normalisatiefunctie (NL/BE), geen libphonenumber |
+| 33 | Webapp groepsleiders | Leiding ziet en wijzigt ledenlijst en contactgegevens (incl. voogden) van de eigen speltak. Eigen velden van de leiding (aanwezigheid, medische gegevens) mogelijk later, nu niet. Afscherming per speltak in de database (Row-Level Security), MFA verplicht |
+| 34 | Wijzigingen leiding | Zijn voorstellen; de beheerder keurt ze per veld goed of af in de desktop-app (wachtrij oud → nieuw). Wijzigingen in SOL3-velden voert de beheerder daarna zelf in SOL door, zodat besluit 21 blijft gelden |
+| 35 | Financiën lokaal | Financiële gegevens (Betaler, IBAN, machtiging, contributie, SEPA, bank, grootboek, begroting) blijven in de lokale versleutelde database en gaan nooit naar de server |
+| 36 | Koppeling leden–financiën | Ledengegevens en financiële gegevens zijn gescheiden, zonder databasekoppeling (foreign key) ertussen; de koppeling loopt via het lidnummer. Een verwijzing naar een onbekend lidnummer geeft een waarschuwing. Relaties zonder lidnummer (crediteuren, sponsors) bestaan alleen aan de financiële kant |
+| 37 | Platform webapp | Supabase (PostgreSQL, EU-regio Frankfurt), Supabase Auth met TOTP-MFA. De desktop-app logt in als beheerder met MFA; de `service_role`-sleutel komt nooit op de pc of in de app. Abonnement (gratis pauzeert na 7 dagen zonder gebruik, of Pro) wordt bepaald bij de start van fase 7 |
+| 38 | Bron ledengegevens | De pc is leidend, de server bevat een kopie. Synchroniseren vanuit de desktop-app: ledengegevens (zonder financiële velden) naar de server, voorstellen van de leiding terug. Werkt zonder internet. Fase 2 bereidt dit voor met vaste ID's, een tijdstip "laatst gewijzigd" en de bron per veld (SOL3, Verenigd, leiding) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
 - **Fase 1 (Fundament): gereed**, v0.1.0, 124 tests groen. Zie CHANGELOG.md.
 - **Ontwikkelomgeving:** .NET SDK 10.0.403, GitHub CLI (`C:\Program Files\GitHub CLI\gh.exe`), Visual Studio 2026 Community. De gebruiker werkt in VS Code met Claude Code.
 - **GitHub: gereed.** Privé-repository https://github.com/jeroengoudswaard/verenigd (remote `origin`, branch `main`).
+- **Webapp groepsleiders (fase 7):** besluiten 33–38 vastgesteld (2026-10-27), naar aanleiding van een extern implementatieplan (multi-user, API's, PostgreSQL); alleen de financiële scheiding en het idee van een webapp zijn overgenomen, de rest past niet bij Verenigd. Nog te beslissen bij het voorstel voor fase 2: leden en financiën in één versleuteld bestand (gescheiden tabellen) of twee aparte bestanden.
 - **Open punt: Fase 2 (Leden).** Besluiten 20–23 vastgesteld. Bekende kenmerken van SOL3-CSV's: `;`-gescheiden, alle velden tussen aanhalingstekens, Windows-1252, komma's binnen velden, één regel per persoon × eenheid (× rol) met identieke dubbele regels, inconsistente postcode-/plaatsnotatie, kolomnamen als `Contact: Accountnaam: Facturatie straat`. Export 1 (Leden-basis) ontvangen: `Lidnummer;Voornaam;Tussenvoegsel;Achternaam;Geboortedatum;Gender;E-mail;Telefoon;Startdatum functie;Status;Contactpersoon-ID;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Datums en Contactpersoon-ID: zie besluiten 27–28. Export 2 (Huishouden) ontvangen: `Lidnummer;Contactpersoon-ID;Lid straat;Lid huisnummer;Lid huisnr.toev.;Postcode;Lid plaats;Land;Betaalprofiel IBAN;Betaalprofiel rekeningshoudersnaam;Organisatie naam;Organisatie plaats;Naam organisatie eenheid`. Export 3 (Voogden) ontvangen: `Lidnummer;Voogd 1 naam;Voogd 1 e-mail;Voogd 1 telefoon;Voogd 2 volledige naam;Voogd 2 e-mail;Voogd 2: Telefoon;Voogd 1 mobiel;Voogd 2 mobiel;Organisatie naam;Organisatie plaats;Naam organisatie eenheid` — telefoon én mobiel worden allebei bewaard (wens gebruiker). Wachten op kopregel van export 4. Daarna voorstel ter goedkeuring (importscherm-mockup, definitief datamodel, teststrategie), pas dan code.
 
 ## Privacy
