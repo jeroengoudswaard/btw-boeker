@@ -1,5 +1,6 @@
 using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Debiteuren;
+using Verenigd.Application.Facturen;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Boekhouding;
 
@@ -27,6 +28,12 @@ public static class Bankherkenning
             && Contributievorderingen.Herken(stand, mutatie) is { } contributie)
         {
             return new Herkenning(debiteuren, contributie.Omschrijving, "Contributie") { Aflettering = contributie.Regels };
+        }
+
+        if (stand.Rekeningen.FirstOrDefault(r => r.Nummer == Debiteurenrekeningen.Overig && r.IsActief) is { } overig
+            && Factuuroverzicht.Herken(stand, mutatie) is { } factuur)
+        {
+            return new Herkenning(overig, factuur.Omschrijving, "Factuur") { Aflettering = factuur.Regels };
         }
 
         if (mutatie.TegenIban is { } tegen

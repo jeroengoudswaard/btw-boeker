@@ -18,10 +18,13 @@ public enum DebiteurmutatieSoort
 
     /// <summary>Afgeboekt als oninbaar (besluit 101).</summary>
     Oninbaar = 5,
+
+    /// <summary>Verlaagd door een creditfactuur (stap 4c-2).</summary>
+    Creditering = 6,
 }
 
 /// <summary>
-/// Eén mutatie op een contributievordering (per incassopost, aangeduid met het EndToEndId). Het saldo van de vordering is
+/// Eén mutatie op een vordering: een contributiepost (aangeduid met het EndToEndId) of een verkoopfactuur (het factuurnummer). Het saldo van de vordering is
 /// de som van de mutaties waarvan de journaalpost bestaat en niet is tegengeboekt.
 /// </summary>
 public sealed class Debiteurmutatie

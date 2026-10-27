@@ -3,6 +3,8 @@ using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Debiteuren;
+using Verenigd.Domain.Financien.Facturen;
+using Verenigd.Domain.Financien.Relaties;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Tests.Boekhouding;
@@ -44,6 +46,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Bankmutatie> Bankmutaties { get; } = [];
     public List<Boekingsregel> Boekingsregels { get; } = [];
     public List<Debiteurmutatie> Debiteurmutaties { get; } = [];
+    public List<Relatie> Relaties { get; } = [];
+    public List<Verkoopfactuur> Verkoopfacturen { get; } = [];
+    public Factuurinstellingen? Factuurinstellingen { get; set; }
 
     /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
     public Func<IReadOnlyList<Incassorun>> Incassoruns { get; set; } = () => [];
@@ -64,6 +69,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Bankmutaties = Bankmutaties.ToList(),
         Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
         Debiteurmutaties = Debiteurmutaties.ToList(),
+        Relaties = Relaties.ToList(),
+        Verkoopfacturen = Verkoopfacturen.ToList(),
+        Factuurinstellingen = Factuurinstellingen,
         Incassoruns = Incassoruns(),
         Herincassos = Herincassos(),
     };
@@ -111,6 +119,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Journaalpost post: Posten.Remove(post); break;
                 case Boekingsregel regel: Boekingsregels.Remove(regel); break;
                 case Debiteurmutatie mutatie: Debiteurmutaties.Remove(mutatie); break;
+                case Verkoopfactuur factuur: Verkoopfacturen.Remove(factuur); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
@@ -128,6 +137,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Bankmutatie m: Bankmutaties.Add(m); break;
                 case Boekingsregel r: Boekingsregels.Add(MetId(r)); break;
                 case Debiteurmutatie d: Debiteurmutaties.Add(d); break;
+                case Relatie relatie: Relaties.Add(relatie); break;
+                case Verkoopfactuur factuur: Verkoopfacturen.Add(factuur); break;
+                case Factuurinstellingen instellingen: Factuurinstellingen = MetId(instellingen); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }

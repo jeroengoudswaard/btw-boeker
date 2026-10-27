@@ -2,6 +2,8 @@ using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Debiteuren;
+using Verenigd.Domain.Financien.Facturen;
+using Verenigd.Domain.Financien.Relaties;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Boekhouding;
@@ -30,6 +32,13 @@ public sealed record BoekhoudingStand(
 
     /// <summary>Aangevraagde herincasso's (alleen-lezen).</summary>
     public IReadOnlyList<Herincasso> Herincassos { get; init; } = [];
+
+    /// <summary>Alle relaties; gedeeld door beide administraties (besluit 105).</summary>
+    public IReadOnlyList<Relatie> Relaties { get; init; } = [];
+
+    public IReadOnlyList<Verkoopfactuur> Verkoopfacturen { get; init; } = [];
+
+    public Factuurinstellingen? Factuurinstellingen { get; init; }
 
     public bool IsIngericht => Rekeningen.Count > 0;
 
