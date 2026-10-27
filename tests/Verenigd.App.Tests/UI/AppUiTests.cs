@@ -5,9 +5,11 @@ using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
+using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
 using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Instellingen;
+using static Verenigd.Application.Tests.Import.Sol3Voorbeeld;
 using FlauiApplicatie = FlaUI.Core.Application;
 
 namespace Verenigd.App.Tests.UI;
@@ -105,6 +107,60 @@ public sealed class AppUiTests : IDisposable
 
         var bewaard = new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad();
         Assert.Contains(bewaard.OpenTabbladen, t => t.Module == Application.Modules.ModuleSoort.Boekhouding);
+    }
+
+    [Fact]
+    public async Task Geimporteerde_leden_staan_in_tabblad_leden_en_wizard_opent_via_menu()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        var beheer = new DatabaseBeheer();
+        await beheer.MaakAanAsync(db, Wachtwoord);
+        await using (var sessie = await beheer.OpenAsync(db, Wachtwoord))
+        {
+            string Schrijf(string naam, byte[] inhoud)
+            {
+                var pad = Path.Combine(_datamap, naam);
+                File.WriteAllBytes(pad, inhoud);
+                return pad;
+            }
+
+            var dienst = new Sol3ImportDienst(sessie, TimeProvider.System);
+            var analyse = await dienst.AnalyseerAsync(new Dictionary<Sol3Export, string>
+            {
+                [Sol3Export.LedenBasis] = Schrijf("1.csv", Csv(KopLeden, Lid("100000001"), Lid("100000002", voornaam: "Bo"))),
+                [Sol3Export.Huishouden] = Schrijf("2.csv", Csv(KopHuishouden, Huishouden("100000001"), Huishouden("100000002"))),
+                [Sol3Export.Voogden] = Schrijf("3.csv", Csv(KopVoogden, Voogden("100000001"))),
+                [Sol3Export.Functies] = Schrijf("4.csv", Csv(KopFuncties, Functie("100000001"), Functie("100000002"))),
+            });
+            await dienst.VoerUitAsync(analyse, ImportKeuzes.Standaard(analyse.Voorstel));
+        }
+
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_2); // Leden
+        Zoek(venster, "Ledenlijst");
+        Assert.True(
+            Retry.WhileFalse(() => Zoek(venster, "LedenAantal").Name == "2 van 2 personen", Wachttijd).Result,
+            Zoek(venster, "LedenAantal").Name);
+        Bewaar(venster, "06-leden");
+
+        Zoek(venster, "LedenImporteren").AsButton().Invoke();
+        var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        Assert.Equal("SOL3-import", wizard.Title);
+        Assert.False(Zoek(wizard, "WizardVolgende").IsEnabled); // nog geen bestanden gekozen
+        Bewaar(wizard, "07-importwizard");
+        Zoek(wizard, "WizardAnnuleren").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
     }
 
     [Fact]

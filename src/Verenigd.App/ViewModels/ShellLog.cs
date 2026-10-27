@@ -28,6 +28,9 @@ internal static partial class ShellLog
     [LoggerMessage(7, LogLevel.Information, "Back-up teruggezet naar {Bestand}")]
     public static partial void BackupTeruggezet(ILogger logger, string bestand);
 
+    [LoggerMessage(9, LogLevel.Information, "SOL3-import uitgevoerd: {Nieuw} nieuw, {Gewijzigd} gewijzigd, {Uitgeschreven} uitgeschreven")]
+    public static partial void Sol3Geimporteerd(ILogger logger, int nieuw, int gewijzigd, int uitgeschreven);
+
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 }

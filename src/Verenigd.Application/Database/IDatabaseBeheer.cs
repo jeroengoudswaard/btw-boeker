@@ -1,5 +1,7 @@
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Beveiliging;
+using Verenigd.Application.Import;
+using Verenigd.Application.Leden;
 
 namespace Verenigd.Application.Database;
 
@@ -34,6 +36,10 @@ public interface IDatabaseSessie : IAsyncDisposable
     string Pad { get; }
 
     IAdministratieRepository Administraties { get; }
+
+    ILedenRepository Leden { get; }
+
+    ILedenImportOpslag LedenImport { get; }
 
     /// <summary>Schrijft een consistente, versleutelde back-up (database + sleutelbestand) naar één bestand.</summary>
     Task MaakBackupAsync(string doelPad, CancellationToken annulering = default);

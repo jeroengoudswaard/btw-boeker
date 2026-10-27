@@ -19,6 +19,10 @@
     <ProjectReference Include="..\..\src\Verenigd.App\Verenigd.App.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Dezelfde synthetische SOL3-exports als in de Application-tests -->
+    <Compile Include="..\Verenigd.Application.Tests\Import\Sol3Voorbeeld.cs" Link="Leden\Sol3Voorbeeld.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="System.IO" />
   </ItemGroup>

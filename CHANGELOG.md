@@ -2,6 +2,45 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.2.0] - 2026-10-27: Fase 2 "Leden"
+
+### Toegevoegd
+- **SOL3-import** (Bestand › Importeren › SOL3-leden, of de knop in het tabblad Leden), als wizard in vier stappen:
+  1. **Bestanden:** de vier eigen SOL3-exports kiezen of in het venster slepen. De app herkent elke export aan zijn kopregel; de volgorde van bestanden en kolommen doet er niet toe. Alle vier zijn verplicht.
+  2. **Groepen:** nieuwe groepen indelen als speltak, bestuur, technisch of overig. Groepen met "(Migratie)" staan standaard op technisch.
+  3. **Controleren:** voorbeeldoverzicht met de tabbladen Nieuw, Gewijzigd (oud → nieuw per veld), Uitgeschreven (per lid aan te vinken) en Waarschuwingen (op te slaan als CSV). Er is dan nog niets gewijzigd.
+  4. **Klaar:** de import wordt in één transactie uitgevoerd, na een automatische back-up (`<naam>-voor-import-<datum-tijd>.vbak` naast de database). Mislukt er iets, dan blijft de database ongewijzigd.
+- Importregels:
+  - SOL3 is leidend.
+  - Identieke dubbele regels worden ontdubbeld.
+  - Telefoonnummers worden opgeslagen als `+31…` en getoond als `06 …`; postcodes krijgen de notatie `1234 AB`; plaatsnamen in hoofdletters worden genormaliseerd.
+  - IBAN's worden vergeleken zonder spaties en hoofdletters. Leden met hetzelfde IBAN horen bij één betaler.
+  - Dubbele functies worden samengevoegd met de vroegste startdatum.
+  - Voogdnamen als "Voogd 1" betekenen dat de naam onbekend is.
+  - Leden die uit de export verdwijnen worden na bevestiging uitgeschreven, nooit verwijderd.
+  - Dezelfde import twee keer uitvoeren verandert niets.
+- Waarschuwingen bij:
+  - een onbekende status of een onbekend lidtype;
+  - een onleesbare datum of een onherkend telefoonnummer;
+  - een ongeldige postcode of een ongeldig IBAN-controlegetal;
+  - een Contactpersoon-ID dat niet 1-op-1 bij het lidnummer hoort;
+  - een lid dat ontbreekt in een van de exports;
+  - mogelijk dubbele personen.
+- **Tabblad Leden** (Ctrl+2):
+  - Ledenlijst met zoeken (Ctrl+F) op naam, lidnummer of e-mail, en filters op groep, lidtype en "Toon uitgeschreven".
+  - Vernieuwen met F5.
+  - Gegevens van het geselecteerde lid: persoon en adres, "Lid sinds", functies (actief, beëindigd, technisch) en voogden.
+  - **Notities** zijn het enige bewerkbare veld; ze worden opgeslagen met Ctrl+S. De overige gegevens komen uit SOL3.
+- Datamodel:
+  - Ledengegevens (personen, functies, groepen, voogden) en financiële gegevens (betalers) staan in gescheiden tabellen, alleen gekoppeld via het lidnummer.
+  - Per persoon worden een vaste ID, een tijdstip "laatst gewijzigd" en de herkomst per veld bijgehouden, als voorbereiding op de webapp voor groepsleiders (fase 7).
+- Architectuurtests (nieuw project `Verenigd.Architectuur.Tests`) bewaken de lagen en de scheiding leden–financiën.
+- 313 geautomatiseerde tests (was 124).
+
+### Nog niet functioneel
+- IBAN invullen of wijzigen in Verenigd, SEPA-machtigingen en contributiecategorie: fase 3.
+- De groepsindeling kan alleen bij een import worden gekozen.
+
 ## [0.1.0] - 2026-10-26: Fase 1 "Fundament"
 
 ### Toegevoegd

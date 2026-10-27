@@ -1,6 +1,8 @@
 using System.Windows;
 using Microsoft.Win32;
+using Verenigd.App.ViewModels.Leden;
 using Verenigd.App.Views.Dialogen;
+using Verenigd.App.Views.Leden;
 using Verenigd.Application.Beveiliging;
 
 namespace Verenigd.App.Diensten;
@@ -10,6 +12,7 @@ internal sealed class WpfDialoogService : IDialoogService
 {
     private const string DatabaseFilter = "Verenigd-database (*.vdb)|*.vdb";
     private const string BackupFilter = "Verenigd-back-up (*.vbak)|*.vbak";
+    private const string CsvFilter = "CSV-bestand (*.csv)|*.csv|Alle bestanden (*.*)|*.*";
 
     private static Window? Eigenaar => System.Windows.Application.Current.MainWindow;
 
@@ -50,6 +53,26 @@ internal sealed class WpfDialoogService : IDialoogService
         var dialoog = new OpenFileDialog { Title = "Back-up terugzetten", Filter = BackupFilter, CheckFileExists = true };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
+
+    public IReadOnlyList<string> KiesImportbestanden()
+    {
+        var dialoog = new OpenFileDialog
+        {
+            Title = "SOL3-exports kiezen",
+            Filter = CsvFilter,
+            Multiselect = true,
+            CheckFileExists = true,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileNames : [];
+    }
+
+    public string? KiesCsvDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog { Title = "Opslaan als", Filter = CsvFilter, DefaultExt = ".csv", FileName = voorgesteldeNaam };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public bool ToonImportWizard(ImportWizardViewModel wizard) => ToonModaal(new ImportWizardVenster(wizard));
 
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)
     {

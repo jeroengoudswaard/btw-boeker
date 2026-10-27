@@ -1,3 +1,4 @@
+using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 
 namespace Verenigd.App.Diensten;
@@ -44,4 +45,12 @@ public interface IDialoogService
     void ToonFout(string titel, string melding);
 
     void ToonInformatie(string titel, string melding);
+
+    /// <summary>Eén of meer SOL3-exports (CSV) kiezen; leeg bij annuleren.</summary>
+    IReadOnlyList<string> KiesImportbestanden();
+
+    string? KiesCsvDoel(string voorgesteldeNaam);
+
+    /// <returns><c>true</c> als de import is uitgevoerd.</returns>
+    bool ToonImportWizard(ImportWizardViewModel wizard);
 }

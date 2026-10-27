@@ -1,0 +1,186 @@
+<UserControl x:Class="Verenigd.App.Views.Leden.LedenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Leden"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:LedenViewModel}"
+             AutomationProperties.AutomationId="LedenTabblad">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding VernieuwCommand}" />
+    </UserControl.InputBindings>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Find" Executed="Zoeken_Executed" />
+    </UserControl.CommandBindings>
+
+    <DockPanel Margin="{StaticResource PaginaMarge}">
+        <!-- ===== Opdrachtbalk met filters ===== -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Label Content="_Zoeken" Target="{Binding ElementName=Zoekveld}" VerticalAlignment="Center" Padding="0,0,8,0" />
+            <TextBox x:Name="Zoekveld" Width="240" Margin="0,0,16,0" VerticalAlignment="Center"
+                     Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Naam, lidnummer of e-mail (Ctrl+F)"
+                     AutomationProperties.Name="Zoeken op naam, lidnummer of e-mail" AutomationProperties.AutomationId="LedenZoeken" />
+            <Label Content="_Groep" Target="{Binding ElementName=Groepkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+            <ComboBox x:Name="Groepkeuze" MinWidth="160" Margin="0,0,16,0" VerticalAlignment="Center"
+                      ItemsSource="{Binding Groepfilters}" SelectedItem="{Binding Groepfilter}"
+                      AutomationProperties.Name="Groep" />
+            <Label Content="_Lidtype" Target="{Binding ElementName=Lidtypekeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+            <ComboBox x:Name="Lidtypekeuze" MinWidth="140" Margin="0,0,16,0" VerticalAlignment="Center"
+                      ItemsSource="{x:Static vm:LedenViewModel.Lidtypekeuzes}" DisplayMemberPath="Tekst"
+                      SelectedItem="{Binding GekozenLidtype}"
+                      AutomationProperties.Name="Lidtype" />
+            <CheckBox Content="_Toon uitgeschreven" IsChecked="{Binding ToonUitgeschreven}" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <Button Command="{Binding VernieuwCommand}" ToolTip="Vernieuwen (F5)" AutomationProperties.Name="Vernieuwen"
+                    VerticalAlignment="Center" Margin="0,0,8,0">
+                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72C;" />
+            </Button>
+            <Button Content="_Importeren uit SOL3..." VerticalAlignment="Center"
+                    Command="{Binding DataContext.ImporteerSol3Command, RelativeSource={RelativeSource AncestorType=Window}}"
+                    AutomationProperties.AutomationId="LedenImporteren" />
+        </WrapPanel>
+
+        <!-- ===== Statusregel ===== -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen (Ctrl+S)" Style="{StaticResource Toelichting}"
+                       Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
+            <TextBlock Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" AutomationProperties.AutomationId="LedenAantal" />
+        </DockPanel>
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}"
+                   Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
+
+        <Grid>
+            <!-- ===== Lege database ===== -->
+            <StackPanel MaxWidth="480" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="1"
+                        Visibility="{Binding IsLeeg, Converter={StaticResource BoolNaarZichtbaar}}">
+                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE716;" FontSize="48" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <TextBlock Text="Nog geen leden" Style="{StaticResource Sectietitel}" HorizontalAlignment="Center" />
+                <TextBlock Style="{StaticResource Toelichting}" TextAlignment="Center"
+                           Text="Importeer de vier SOL3-exports via Bestand › Importeren › SOL3-leden, of met de knop 'Importeren uit SOL3'." />
+            </StackPanel>
+
+            <Grid Visibility="{Binding IsLeeg, Converter={StaticResource OnwaarNaarZichtbaar}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*" MinHeight="120" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="2*" MinHeight="120" />
+                </Grid.RowDefinitions>
+
+                <!-- ===== Ledenlijst ===== -->
+                <DataGrid ItemsSource="{Binding Leden}" SelectedItem="{Binding GeselecteerdLid}"
+                          AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow"
+                          HeadersVisibility="Column" GridLinesVisibility="None" CanUserAddRows="False"
+                          AutomationProperties.Name="Ledenlijst" AutomationProperties.AutomationId="Ledenlijst">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Lidnummer" Binding="{Binding Lidnummer}" Width="Auto" />
+                        <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="2*" SortMemberPath="Achternaam" />
+                        <DataGridTextColumn Header="Groep" Binding="{Binding Groepen}" Width="*" />
+                        <DataGridTextColumn Header="Lidtype" Binding="{Binding Lidtypetekst}" Width="Auto" />
+                        <DataGridTextColumn Header="Geboortedatum" Binding="{Binding Geboortedatum}" Width="Auto" />
+                        <DataGridTextColumn Header="Telefoon" Binding="{Binding Telefoon}" Width="Auto" />
+                        <DataGridTextColumn Header="E-mail" Binding="{Binding Email}" Width="2*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Statustekst}" Width="Auto" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <GridSplitter Grid.Row="1" Height="8" HorizontalAlignment="Stretch" Background="Transparent"
+                              AutomationProperties.Name="Verdeling lijst en gegevens" />
+
+                <!-- ===== Gegevens van het geselecteerde lid ===== -->
+                <TextBlock Grid.Row="2" Text="Selecteer een lid om de gegevens te zien." Style="{StaticResource Toelichting}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Visibility="{Binding GeselecteerdLid, Converter={StaticResource NullNaarZichtbaar}}" />
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding GeselecteerdLid, Converter={StaticResource NietNullNaarZichtbaar}}">
+                    <Grid DataContext="{Binding GeselecteerdLid}" d:DataContext="{d:DesignInstance Type=vm:LidRegel}"
+                          AutomationProperties.AutomationId="Lidgegevens">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource Kaart}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Naam}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,8">
+                                    <Run Text="Lidnummer" /> <Run Text="{Binding Lidnummer, Mode=OneWay}" /> · <Run Text="{Binding Statustekst, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Adres}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding PostcodePlaats}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Land}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                <TextBlock><Run Text="Geboren:" /> <Run Text="{Binding Geboortedatum, Mode=OneWay}" /></TextBlock>
+                                <TextBlock><Run Text="Lid sinds:" /> <Run Text="{Binding LidSinds, Mode=OneWay}" /></TextBlock>
+                                <TextBlock><Run Text="Telefoon:" /> <Run Text="{Binding Telefoon, Mode=OneWay}" /></TextBlock>
+                                <TextBlock TextWrapping="Wrap"><Run Text="E-mail:" /> <Run Text="{Binding Email, Mode=OneWay}" /></TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource Kaart}">
+                            <StackPanel>
+                                <TextBlock Text="Functies" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding Functies}" Focusable="False">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:FunctieRegel}">
+                                            <TextBlock Text="{Binding Omschrijving}" TextWrapping="Wrap" Margin="0,0,0,4">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsActief}" Value="False">
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsTechnisch}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                                <Setter Property="ToolTip" Value="Technische groep (migratie naar SOL3)" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="Voogden" FontWeight="SemiBold" Margin="0,12,0,8" />
+                                <TextBlock Text="Geen voogden bekend" Style="{StaticResource Toelichting}">
+                                    <TextBlock.Visibility>
+                                        <Binding Path="Voogden.Count" Converter="{StaticResource GelijkAanZichtbaar}" ConverterParameter="0" />
+                                    </TextBlock.Visibility>
+                                </TextBlock>
+                                <ItemsControl ItemsSource="{Binding Voogden}" Focusable="False">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:VoogdRegel}">
+                                            <StackPanel Margin="0,0,0,8">
+                                                <TextBlock TextWrapping="Wrap"><Run Text="{Binding Titel, Mode=OneWay}" FontWeight="SemiBold" />: <Run Text="{Binding Naam, Mode=OneWay}" /></TextBlock>
+                                                <TextBlock Text="{Binding Email}" TextWrapping="Wrap" />
+                                                <TextBlock><Run Text="{Binding Telefoon, Mode=OneWay}" />  <Run Text="{Binding Mobiel, Mode=OneWay}" /></TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="4" Style="{StaticResource Kaart}">
+                            <DockPanel>
+                                <Label DockPanel.Dock="Top" Content="_Notities" Target="{Binding ElementName=Notitieveld}" Padding="0,0,0,8" FontWeight="SemiBold" />
+                                <TextBlock DockPanel.Dock="Bottom" Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
+                                           Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                           Text="Eigen veld van Verenigd; de overige gegevens komen uit SOL3 en wijzigt u daar." />
+                                <TextBox x:Name="Notitieveld" MinHeight="96" AcceptsReturn="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                                         Text="{Binding Notities, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Notities" AutomationProperties.AutomationId="LidNotities" />
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</UserControl>

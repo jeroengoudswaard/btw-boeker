@@ -5,8 +5,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
+using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
+using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -66,7 +68,8 @@ public sealed partial class ShellViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
-        nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand))]
+        nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
+        nameof(ImporteerSol3Command))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -195,6 +198,45 @@ public sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    /// <summary>Bestand › Importeren › SOL3-leden. Na een geslaagde import wordt het tabblad Leden getoond en vernieuwd.</summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task ImporteerSol3Async()
+    {
+        if (_sessie is null)
+        {
+            return;
+        }
+
+        var wizard = new ImportWizardViewModel(new Sol3ImportDienst(_sessie, _tijd), _dialogen);
+        if (!_dialogen.ToonImportWizard(wizard))
+        {
+            return;
+        }
+
+        if (wizard.Resultaat is { } resultaat)
+        {
+            ShellLog.Sol3Geimporteerd(_logger, resultaat.Nieuw, resultaat.Gewijzigd, resultaat.Uitgeschreven);
+            Statusmelding = string.Create(
+                CultureInfo.CurrentCulture,
+                $"Import voltooid: {resultaat.Nieuw} nieuw, {resultaat.Gewijzigd} gewijzigd, {resultaat.Uitgeschreven} uitgeschreven");
+        }
+
+        var verzoek = new ModuleVerzoek(ModuleSoort.Leden, null);
+        if (Tabbladen.OfType<LedenViewModel>().FirstOrDefault() is { } leden)
+        {
+            GeselecteerdTabblad = leden;
+            await leden.VernieuwCommand.ExecuteAsync(null);
+        }
+        else
+        {
+            OpenModule(verzoek);
+            if (GeselecteerdTabblad is LedenViewModel nieuw && nieuw.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+        }
+    }
+
     [RelayCommand]
     private async Task HerstelBackupAsync()
     {
@@ -257,10 +299,15 @@ public sealed partial class ShellViewModel : ObservableObject
         TabbladViewModel tab = verzoek.Module switch
         {
             ModuleSoort.Instellingen => new InstellingenViewModel(_sessie!.Administraties, Administraties),
+            ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         Tabbladen.Add(tab);
         GeselecteerdTabblad = tab;
+        if (tab is LedenViewModel leden)
+        {
+            leden.VernieuwCommand.Execute(null);
+        }
     }
 
     private bool KanModuleOpenen(ModuleVerzoek? verzoek)
