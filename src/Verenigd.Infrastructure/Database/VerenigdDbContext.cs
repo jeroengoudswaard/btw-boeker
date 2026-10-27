@@ -1,11 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien;
+using Verenigd.Domain.Leden;
+using Verenigd.Infrastructure.Database.Financien;
+using Verenigd.Infrastructure.Database.Leden;
 
 namespace Verenigd.Infrastructure.Database;
 
 public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> options) : DbContext(options)
 {
     public DbSet<Administratie> Administraties => Set<Administratie>();
+
+    public DbSet<Persoon> Personen => Set<Persoon>();
+    public DbSet<Groep> Groepen => Set<Groep>();
+    public DbSet<Betaler> Betalers => Set<Betaler>();
+    public DbSet<BetalerLid> BetalerLeden => Set<BetalerLid>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,5 +46,8 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
                     Accentkleur = Administratie.Standaardkleur(AdministratieSoort.Stichting),
                 });
         });
+
+        LedenConfiguratie.Configureer(modelBuilder);
+        FinancienConfiguratie.Configureer(modelBuilder);
     }
 }

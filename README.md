@@ -5,11 +5,12 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 | Fase | Inhoud | Status |
 |------|--------|--------|
 | 1 | Fundament: hoofdvenster met tabbladen, versleutelde database, herstelsleutel, back-up, thema's | ✅ Gereed (v0.1.0) |
-| 2 | Leden, met import uit SOL3 (scouting.nl) | Gepland |
+| 2 | Leden, met import uit SOL3 (scouting.nl) | ✅ Gereed (v0.2.0) |
 | 3 | Contributie en SEPA-incasso (pain.008, Rabobank) | Gepland |
 | 4 | Bankimport (CAMT.053, Rabobank en ING) en dubbel boekhouden | Gepland |
 | 5 | Jaarbegroting (vereniging) en meerjarenplan (stichting) | Gepland |
 | 6 | E-mail via Gmail | Gepland |
+| 7 | Webapp voor groepsleiders (Supabase) | Gepland |
 
 ## Vereisten
 
@@ -51,6 +52,7 @@ src/
   Verenigd.App/             WPF (Fluent-thema), MVVM met CommunityToolkit.Mvvm, Generic Host
 tests/
   Verenigd.*.Tests/         xUnit-tests per laag; App.Tests bevat ook de FlaUI-UI-tests
+  Verenigd.Architectuur.Tests/  Bewaakt de lagen en de scheiding leden–financiën
 docs/
   ARCHITECTUUR.md           Ontwerpkeuzes, beveiliging en teststrategie
 ```
@@ -64,6 +66,8 @@ docs/
 | `*.vbak` | Een back-up: database en sleutelbestand samen in één bestand, nog steeds versleuteld |
 | `%APPDATA%\Verenigd\instellingen.json` | Thema, laatst geopende database, open tabbladen |
 | `%LOCALAPPDATA%\Verenigd\logs\` | Logbestanden (30 dagen), zonder persoonsgegevens |
+
+SOL3-exports zijn echte persoonsgegevens: bewaar ze in `privé/` of buiten de repository. De tests gebruiken alleen verzonnen gegevens.
 
 Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`, sleutelbestanden en de mappen `voorbeelden/` en `privé/`.
 

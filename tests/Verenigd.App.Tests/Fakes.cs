@@ -2,8 +2,11 @@ using Verenigd.App.Diensten;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
+using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
+using Verenigd.Application.Leden;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Leden;
 
 namespace Verenigd.App.Tests;
 
@@ -23,6 +26,18 @@ internal sealed class FakeDialoogService : IDialoogService
     public List<string> Fouten { get; } = [];
     public List<string> Bevestigingsvragen { get; } = [];
     public Herstelsleutel? GetoondeHerstelsleutel { get; private set; }
+    public IReadOnlyList<string> Importbestanden { get; set; } = [];
+    public string? CsvDoel { get; set; }
+
+    /// <summary>Wat de "gebruiker" in de importwizard doet; standaard annuleren.</summary>
+    public Func<ViewModels.Leden.ImportWizardViewModel, Task<bool>>? ImportWizard { get; set; }
+
+    public IReadOnlyList<string> KiesImportbestanden() => Importbestanden;
+
+    public string? KiesCsvDoel(string voorgesteldeNaam) => CsvDoel;
+
+    public bool ToonImportWizard(ViewModels.Leden.ImportWizardViewModel wizard) =>
+        ImportWizard is not null && ImportWizard(wizard).GetAwaiter().GetResult();
 
     public string? KiesNieuwDatabasebestand(string titel) => NieuwDatabasebestand;
 
@@ -64,6 +79,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
 
     public Herstelsleutel Herstelsleutel { get; } = Herstelsleutel.Genereer();
     public InMemoryAdministratieRepository Repository { get; } = new();
+    public InMemoryLedenOpslag Leden { get; } = new();
     public FakeSessie? LaatsteSessie { get; private set; }
     public List<(string Backup, string Doel)> Teruggezet { get; } = [];
 
@@ -94,7 +110,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
             throw new OngeldigeSleutelException();
         }
 
-        LaatsteSessie = new FakeSessie(pad, Repository);
+        LaatsteSessie = new FakeSessie(pad, Repository, Leden);
         return Task.FromResult<IDatabaseSessie>(LaatsteSessie);
     }
 
@@ -117,10 +133,12 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     }
 }
 
-internal sealed class FakeSessie(string pad, IAdministratieRepository administraties) : IDatabaseSessie
+internal sealed class FakeSessie(string pad, IAdministratieRepository administraties, InMemoryLedenOpslag leden) : IDatabaseSessie
 {
     public string Pad { get; } = pad;
     public IAdministratieRepository Administraties { get; } = administraties;
+    public ILedenRepository Leden { get; } = leden;
+    public ILedenImportOpslag LedenImport { get; } = leden;
     public List<string> Backups { get; } = [];
     public bool Gesloten { get; private set; }
 
@@ -153,6 +171,42 @@ internal sealed class InMemoryAdministratieRepository : IAdministratieRepository
     public Task BewaarAsync(Administratie administratie, CancellationToken annulering = default)
     {
         AantalKeerBewaard++;
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Ledengegevens in het geheugen; dient zowel het tabblad Leden als de import.</summary>
+internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
+{
+    public ImportStand Stand { get; private set; } = ImportStand.Leeg;
+    public List<(Guid Id, string? Notities)> BewaardeNotities { get; } = [];
+    public int AantalKeerGeladen { get; private set; }
+
+    public Task<IReadOnlyList<Persoon>> HaalAlleAsync(CancellationToken annulering = default)
+    {
+        AantalKeerGeladen++;
+        return Task.FromResult<IReadOnlyList<Persoon>>(Stand.Personen.ToList());
+    }
+
+    public Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default) =>
+        Task.FromResult<IReadOnlyList<Groep>>(Stand.Groepen.ToList());
+
+    public Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default)
+    {
+        var persoon = Stand.Personen.SingleOrDefault(p => p.Id == persoonId) ?? throw new KeyNotFoundException();
+        persoon.WijzigNotities(notities, nuUtc);
+        BewaardeNotities.Add((persoonId, notities));
+        return Task.CompletedTask;
+    }
+
+    public Task<ImportStand> LaadAsync(CancellationToken annulering = default) => Task.FromResult(Stand);
+
+    public Task PasToeAsync(Func<ImportStand, ImportWijzigingen> wijziging, CancellationToken annulering = default)
+    {
+        var w = wijziging(Stand);
+        Stand = new ImportStand(
+            [.. Stand.Personen, .. w.NieuwePersonen], [.. Stand.Groepen, .. w.NieuweGroepen],
+            [.. Stand.Betalers, .. w.NieuweBetalers], [.. Stand.Koppelingen, .. w.NieuweKoppelingen]);
         return Task.CompletedTask;
     }
 }

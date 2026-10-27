@@ -3,6 +3,9 @@ using System.Security.Cryptography;
 using Microsoft.Data.Sqlite;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Database;
+using Verenigd.Application.Import;
+using Verenigd.Application.Leden;
+using Verenigd.Infrastructure.Database.Leden;
 
 namespace Verenigd.Infrastructure.Database;
 
@@ -15,11 +18,17 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         Pad = pad;
         _databasesleutel = databasesleutel;
         Administraties = new AdministratieRepository(MaakContext);
+        Leden = new LedenRepository(MaakContext);
+        LedenImport = new LedenImportOpslag(MaakContext);
     }
 
     public string Pad { get; }
 
     public IAdministratieRepository Administraties { get; }
+
+    public ILedenRepository Leden { get; }
+
+    public ILedenImportOpslag LedenImport { get; }
 
     public async Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
     {
