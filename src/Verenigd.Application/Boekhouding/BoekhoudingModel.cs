@@ -43,6 +43,12 @@ public sealed record RekeningInvoer(int? Id, int Nummer, string Naam, int? Rubri
 
 public sealed record RubriekInvoer(int? Id, string Naam, int Volgorde);
 
+/// <summary>Besluit 73: bewuste keuze om een verschil in de beginbalans op deze (balans)rekening te boeken.</summary>
+public sealed record VerschilKeuze(int Nummer, string Naam)
+{
+    public static VerschilKeuze Standaard { get; } = new(1299, "Te onderzoeken verschillen");
+}
+
 // ---- Rapporten -------------------------------------------------------------------------------
 
 public sealed record SaldiRegel(Grootboekrekening Rekening, Bedrag Debet, Bedrag Credit)

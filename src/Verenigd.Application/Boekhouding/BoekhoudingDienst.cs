@@ -251,14 +251,24 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return wijziging;
         }, annulering);
 
-    /// <summary>Eenmalige overname uit Excel (besluit 62); alleen in een lege administratie.</summary>
-    /// <exception cref="InvalidOperationException">Al ingericht, of de beginbalans is niet in evenwicht.</exception>
-    public async Task ImporteerAsync(AdministratieSoort administratie, VoorbladVoorstel voorstel, CancellationToken annulering = default)
+    /// <summary>
+    /// Eenmalige overname uit Excel (besluit 62); alleen in een lege administratie. Een verschil in de beginbalans wordt
+    /// geweigerd, tenzij de gebruiker bewust <paramref name="verschil"/> kiest (besluit 73).
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Al ingericht, of niet in evenwicht zonder (geldige) verschilrekening.</exception>
+    public async Task ImporteerAsync(
+        AdministratieSoort administratie, VoorbladVoorstel voorstel, VerschilKeuze? verschil = null, CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(voorstel);
-        if (!voorstel.IsInEvenwicht)
+        if (!voorstel.IsInEvenwicht && verschil is null)
         {
             throw new InvalidOperationException("De beginbalans is niet in evenwicht; er is niets geïmporteerd.");
+        }
+
+        if (verschil is not null
+            && voorstel.Rekeningen.FirstOrDefault(r => r.Nummer == verschil.Nummer && !r.Overslaan) is { Soort: not RekeningSoort.Balans })
+        {
+            throw new InvalidOperationException("Het verschil kan alleen op een balansrekening (tussenrekening) worden geboekt.");
         }
 
         var vooraf = await Repository.LaadAsync(administratie, annulering).ConfigureAwait(false);
@@ -310,16 +320,35 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 wijziging.Toevoegen.Add(new Boekjaar(administratie, voorstel.Beginjaar));
             }
 
+            Grootboekrekening? verschilrekening = null;
+            if (!voorstel.IsInEvenwicht)
+            {
+                verschilrekening = rekeningen.Find(r => r.Rekening.Nummer == verschil!.Nummer).Rekening;
+                if (verschilrekening is null)
+                {
+                    verschilrekening = new Grootboekrekening(administratie, verschil!.Nummer, verschil.Naam, RekeningSoort.Balans, null);
+                    wijziging.Toevoegen.Add(verschilrekening);
+                }
+            }
+
             var saldi = rekeningen.Where(r => r.Bron.Debet != r.Bron.Credit).ToList();
             if (saldi.Count > 0)
             {
                 var opening = new Journaalpost(administratie, memoriaal, new DateOnly(voorstel.Beginjaar, 1, 1),
                     $"Openingsbalans {VoorbladInlezer.Jaar(voorstel.Beginjaar)} (overgenomen uit Excel)", PostSoort.Openingsbalans);
-                opening.Wijzig(memoriaal, opening.Datum, opening.Omschrijving, saldi.Select(s =>
+                var regels = saldi.Select(s =>
                 {
                     var saldo = s.Bron.Debet.Centen - s.Bron.Credit.Centen;
                     return new RegelInvoer(s.Rekening, null, saldo > 0 ? new Bedrag(saldo) : Bedrag.Nul, saldo < 0 ? new Bedrag(-saldo) : Bedrag.Nul);
-                }));
+                }).ToList();
+                if (verschilrekening is not null)
+                {
+                    var verschilbedrag = voorstel.TotaalDebet.Centen - voorstel.TotaalCredit.Centen;
+                    regels.Add(new RegelInvoer(verschilrekening, "Onverklaard verschil uit de Excel-overname (te onderzoeken)",
+                        verschilbedrag < 0 ? new Bedrag(-verschilbedrag) : Bedrag.Nul, verschilbedrag > 0 ? new Bedrag(verschilbedrag) : Bedrag.Nul));
+                }
+
+                opening.Wijzig(memoriaal, opening.Datum, opening.Omschrijving, regels);
                 opening.Boek(1, NuUtc);
                 wijziging.Toevoegen.Add(opening);
             }

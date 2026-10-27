@@ -108,6 +108,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 70 | Memoriaal en kruisposten | Rekening 9990 Memoriaal wordt niet overgenomen (memoriaal is een dagboek; saldo ≠ 0 geeft een waarschuwing); 1298 Kruisposten wordt een tussenrekening voor overboekingen tussen eigen rekeningen |
 | 71 | Conceptposten | Journaalposten zijn *Concept* of *Geboekt*; alleen geboekte posten tellen in rapporten; een boekjaar kan pas worden afgesloten zonder concepten. Een geboekte post is onveranderlijk (corrigeren via tegenboeken) |
 | 72 | Ctrl+N in Boekhouding | Binnen het tabblad Boekhouding betekent Ctrl+N "Nieuwe post"; "Nieuwe database" blijft via het menu Bestand |
+| 73 | Verschil in beginbalans | Een beginbalans die niet in evenwicht is wordt standaard geweigerd. Als bewuste uitzondering kan de gebruiker in de importwizard het verschil op een tussenrekening boeken (standaard nieuwe rekening *1299 Te onderzoeken verschillen*); dat staat als aparte regel op de openingsbalans en in het logboek. De huidige Excel-boekhouding 2025 heeft een verschil van € 7,24 (activa € 23.563,88, passiva € 23.556,64) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 

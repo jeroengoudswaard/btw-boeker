@@ -200,6 +200,62 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Verschil_kan_bewust_op_nieuwe_tussenrekening_worden_geboekt()
+    {
+        var leeg = new BoekhoudingTestdata(ingericht: false);
+        await using var sessie = new FakeSessie(leeg);
+        var voorstel = new VoorbladVoorstel(2025,
+        [
+            new VoorbladRekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(2355664)),
+            new VoorbladRekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(2356388), Bedrag.Nul),
+        ], []);
+
+        await new BoekhoudingDienst(sessie, TimeProvider.System)
+            .ImporteerAsync(Ver, voorstel, new VerschilKeuze(1299, "Te onderzoeken verschillen"));
+
+        var verschil = leeg.Rekeningen.Single(r => r.Nummer == 1299);
+        Assert.Equal(RekeningSoort.Balans, verschil.Soort);
+        var opening = Assert.Single(leeg.Posten);
+        Assert.True(opening.IsInEvenwicht);
+        Assert.Equal(new Bedrag(724), opening.Regels.Single(r => r.Rekening == verschil).Credit);
+        Assert.Contains("verschil", opening.Regels.Single(r => r.Rekening == verschil).Omschrijving, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Verschil_kan_ook_op_bestaande_rekening_uit_het_schema()
+    {
+        var leeg = new BoekhoudingTestdata(ingericht: false);
+        await using var sessie = new FakeSessie(leeg);
+        var voorstel = new VoorbladVoorstel(2025,
+        [
+            new VoorbladRekening(600, "Algemene reserve", null, RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(1000)),
+            new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
+            new VoorbladRekening(1298, "Kruisposten", null, RekeningSoort.Balans, RekeningRol.Kruisposten, false, Bedrag.Nul, Bedrag.Nul),
+        ], []);
+
+        await new BoekhoudingDienst(sessie, TimeProvider.System).ImporteerAsync(Ver, voorstel, new VerschilKeuze(1298, "Kruisposten"));
+
+        Assert.Equal(3, leeg.Rekeningen.Count);
+        Assert.Equal(new Bedrag(100), Assert.Single(leeg.Posten).Regels.Single(r => r.Rekening.Nummer == 1298).Debet);
+    }
+
+    [Fact]
+    public async Task Verschil_op_resultaatrekening_wordt_geweigerd()
+    {
+        var leeg = new BoekhoudingTestdata(ingericht: false);
+        await using var sessie = new FakeSessie(leeg);
+        var voorstel = new VoorbladVoorstel(2025,
+        [
+            new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
+            new VoorbladRekening(4115, "Energie", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
+        ], []);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new BoekhoudingDienst(sessie, TimeProvider.System).ImporteerAsync(Ver, voorstel, new VerschilKeuze(4115, "Energie")));
+        Assert.Empty(leeg.Rekeningen);
+    }
+
+    [Fact]
     public async Task Lege_administratie_inrichten_maakt_memoriaal_en_boekjaar()
     {
         var leeg = new BoekhoudingTestdata(ingericht: false);
