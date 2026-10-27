@@ -92,6 +92,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 54 | Categoriewisseling | Een categorie heeft een ingangsdatum (historie). Voor een maand geldt de categorie op de 1e van die maand |
 | 55 | Gemiste maanden | Worden in de eerstvolgende run met terugwerkende kracht meegenomen, als aparte regel per maand. Een maand wordt nooit twee keer geïncasseerd |
 | 56 | Incassodag | Vaste dag, instelbaar; valt die niet op een bankwerkdag, dan schuift de uitvoerdatum op. De app controleert of het bestand op tijd klaar is |
+| 57 | SEPA-uitgangspunten | Incassotype CORE, altijd sequentietype RCUR; omschrijving `Contributie Scouting <maand jaar> – <voornamen>` (max. 140 SEPA-tekens), instelbaar |
+| 58 | Naheffing | Hooguit tot het begin van het lopende boekjaar; oudere gemiste maanden komen op de lijst "zelf te innen" |
+| 59 | Uitvoerdatum | Valt de incassodag niet op een TARGET-werkdag, dan schuift de uitvoerdatum naar de volgende werkdag |
+| 60 | Run annuleren | Een definitieve run die de bank niet heeft uitgevoerd kan na bevestiging worden geannuleerd: status *Geannuleerd*, de maanden komen weer vrij, de run blijft in de historie |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -103,7 +107,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Kopregels van de vier SOL3-exports: zie `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Export 4 heeft het lidnummer als laatste kolom; de import zoekt kolommen op naam (aanvulling op besluit 20).
   - Tests: 313 in totaal. Gebouwd in een Linux-cloudsessie: Domain, Application, Infrastructure en Architectuur (238) groen; de ViewModel-tests (71) via een tijdelijk net10.0-project, waarvan 2 bestaande tests alleen op Linux falen (Windows-paden). **Nog op Windows te draaien:** de volledige suite, inclusief de 4 FlaUI-UI-tests (`dotnet test`, dan `--filter Categorie=UI`).
   - Bekende beperkingen: IBAN invullen in Verenigd, machtiging en contributiecategorie volgen in fase 3; de groepsindeling kan alleen bij een import worden gekozen.
-- **Fase 3 (Contributie & SEPA): voorstel in bespreking.** Besluiten 44–56 vastgesteld (2026-10-27). Definitief ontwerp ter goedkeuring voorgelegd, pas dan code.
+- **Fase 3 (Contributie & SEPA): voorstel in bespreking.** Besluiten 44–60 vastgesteld en ontwerp goedgekeurd (2026-10-27): rekenregel per maand, datamodel (categorieën, tarieven, LidCategorieen met historie, machtiging op Betaler, incassoruns met momentopname, uniek Lidnummer+Maand), tabblad Contributie met vier subtabbladen, incassowizard, pain.008.001.08 met XSD-validatie. Bouw in uitvoering.
 
 ## Privacy
 
