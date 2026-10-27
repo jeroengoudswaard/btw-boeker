@@ -243,3 +243,26 @@ IFactuurPdfMaker (Application) ◄── FactuurPdfMaker (Infrastructure: MigraD
   - Application: definitief maken en boeken, doornummeren, creditfactuur (één keer), vervallen, herkenning op nummer en op IBAN, afletteren met meerdere facturen, instellingen.
   - Infrastructure: opslag op een echte versleutelde database, de PDF (met en zonder logo, credit) en de QR-PNG. Handmatig gecontroleerd: de QR-code in de PDF wordt gelezen als de juiste EPC-inhoud.
   - App: relaties, factuur maken tot en met PDF, creditfactuur, concept verwijderen, Ctrl+N, afletteren in Bank, Instellingen › Facturen. De FlaUI-test opent Relaties en Facturen.
+
+## Standaardinrichting en sjablonen (besluiten 114–121)
+
+```
+Sjablonen/vereniging.json, stichting.json (embedded resource) ─┐
+.vsjabloon van een andere groep ──────────────────────────────┴► Rekeningsjablonen.Lees (controles)
+   ► Rekeningsjablonen.Rekeningen(sjabloon, speltakken) ► wizard (aan/uit, namen, beginsaldi)
+   ► Rekeningsjablonen.Voorstel ► VoorbladVoorstel { Herkomst = "standaardinrichting", MetVerkoopboek }
+   ► BoekhoudingDienst.ImporteerAsync (dezelfde route als de Excel-overname: back-up, rubrieken, rekeningen, dagboeken, boekjaar, openingsbalans)
+Ingerichte administratie ► Rekeningsjablonen.UitStand ► Schrijf ► .vsjabloon
+```
+
+- **Formaat.** JSON met `formaat: "verenigd-rekeningschema"` en `versie: 1`. Een nieuwere versie wordt geweigerd met de melding de app bij te werken. Daardoor kan fase 5 de begrotingsindeling toevoegen zonder oude bestanden te breken.
+- **Controles bij het lezen:**
+  - Unieke nummers (1–99999), een naam per rekening en bestaande rubrieken.
+  - Een rol alleen op een balansrekening, precies één reserverekening, en hooguit één kas- en één kruispostenrekening.
+  - Een geldige regel voor de speltakrekeningen.
+- **Speltakken.** `speltakken: { rubriek, vanaf, stap, naam: "Contributie {speltak}", standaard: [...] }`. Dubbele en lege namen worden overgeslagen. Valt een nummer samen met een bestaande rekening, dan wordt geweigerd.
+- **Privacy.** Een sjabloon bevat alleen nummers, namen, rubrieken en rollen. Een export uit de eigen administratie bevat dus geen saldi.
+- **Teststrategie:**
+  - Application: geldige ingebouwde sjablonen, speltakrekeningen, schrijven en lezen zonder verlies, weigeren van ongeldige bestanden, inrichten met beginsaldi en terug exporteren.
+  - App: de wizard voor Vereniging en Stichting (speltak toevoegen, verplichte reserve, ongeldig bedrag, verschilrekening), een waarschuwing bij een sjabloon voor de andere administratie, inrichten en exporteren vanuit het tabblad, een ongeldig sjabloonbestand.
+  - FlaUI: de wizard opent vanuit het startscherm.

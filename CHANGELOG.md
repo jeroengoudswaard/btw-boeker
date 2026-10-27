@@ -2,6 +2,31 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.4] - 2026-10-28: Standaardinrichting en sjablonen
+
+### Toegevoegd
+- **Standaardschema voor scoutinggroepen** (besluiten 114, 115, 117 en 118), zodat een groep zonder eigen Excel-boekhouding kan beginnen:
+  - Vereniging: 27 rekeningen in 9 rubrieken, plus een contributierekening per speltak (vanaf 8010).
+  - Stichting: 27 rekeningen in 8 rubrieken, met gebouw, inventaris, afschrijvingen en huur van de Vereniging.
+  - De dagboeken Memoriaal en Verkoop worden aangemaakt, en bij de Vereniging ook Kas.
+- **Wizard *Boekhouding inrichten met een sjabloon*:**
+  - **Speltakken:** Bevers, Welpen, Scouts, Explorers en Roverscouts staan klaar; vink aan wat uw groep heeft en voeg eigen speltakken toe (besluit 119).
+  - **Rekeningen:** zet rekeningen aan of uit en pas namen aan. De reserverekening blijft altijd aan, want de jaarafsluiting heeft haar nodig.
+  - **Beginsaldi:** per balansrekening, met de controle debet = credit. Een verschil kan net als bij de Excel-overname alleen bewust op een tussenrekening (besluiten 73 en 120).
+  - Vooraf wordt een back-up gemaakt; daarna is het boekjaar open.
+- **Sjablonen delen met andere groepen** (besluit 116):
+  - *Bestand › Exporteren › Rekeningschema als sjabloon* maakt een `.vsjabloon`-bestand.
+  - *Bestand › Importeren › Rekeningschema-sjabloon* en de knop *Sjabloonbestand...* richten een lege administratie ermee in.
+  - Een sjabloon bevat alleen nummers, namen, rubrieken en rollen, nooit bedragen of persoonsgegevens.
+- Het startscherm van een lege boekhouding biedt nu vier keuzes: *Standaardschema gebruiken*, *Sjabloonbestand*, *Overnemen uit Excel* en *Leeg beginnen*.
+- 638 geautomatiseerde tests (was 623).
+
+### Gewijzigd
+- PDFsharp-MigraDoc 6.2.4 vastgelegd als besluit 121.
+
+### Nog niet functioneel
+- De begrotingsindeling in het sjabloon volgt in fase 5 (besluit 114).
+
 ## [0.4.3] - 2026-10-28: Fase 4c-2 "Relaties en verkoopfacturen"
 
 ### Toegevoegd

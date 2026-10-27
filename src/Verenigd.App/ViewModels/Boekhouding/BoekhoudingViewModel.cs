@@ -362,6 +362,70 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
     }
 
+    /// <summary>Inrichten met het ingebouwde standaardschema van deze administratie (besluiten 114 en 118).</summary>
+    [RelayCommand]
+    private Task StandaardInrichtenAsync() => RichtInMetSjabloonAsync(() => Rekeningsjablonen.Standaard(Soort));
+
+    /// <summary>Bestand › Importeren › Rekeningschema-sjabloon (besluit 116).</summary>
+    [RelayCommand]
+    private Task SjabloonInlezenAsync()
+    {
+        if (IsIngericht)
+        {
+            _dialogen.ToonInformatie("Rekeningschema-sjabloon", $"De boekhouding van {Administratienaam} is al ingericht; een sjabloon kan alleen in een lege administratie.");
+            return Task.CompletedTask;
+        }
+
+        return _dialogen.KiesSjabloonbestand() is { } pad
+            ? RichtInMetSjabloonAsync(() => Rekeningsjablonen.Lees(File.ReadAllText(pad)))
+            : Task.CompletedTask;
+    }
+
+    private async Task RichtInMetSjabloonAsync(Func<Rekeningsjabloon> sjabloon)
+    {
+        if (IsIngericht)
+        {
+            return;
+        }
+
+        StandaardinrichtingViewModel wizard;
+        try
+        {
+            wizard = new StandaardinrichtingViewModel(_dienst, Soort, sjabloon(), Vandaag.Year);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            Foutmelding = ex is InvalidOperationException ? ex.Message : "Het sjabloonbestand kan niet worden gelezen.";
+            return;
+        }
+
+        Foutmelding = null;
+        if (!_dialogen.ToonStandaardinrichting(wizard) || !wizard.IsKlaar)
+        {
+            return;
+        }
+
+        ShellLog.BoekhoudingOvergenomen(_logger, Soort.ToString(), wizard.AantalIngericht);
+        await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+    }
+
+    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon: alleen nummers, namen, rubrieken en rollen (besluit 116).</summary>
+    [RelayCommand]
+    private Task ExporteerSjabloonAsync()
+    {
+        if (_stand is not { IsIngericht: true } stand
+            || _dialogen.KiesSjabloonDoel($"rekeningschema-{Administratienaam.ToLowerInvariant().Replace(' ', '-')}{Rekeningsjablonen.Extensie}") is not { } doel)
+        {
+            return Task.CompletedTask;
+        }
+
+        return VoerUitAsync(async () =>
+        {
+            await File.WriteAllTextAsync(doel, Rekeningsjablonen.Schrijf(Rekeningsjablonen.UitStand(stand, $"Rekeningschema {Administratienaam}")));
+            Melding = $"Rekeningschema opgeslagen als {Path.GetFileName(doel)}. Het bevat geen bedragen of persoonsgegevens.";
+        }, null);
+    }
+
     // ---- Journaal ---------------------------------------------------------------------------
 
     /// <summary>Ctrl+N binnen het tabblad (besluit 72).</summary>

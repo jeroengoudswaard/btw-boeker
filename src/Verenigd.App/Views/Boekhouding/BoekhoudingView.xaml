@@ -39,13 +39,18 @@
                 Visibility="{Binding IsLeeg, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="BoekhoudingLeeg">
             <StackPanel>
                 <TextBlock Text="Deze administratie heeft nog geen boekhouding" Style="{StaticResource Sectietitel}" />
-                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12"
-                           Text="Neem het rekeningschema en de eindbalans eenmalig over uit de huidige Excel-boekhouding, of begin met een leeg rekeningschema." />
-                <StackPanel Style="{StaticResource Knoppenbalk}" HorizontalAlignment="Left">
-                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}" Style="{DynamicResource AccentButtonStyle}"
-                            Margin="0,0,8,0" AutomationProperties.AutomationId="OvernemenUitExcel" />
-                    <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" AutomationProperties.AutomationId="LeegBeginnen" />
-                </StackPanel>
+                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
+                           Text="Begin met het standaardschema voor scoutinggroepen, met een sjabloon van een andere groep, met een overname uit de huidige Excel-boekhouding of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
+                <WrapPanel>
+                    <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}"
+                            Margin="0,0,8,8" ToolTip="Een compact rekeningschema met rubrieken, aan te passen vóór het inrichten"
+                            AutomationProperties.AutomationId="StandaardInrichten" />
+                    <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Margin="0,0,8,8"
+                            ToolTip="Een rekeningschema-sjabloon (.vsjabloon) van een andere groep" AutomationProperties.AutomationId="SjabloonInlezen" />
+                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}"
+                            Margin="0,0,8,8" AutomationProperties.AutomationId="OvernemenUitExcel" />
+                    <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" Margin="0,0,8,8" AutomationProperties.AutomationId="LeegBeginnen" />
+                </WrapPanel>
             </StackPanel>
         </Border>
 

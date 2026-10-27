@@ -92,6 +92,13 @@
                               AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                     <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
+                    <MenuItem Header="_Rekeningschema-sjabloon..." Command="{Binding ImporteerSjabloonCommand}"
+                              AutomationProperties.AutomationId="Menu_ImporteerSjabloon" />
+                </MenuItem>
+                <MenuItem Header="_Exporteren" AutomationProperties.AutomationId="Menu_Exporteren">
+                    <MenuItem Header="_Rekeningschema als sjabloon..." Command="{Binding ExporteerSjabloonCommand}"
+                              ToolTip="Alleen nummers, namen, rubrieken en rollen; om te delen met andere groepen"
+                              AutomationProperties.AutomationId="Menu_ExporteerSjabloon" />
                 </MenuItem>
                 <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
                           AutomationProperties.AutomationId="Menu_NieuweIncassorun" />

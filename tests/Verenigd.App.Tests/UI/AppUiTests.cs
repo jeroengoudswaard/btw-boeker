@@ -216,7 +216,15 @@ public sealed class AppUiTests : IDisposable
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
         Zoek(venster, "OvernemenUitExcel");
+        Zoek(venster, "SjabloonInlezen");
         Bewaar(venster, "10-boekhouding-leeg");
+        Zoek(venster, "StandaardInrichten").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 1, Wachttijd).Result, "De wizard Standaardinrichting opende niet.");
+        var inrichten = venster.ModalWindows[0];
+        Zoek(inrichten, "Speltakken");
+        Bewaar(inrichten, "15-standaardinrichting");
+        Zoek(inrichten, "InrichtenAnnuleren").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
         foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabBoekingsregels", "SubtabFacturen", "SubtabRelaties", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBoekjaren" })

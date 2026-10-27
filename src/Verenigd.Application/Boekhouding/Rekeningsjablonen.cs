@@ -121,7 +121,7 @@ public static class Rekeningsjablonen
         var alle = sjabloon.Rekeningen.ToList();
         if (sjabloon.Speltakken is { } regel)
         {
-            var namen = speltakken.Select(s => s?.Trim() ?? string.Empty).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+            var namen = speltakken.Select(s => s?.Trim() ?? string.Empty).Where(s => s.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             for (var i = 0; i < namen.Count; i++)
             {
                 var nummer = regel.Vanaf + (i * regel.Stap);

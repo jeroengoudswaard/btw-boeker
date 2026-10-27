@@ -65,6 +65,22 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesAfbeelding() => Afbeelding;
 
+    public string? Sjabloonbestand { get; set; }
+    public string? SjabloonDoel { get; set; }
+    public string? SjabloonVoorstel { get; private set; }
+    public Func<ViewModels.Boekhouding.StandaardinrichtingViewModel, Task<bool>>? Standaardinrichting { get; set; }
+
+    public string? KiesSjabloonbestand() => Sjabloonbestand;
+
+    public string? KiesSjabloonDoel(string voorgesteldeNaam)
+    {
+        SjabloonVoorstel = voorgesteldeNaam;
+        return SjabloonDoel;
+    }
+
+    public bool ToonStandaardinrichting(ViewModels.Boekhouding.StandaardinrichtingViewModel wizard) =>
+        Standaardinrichting is not null && Standaardinrichting(wizard).GetAwaiter().GetResult();
+
     public bool ToonBoekhoudingImport(ViewModels.Boekhouding.BoekhoudingImportViewModel wizard) =>
         BoekhoudingImport is not null && BoekhoudingImport(wizard).GetAwaiter().GetResult();
 

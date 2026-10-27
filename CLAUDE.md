@@ -188,8 +188,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **4c-2 Relaties en verkoopfacturen: gereed**, v0.4.3 (2026-10-28). Besluiten 105–113. Zie CHANGELOG.md en docs/ARCHITECTUUR.md. Subtabbladen Facturen en Relaties in Boekhouding, dagboek VRK (1310 aan opbrengst), creditfactuur, PDF met EPC-QR, Instellingen › Facturen met logo, herkenning en afletteren van factuurbetalingen in de bank.
     - Uitwerking: PDFsharp-MigraDoc staat vast op 6.2.4, de laatste MIT-versie (6.5 is AGPL-3.0 met licentiecontrole), zodat besluit 95 blijft gelden; System.Security.Cryptography.Pkcs is vastgezet op een gepatchte versie. De QR-code wordt als 8-bits PNG weggeschreven (PDFsharp leest de 1-bits PNG van QRCoder niet); gecontroleerd met een QR-lezer.
     - Tests: 623 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 215, Infrastructure 56, Architectuur 7; ViewModel-tests 130/132 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een PDF-factuur met Segoe UI bekijken en de QR-code met een bankapp scannen.
-    - Pull request voor 4c-2 nog niet geopend: de gebruiker test eerst op Windows.
-    - Volgende stap: standaardinrichting (besluiten 114–117, v0.4.4), daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+  - **Standaardinrichting en sjablonen: gereed**, v0.4.4 (2026-10-28). Besluiten 114–121. Standaardschema's Vereniging en Stichting (JSON, ingebouwd), wizard Speltakken → Rekeningen → Beginsaldi → Klaar (zelfde route als de Excel-overname), export en import als `.vsjabloon`, vier keuzes op het startscherm van een lege boekhouding.
+    - Tests: 638 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 135/137 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
+    - Pull request: 4c-2 en de standaardinrichting staan samen op de branch; de gebruiker test eerst op Windows.
+    - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 
