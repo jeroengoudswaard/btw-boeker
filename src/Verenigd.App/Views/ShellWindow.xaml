@@ -7,6 +7,8 @@
         xmlns:views="clr-namespace:Verenigd.App.Views"
         xmlns:ledenvm="clr-namespace:Verenigd.App.ViewModels.Leden"
         xmlns:leden="clr-namespace:Verenigd.App.Views.Leden"
+        xmlns:contributievm="clr-namespace:Verenigd.App.ViewModels.Contributie"
+        xmlns:contributie="clr-namespace:Verenigd.App.Views.Contributie"
         xmlns:inst="clr-namespace:Verenigd.Application.Instellingen;assembly=Verenigd.Application"
         xmlns:mod="clr-namespace:Verenigd.Application.Modules;assembly=Verenigd.Application"
         mc:Ignorable="d"
@@ -27,6 +29,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type ledenvm:LedenViewModel}">
             <leden:LedenView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type contributievm:ContributieViewModel}">
+            <contributie:ContributieView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
@@ -78,6 +83,8 @@
                     <MenuItem Header="SOL3-_leden..." Command="{Binding ImporteerSol3Command}"
                               AutomationProperties.AutomationId="Menu_ImporteerSol3" />
                 </MenuItem>
+                <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
+                          AutomationProperties.AutomationId="Menu_NieuweIncassorun" />
                 <Separator />
                 <MenuItem Header="_Back-up maken..." Command="{Binding MaakBackupCommand}" />
                 <MenuItem Header="Back-up _terugzetten..." Command="{Binding HerstelBackupCommand}" />

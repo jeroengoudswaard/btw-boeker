@@ -1,6 +1,8 @@
 using System.Windows;
 using Microsoft.Win32;
+using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Leden;
+using Verenigd.App.Views.Contributie;
 using Verenigd.App.Views.Dialogen;
 using Verenigd.App.Views.Leden;
 using Verenigd.Application.Beveiliging;
@@ -73,6 +75,20 @@ internal sealed class WpfDialoogService : IDialoogService
     }
 
     public bool ToonImportWizard(ImportWizardViewModel wizard) => ToonModaal(new ImportWizardVenster(wizard));
+
+    public string? KiesXmlDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog
+        {
+            Title = "Incassobestand opslaan",
+            Filter = "SEPA-incassobestand (*.xml)|*.xml",
+            DefaultExt = ".xml",
+            FileName = voorgesteldeNaam,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public bool ToonIncassoWizard(IncassoWizardViewModel wizard) => ToonModaal(new IncassoWizardVenster(wizard));
 
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)
     {

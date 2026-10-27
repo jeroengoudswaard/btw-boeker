@@ -3,6 +3,10 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Officieel ISO 20022-schema (inhoudelijk ongewijzigd), om elk incassobestand vóór het opslaan te valideren -->
+    <EmbeddedResource Include="Incasso\pain.008.001.08.xsd" LogicalName="pain.008.001.08.xsd" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Verenigd.Domain\Verenigd.Domain.csproj" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,41 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.3.0] - 2026-10-27: Fase 3 "Contributie & SEPA-incasso"
+
+### Toegevoegd
+- **Tabblad Contributie · Vereniging** (Ctrl+3) met vier subtabbladen:
+  - **Leden & categorie:**
+    - Per lid een contributiecategorie met ingangsdatum; de historie blijft bewaard.
+    - De app stelt *Jeugdlid <speltak>* of *Leiding* voor. Met *Voorstellen overnemen* neemt u alle voorstellen in één keer over.
+    - Een waarschuwing verschijnt bij geen categorie, geen betaler of geen geldige machtiging.
+  - **Betalers & machtigingen:**
+    - IBAN (met controle), rekeninghouder, mandaatkenmerk, ondertekenings- en intrekkingsdatum.
+    - Leden koppelen en ontkoppelen.
+  - **Tarieven:** maandbedrag per categorie per boekjaar, met *Kopiëren van vorig jaar*. Leiding en Vrijgesteld staan vast op € 0,00.
+  - **Incassoruns:** historie met status. Het bestand kan opnieuw worden opgeslagen (altijd identiek), en een run die de bank niet heeft uitgevoerd kan worden geannuleerd.
+- **Incassowizard** (*Bestand › Nieuwe incassorun…* of de knop in het tabblad), in vier stappen:
+  1. **Maand:** de maand kiezen.
+  2. **Berekening:** posten per betaler en de lijst "zelf te innen".
+  3. **Controleren:** controle en *Definitief maken*. Eerst wordt een back-up gemaakt.
+  4. **Klaar:** het pain.008-bestand en de CSV "zelf te innen" opslaan.
+- **Rekenregel:**
+  - Een maand telt als het lid op de 1e ingeschreven is.
+  - Gemiste maanden uit het lopende boekjaar worden nageheven, oudere komen op de lijst "zelf te innen".
+  - Een maand wordt nooit twee keer geïncasseerd; de database bewaakt dat ook.
+  - Eén post per betaler, zonder gezinskorting.
+- **SEPA-bestand pain.008.001.08:**
+  - CORE, altijd RCUR, uitvoerdatum op een TARGET-werkdag.
+  - De tekst wordt omgezet naar de toegestane SEPA-tekens.
+  - Het bestand wordt gecontroleerd tegen het officiële ISO 20022-schema voordat het kan worden opgeslagen.
+- **Instellingen › Incasso:** incassant-ID (met controlegetal), naam, IBAN, incassodag, eerste incassomaand en het omschrijvingssjabloon.
+- Het logboek bevat alleen de maand, het aantal posten en het totaal; nooit IBAN's of namen.
+- 443 geautomatiseerde tests (was 313).
+
+### Nog niet functioneel
+- Boeken in het grootboek, storneringen en terugboekingen (CAMT.053): fase 4.
+- Afdracht aan Scouting Nederland: fase 4.
+
 ## [0.2.0] - 2026-10-27: Fase 2 "Leden"
 
 ### Toegevoegd

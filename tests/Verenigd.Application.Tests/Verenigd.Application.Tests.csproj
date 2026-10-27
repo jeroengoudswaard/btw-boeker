@@ -18,6 +18,9 @@
     <ProjectReference Include="..\..\src\Verenigd.Application\Verenigd.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Incasso\Voorbeeld-pain008.xml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>

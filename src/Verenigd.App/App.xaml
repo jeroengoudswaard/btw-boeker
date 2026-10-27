@@ -13,6 +13,7 @@
             <conv:OmgekeerdeBoolNaarZichtbaarheidConverter x:Key="OnwaarNaarZichtbaar" />
             <conv:GelijkAanParameterConverter x:Key="GelijkAan" />
             <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
+            <conv:NietConverter x:Key="Niet" />
 
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 

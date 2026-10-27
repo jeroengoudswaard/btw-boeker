@@ -93,3 +93,29 @@ Elke persoon heeft een vaste `Guid`, een tijdstip `LaatstGewijzigdUtc` en per ve
 | App | ViewModel + FlaUI | Wizard (stappen, herkenning, uitschrijfkeuze, CSV-export), tabblad Leden (filters, notities, F5), menu-opdracht; UI-test: geïmporteerde leden in tabblad, wizard opent |
 
 Alle testgegevens zijn synthetisch (`tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`, gedeeld via een gekoppeld bestand).
+
+## Contributie en SEPA-incasso (fase 3)
+
+```
+IncassoStand (leden + financiën, alleen-lezen) ──► ContributieRekenaar ──► IncassoVoorstel (posten, zelf te innen)
+                                                                               │  Definitief maken
+            back-up ──► IContributieRepository.BewaarRunAsync (één transactie, opnieuw rekenen + vergelijken)
+                                                                               │
+                                     Incassorun (momentopname) ──► Pain008Schrijver ──► XSD-controle ──► .xml
+```
+
+- **Rekenregel** (`Application.Incasso.ContributieRekenaar`): een pure functie.
+  - Een maand is verschuldigd als het lid op de 1e ingeschreven is, een categorie met tarief heeft (de categorie op de 1e van de maand) en die maand nog niet in een run zat die niet geannuleerd is.
+  - Naheffing gaat tot het begin van het lopende boekjaar, nooit vóór de instelling *eerste incassomaand*. Die voorkomt dat de eerste run jaren aan naheffing bevat.
+- **Momentopname.** Een `Incassopost` bewaart IBAN, naam, mandaatkenmerk en ondertekeningsdatum zoals ze naar de bank gingen. Latere wijzigingen bij de betaler veranderen een run niet.
+- **Nooit dubbel.**
+  - `Postregels` heeft een unieke index op (lidnummer, maand) met `WHERE IsGeannuleerd = 0`.
+  - Bij *Definitief maken* rekent de app binnen de transactie opnieuw. Wijkt de uitkomst af van wat de gebruiker heeft gecontroleerd, dan wordt er niets opgeslagen.
+- **Bestand.** pain.008.001.08 met CORE, RCUR, één `PmtInf`, en `NOTPROVIDED` als BIC.
+  - De uitvoer is deterministisch: aanmaaktijd en kenmerken komen uit de run. De SHA-256-hash wordt bij de run opgeslagen, en opnieuw opslaan moet dezelfde hash opleveren.
+  - Het schema `src/Verenigd.Application/Incasso/pain.008.001.08.xsd` is het inhoudelijk ongewijzigde ISO 20022-schema (door ISO gegenereerd op 2019-02-14). Het komt uit het open-source pakket *sepaxml* (MIT) en is ingebed als resource.
+- **Tekens en datums.**
+  - `SepaTekst` zet tekst om naar de SEPA-tekenset.
+  - `Bankwerkdagen` volgt de TARGET-kalender, met de paasdatum berekend.
+  - `Bedrag` rekent in hele centen en heeft een eigen notatie, die op elk systeem gelijk is.
+- **Voorbeeldbestand.** `tests/Verenigd.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld. Bijwerken na een bewuste wijziging: draai de test met `VERENIGD_VOORBEELDEN_BIJWERKEN=1` en controleer het verschil voordat u het commit.

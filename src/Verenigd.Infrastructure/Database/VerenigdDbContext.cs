@@ -15,6 +15,11 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Groep> Groepen => Set<Groep>();
     public DbSet<Betaler> Betalers => Set<Betaler>();
     public DbSet<BetalerLid> BetalerLeden => Set<BetalerLid>();
+    public DbSet<Contributiecategorie> Contributiecategorieen => Set<Contributiecategorie>();
+    public DbSet<Tarief> Tarieven => Set<Tarief>();
+    public DbSet<LidCategorie> LidCategorieen => Set<LidCategorie>();
+    public DbSet<Incassoinstellingen> Incassoinstellingen => Set<Incassoinstellingen>();
+    public DbSet<Incassorun> Incassoruns => Set<Incassorun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,5 +54,6 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
 
         LedenConfiguratie.Configureer(modelBuilder);
         FinancienConfiguratie.Configureer(modelBuilder);
+        IncassoConfiguratie.Configureer(modelBuilder);
     }
 }

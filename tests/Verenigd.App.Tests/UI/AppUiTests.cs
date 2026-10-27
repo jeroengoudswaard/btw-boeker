@@ -164,6 +164,41 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact]
+    public async Task Contributie_toont_subtabbladen_en_incassowizard()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
+        Zoek(venster, "ContributieTabblad");
+        foreach (var subtab in new[] { "SubtabLeden", "SubtabBetalers", "SubtabTarieven", "SubtabRuns" })
+        {
+            Zoek(venster, subtab);
+        }
+
+        Bewaar(venster, "08-contributie");
+        Zoek(venster, "SubtabRuns").AsTabItem().Select();
+        Zoek(venster, "NieuweIncassorun").AsButton().Invoke();
+        var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        Assert.Equal("Nieuwe incassorun", wizard.Title);
+        Zoek(wizard, "IncassoMaand");
+        Bewaar(wizard, "09-incassowizard");
+        Zoek(wizard, "IncassoAnnuleren").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
+    }
+
+    [Fact]
     public void Donker_thema_wordt_toegepast_zonder_fouten()
     {
         new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))

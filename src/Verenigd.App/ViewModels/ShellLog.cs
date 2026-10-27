@@ -31,6 +31,12 @@ internal static partial class ShellLog
     [LoggerMessage(9, LogLevel.Information, "SOL3-import uitgevoerd: {Nieuw} nieuw, {Gewijzigd} gewijzigd, {Uitgeschreven} uitgeschreven")]
     public static partial void Sol3Geimporteerd(ILogger logger, int nieuw, int gewijzigd, int uitgeschreven);
 
+    [LoggerMessage(10, LogLevel.Information, "Incassorun {Maand} definitief: {Aantal} posten, totaal {Totaal}")]
+    public static partial void IncassorunDefinitief(ILogger logger, string maand, int aantal, string totaal);
+
+    [LoggerMessage(11, LogLevel.Information, "Incassorun {Maand} geannuleerd")]
+    public static partial void IncassorunGeannuleerd(ILogger logger, string maand);
+
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 }
