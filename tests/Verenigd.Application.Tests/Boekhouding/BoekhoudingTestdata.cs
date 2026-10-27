@@ -1,6 +1,7 @@
 using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
+using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Tests.Boekhouding;
@@ -38,6 +39,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Dagboek> Dagboeken { get; } = [];
     public List<Boekjaar> Boekjaren { get; } = [];
     public List<Journaalpost> Posten { get; } = [];
+    public List<Bankafschrift> Bankafschriften { get; } = [];
+    public List<Bankmutatie> Bankmutaties { get; } = [];
+    public List<Boekingsregel> Boekingsregels { get; } = [];
 
     public Grootboekrekening Reserve { get; } = null!;
     public Grootboekrekening Kas { get; } = null!;
@@ -47,7 +51,16 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public Dagboek Memoriaal { get; } = null!;
     public Dagboek Kasboek { get; } = null!;
 
-    public BoekhoudingStand Stand => new(Ver, Rubrieken.ToList(), Rekeningen.ToList(), Dagboeken.ToList(), Boekjaren.ToList(), Posten.ToList());
+    public BoekhoudingStand Stand => new(Ver, Rubrieken.ToList(), Rekeningen.ToList(), Dagboeken.ToList(), Boekjaren.ToList(), Posten.ToList())
+    {
+        Bankafschriften = Bankafschriften.ToList(),
+        Bankmutaties = Bankmutaties.ToList(),
+        Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
+    };
+
+    /// <summary>Een bankdagboek op <see cref="Bank"/> (of een andere rekening) voor een eigen IBAN.</summary>
+    public Dagboek Bankdagboek(string code, string iban, Grootboekrekening? rekening = null) =>
+        Dagboek(new Dagboek(Ver, DagboekSoort.Bank, code, code, rekening ?? Bank, Iban.Maak(iban)));
 
     public Rubriek Rubriek(string naam)
     {
@@ -86,6 +99,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
             switch (item)
             {
                 case Journaalpost post: Posten.Remove(post); break;
+                case Boekingsregel regel: Boekingsregels.Remove(regel); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
@@ -99,11 +113,14 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Dagboek d: Dagboeken.Add(MetId(d)); break;
                 case Boekjaar b: Boekjaren.Add(b); break;
                 case Journaalpost p: Posten.Add(p); break;
+                case Bankafschrift a: Bankafschriften.Add(MetId(a)); break;
+                case Bankmutatie m: Bankmutaties.Add(m); break;
+                case Boekingsregel r: Boekingsregels.Add(MetId(r)); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
 
-        return Task.FromResult(resultaat.Waarde);
+        return Task.FromResult(resultaat.Uitkomst());
     }
 
     private Dagboek Dagboek(Dagboek dagboek)

@@ -95,4 +95,26 @@ public sealed class ShellBoekhoudingTests
         await shell.AfdrukkenCommand.ExecuteAsync(null);
         Assert.Single(_afdruk.Afgedrukt);
     }
+
+    [Fact]
+    public async Task Bankafschrift_via_het_menu_opent_boekhouding_en_de_bankimport()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        Assert.True(shell.ImporteerBankafschriftCommand.CanExecute(null));
+        _dialogen.CamtBestanden = ["afschrift.xml"];
+        var gestart = false;
+        _dialogen.BankImport = _ =>
+        {
+            gestart = true;
+            return Task.FromResult(false);
+        };
+
+        await shell.ImporteerBankafschriftCommand.ExecuteAsync(null);
+        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        Assert.False(gestart); // nog niet ingericht: eerst uitleg, geen wizard
+
+        await ((BoekhoudingViewModel)shell.GeselecteerdTabblad!).LeegBeginnenCommand.ExecuteAsync(null);
+        await shell.ImporteerBankafschriftCommand.ExecuteAsync(null);
+        Assert.True(gestart);
+    }
 }

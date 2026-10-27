@@ -20,6 +20,8 @@ public sealed record Rapportkeuze(Rapportsoort Soort, string Naam);
 public enum BoekhoudingSubtab
 {
     Journaal,
+    Bank,
+    Boekingsregels,
     Rekeningschema,
     Grootboekkaart,
     Rapporten,

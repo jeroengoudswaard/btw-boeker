@@ -74,7 +74,7 @@ public sealed partial class ShellViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(NieuweIncassorunCommand))]
+        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(NieuweIncassorunCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -264,6 +264,31 @@ public sealed partial class ShellViewModel : ObservableObject
             }
 
             await boekhouding.OvernemenUitExcelCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>
+    /// Bestand › Importeren › Bankafschrift (CAMT.053): opent Boekhouding voor de administratie van het actieve tabblad,
+    /// anders de Vereniging (besluit 17), en start de bankimport.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task ImporteerBankafschriftAsync()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        {
+            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await boekhouding.BankInlezenCommand.ExecuteAsync(null);
         }
     }
 

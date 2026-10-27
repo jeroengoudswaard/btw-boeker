@@ -5,9 +5,11 @@ using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.App.Tests.Boekhouding;
 
-public sealed class BoekhoudingImportViewModelTests
+public sealed class BoekhoudingImportViewModelTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();
+
+    public void Dispose() => _omgeving.Dispose();
 
     private BoekhoudingImportViewModel Maak() =>
         new(new BoekhoudingDienst(_omgeving.Sessie, _omgeving.Tijd), _omgeving.Lezer, AdministratieSoort.Vereniging, "boekhouding.xlsx");

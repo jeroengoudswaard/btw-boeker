@@ -1,5 +1,6 @@
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
+using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Boekhouding;
@@ -13,7 +14,17 @@ public sealed record BoekhoudingStand(
     IReadOnlyList<Boekjaar> Boekjaren,
     IReadOnlyList<Journaalpost> Posten)
 {
+    public IReadOnlyList<Bankafschrift> Bankafschriften { get; init; } = [];
+
+    public IReadOnlyList<Bankmutatie> Bankmutaties { get; init; } = [];
+
+    /// <summary>In volgorde: de eerste passende regel wint.</summary>
+    public IReadOnlyList<Boekingsregel> Boekingsregels { get; init; } = [];
+
     public bool IsIngericht => Rekeningen.Count > 0;
+
+    /// <summary>De bankmutatie waaruit een post is ontstaan, of <c>null</c>.</summary>
+    public Bankmutatie? MutatieVan(Guid postId) => Bankmutaties.FirstOrDefault(m => m.PostId == postId);
 
     public Boekjaar? Boekjaar(int jaar) => Boekjaren.FirstOrDefault(b => b.Jaar == jaar);
 }
@@ -24,6 +35,12 @@ public sealed class BoekhoudingWijziging<T>(T waarde)
     public T Waarde { get; } = waarde;
     public List<object> Toevoegen { get; } = [];
     public List<object> Verwijderen { get; } = [];
+
+    /// <summary>Voor waarden die pas na het opslaan bekend zijn, zoals een nieuw Id.</summary>
+    public Func<T>? WaardeNaOpslaan { get; init; }
+
+    /// <summary>Wat <see cref="IBoekhoudingRepository.PasToeAsync{T}"/> na het opslaan teruggeeft.</summary>
+    public T Uitkomst() => WaardeNaOpslaan is { } waarde ? waarde() : Waarde;
 }
 
 public interface IBoekhoudingRepository

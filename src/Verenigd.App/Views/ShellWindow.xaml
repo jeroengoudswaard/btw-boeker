@@ -90,6 +90,8 @@
                               AutomationProperties.AutomationId="Menu_ImporteerSol3" />
                     <MenuItem Header="_Boekhouding uit Excel..." Command="{Binding ImporteerBoekhoudingCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
+                    <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
+                              AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
                 </MenuItem>
                 <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
                           AutomationProperties.AutomationId="Menu_NieuweIncassorun" />

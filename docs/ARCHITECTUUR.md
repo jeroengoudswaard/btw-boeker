@@ -149,3 +149,42 @@ Grootboek (pure functies: saldo, saldibalans, balans, W&V, kaart) ──► Rapp
   - Infrastructure: opslag op een echte versleutelde database en ClosedXML-lezen/schrijven op een gegenereerd xlsx-bestand.
   - App: ViewModel-tests voor tabblad, wizard en shell. Eén FlaUI-test opent het tabblad en maakt een nieuwe post.
   - Er wordt nooit een echte boekhouding gebruikt.
+
+## Bank (fase 4b)
+
+```
+CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtBestand ──► BankimportPlanner (sleutels, saldo-aansluiting)
+                                                                                      │  wizard: nieuwe IBAN → grootboekrekening + dagboekcode
+                     back-up ──► BankDienst.ImporteerAsync (één transactie) ──► Bankafschrift, Bankmutatie
+                                                                                      │
+                                         Bankherkenning: eigen IBAN → Kruisposten · eerste passende Boekingsregel · anders werkvoorraad
+                                                                                      │
+                              conceptpost in bankdagboek (Bankmutatie.PostId) ──► Ctrl+B: BoekConceptenAsync
+```
+
+- **Lezer.**
+  - Elementen worden op lokale naam gezocht, zodat 001.02 en 001.08 met dezelfde code werken (bijvoorbeeld de naam onder `Pty/Nm` of direct onder `Nm`).
+  - DTD's en externe entiteiten zijn uitgeschakeld.
+  - Alleen transacties met status `BOOK` tellen; andere geven een melding.
+  - De afschriftdatum is de datum van het eindsaldo (`CLBD`).
+- **Nooit dubbel.**
+  - De sleutel is `IBAN|R|<bankreferentie>`. Zonder bankreferentie, zoals bij Rabobank-rente, is het `IBAN|D|datum|bedrag|NtryRef|EndToEndId`.
+  - De planner ontdubbelt binnen en tussen bestanden. `Bankmutaties` heeft een unieke index op (administratie, sleutel), met `COLLATE BINARY`.
+- **Status.** Er is geen statusveld: zonder `PostId` staat de transactie in de werkvoorraad, met een conceptpost is ze concept, met een geboekte post geboekt.
+- **Vaste bankregel.** `BoekhoudingDienst` weigert:
+  - een wijziging waardoor de regels op de bankrekening niet meer gelijk zijn aan het bedrag van het afschrift (eerst gecontroleerd op een proefpost);
+  - een andere dagboekkeuze voor een bankpost;
+  - een nieuwe post in een bankdagboek.
+
+  Een concept verwijderen of een bankpost tegenboeken zet de transactie terug in de werkvoorraad.
+- **Herkenning.** Overboekingen naar of van een eigen rekening gaan naar de rekening met rol *Kruisposten*. Anders wint de eerste actieve regel in de volgorde (`Volgorde`, dan `Id`); alle ingevulde voorwaarden moeten kloppen.
+- **Aansluiting.**
+  - De planner meldt een saldo-gat tussen opeenvolgende afschriften, ook tegenover eerder opgeslagen afschriften.
+  - Hij meldt ook een afschrift waarvan de transacties niet optellen tot het verschil tussen begin- en eindsaldo.
+  - `ControleerBeginsaldo` vergelijkt het eerste afschrift in een boekjaar met de openingsbalans plus eerder geboekte posten (besluit 80).
+- **Teststrategie 4b:**
+  - Domain: transactiecodes, bankpost en vaste bankregel, boekingsregels.
+  - Application: de lezer op synthetische bestanden in beide versies (`CamtVoorbeeld`), planner, herkenning en dienst.
+  - Infrastructure: import, herkenning en boeken op een echte versleutelde database, plus de unieke index.
+  - App: ViewModel-tests voor wizard, subtabbladen en shell. De FlaUI-test opent de subtabbladen Bank en Boekingsregels.
+  - Echte afschriften zijn alleen lokaal gecontroleerd op aantallen en aansluiting, en niet bewaard.

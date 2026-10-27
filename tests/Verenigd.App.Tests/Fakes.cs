@@ -43,6 +43,14 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesExcelBestand() => ExcelBestand;
 
+    public IReadOnlyList<string>? CamtBestanden { get; set; }
+    public Func<ViewModels.Boekhouding.BankImportViewModel, Task<bool>>? BankImport { get; set; }
+
+    public IReadOnlyList<string>? KiesCamtBestanden() => CamtBestanden;
+
+    public bool ToonBankImport(ViewModels.Boekhouding.BankImportViewModel wizard) =>
+        BankImport is not null && BankImport(wizard).GetAwaiter().GetResult();
+
     public string? KiesXlsxDoel(string voorgesteldeNaam) => XlsxDoel;
 
     public bool ToonBoekhoudingImport(ViewModels.Boekhouding.BoekhoudingImportViewModel wizard) =>
@@ -413,7 +421,7 @@ internal sealed class InMemoryBoekhoudingOpslag : Verenigd.Application.Boekhoudi
             lijst.Add(item);
         }
 
-        return Task.FromResult(resultaat.Waarde);
+        return Task.FromResult(resultaat.Uitkomst());
     }
 
     private Verenigd.Application.Boekhouding.BoekhoudingStand Stand(AdministratieSoort administratie)
@@ -424,7 +432,12 @@ internal sealed class InMemoryBoekhoudingOpslag : Verenigd.Application.Boekhoudi
             [.. lijst.OfType<Domain.Financien.Boekhouding.Grootboekrekening>().OrderBy(r => r.Nummer)],
             [.. lijst.OfType<Domain.Financien.Boekhouding.Dagboek>().OrderBy(d => d.Soort)],
             [.. lijst.OfType<Domain.Financien.Boekhouding.Boekjaar>().OrderBy(b => b.Jaar)],
-            [.. lijst.OfType<Domain.Financien.Boekhouding.Journaalpost>().OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)]);
+            [.. lijst.OfType<Domain.Financien.Boekhouding.Journaalpost>().OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
+        {
+            Bankafschriften = [.. lijst.OfType<Domain.Financien.Bank.Bankafschrift>().OrderBy(a => a.Datum)],
+            Bankmutaties = [.. lijst.OfType<Domain.Financien.Bank.Bankmutatie>().OrderBy(m => m.Boekdatum)],
+            Boekingsregels = [.. lijst.OfType<Domain.Financien.Bank.Boekingsregel>().OrderBy(r => r.Volgorde).ThenBy(r => r.Id)],
+        };
     }
 }
 

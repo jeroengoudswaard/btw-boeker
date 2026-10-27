@@ -63,6 +63,12 @@ public interface IDialoogService
 
     string? KiesExcelBestand();
 
+    /// <summary>Een of meer CAMT.053-bankafschriften (.xml).</summary>
+    IReadOnlyList<string>? KiesCamtBestanden();
+
+    /// <returns><c>true</c> als de afschriften zijn ingelezen.</returns>
+    bool ToonBankImport(BankImportViewModel wizard);
+
     string? KiesXlsxDoel(string voorgesteldeNaam);
 
     /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>

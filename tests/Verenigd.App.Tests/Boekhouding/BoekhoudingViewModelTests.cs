@@ -5,9 +5,11 @@ using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.App.Tests.Boekhouding;
 
-public sealed class BoekhoudingViewModelTests
+public sealed class BoekhoudingViewModelTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();
+
+    public void Dispose() => _omgeving.Dispose();
 
     private static void VulRegel(PostEditor editor, int index, int nummer, string debet, string credit)
     {

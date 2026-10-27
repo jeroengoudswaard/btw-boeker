@@ -98,6 +98,17 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
+    public IReadOnlyList<string>? KiesCamtBestanden()
+    {
+        var dialoog = new OpenFileDialog
+        {
+            Title = "Bankafschriften (CAMT.053) kiezen", Filter = "CAMT.053-bankafschrift (*.xml)|*.xml", CheckFileExists = true, Multiselect = true,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileNames : null;
+    }
+
+    public bool ToonBankImport(BankImportViewModel wizard) => ToonModaal(new BankImportVenster(wizard));
+
     public string? KiesXlsxDoel(string voorgesteldeNaam)
     {
         var dialoog = new SaveFileDialog { Title = "Exporteren naar Excel", Filter = "Excel-werkmap (*.xlsx)|*.xlsx", DefaultExt = ".xlsx", FileName = voorgesteldeNaam };
