@@ -96,6 +96,14 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 58 | Naheffing | Hooguit tot het begin van het lopende boekjaar; oudere gemiste maanden komen op de lijst "zelf te innen" |
 | 59 | Uitvoerdatum | Valt de incassodag niet op een TARGET-werkdag, dan schuift de uitvoerdatum naar de volgende werkdag |
 | 60 | Run annuleren | Een definitieve run die de bank niet heeft uitgevoerd kan na bevestiging worden geannuleerd: status *Geannuleerd*, de maanden komen weer vrij, de run blijft in de historie |
+| 61 | Boekhouding Stichting | Voorlopig alleen de Vereniging; de Stichting volgt later (het model blijft per administratie) |
+| 62 | Overname huidige boekhouding | Eenmalig het rekeningschema en de eindbalans 2025 uit de huidige Excel-boekhouding inlezen als beginbalans 2026 (importwizard met voorbeeldoverzicht en controle debet = credit). Het Excel-bestand wordt niet bewaard en komt nooit in Git |
+| 63 | Contributie boeken | Baten-lastenstelsel: de incassorun boekt *Debiteuren contributie* aan *Contributie <speltak>*; de bankontvangst boekt de debiteuren af; een stornering zet de vordering weer open |
+| 64 | Banktransacties | Elke transactie uit CAMT.053 apart boeken, met boekingsregels (tegenrekening/omschrijving → grootboekrekening) |
+| 65 | Kas | Kasboek in Verenigd met handmatige ontvangsten en uitgaven |
+| 66 | Debiteuren/crediteuren | Openstaande posten én verkoopfacturen maken (bijv. verhuur), in stap 4c; de vorm (PDF) wordt in het ontwerp van 4c bepaald |
+| 67 | Overzichten en export | Afdrukken via Windows (ook naar PDF) en exporteren naar CSV én Excel (.xlsx, ClosedXML, MIT-licentie) |
+| 68 | Opdeling fase 4 | 4a Grootboek → 4b Bank → 4c Contributie & relaties, elk een eigen pull request |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -111,7 +119,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Toevoeging op het ontwerp: instelling *eerste incassomaand* (eerdere maanden zijn nooit verschuldigd via Verenigd), zodat de eerste run geen jaren aan naheffing bevat. Concept-runs worden niet opgeslagen; een run bestaat pas als hij definitief is.
   - Tests: 443 in totaal. In de Linux-cloudsessie groen: Domain 159, Application 139, Infrastructure 41, Architectuur 7; ViewModel-tests 90/92 via een tijdelijk net10.0-project (dezelfde 2 bestaande tests met Windows-paden falen alleen op Linux). **Nog op Windows te draaien:** de volledige suite en de 5 FlaUI-UI-tests.
   - Bekende beperkingen: het verschil tussen het IBAN uit SOL3 en een in Verenigd ingevoerd IBAN (besluit 22) wordt nog niet apart gesignaleerd; de SOL3-import overschrijft de betalerkoppeling als SOL3 een IBAN levert (nu zijn de SOL3-IBAN-kolommen leeg). Boeken, storneringen en afdracht volgen in fase 4.
-- **Volgende stap: Fase 4 (Bankimport & boekhouding).** Eerst voorstel ter goedkeuring.
+- **Fase 4 (Bankimport & boekhouding): in ontwerp.** Besluiten 61–68 vastgesteld (2026-10-27), na analyse van de huidige Excel-boekhouding van de Vereniging (59 rekeningen, 4-cijferig, T-rekeningen per tabblad, bank in maandtotalen, contributie per speltak 8020–8060, kruisposten 1298, overlopende posten 1400/1700, geen btw). Detailontwerp 4a ter goedkeuring.
 
 ## Privacy
 
