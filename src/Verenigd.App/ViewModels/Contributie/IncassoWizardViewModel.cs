@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Verenigd.App.Diensten;
+using Verenigd.Application.Debiteuren;
 using Verenigd.Application.Incasso;
 using Verenigd.Domain.Financien;
 
@@ -30,10 +31,13 @@ public sealed partial class IncassoWizardViewModel : ObservableObject
 {
     private readonly IncassoDienst _dienst;
     private readonly IDialoogService _dialogen;
+    private readonly ContributieboekingDienst? _boeking;
     private IncassoVoorstel? _voorstel;
 
-    public IncassoWizardViewModel(IncassoDienst dienst, IDialoogService dialogen, TimeProvider tijd)
+    /// <param name="boeking">Boekt de run na Definitief maken (besluit 99); <c>null</c> = niet boeken.</param>
+    public IncassoWizardViewModel(IncassoDienst dienst, IDialoogService dialogen, TimeProvider tijd, ContributieboekingDienst? boeking = null)
     {
+        _boeking = boeking;
         ArgumentNullException.ThrowIfNull(tijd);
         _dienst = dienst;
         _dialogen = dialogen;
@@ -185,6 +189,11 @@ public sealed partial class IncassoWizardViewModel : ObservableObject
                 $"De run van {run.Maand} is definitief: {Totaaltekst}, uitvoerdatum {Weergave.Datum(run.Uitvoerdatum)}. Vooraf is een back-up gemaakt."),
         };
 
+        if (_boeking is not null)
+        {
+            regels.Add(await BoekAsync(run));
+        }
+
         try
         {
             var bestand = await _dienst.MaakBestandAsync(run);
@@ -211,6 +220,26 @@ public sealed partial class IncassoWizardViewModel : ObservableObject
         }
 
         Samenvatting = string.Join(Environment.NewLine + Environment.NewLine, regels);
+    }
+
+    /// <summary>Besluit 99: automatisch boeken; lukt dat niet, dan uitleg en later de knop Boeken.</summary>
+    private async Task<string> BoekAsync(Incassorun run)
+    {
+        try
+        {
+            var ontbrekend = await _boeking!.OntbrekendeOpbrengstrekeningenAsync(run.Id);
+            if (ontbrekend.Count > 0)
+            {
+                return $"De run is nog niet geboekt: kies eerst een opbrengstrekening voor {string.Join(", ", ontbrekend)} (Tarieven) en klik daarna bij Incassoruns op Boeken.";
+            }
+
+            var nummer = await _boeking.BoekRunAsync(run.Id);
+            return nummer is null ? "Er was niets te boeken (alleen herincasso's)." : $"De run is geboekt als {nummer} (Debiteuren contributie aan Contributie per speltak).";
+        }
+        catch (InvalidOperationException ex)
+        {
+            return $"De run is nog niet geboekt: {ex.Message} Boek hem later bij Incassoruns.";
+        }
     }
 
     partial void OnIsGecontroleerdChanged(bool value) => Vernieuw();

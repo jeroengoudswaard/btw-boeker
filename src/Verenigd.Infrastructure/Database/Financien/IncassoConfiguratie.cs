@@ -22,6 +22,8 @@ internal static class IncassoConfiguratie
             b.HasIndex(x => x.Naam).IsUnique();
             b.Property(x => x.Speltak).HasMaxLength(200);
             b.Ignore(x => x.HeeftTarief);
+            // Verwijzing naar de boekhouding zonder databasekoppeling: contributie en grootboek blijven los te laden.
+            b.Property(x => x.OpbrengstrekeningId);
         });
 
         modelBuilder.Entity<Tarief>(b =>
@@ -81,7 +83,10 @@ internal static class IncassoConfiguratie
             b.Property(x => x.Omschrijving).IsRequired().HasMaxLength(140);
             b.HasMany(x => x.Regels).WithOne().HasForeignKey("PostId").IsRequired().OnDelete(DeleteBehavior.Restrict);
             b.Navigation(x => x.Regels).UsePropertyAccessMode(PropertyAccessMode.Field);
+            b.Property(x => x.HerincassoVan).HasMaxLength(35);
             b.Ignore(x => x.Bedrag);
+            b.Ignore(x => x.IsHerincasso);
+            b.Ignore(x => x.Vordering);
         });
 
         modelBuilder.Entity<Postregel>(b =>
@@ -92,8 +97,19 @@ internal static class IncassoConfiguratie
             b.Property(x => x.Maand).IsRequired().HasMaxLength(7).HasConversion(m => m.Code, s => Maand.Parse(s));
             b.Property(x => x.Categorie).IsRequired().HasMaxLength(Contributiecategorie.MaximaleNaamLengte);
             b.Property(x => x.Bedrag).HasConversion(v => v.Centen, c => new Bedrag(c));
-            // Besluit 55: een maand wordt nooit twee keer geïncasseerd, behalve na annuleren (besluit 60).
-            b.HasIndex(x => new { x.Lidnummer, x.Maand }).IsUnique().HasFilter("\"IsGeannuleerd\" = 0");
+            // Besluit 55: een maand wordt nooit twee keer geïncasseerd, behalve na annuleren (besluit 60) en bij een
+            // herincasso van een gestorneerde post (besluit 92).
+            b.HasIndex(x => new { x.Lidnummer, x.Maand }).IsUnique().HasFilter("\"IsGeannuleerd\" = 0 AND \"IsHerincasso\" = 0");
+        });
+
+        modelBuilder.Entity<Domain.Financien.Debiteuren.Herincasso>(b =>
+        {
+            b.ToTable("Herincassos");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Id).ValueGeneratedNever();
+            b.Property(x => x.Vordering).IsRequired().HasMaxLength(35).UseCollation("BINARY");
+            b.HasIndex(x => x.Vordering);
+            b.Ignore(x => x.IsOpen);
         });
     }
 }

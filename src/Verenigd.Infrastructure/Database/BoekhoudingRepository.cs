@@ -58,12 +58,24 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             .OrderBy(m => m.Boekdatum).ToListAsync(annulering).ConfigureAwait(false);
         var regels = await context.Boekingsregels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
             .OrderBy(r => r.Volgorde).ThenBy(r => r.Id).ToListAsync(annulering).ConfigureAwait(false);
+        var debiteurmutaties = await context.Debiteurmutaties.Where(m => m.Administratie == administratie)
+            .OrderBy(m => m.Datum).ToListAsync(annulering).ConfigureAwait(false);
+        // Contributie hoort alleen bij de Vereniging (besluit 16).
+        var runs = administratie == AdministratieSoort.Vereniging
+            ? await context.Incassoruns.Include(r => r.Posten).ThenInclude(p => p.Regels).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false)
+            : [];
+        var herincassos = administratie == AdministratieSoort.Vereniging
+            ? await context.Herincassos.ToListAsync(annulering).ConfigureAwait(false)
+            : [];
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
             [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
         {
             Bankafschriften = afschriften,
             Bankmutaties = mutaties,
             Boekingsregels = regels,
+            Debiteurmutaties = debiteurmutaties,
+            Incassoruns = runs,
+            Herincassos = herincassos,
         };
     }
 }

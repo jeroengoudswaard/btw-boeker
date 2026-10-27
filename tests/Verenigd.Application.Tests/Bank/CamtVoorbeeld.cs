@@ -8,7 +8,7 @@ namespace Verenigd.Application.Tests.Bank;
 internal sealed record VbTransactie(
     long Centen, string? Familie = "RCDT", string? Sub = "ESCT", string Eigen = "541", string? Ref = null,
     string? TegenIban = CamtVoorbeeld.Tegen, string? Naam = "Verzonnen BV", string? Omschrijving = "Factuur 1", string? E2e = "E2E-1",
-    int? Batch = null, string Status = "BOOK", string? Mandaat = null, string NtryRef = "1");
+    int? Batch = null, string Status = "BOOK", string? Mandaat = null, string NtryRef = "1", string BatchId = "RUN-1", string? Reden = null);
 
 internal sealed record VbAfschrift(DateOnly Datum, long Begin, params VbTransactie[] Transacties)
 {
@@ -70,8 +70,9 @@ internal static class CamtVoorbeeld
             : "<RltdPties>" + Partij(partij, t.Naam) + (t.TegenIban is null ? string.Empty : $"<{partij}Acct><Id><IBAN>{t.TegenIban}</IBAN></Id></{partij}Acct>") + "</RltdPties>";
         var refs = "<Refs>" + (t.Ref is null ? string.Empty : $"<AcctSvcrRef>{t.Ref}</AcctSvcrRef>") + (t.Mandaat is null ? string.Empty : $"<MndtId>{t.Mandaat}</MndtId>")
             + (t.E2e is null ? string.Empty : $"<EndToEndId>{t.E2e}</EndToEndId>") + "</Refs>";
-        var batch = t.Batch is { } n ? string.Create(CultureInfo.InvariantCulture, $"<Btch><PmtInfId>RUN-1</PmtInfId><NbOfTxs>{n}</NbOfTxs></Btch>") : string.Empty;
-        var tekst = t.Omschrijving is null ? string.Empty : $"<RmtInf><Ustrd>{Esc(t.Omschrijving)}</Ustrd></RmtInf>";
+        var batch = t.Batch is { } n ? string.Create(CultureInfo.InvariantCulture, $"<Btch><PmtInfId>{t.BatchId}</PmtInfId><NbOfTxs>{n}</NbOfTxs></Btch>") : string.Empty;
+        var tekst = (t.Omschrijving is null ? string.Empty : $"<RmtInf><Ustrd>{Esc(t.Omschrijving)}</Ustrd></RmtInf>")
+            + (t.Reden is null ? string.Empty : $"<RtrInf><Rsn><Cd>{t.Reden}</Cd></Rsn></RtrInf>");
         return string.Create(CultureInfo.InvariantCulture,
             $"""<Ntry><NtryRef>{t.NtryRef}</NtryRef><Amt Ccy="EUR">{Bedrag(t.Centen)}</Amt><CdtDbtInd>{Ind(t.Centen)}</CdtDbtInd>{status}<BookgDt><Dt>{datum:yyyy-MM-dd}</Dt></BookgDt><ValDt><Dt>{datum:yyyy-MM-dd}</Dt></ValDt>{(t.Ref is null ? "" : $"<AcctSvcrRef>{t.Ref}</AcctSvcrRef>")}<BkTxCd>{code}</BkTxCd><NtryDtls>{batch}<TxDtls>{refs}<Amt Ccy="EUR">{Bedrag(t.Centen)}</Amt><CdtDbtInd>{Ind(t.Centen)}</CdtDbtInd>{partijen}{tekst}</TxDtls></NtryDtls></Ntry>""");
     }

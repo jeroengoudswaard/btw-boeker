@@ -1,6 +1,7 @@
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Boekhouding;
@@ -20,6 +21,15 @@ public sealed record BoekhoudingStand(
 
     /// <summary>In volgorde: de eerste passende regel wint.</summary>
     public IReadOnlyList<Boekingsregel> Boekingsregels { get; init; } = [];
+
+    /// <summary>Mutaties op contributievorderingen (stap 4c-1).</summary>
+    public IReadOnlyList<Debiteurmutatie> Debiteurmutaties { get; init; } = [];
+
+    /// <summary>De incassoruns (alleen-lezen), om bankontvangsten en storneringen te herkennen.</summary>
+    public IReadOnlyList<Incassorun> Incassoruns { get; init; } = [];
+
+    /// <summary>Aangevraagde herincasso's (alleen-lezen).</summary>
+    public IReadOnlyList<Herincasso> Herincassos { get; init; } = [];
 
     public bool IsIngericht => Rekeningen.Count > 0;
 

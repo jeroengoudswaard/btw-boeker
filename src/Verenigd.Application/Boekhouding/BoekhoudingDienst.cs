@@ -90,10 +90,10 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 throw new InvalidOperationException("Een geboekte post kan niet worden verwijderd; maak een tegenboeking.");
             }
 
-            // De banktransactie gaat terug naar de werkvoorraad (besluit 75).
+            // De banktransactie gaat terug naar de werkvoorraad (besluit 75); een aflettering vervalt.
             stand.MutatieVan(post.Id)?.Ontkoppel();
-
             var wijziging = new BoekhoudingWijziging<bool>(true);
+            wijziging.Verwijderen.AddRange(stand.Debiteurmutaties.Where(m => m.PostId == post.Id));
             wijziging.Verwijderen.Add(post);
             return wijziging;
         }, annulering);
@@ -123,8 +123,8 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             }
 
             var rubriek = invoer.RubriekId is { } rid ? stand.Rubrieken.Single(r => r.Id == rid) : null;
-            var wijziging = new BoekhoudingWijziging<int>(0);
-            Grootboekrekening rekening;
+            Grootboekrekening rekening = null!;
+            var wijziging = new BoekhoudingWijziging<int>(0) { WaardeNaOpslaan = () => rekening.Id };
             if (invoer.Id is { } id)
             {
                 rekening = stand.Rekeningen.Single(r => r.Id == id);

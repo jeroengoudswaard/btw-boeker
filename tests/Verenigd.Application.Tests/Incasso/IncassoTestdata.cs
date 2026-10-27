@@ -1,5 +1,6 @@
 using Verenigd.Application.Incasso;
 using Verenigd.Domain.Financien;
+using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Gedeeld;
 using Verenigd.Domain.Leden;
 
@@ -25,6 +26,7 @@ internal sealed class IncassoTestdata
     public List<Betaler> Betalers { get; } = [];
     public List<BetalerLid> Koppelingen { get; } = [];
     public List<Incassorun> Runs { get; } = [];
+    public List<Herincasso> Herincassos { get; } = [];
 
     public Incassoinstellingen? Instellingen { get; set; } = new(
         IncassantId.Maak("DE98ZZZ09999999999"), "Scouting Testgroep", Iban.Maak("NL91ABNA0417164300"), 1, new Maand(2026, 1));
@@ -46,7 +48,10 @@ internal sealed class IncassoTestdata
         }
     }
 
-    public IncassoStand Stand => new(Personen, Categorieen, Tarieven, LidCategorieen, Betalers, Koppelingen, Runs, Instellingen);
+    public IncassoStand Stand => new(Personen, Categorieen, Tarieven, LidCategorieen, Betalers, Koppelingen, Runs, Instellingen)
+    {
+        Herincassos = Herincassos,
+    };
 
     public Contributiecategorie Categorie(string naam, CategorieSoort soort, string? speltak)
     {

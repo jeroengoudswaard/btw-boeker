@@ -1,4 +1,5 @@
 using Verenigd.Domain.Financien;
+using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Gedeeld;
 using Verenigd.Domain.Leden;
 
@@ -16,7 +17,11 @@ public sealed record IncassoStand(
     IReadOnlyList<Betaler> Betalers,
     IReadOnlyList<BetalerLid> Koppelingen,
     IReadOnlyList<Incassorun> Runs,
-    Incassoinstellingen? Instellingen);
+    Incassoinstellingen? Instellingen)
+{
+    /// <summary>Gestorneerde posten die in de volgende run opnieuw worden meegenomen (besluit 92).</summary>
+    public IReadOnlyList<Herincasso> Herincassos { get; init; } = [];
+}
 
 /// <summary>Eén lid × één maand in een voorstel.</summary>
 public sealed record VoorstelRegel(
@@ -25,6 +30,9 @@ public sealed record VoorstelRegel(
 /// <summary>Eén incasso bij één betaler (besluit 46).</summary>
 public sealed record VoorstelPost(Betaler Betaler, string Rekeninghouder, string Omschrijving, IReadOnlyList<VoorstelRegel> Regels)
 {
+    /// <summary>Bij een herincasso (besluit 100): het EndToEndId van de gestorneerde post.</summary>
+    public string? HerincassoVan { get; init; }
+
     public Bedrag Bedrag => Regels.Select(r => r.Bedrag).Som();
 }
 
@@ -129,5 +137,11 @@ public interface IContributieRepository
 
     Task LegBestandVastAsync(Guid runId, string hash, CancellationToken annulering = default);
 
+    /// <summary>Annuleert de run; herincasso's die erin zaten wachten weer op de volgende run.</summary>
     Task AnnuleerRunAsync(Guid runId, DateTime nuUtc, CancellationToken annulering = default);
+
+    Task VraagHerincassoAanAsync(Herincasso herincasso, CancellationToken annulering = default);
+
+    /// <summary>Per categorie-ID de opbrengstrekening (grootboekrekening-ID), of <c>null</c> om de koppeling te wissen.</summary>
+    Task BewaarOpbrengstrekeningenAsync(IReadOnlyDictionary<int, int?> perCategorie, CancellationToken annulering = default);
 }

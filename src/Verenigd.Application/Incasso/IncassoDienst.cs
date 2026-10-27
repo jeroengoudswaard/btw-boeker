@@ -45,6 +45,11 @@ public sealed class IncassoDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 }
 
                 run = BouwRun(actueel, tijd.GetUtcNow().UtcDateTime);
+                foreach (var post in actueel.Posten.Where(p => p.HerincassoVan is not null))
+                {
+                    stand.Herincassos.Single(h => h.IsOpen && h.Vordering == post.HerincassoVan).Verwerk(run.Id);
+                }
+
                 return run;
             },
             annulering).ConfigureAwait(false);
@@ -151,7 +156,7 @@ public sealed class IncassoDienst(IDatabaseSessie sessie, TimeProvider tijd)
         {
             var incassopost = run.VoegPostToe(
                 post.Betaler.Id, post.Betaler.Iban, post.Rekeninghouder, post.Betaler.Mandaatkenmerk!,
-                post.Betaler.MachtigingOndertekendOp!.Value, post.Omschrijving);
+                post.Betaler.MachtigingOndertekendOp!.Value, post.Omschrijving, post.HerincassoVan);
             foreach (var regel in post.Regels)
             {
                 incassopost.VoegRegelToe(regel.Lidnummer, regel.Maand, regel.Categorie, regel.Bedrag);
@@ -166,6 +171,7 @@ public sealed class IncassoDienst(IDatabaseSessie sessie, TimeProvider tijd)
         && a.Posten.Count == b.Posten.Count
         && a.Posten.Zip(b.Posten).All(p =>
             p.First.Betaler.Id == p.Second.Betaler.Id
+            && p.First.HerincassoVan == p.Second.HerincassoVan
             && p.First.Omschrijving == p.Second.Omschrijving
             && p.First.Regels.SequenceEqual(p.Second.Regels));
 }

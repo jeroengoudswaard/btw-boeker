@@ -2,6 +2,7 @@ using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Tests.Boekhouding;
@@ -42,6 +43,12 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Bankafschrift> Bankafschriften { get; } = [];
     public List<Bankmutatie> Bankmutaties { get; } = [];
     public List<Boekingsregel> Boekingsregels { get; } = [];
+    public List<Debiteurmutatie> Debiteurmutaties { get; } = [];
+
+    /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
+    public Func<IReadOnlyList<Incassorun>> Incassoruns { get; set; } = () => [];
+
+    public Func<IReadOnlyList<Herincasso>> Herincassos { get; set; } = () => [];
 
     public Grootboekrekening Reserve { get; } = null!;
     public Grootboekrekening Kas { get; } = null!;
@@ -56,6 +63,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Bankafschriften = Bankafschriften.ToList(),
         Bankmutaties = Bankmutaties.ToList(),
         Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
+        Debiteurmutaties = Debiteurmutaties.ToList(),
+        Incassoruns = Incassoruns(),
+        Herincassos = Herincassos(),
     };
 
     /// <summary>Een bankdagboek op <see cref="Bank"/> (of een andere rekening) voor een eigen IBAN.</summary>
@@ -100,6 +110,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
             {
                 case Journaalpost post: Posten.Remove(post); break;
                 case Boekingsregel regel: Boekingsregels.Remove(regel); break;
+                case Debiteurmutatie mutatie: Debiteurmutaties.Remove(mutatie); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
@@ -116,6 +127,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Bankafschrift a: Bankafschriften.Add(MetId(a)); break;
                 case Bankmutatie m: Bankmutaties.Add(m); break;
                 case Boekingsregel r: Boekingsregels.Add(MetId(r)); break;
+                case Debiteurmutatie d: Debiteurmutaties.Add(d); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }

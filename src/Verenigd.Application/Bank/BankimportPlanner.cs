@@ -12,6 +12,9 @@ public sealed record BankimportRekening(
     Iban Iban, Dagboek? Dagboek, IReadOnlyList<CamtAfschrift> Afschriften, IReadOnlyList<NieuweMutatie> Nieuw, int AlBekend,
     int BuitenBoekjaar, IReadOnlyList<string> Meldingen)
 {
+    /// <summary>Al ingelezen transacties; de import vult daarmee velden aan die eerder nog niet werden bewaard.</summary>
+    public IReadOnlyList<NieuweMutatie> Bekend { get; init; } = [];
+
     public DateOnly? Van => Afschriften.Count == 0 ? null : Afschriften.Min(a => a.Datum);
 
     public DateOnly? Tot => Afschriften.Count == 0 ? null : Afschriften.Max(a => a.Datum);
@@ -49,6 +52,7 @@ public static class BankimportPlanner
                 .ToList();
 
             var nieuw = new List<NieuweMutatie>();
+            var bekendeTransacties = new List<NieuweMutatie>();
             var gezien = new HashSet<string>(StringComparer.Ordinal);
             int alBekend = 0, buiten = 0;
             foreach (var transactie in groep.SelectMany(a => a.Transacties))
@@ -62,6 +66,7 @@ public static class BankimportPlanner
                 if (bekend.Contains(sleutel))
                 {
                     alBekend++;
+                    bekendeTransacties.Add(new NieuweMutatie(sleutel, transactie));
                 }
                 else if (stand.Boekjaar(transactie.Boekdatum.Year) is not { IsOpen: true })
                 {
@@ -81,7 +86,7 @@ public static class BankimportPlanner
             }
 
             rekeningmeldingen.AddRange(Aansluiting(afschriften, opgeslagen));
-            rekeningen.Add(new BankimportRekening(iban, dagboek, afschriften, nieuw, alBekend, buiten, rekeningmeldingen));
+            rekeningen.Add(new BankimportRekening(iban, dagboek, afschriften, nieuw, alBekend, buiten, rekeningmeldingen) { Bekend = bekendeTransacties });
         }
 
         return new BankimportVoorstel(rekeningen, meldingen);

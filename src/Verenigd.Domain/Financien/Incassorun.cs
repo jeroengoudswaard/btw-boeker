@@ -55,15 +55,20 @@ public sealed class Incassorun
     /// <summary>Kort, uniek kenmerk voor bericht- en batch-ID's in het SEPA-bestand.</summary>
     public string Kenmerk => "VER" + Id.ToString("N")[..12].ToUpperInvariant();
 
+    /// <param name="herincassoVan">Bij een herincasso (besluit 100): het EndToEndId van de gestorneerde post.</param>
     public Incassopost VoegPostToe(
-        Guid betalerId, Iban iban, string rekeninghouder, string mandaatkenmerk, DateOnly ondertekendOp, string omschrijving)
+        Guid betalerId, Iban iban, string rekeninghouder, string mandaatkenmerk, DateOnly ondertekendOp, string omschrijving,
+        string? herincassoVan = null)
     {
         if (BestandHash is not null)
         {
             throw new InvalidOperationException("Het bestand van deze run is al gemaakt; de run kan niet meer worden gewijzigd.");
         }
 
-        var post = new Incassopost(this, _posten.Count + 1, betalerId, iban, rekeninghouder, mandaatkenmerk, ondertekendOp, omschrijving);
+        var post = new Incassopost(this, _posten.Count + 1, betalerId, iban, rekeninghouder, mandaatkenmerk, ondertekendOp, omschrijving)
+        {
+            HerincassoVan = string.IsNullOrWhiteSpace(herincassoVan) ? null : herincassoVan,
+        };
         _posten.Add(post);
         return post;
     }
@@ -134,10 +139,18 @@ public sealed class Incassopost
 
     public Bedrag Bedrag => _regels.Select(r => r.Bedrag).Som();
 
+    /// <summary>Het EndToEndId van de gestorneerde post die deze post opnieuw incasseert, of <c>null</c>.</summary>
+    public string? HerincassoVan { get; internal init; }
+
+    public bool IsHerincasso => HerincassoVan is not null;
+
+    /// <summary>De vordering die deze post int: bij een herincasso die van de oorspronkelijke post.</summary>
+    public string Vordering => HerincassoVan ?? EndToEndId;
+
     public Postregel VoegRegelToe(Lidnummer lidnummer, Maand maand, string categorie, Bedrag bedrag)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(bedrag.Centen, 0L, nameof(bedrag));
-        var regel = new Postregel(lidnummer, maand, categorie, bedrag);
+        var regel = new Postregel(lidnummer, maand, categorie, bedrag) { IsHerincasso = IsHerincasso };
         _regels.Add(regel);
         return regel;
     }
@@ -165,6 +178,12 @@ public sealed class Postregel
     public string Categorie { get; private set; }
     public Bedrag Bedrag { get; private set; }
     public bool IsGeannuleerd { get; private set; }
+
+    /// <summary>
+    /// Een herincasso van een al gevorderde maand: telt niet mee voor "nooit twee keer" (besluit 55) en levert geen nieuwe
+    /// opbrengst op (besluit 100).
+    /// </summary>
+    public bool IsHerincasso { get; internal init; }
 
     internal void Annuleer() => IsGeannuleerd = true;
 }

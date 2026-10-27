@@ -180,7 +180,7 @@ public sealed class AppUiTests : IDisposable
 
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
         Zoek(venster, "ContributieTabblad");
-        foreach (var subtab in new[] { "SubtabLeden", "SubtabBetalers", "SubtabTarieven", "SubtabRuns" })
+        foreach (var subtab in new[] { "SubtabLeden", "SubtabBetalers", "SubtabTarieven", "SubtabRuns", "SubtabOpenstaand" })
         {
             Zoek(venster, subtab);
         }

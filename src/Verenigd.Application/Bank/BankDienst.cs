@@ -5,6 +5,7 @@ using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Boekhouding;
+using Verenigd.Domain.Financien.Debiteuren;
 
 namespace Verenigd.Application.Bank;
 
@@ -37,7 +38,7 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
             throw new InvalidOperationException($"Kies een grootboekrekening voor de nieuwe bankrekening {rekening.Iban}.");
         }
 
-        if (voorstel.AantalNieuw == 0 && voorstel.Rekeningen.All(r => r.Afschriften.Count == 0))
+        if (voorstel.AantalNieuw == 0 && voorstel.Rekeningen.All(r => r.Afschriften.Count == 0 && r.Bekend.Count == 0))
         {
             return new BankimportResultaat(0, 0, 0);
         }
@@ -82,7 +83,17 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 {
                     var t = nieuw.Transactie;
                     mutaties.Add(new Bankmutatie(administratie, dagboek, nieuw.Sleutel, t.Boekdatum, t.Bedrag, t.IsBij, t.Code,
-                        t.TegenIban, t.Tegennaam, t.Omschrijving, t.EndToEndId, t.MandaatId, t.BatchAantal));
+                        t.TegenIban, t.Tegennaam, t.Omschrijving, t.EndToEndId, t.MandaatId, t.BatchAantal, t.BatchKenmerk, t.Retourreden));
+                }
+
+                // Velden die bij een eerdere import nog niet werden bewaard (batchkenmerk, retourreden) aanvullen.
+                var opgeslagenMutaties = stand.Bankmutaties.ToDictionary(m => m.Sleutel, StringComparer.Ordinal);
+                foreach (var bekendeTransactie in import.Bekend)
+                {
+                    if (opgeslagenMutaties.TryGetValue(bekendeTransactie.Sleutel, out var bestaand))
+                    {
+                        bestaand.Verrijk(bekendeTransactie.Transactie.BatchKenmerk, bekendeTransactie.Transactie.Retourreden);
+                    }
                 }
             }
 
@@ -91,9 +102,14 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
             foreach (var mutatie in mutaties)
             {
                 toevoegen.Add(mutatie);
-                if (MaakConcept(naImport, mutatie) is { } post)
+                var verwerkt = naImport with
                 {
-                    toevoegen.Add(post);
+                    Bankmutaties = [.. naImport.Bankmutaties, .. mutaties],
+                    Posten = [.. naImport.Posten, .. toevoegen.OfType<Journaalpost>()],
+                    Debiteurmutaties = [.. naImport.Debiteurmutaties, .. toevoegen.OfType<Debiteurmutatie>()],
+                };
+                if (MaakConcept(verwerkt, mutatie, toevoegen) is not null)
+                {
                     herkend++;
                 }
             }
@@ -160,13 +176,23 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
     public Task<int> PasRegelsToeAsync(AdministratieSoort administratie, CancellationToken annulering = default) =>
         Repository.PasToeAsync(administratie, stand =>
         {
-            var posten = stand.Bankmutaties
-                .Where(m => m.PostId is null && stand.Boekjaar(m.Boekdatum.Year) is { IsOpen: true })
-                .Select(m => MaakConcept(stand, m))
-                .OfType<Journaalpost>()
-                .ToList();
-            var wijziging = new BoekhoudingWijziging<int>(posten.Count);
-            wijziging.Toevoegen.AddRange(posten);
+            var toevoegen = new List<object>();
+            var aantal = 0;
+            foreach (var mutatie in stand.Bankmutaties.Where(m => m.PostId is null && stand.Boekjaar(m.Boekdatum.Year) is { IsOpen: true }).ToList())
+            {
+                var verwerkt = stand with
+                {
+                    Posten = [.. stand.Posten, .. toevoegen.OfType<Journaalpost>()],
+                    Debiteurmutaties = [.. stand.Debiteurmutaties, .. toevoegen.OfType<Debiteurmutatie>()],
+                };
+                if (MaakConcept(verwerkt, mutatie, toevoegen) is not null)
+                {
+                    aantal++;
+                }
+            }
+
+            var wijziging = new BoekhoudingWijziging<int>(aantal);
+            wijziging.Toevoegen.AddRange(toevoegen);
             return wijziging;
         }, annulering);
 
@@ -234,7 +260,8 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return new BoekhoudingWijziging<bool>(true);
         }, annulering);
 
-    private static Journaalpost? MaakConcept(BoekhoudingStand stand, Bankmutatie mutatie)
+    /// <summary>Herkent de transactie en voegt de conceptpost (en eventuele aflettering) toe aan <paramref name="toevoegen"/>.</summary>
+    private static Journaalpost? MaakConcept(BoekhoudingStand stand, Bankmutatie mutatie, List<object> toevoegen)
     {
         if (Bankherkenning.Bepaal(stand, mutatie) is not { } herkenning)
         {
@@ -243,6 +270,9 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
 
         var post = mutatie.MaakPost(herkenning.Rekening, herkenning.Omschrijving);
         mutatie.Koppel(post);
+        toevoegen.Add(post);
+        toevoegen.AddRange(herkenning.Aflettering.Select(a => new Debiteurmutatie(
+            mutatie.Administratie, a.Vordering, a.BetalerId, a.IncassorunId, a.Soort, mutatie.Boekdatum, a.Saldo, post.Id, a.Reden)));
         return post;
     }
 
