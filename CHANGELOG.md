@@ -2,6 +2,42 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.0] - 2026-10-27: Fase 4a "Grootboek"
+
+### Toegevoegd
+- **Tabblad Boekhouding** per administratie (Ctrl+4, of via *Modules*). Het heeft vijf subtabbladen:
+  - **Journaal:**
+    - Journaalposten met dagboek, datum, omschrijving en regels (rekening, omschrijving, debet of credit).
+    - Een post is *Concept* (opslaan met Ctrl+S) of *Geboekt* (Ctrl+Enter). Boeken kan pas als debet en credit gelijk zijn.
+    - Geboekte posten krijgen een doorlopend nummer per dagboek en jaar (`MEM-2026-0001`) en zijn onveranderlijk. Corrigeren gaat via *Tegenboeken*.
+    - Ctrl+N maakt binnen dit tabblad een nieuwe post (besluit 72). Ctrl+F zoekt op nummer of omschrijving.
+  - **Rekeningschema:** rekeningen (nummer, naam, rubriek, soort balans/resultaat, rol, actief) en rubrieken. Een rekening met de rol *Kas* krijgt automatisch het dagboek Kas.
+  - **Grootboekkaart:** alle mutaties van één rekening over een periode, met begin-, lopend en eindsaldo.
+  - **Rapporten:** saldibalans, balans en staat van baten en lasten, per rubriek. Alleen geboekte posten tellen mee.
+  - **Boekjaren:**
+    - *Afsluiten*: het resultaat gaat naar de reserverekening, het jaar wordt vergrendeld en de openingsbalans van het volgende jaar wordt gemaakt. Vooraf wordt een back-up gemaakt.
+    - *Heropenen* zet dat terug.
+    - *Volgend boekjaar openen* maakt het mogelijk om alvast in het nieuwe jaar te boeken.
+- **Overname uit de huidige Excel-boekhouding** (*Bestand › Importeren › Boekhouding uit Excel…*, of de knop in een lege administratie). De wizard heeft vier stappen:
+  1. **Bestand:** het werkblad *Voorblad* wordt gelezen.
+  2. **Rekeningen:** per rekening de soort controleren; rekeningen kunnen worden overgeslagen (9990 Memoriaal standaard).
+  3. **Beginbalans:** controle debet = credit.
+     - Een verschil wordt geweigerd, tenzij u het bewust op een tussenrekening boekt (standaard *1299 Te onderzoeken verschillen*, besluit 73).
+     - Het verschil staat dan als aparte regel op de openingsbalans en in het logboek.
+  4. **Klaar:** vooraf is een back-up gemaakt.
+
+  De overname kan één keer per administratie. Het Excel-bestand wordt alleen gelezen en niet bewaard.
+- **Afdrukken en exporteren** (besluit 67):
+  - *Bestand › Afdrukken…* (Ctrl+P) drukt het rapport of de grootboekkaart af via het Windows-afdrukvenster, ook naar PDF.
+  - Exporteren kan naar Excel (.xlsx, via ClosedXML) en naar CSV (`;`, UTF-8, Nederlandse bedragnotatie).
+- Het logboek bevat alleen aantallen, bedragen en jaartallen; nooit namen of IBAN's.
+- 512 geautomatiseerde tests (was 443).
+
+### Nog niet functioneel
+- Bankimport (CAMT.053) en boekingsregels: stap 4b.
+- Contributie boeken, storneringen, debiteuren/crediteuren en verkoopfacturen: stap 4c.
+- De boekhouding van de Stichting kan al worden geopend, maar wordt pas later uitgewerkt (besluit 61).
+
 ## [0.3.0] - 2026-10-27: Fase 3 "Contributie & SEPA-incasso"
 
 ### Toegevoegd

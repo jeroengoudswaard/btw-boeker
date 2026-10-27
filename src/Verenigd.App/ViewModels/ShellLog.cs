@@ -37,6 +37,15 @@ internal static partial class ShellLog
     [LoggerMessage(11, LogLevel.Information, "Incassorun {Maand} geannuleerd")]
     public static partial void IncassorunGeannuleerd(ILogger logger, string maand);
 
+    [LoggerMessage(12, LogLevel.Information, "Boekhouding {Administratie} overgenomen uit Excel: {Aantal} rekeningen")]
+    public static partial void BoekhoudingOvergenomen(ILogger logger, string administratie, int aantal);
+
+    [LoggerMessage(13, LogLevel.Warning, "Boekhouding {Administratie} overgenomen met een bewust geboekt verschil van {Verschil} op rekening {Rekening}")]
+    public static partial void BoekhoudingVerschilGeboekt(ILogger logger, string administratie, string verschil, string rekening);
+
+    [LoggerMessage(14, LogLevel.Information, "Boekjaar {Jaar} van {Administratie} {Handeling}")]
+    public static partial void BoekjaarGewijzigd(ILogger logger, int jaar, string administratie, string handeling);
+
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 }

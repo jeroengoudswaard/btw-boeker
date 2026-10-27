@@ -18,7 +18,7 @@ public sealed class ShellViewModelTests
     private readonly FakeThemaService _thema = new();
 
     private ShellViewModel MaakShell() =>
-        new(_beheer, _instellingen, _dialogen, _thema, new VasteTijd(new DateTimeOffset(2026, 10, 26, 12, 0, 0, TimeSpan.Zero)),
+        new(_beheer, _instellingen, _dialogen, _thema, FakeBoekhouding.Hulpmiddelen(), new VasteTijd(new DateTimeOffset(2026, 10, 26, 12, 0, 0, TimeSpan.Zero)),
             NullLogger<ShellViewModel>.Instance);
 
     private async Task<ShellViewModel> MaakShellMetOpenDatabase()

@@ -10,6 +10,7 @@ using Verenigd.App.Views;
 using Verenigd.Application.Database;
 using Verenigd.Application.Instellingen;
 using Verenigd.Infrastructure.Database;
+using Verenigd.Infrastructure.Excel;
 using Verenigd.Infrastructure.Instellingen;
 
 namespace Verenigd.App;
@@ -42,6 +43,7 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IInstellingenOpslag>(_ => new JsonInstellingenOpslag(Paden.Instellingenbestand));
         builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
         builder.Services.AddSingleton<IThemaService, WpfThemaService>();
+        builder.Services.AddSingleton(new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst()));
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddSingleton<ShellWindow>();
         _host = builder.Build();

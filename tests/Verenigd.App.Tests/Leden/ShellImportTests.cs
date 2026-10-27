@@ -20,7 +20,7 @@ public sealed class ShellImportTests
         _beheer.Voeg(Pad, Wachtwoord);
         _dialogen.BestaandDatabasebestand = Pad;
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, HerstelGevraagd: false));
-        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(),
+        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(), FakeBoekhouding.Hulpmiddelen(),
             new VasteTijd(new DateTimeOffset(2026, 10, 27, 12, 0, 0, TimeSpan.Zero)), NullLogger<ShellViewModel>.Instance);
         await shell.InitialiseerAsync();
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
@@ -30,7 +30,7 @@ public sealed class ShellImportTests
     [Fact]
     public async Task Importeren_kan_alleen_met_open_database()
     {
-        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(),
+        var shell = new ShellViewModel(_beheer, new InMemoryInstellingenOpslag(), _dialogen, new FakeThemaService(), FakeBoekhouding.Hulpmiddelen(),
             TimeProvider.System, NullLogger<ShellViewModel>.Instance);
 
         Assert.False(shell.ImporteerSol3Command.CanExecute(null));

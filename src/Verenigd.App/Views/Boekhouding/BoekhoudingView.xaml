@@ -1,0 +1,362 @@
+<UserControl x:Class="Verenigd.App.Views.Boekhouding.BoekhoudingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:BoekhoudingViewModel}"
+             AutomationProperties.AutomationId="BoekhoudingTabblad"
+             PreviewKeyDown="Tabblad_PreviewKeyDown">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding VernieuwCommand}" />
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding NieuwePostCommand}" />
+    </UserControl.InputBindings>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Find" Executed="Zoeken_Executed" />
+    </UserControl.CommandBindings>
+
+    <DockPanel Margin="{StaticResource PaginaMarge}">
+        <!-- ===== Opdrachtbalk onderaan ===== -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Button DockPanel.Dock="Right" Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}"
+                    Style="{DynamicResource AccentButtonStyle}" ToolTip="Concept en rekeningen opslaan (Ctrl+S)" AutomationProperties.AutomationId="BoekhoudingOpslaan" />
+            <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0"
+                       Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0" AutomationProperties.LiveSetting="Assertive"
+                           AutomationProperties.AutomationId="BoekhoudingFout"
+                           Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                <TextBlock Text="{Binding Melding}" Style="{StaticResource Toelichting}" AutomationProperties.LiveSetting="Polite"
+                           AutomationProperties.AutomationId="BoekhoudingMelding"
+                           Visibility="{Binding Melding, Converter={StaticResource NietNullNaarZichtbaar}}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ===== Nog niet ingericht ===== -->
+        <Border DockPanel.Dock="Top" Style="{StaticResource Kaart}" MaxWidth="640" HorizontalAlignment="Left"
+                Visibility="{Binding IsLeeg, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="BoekhoudingLeeg">
+            <StackPanel>
+                <TextBlock Text="Deze administratie heeft nog geen boekhouding" Style="{StaticResource Sectietitel}" />
+                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12"
+                           Text="Neem het rekeningschema en de eindbalans eenmalig over uit de huidige Excel-boekhouding, of begin met een leeg rekeningschema." />
+                <StackPanel Style="{StaticResource Knoppenbalk}" HorizontalAlignment="Left">
+                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}" Style="{DynamicResource AccentButtonStyle}"
+                            Margin="0,0,8,0" AutomationProperties.AutomationId="OvernemenUitExcel" />
+                    <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" AutomationProperties.AutomationId="LeegBeginnen" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <DockPanel Visibility="{Binding IsIngericht, Converter={StaticResource BoolNaarZichtbaar}}">
+            <!-- ===== Boekjaar en uitvoer ===== -->
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <Label Content="_Boekjaar" Target="{Binding ElementName=Jaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                <ComboBox x:Name="Jaarkeuze" ItemsSource="{Binding Boekjaren}" SelectedItem="{Binding Jaar}" Width="100" Margin="0,0,24,0"
+                          VerticalAlignment="Center" AutomationProperties.AutomationId="Boekjaarkeuze" />
+                <Button Command="{Binding AfdrukkenCommand}" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Afdrukken, ook naar PDF (Ctrl+P)"
+                        AutomationProperties.AutomationId="Afdrukken">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE749;" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <AccessText Text="Af_drukken..." />
+                    </StackPanel>
+                </Button>
+                <Button Content="Naar _Excel..." Command="{Binding ExporteerExcelCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
+                        ToolTip="Het rapport of de grootboekkaart opslaan als .xlsx" AutomationProperties.AutomationId="ExporteerExcel" />
+                <Button Content="Naar _CSV..." Command="{Binding ExporteerCsvCommand}" VerticalAlignment="Center"
+                        ToolTip="Het rapport of de grootboekkaart opslaan als .csv" AutomationProperties.AutomationId="ExporteerCsv" />
+            </WrapPanel>
+
+            <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="BoekhoudingSubtabbladen">
+                <!-- ===== Journaal ===== -->
+                <TabItem Header="_Journaal" AutomationProperties.AutomationId="SubtabJournaal">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="3*" MinWidth="420" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel>
+                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Button Content="_Nieuwe post" Command="{Binding NieuwePostCommand}" Margin="0,0,16,0" ToolTip="Nieuwe post (Ctrl+N)"
+                                        AutomationProperties.AutomationId="NieuwePost" />
+                                <TextBox x:Name="Zoekveld" Width="200" VerticalAlignment="Center" Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Zoeken op nummer of omschrijving (Ctrl+F)" AutomationProperties.Name="Zoeken op nummer of omschrijving" />
+                            </WrapPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
+                            <DataGrid ItemsSource="{Binding Posten}" SelectedItem="{Binding GeselecteerdePost}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Journaalposten"
+                                      AutomationProperties.AutomationId="Journaalposten">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" Width="Auto" />
+                                    <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
+                                    <DataGridTextColumn Header="Omschrijving" Binding="{Binding Omschrijving}" Width="*" />
+                                    <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedrag}" Width="Auto" />
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <TextBlock Grid.Column="2" Text="Selecteer een post of kies Nieuwe post (Ctrl+N)." Style="{StaticResource Toelichting}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding Editor, Converter={StaticResource NullNaarZichtbaar}}" />
+                        <Border Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding Editor}" d:DataContext="{d:DesignInstance Type=vm:PostEditor}"
+                                Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.AutomationId="PostEditor">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Sectietitel}">
+                                    <Run Text="{Binding Nummer, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Statustekst, Mode=OneWay}" />
+                                </TextBlock>
+                                <Grid DockPanel.Dock="Top" IsEnabled="{Binding IsBewerkbaar}" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Content="Dag_boek" Target="{Binding ElementName=Dagboekkeuze}" Padding="0,0,0,4" />
+                                    <ComboBox x:Name="Dagboekkeuze" Grid.Row="1" ItemsSource="{Binding Dagboeken}" SelectedItem="{Binding GekozenDagboek}" DisplayMemberPath="Naam"
+                                              MinWidth="140" AutomationProperties.AutomationId="PostDagboek" />
+                                    <Label Grid.Column="2" Content="_Datum" Target="{Binding ElementName=Postdatum}" Padding="0,0,0,4" />
+                                    <DatePicker x:Name="Postdatum" Grid.Column="2" Grid.Row="1" SelectedDate="{Binding Datum}" Width="140"
+                                                AutomationProperties.AutomationId="PostDatum" />
+                                    <Label Grid.Column="4" Content="_Omschrijving" Target="{Binding ElementName=Postomschrijving}" Padding="0,0,0,4" />
+                                    <TextBox x:Name="Postomschrijving" Grid.Column="4" Grid.Row="1" Text="{Binding Omschrijving, UpdateSourceTrigger=PropertyChanged}"
+                                             MaxLength="200" AutomationProperties.AutomationId="PostOmschrijving" />
+                                </Grid>
+
+                                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                    <TextBlock>
+                                        <Run Text="Debet " /><Run Text="{Binding TotaalDebettekst, Mode=OneWay}" FontWeight="SemiBold" />
+                                        <Run Text="   ·   credit " /><Run Text="{Binding TotaalCredittekst, Mode=OneWay}" FontWeight="SemiBold" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Boekmelding}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0" AutomationProperties.AutomationId="PostBoekmelding"
+                                               Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                        <Button Content="_Boeken" MinWidth="96" Margin="0,0,8,0" Style="{DynamicResource AccentButtonStyle}"
+                                                Command="{Binding DataContext.BoekenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                ToolTip="Boeken (Ctrl+Enter). Een geboekte post kan niet meer worden gewijzigd." AutomationProperties.AutomationId="PostBoeken"
+                                                Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                        <Button Content="Concept _verwijderen" Margin="0,0,8,0"
+                                                Command="{Binding DataContext.VerwijderConceptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                AutomationProperties.AutomationId="ConceptVerwijderen"
+                                                Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                        <Button Content="_Tegenboeken..."
+                                                Command="{Binding DataContext.TegenboekenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                ToolTip="Een geboekte post corrigeren met een post met omgekeerde bedragen" AutomationProperties.AutomationId="Tegenboeken"
+                                                Visibility="{Binding IsAlleenLezen, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button DockPanel.Dock="Bottom" Content="_Regel toevoegen" HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding NieuweRegelCommand}"
+                                        AutomationProperties.AutomationId="RegelToevoegen"
+                                        Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                <DataGrid ItemsSource="{Binding Regels}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                                          CanUserSortColumns="False" HeadersVisibility="Column" IsEnabled="{Binding IsBewerkbaar}"
+                                          AutomationProperties.Name="Boekingsregels" AutomationProperties.AutomationId="PostRegels">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Rekening" Width="2*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <ComboBox ItemsSource="{Binding DataContext.Rekeningen, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                              SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}"
+                                                              IsTextSearchEnabled="True" AutomationProperties.Name="Rekening" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Omschrijving" Width="2*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <TextBox Text="{Binding Omschrijving, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Omschrijving van de regel" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Debet" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <TextBox Text="{Binding Debettekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Debet" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Credit" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <TextBox Text="{Binding Credittekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Credit" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Width="Auto">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" ToolTip="Regel verwijderen"
+                                                            AutomationProperties.Name="Regel verwijderen"
+                                                            Command="{Binding DataContext.VerwijderRegelCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <!-- ===== Rekeningschema ===== -->
+                <TabItem Header="_Rekeningschema" AutomationProperties.AutomationId="SubtabRekeningschema">
+                    <DockPanel Margin="0,12,0,0">
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <Button Content="Nieuwe _rekening" Command="{Binding NieuweRekeningCommand}" Margin="0,0,24,0" AutomationProperties.AutomationId="NieuweRekening" />
+                            <TextBox Width="200" VerticalAlignment="Center" Margin="0,0,8,0" Text="{Binding NieuweRubriekNaam, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Naam van de nieuwe rubriek" />
+                            <Button Content="R_ubriek toevoegen" Command="{Binding NieuweRubriekCommand}" VerticalAlignment="Center" />
+                        </WrapPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                   Text="Opslaan met Ctrl+S. Het nummer van een bestaande rekening en de soort van een rekening waarop al is geboekt staan vast; een rekening die niet meer wordt gebruikt kunt u inactief maken." />
+                        <DataGrid ItemsSource="{Binding Rekeningen}" SelectedItem="{Binding GeselecteerdeRekening}" AutoGenerateColumns="False"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" SelectionMode="Single"
+                                  AutomationProperties.Name="Rekeningschema" AutomationProperties.AutomationId="Rekeningschema">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Nummer" Width="90" SortMemberPath="Nummer">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <TextBox Text="{Binding Nummertekst, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsNieuw, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="Rekeningnummer" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Naam" Width="2*" SortMemberPath="Naam">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <TextBox Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Naam van de rekening" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Rubriek" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Rubrieken, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding GekozenRubriek, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Naam"
+                                                      AutomationProperties.Name="Rubriek" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Soort" Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Soorten, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding Soort, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Soort" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Rol" Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <ComboBox ItemsSource="{Binding DataContext.Rollen, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding Rol, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Rol"
+                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Kruisposten: tussenrekening voor overboekingen. Kas: rekening van het kasboek." />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Actief" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RekeningRegel}">
+                                            <CheckBox IsChecked="{Binding IsActief, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" AutomationProperties.Name="Actief" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Saldo" Binding="{Binding Saldotekst}" IsReadOnly="True" Width="Auto" />
+                                <DataGridTextColumn Header="Let op" Binding="{Binding Fout}" IsReadOnly="True" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </TabItem>
+
+                <!-- ===== Grootboekkaart ===== -->
+                <TabItem Header="_Grootboekkaart" AutomationProperties.AutomationId="SubtabGrootboekkaart">
+                    <DockPanel Margin="0,12,0,0">
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <Label Content="Re_kening" Target="{Binding ElementName=Kaartrekening}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Kaartrekening" ItemsSource="{Binding Rekeningkeuzes}" SelectedItem="{Binding KaartRekening}" Width="280"
+                                      IsTextSearchEnabled="True" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="KaartRekening" />
+                            <Label Content="_Van" Target="{Binding ElementName=KaartVan}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <DatePicker x:Name="KaartVan" SelectedDate="{Binding KaartVan}" Width="130" Margin="0,0,16,0" VerticalAlignment="Center" />
+                            <Label Content="_Tot en met" Target="{Binding ElementName=KaartTot}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <DatePicker x:Name="KaartTot" SelectedDate="{Binding KaartTot}" Width="130" VerticalAlignment="Center" />
+                        </WrapPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                            <Run Text="Beginsaldo " /><Run Text="{Binding KaartBeginsaldo, Mode=OneWay}" FontWeight="SemiBold" />
+                            <Run Text="   ·   eindsaldo " /><Run Text="{Binding KaartEindsaldo, Mode=OneWay}" FontWeight="SemiBold" />
+                            <Run Text="   (positief = debet)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </TextBlock>
+                        <DataGrid ItemsSource="{Binding KaartMutaties}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                  AutomationProperties.Name="Mutaties op de grootboekkaart" AutomationProperties.AutomationId="KaartMutaties">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
+                                <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" Width="Auto" />
+                                <DataGridTextColumn Header="Omschrijving" Binding="{Binding Omschrijving}" Width="*" />
+                                <DataGridTextColumn Header="Debet" Binding="{Binding Debet}" Width="Auto" />
+                                <DataGridTextColumn Header="Credit" Binding="{Binding Credit}" Width="Auto" />
+                                <DataGridTextColumn Header="Saldo" Binding="{Binding Saldo}" Width="Auto" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </TabItem>
+
+                <!-- ===== Rapporten ===== -->
+                <TabItem Header="Ra_pporten" AutomationProperties.AutomationId="SubtabRapporten">
+                    <DockPanel Margin="0,12,0,0">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                            <Label Content="Rapport" Target="{Binding ElementName=Rapportkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Rapportkeuze" ItemsSource="{Binding Rapportkeuzes}" SelectedValuePath="Soort" DisplayMemberPath="Naam"
+                                      SelectedValue="{Binding Rapportsoort}" Width="240" AutomationProperties.AutomationId="Rapportkeuze" />
+                            <TextBlock Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="16,0,0,0"
+                                       Text="Alleen geboekte posten tellen mee." />
+                        </StackPanel>
+                        <FlowDocumentScrollViewer Document="{Binding Rapport, Converter={StaticResource RapportNaarDocument}}" VerticalScrollBarVisibility="Auto"
+                                                  IsToolBarVisible="False" AutomationProperties.Name="Rapport" AutomationProperties.AutomationId="Rapport" />
+                    </DockPanel>
+                </TabItem>
+
+                <!-- ===== Boekjaren ===== -->
+                <TabItem Header="Boek_jaren" AutomationProperties.AutomationId="SubtabBoekjaren">
+                    <DockPanel Margin="0,12,0,0">
+                        <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Content="Volgend boekjaar _openen" Command="{Binding OpenVolgendBoekjaarCommand}"
+                                Margin="0,0,0,12" ToolTip="Om alvast in het volgende jaar te boeken, voordat het huidige jaar is afgesloten" />
+                        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                   Text="Afsluiten kan als er geen concepten meer zijn en eerdere jaren zijn afgesloten. Het resultaat gaat naar de reserverekening; vooraf wordt een back-up gemaakt." />
+                        <DataGrid ItemsSource="{Binding Jaren}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                  AutomationProperties.Name="Boekjaren" AutomationProperties.AutomationId="Boekjaren">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Boekjaar" Binding="{Binding Jaartekst}" Width="Auto" />
+                                <DataGridTextColumn Header="Status" Binding="{Binding Statustekst}" Width="Auto" />
+                                <DataGridTextColumn Header="Geboekt" Binding="{Binding AantalGeboekt}" Width="Auto" />
+                                <DataGridTextColumn Header="Concepten" Binding="{Binding AantalConcepten}" Width="Auto" />
+                                <DataGridTemplateColumn Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:JaarRegel}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Afsluiten..." Margin="0,0,8,0" CommandParameter="{Binding}"
+                                                        Command="{Binding DataContext.SluitBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Visibility="{Binding IsOpen, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                        AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} afsluiten}" />
+                                                <Button Content="Heropenen..." CommandParameter="{Binding}"
+                                                        Command="{Binding DataContext.HeropenBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Visibility="{Binding IsAfgesloten, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                        AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} heropenen}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

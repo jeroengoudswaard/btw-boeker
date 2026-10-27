@@ -1,3 +1,4 @@
+using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
@@ -59,4 +60,11 @@ public interface IDialoogService
 
     /// <returns><c>true</c> als er een run definitief is gemaakt.</returns>
     bool ToonIncassoWizard(IncassoWizardViewModel wizard);
+
+    string? KiesExcelBestand();
+
+    string? KiesXlsxDoel(string voorgesteldeNaam);
+
+    /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
+    bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
 }

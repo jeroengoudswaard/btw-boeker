@@ -44,6 +44,16 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Volgend_boekjaar_openen_om_alvast_te_boeken()
+    {
+        await _dienst.OpenBoekjaarAsync(Ver, 2027);
+
+        Assert.Contains(_data.Boekjaren, b => b.Jaar == 2027 && b.IsOpen);
+        Assert.Equal("MEM-2027-0001", await _dienst.BoekAsync(Ver, Invoer(datum: new DateOnly(2027, 1, 5))));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _dienst.OpenBoekjaarAsync(Ver, 2027));
+    }
+
+    [Fact]
     public async Task Boeken_nummert_doorlopend_per_dagboek_en_jaar()
     {
         var eerste = await _dienst.BoekAsync(Ver, Invoer());

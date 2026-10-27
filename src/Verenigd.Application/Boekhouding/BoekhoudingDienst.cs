@@ -38,6 +38,20 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return wijziging;
         }, annulering);
 
+    /// <summary>Opent een (nieuw) boekjaar, bijvoorbeeld om alvast in het volgende jaar te boeken.</summary>
+    public Task OpenBoekjaarAsync(AdministratieSoort administratie, int jaar, CancellationToken annulering = default) =>
+        Repository.PasToeAsync(administratie, stand =>
+        {
+            if (stand.Boekjaar(jaar) is not null)
+            {
+                throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} bestaat al.");
+            }
+
+            var wijziging = new BoekhoudingWijziging<bool>(true);
+            wijziging.Toevoegen.Add(new Boekjaar(administratie, jaar));
+            return wijziging;
+        }, annulering);
+
     public Task<Guid> BewaarConceptAsync(AdministratieSoort administratie, PostInvoer invoer, CancellationToken annulering = default) =>
         Repository.PasToeAsync(administratie, stand =>
         {

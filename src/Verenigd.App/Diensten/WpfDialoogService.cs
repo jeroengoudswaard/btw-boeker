@@ -1,6 +1,8 @@
 using System.Windows;
 using Microsoft.Win32;
+using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.App.ViewModels.Contributie;
+using Verenigd.App.Views.Boekhouding;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.App.Views.Contributie;
 using Verenigd.App.Views.Dialogen;
@@ -89,6 +91,20 @@ internal sealed class WpfDialoogService : IDialoogService
     }
 
     public bool ToonIncassoWizard(IncassoWizardViewModel wizard) => ToonModaal(new IncassoWizardVenster(wizard));
+
+    public string? KiesExcelBestand()
+    {
+        var dialoog = new OpenFileDialog { Title = "Boekhouding (Excel) kiezen", Filter = "Excel-werkmap (*.xlsx)|*.xlsx", CheckFileExists = true };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public string? KiesXlsxDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog { Title = "Exporteren naar Excel", Filter = "Excel-werkmap (*.xlsx)|*.xlsx", DefaultExt = ".xlsx", FileName = voorgesteldeNaam };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
 
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)
     {
