@@ -31,6 +31,9 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Financien.Bank.Boekingsregel> Boekingsregels => Set<Domain.Financien.Bank.Boekingsregel>();
     public DbSet<Domain.Financien.Debiteuren.Debiteurmutatie> Debiteurmutaties => Set<Domain.Financien.Debiteuren.Debiteurmutatie>();
     public DbSet<Domain.Financien.Debiteuren.Herincasso> Herincassos => Set<Domain.Financien.Debiteuren.Herincasso>();
+    public DbSet<Domain.Financien.Relaties.Relatie> Relaties => Set<Domain.Financien.Relaties.Relatie>();
+    public DbSet<Domain.Financien.Facturen.Verkoopfactuur> Verkoopfacturen => Set<Domain.Financien.Facturen.Verkoopfactuur>();
+    public DbSet<Domain.Financien.Facturen.Factuurinstellingen> Factuurinstellingen => Set<Domain.Financien.Facturen.Factuurinstellingen>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -67,5 +70,6 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
         FinancienConfiguratie.Configureer(modelBuilder);
         IncassoConfiguratie.Configureer(modelBuilder);
         BoekhoudingConfiguratie.Configureer(modelBuilder);
+        FactuurConfiguratie.Configureer(modelBuilder);
     }
 }

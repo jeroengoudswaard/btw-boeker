@@ -593,6 +593,156 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Herincassos", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Factuurinstellingen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Iban")
+                        .HasMaxLength(34)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kvk")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("LogoType")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Naam")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Plaats")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Postcode")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Straat")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefoon")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Termijn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Voettekst")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Administratie")
+                        .IsUnique();
+
+                    b.ToTable("Factuurinstellingen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Factuurregel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Aantal")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FactuurId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Omschrijving")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Prijs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RekeningId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FactuurId");
+
+                    b.HasIndex("RekeningId");
+
+                    b.ToTable("Factuurregels", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Verkoopfactuur", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("CreditVan")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Factuurdatum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Jaar")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nummer")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ontvanger")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RelatieId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Termijn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Volgnummer")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreditVan");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("RelatieId");
+
+                    b.HasIndex("Administratie", "Jaar", "Volgnummer")
+                        .IsUnique()
+                        .HasFilter("\"Volgnummer\" IS NOT NULL");
+
+                    b.ToTable("Verkoopfacturen", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Incassoinstellingen", b =>
                 {
                     b.Property<int>("Id")
@@ -787,6 +937,64 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasFilter("\"IsGeannuleerd\" = 0 AND \"IsHerincasso\" = 0");
 
                     b.ToTable("Postregels", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Relaties.Relatie", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Contactpersoon")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Iban")
+                        .HasMaxLength(34)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActief")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCrediteur")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDebiteur")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Naam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notitie")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Plaats")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Postcode")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Straat")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefoon")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Naam");
+
+                    b.ToTable("Relaties", (string)null);
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Tarief", b =>
@@ -1135,6 +1343,42 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Factuurregel", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Facturen.Verkoopfactuur", null)
+                        .WithMany("Regels")
+                        .HasForeignKey("FactuurId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Grootboekrekening", "Rekening")
+                        .WithMany()
+                        .HasForeignKey("RekeningId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rekening");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Verkoopfactuur", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Facturen.Verkoopfactuur", null)
+                        .WithMany()
+                        .HasForeignKey("CreditVan")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Journaalpost", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Verenigd.Domain.Financien.Relaties.Relatie", null)
+                        .WithMany()
+                        .HasForeignKey("RelatieId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Incassopost", b =>
                 {
                     b.HasOne("Verenigd.Domain.Financien.Betaler", null)
@@ -1217,6 +1461,11 @@ namespace Verenigd.Infrastructure.Database.Migraties
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>
+                {
+                    b.Navigation("Regels");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Facturen.Verkoopfactuur", b =>
                 {
                     b.Navigation("Regels");
                 });
