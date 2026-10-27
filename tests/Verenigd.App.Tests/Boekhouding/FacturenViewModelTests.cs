@@ -55,6 +55,19 @@ public sealed class FacturenViewModelTests : IDisposable
     }
 
     [Fact]
+    public void Kolom_soort_van_een_relatie_werkt_direct_bij_na_aanvinken()
+    {
+        var regel = new RelatieRegel(null);
+        var gemeld = new List<string?>();
+        regel.PropertyChanged += (_, e) => gemeld.Add(e.PropertyName);
+
+        regel.IsCrediteur = true;
+
+        Assert.Equal("Debiteur en crediteur", regel.Rol);
+        Assert.Contains(nameof(RelatieRegel.Rol), gemeld);
+    }
+
+    [Fact]
     public async Task Factuur_maken_definitief_maken_en_als_pdf_opslaan()
     {
         await RelatieAsync();

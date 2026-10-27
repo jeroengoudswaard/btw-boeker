@@ -94,6 +94,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     public partial bool IsIngericht { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLeeg))]
     public partial bool IsGeladen { get; private set; }
 
     public bool IsLeeg => IsGeladen && !IsIngericht;

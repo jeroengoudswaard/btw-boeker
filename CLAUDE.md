@@ -190,7 +190,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Tests: 623 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 215, Infrastructure 56, Architectuur 7; ViewModel-tests 130/132 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests, plus een PDF-factuur met Segoe UI bekijken en de QR-code met een bankapp scannen.
   - **Standaardinrichting en sjablonen: gereed**, v0.4.4 (2026-10-28). Besluiten 114–121. Standaardschema's Vereniging en Stichting (JSON, ingebouwd), wizard Speltakken → Rekeningen → Beginsaldi → Klaar (zelfde route als de Excel-overname), export en import als `.vsjabloon`, vier keuzes op het startscherm van een lege boekhouding.
     - Tests: 638 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 135/137 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
-    - Pull request: 4c-2 en de standaardinrichting staan samen op de branch; de gebruiker test eerst op Windows.
+    - **Windows-test (2026-10-27, Windows 11, commit `a054e08`):** build zonder waarschuwingen; 637/638 geslaagd, inclusief alle FlaUI-UI-tests. De 2 Windows-padtests slagen op Windows. Eén echte bug gevonden: de startkaart van een lege boekhouding verscheen niet (`IsGeladen` gaf geen melding voor `IsLeeg`, aanwezig sinds v0.4.0).
+  - **v0.4.5 (2026-10-28): bugfixes.** `IsLeeg` en de kolom *Soort* bij Relaties (`Rol`) melden zich nu, elk met een regressietest. Een controle van alle berekende eigenschappen vond geen andere gebonden gevallen.
+    - Tests: 640 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 7; ViewModel-tests 137/139 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 640/640).
+    - Pull request: 4c-2, de standaardinrichting en deze bugfixes staan samen op de branch; `main` staat nog op v0.4.2. Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
     - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy

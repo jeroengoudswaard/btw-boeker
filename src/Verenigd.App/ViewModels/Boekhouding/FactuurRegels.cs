@@ -79,11 +79,11 @@ public sealed partial class RelatieRegel : ObservableObject
     public partial string Iban { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout))]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout), nameof(Rol))]
     public partial bool IsDebiteur { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout))]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout), nameof(Rol))]
     public partial bool IsCrediteur { get; set; }
 
     [ObservableProperty]

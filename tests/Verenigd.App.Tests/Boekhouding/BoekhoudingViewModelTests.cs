@@ -24,6 +24,19 @@ public sealed class BoekhoudingViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Na_laden_van_een_lege_administratie_meldt_IsLeeg_zich_zodat_de_startkaart_verschijnt()
+    {
+        var vm = _omgeving.Maak();
+        var gemeld = new List<string?>();
+        vm.PropertyChanged += (_, e) => gemeld.Add(e.PropertyName);
+
+        await vm.VernieuwCommand.ExecuteAsync(null);
+
+        Assert.True(vm.IsLeeg);
+        Assert.Contains(nameof(BoekhoudingViewModel.IsLeeg), gemeld);
+    }
+
+    [Fact]
     public async Task Lege_administratie_toont_overname_en_leeg_beginnen()
     {
         var vm = _omgeving.Maak();

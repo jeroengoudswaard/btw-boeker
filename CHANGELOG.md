@@ -2,6 +2,14 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.5] - 2026-10-28: Bugfixes na de Windows-test
+
+### Opgelost
+- In een lege boekhouding toonde het tabblad Boekhouding de startkaart niet, dus ook niet de knoppen *Standaardschema gebruiken*, *Sjabloonbestand*, *Overnemen uit Excel* en *Leeg beginnen*. Alleen *Bestand › Importeren* werkte. Oorzaak: `IsLeeg` gaf geen melding als het laden klaar was. Dit speelde sinds v0.4.0 en is gevonden door de FlaUI-test op Windows.
+- De kolom *Soort* in Boekhouding › Relaties werkte pas na herladen bij als *Debiteur* of *Crediteur* werd aangevinkt.
+- Beide met een regressietest. Bij een controle van alle berekende eigenschappen in de ViewModels kwamen geen andere gebonden gevallen naar voren.
+- 640 geautomatiseerde tests (was 638).
+
 ## [0.4.4] - 2026-10-28: Standaardinrichting en sjablonen
 
 ### Toegevoegd
