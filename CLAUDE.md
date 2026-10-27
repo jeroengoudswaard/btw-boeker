@@ -140,6 +140,14 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 102 | Handmatige betaling open post | Automatisch concept als IBAN van de betaler én bedrag precies passen bij één open post; anders via de afletterdialoog |
 | 103 | Incasso's van vóór Verenigd | Incasso's van januari–oktober 2026 (oude systeem) via een boekingsregel direct op contributie, zoals in Excel; eventueel per speltak splitsen in het Journaal; geen debiteuren |
 | 104 | Herincasso als aparte post | Een herincasso is een aparte post in de run, naast een eventuele gewone post van dezelfde betaler (uitzondering op besluit 46), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is |
+| 105 | Plaats relaties en facturen | Subtabbladen *Relaties* en *Facturen* in Boekhouding; relaties zijn gedeeld door beide administraties |
+| 106 | Factuurnummer | Per administratie en jaar met voorvoegsel: `V2026-001` (Vereniging), `S2026-001` (Stichting) |
+| 107 | Factureren voor | Voorlopig alleen de Vereniging (besluit 61); de Stichting volgt later |
+| 108 | Relatie en lid | Relaties staan los van leden (geen koppeling via lidnummer) |
+| 109 | Vervallen facturen | Filter en markering *Vervallen*; herinneringen per e-mail volgen in fase 6 |
+| 110 | QR-code | EPC-QR ("girocode") op de PDF-factuur |
+| 111 | Ctrl+N bij facturen | Blijft "Nieuwe post" (besluit 72); een nieuwe factuur alleen via de knop |
+| 112 | Logo | PNG of JPG bij Instellingen › Facturen, opgeslagen in de database |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -168,6 +176,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerking: een herincasso is een **aparte post** in de run (naast een eventuele gewone post van dezelfde betaler), zodat een nieuwe stornering eenduidig aan de oorspronkelijke vordering te koppelen is; dit is een uitzondering op "één post per betaler per run" (besluit 46), bevestigd als besluit 104.
     - Tests: 596 in totaal. In de Linux-cloudsessie groen: Domain 200, Application 207, Infrastructure 51, Architectuur 7; ViewModel-tests 123/125 (dezelfde 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite en de 6 FlaUI-UI-tests.
     - Volgende stap: ontwerp 4c-2 Relaties, openstaande posten en verkoopfacturen.
+  - **4c-2: in ontwerp.** Besluiten 105–112 vastgesteld (2026-10-28).
 
 ## Privacy
 
