@@ -20,21 +20,41 @@ public sealed class ClosedXmlWerkbladLezer : IWerkbladLezer
                 throw new InvalidOperationException($"Het werkblad '{werkblad}' ontbreekt in dit bestand.");
             }
 
-            var resultaat = new Werkblad();
-            foreach (var cel in blad.CellsUsed(XLCellsUsedOptions.Contents))
-            {
-                var formule = cel.HasFormula ? "=" + cel.FormulaA1 : null;
-                var waarde = cel.HasFormula ? cel.CachedValue : cel.Value;
-                resultaat.Zet(cel.Address.RowNumber, cel.Address.ColumnNumber, Omzetten(waarde), formule);
-            }
-
-            return resultaat;
+            return Kopieer(blad);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or FormatException
             or ArgumentException)
         {
             throw new InvalidOperationException("Het Excel-bestand kan niet worden gelezen. Is het een .xlsx-bestand en is het gesloten in Excel?", ex);
         }
+    }
+
+    public IReadOnlyList<GenoemdWerkblad> LeesAlle(string pad)
+    {
+        try
+        {
+            using var stroom = new FileStream(pad, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var boek = new XLWorkbook(stroom);
+            return [.. boek.Worksheets.Select(b => new GenoemdWerkblad(b.Name, Kopieer(b)))];
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or FormatException
+            or ArgumentException)
+        {
+            throw new InvalidOperationException("Het Excel-bestand kan niet worden gelezen. Is het een .xlsx-bestand en is het gesloten in Excel?", ex);
+        }
+    }
+
+    private static Werkblad Kopieer(IXLWorksheet blad)
+    {
+        var resultaat = new Werkblad();
+        foreach (var cel in blad.CellsUsed(XLCellsUsedOptions.Contents))
+        {
+            var formule = cel.HasFormula ? "=" + cel.FormulaA1 : null;
+            var waarde = cel.HasFormula ? cel.CachedValue : cel.Value;
+            resultaat.Zet(cel.Address.RowNumber, cel.Address.ColumnNumber, Omzetten(waarde), formule);
+        }
+
+        return resultaat;
     }
 
     private static object? Omzetten(XLCellValue waarde) => waarde.Type switch

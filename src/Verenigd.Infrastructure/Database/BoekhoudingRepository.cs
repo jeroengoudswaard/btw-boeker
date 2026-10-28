@@ -73,6 +73,10 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             .Where(f => f.Administratie == administratie).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
         var factuurinstellingen = await context.Factuurinstellingen.SingleOrDefaultAsync(i => i.Administratie == administratie, annulering)
             .ConfigureAwait(false);
+        var historischeRegels = await context.HistorischeRegels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
+            .OrderBy(r => r.Jaar).ThenBy(r => r.Datum).ThenBy(r => r.Volgorde).ToListAsync(annulering).ConfigureAwait(false);
+        var historischeTotalen = await context.HistorischeTotalen.Include(t => t.Rekening).Where(t => t.Administratie == administratie)
+            .ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
             [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
         {
@@ -85,6 +89,8 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             Relaties = relaties,
             Verkoopfacturen = facturen,
             Factuurinstellingen = factuurinstellingen,
+            HistorischeRegels = historischeRegels,
+            HistorischeTotalen = historischeTotalen,
         };
     }
 }

@@ -49,6 +49,8 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Relatie> Relaties { get; } = [];
     public List<Verkoopfactuur> Verkoopfacturen { get; } = [];
     public Factuurinstellingen? Factuurinstellingen { get; set; }
+    public List<HistorischeRegel> HistorischeRegels { get; } = [];
+    public List<HistorischTotaal> HistorischeTotalen { get; } = [];
 
     /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
     public Func<IReadOnlyList<Incassorun>> Incassoruns { get; set; } = () => [];
@@ -72,6 +74,8 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Relaties = Relaties.ToList(),
         Verkoopfacturen = Verkoopfacturen.ToList(),
         Factuurinstellingen = Factuurinstellingen,
+        HistorischeRegels = HistorischeRegels.ToList(),
+        HistorischeTotalen = HistorischeTotalen.ToList(),
         Incassoruns = Incassoruns(),
         Herincassos = Herincassos(),
     };
@@ -140,6 +144,8 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Relatie relatie: Relaties.Add(relatie); break;
                 case Verkoopfactuur factuur: Verkoopfacturen.Add(factuur); break;
                 case Factuurinstellingen instellingen: Factuurinstellingen = MetId(instellingen); break;
+                case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
+                case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
