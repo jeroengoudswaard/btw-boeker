@@ -170,6 +170,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 132 | Standaardweergave en volgorde | Een nieuwe database begint in *Expert*. Eerst het historische boekjaar (v0.4.8), daarna de weergaven (v0.4.9) |
 | 133 | Kolommen in Eenvoudig | Inkomsten- en uitgavenpotjes (resultaat): *Inkomst* / *Uitgave*; geldpotjes (bank, kas, spaar): *Erbij* / *Eraf*; overige balanspotjes (reserve, nog te ontvangen/betalen): *Debet* / *Credit* met uitleg als tooltip |
 | 134 | Pull request v0.4.7–v0.4.9 | Direct door met v0.4.9; daarna één pull request voor v0.4.7 t/m v0.4.9 na een Windows-run |
+| 135 | PDF bekijken en lezen | Voorbeeld via Windows zelf (`Windows.Data.Pdf`, geen extra installatie); tekst lezen met PdfPig (Apache-2.0). Alles lokaal en in het geheugen: een bijlage komt nooit onversleuteld op schijf, behalve bij *Opslaan als…* |
+| 136 | Bijlage bij geboekte post | Toevoegen én verwijderen mag, ook bij een geboekte post; de boeking zelf verandert niet |
+| 137 | Bestandstypen bijlagen | PDF, JPG en PNG |
+| 138 | "Zonder bon" | Een uitgave is geld dat van de bank of uit de kas gaat (bank- en kasdagboeken), boven de drempel van besluit 97 |
+| 139 | Restpunten in 4c-3 | De twee tooltips met Expert-woorden en de IBAN-waarschuwing (besluit 22) gaan mee in de pull request van 4c-3 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -226,7 +231,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-28, commit `3f0a8ff`):** 678/679 geslaagd. De UI-test `Start_zonder_database…` sloot de app niet af: de in v0.4.8 toegevoegde stap *Bestand › Importeren* klapte de menu's open via UI Automation en probeerde ze met Escape te sluiten (vermoedelijk zonder toetsenbordfocus). Opgelost in commit `00dfb30` met `Collapse()` en een diagnose bij een mislukte afsluiting (testprobleem, de app is ongewijzigd).
     - **Windows-test (2026-10-28, commit `e869c5c`): 679/679 geslaagd**, inclusief alle FlaUI-UI-tests.
     - Pull request: één PR voor v0.4.7 t/m v0.4.9 (besluit 134), geopend na de geslaagde Windows-run.
-    - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+    - Gemerged als PR #7 (2026-10-28, `cdbe6d2`).
+  - **4c-3 Bijlagen: in ontwerp.** Besluiten 135–139 vastgesteld (2026-10-28); uitgewerkt ontwerp ter goedkeuring voorgelegd.
 
 ## Privacy
 
