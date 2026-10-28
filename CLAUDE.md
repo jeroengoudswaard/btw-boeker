@@ -157,6 +157,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 119 | Speltakken in de wizard | Standaard Bevers, Welpen, Scouts, Explorers en Roverscouts; aanvinken wat de groep heeft, eigen namen toe te voegen |
 | 120 | Beginsaldi | Een wizardstap "Beginsaldi" per balansrekening met de controle debet = credit; een verschil kan net als bij de Excel-import bewust op een tussenrekening (besluit 73) |
 | 121 | PDF-bibliotheek | PDFsharp/MigraDoc vast op 6.2.4, de laatste MIT-versie (het NuGet-pakket 6.5 meldt AGPL-3.0 en heeft een licentiecontrole). Pkcs vastgezet op een gepatchte versie. Overstappen (bijv. QuestPDF) kan later door alleen `IFactuurPdfMaker` te vervangen |
+| 122 | Historisch boekjaar 2025 | Aanvulling op besluit 62: een afgesloten, alleen-lezen boekjaar 2025. Per rekening de oorspronkelijke regels uit de Excel-T-rekeningen (gemarkeerd als "overgenomen uit Excel, niet dubbel geboekt"); Balans en W&V 2025 uit de totalen van het Voorblad; het Journaal 2025 blijft leeg en telt niet mee in het grootboek. Dient in fase 5 als "vorig jaar". Reden: de Excel bevat losse T-rekeningen (bank in maandtotalen, 4 van 245 datum/bedrag-combinaties te koppelen, debet ≠ credit), dus echte journaalposten zijn niet betrouwbaar te reconstrueren |
+| 123 | Regels zonder datum of van vóór 2025 | Krijgen datum 1-1-2025; zonder datum gemarkeerd als "begin- of tussensaldo", een oudere datum komt in de omschrijving. Zo klopt het totaal per rekening met Excel |
+| 124 | Planning historisch boekjaar | Na de proefimport, als aparte stap vóór 4c-3 (v0.4.8); eerst een uitgewerkt ontwerp ter goedkeuring |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -200,7 +203,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Pull request: één PR voor v0.4.3 t/m v0.4.6 (4c-2, standaardinrichting en bugfixes), geopend na de geslaagde Windows-run.
     - Daarna: de gebruiker doet zelf de proefimport van de echte Excel-boekhouding en bankafschriften op Windows (de bestanden blijven buiten Git). Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
   - **v0.4.7 (in uitvoering): bevindingen uit de proefimport.** De gebruiker test met de echte bestanden en verzamelt bevindingen; die worden samen opgelost in één PR (keuze 3A).
-    - Antwoord bij de proefimport: het boekjaar is 2026, omdat de eindbalans 2025 de openingsbalans 2026 wordt (besluit 62). Of 2025 zichtbaar moet worden in Verenigd, staat nog open.
+    - Antwoord bij de proefimport: het boekjaar is 2026, omdat de eindbalans 2025 de openingsbalans 2026 wordt (besluit 62). 2025 wordt zichtbaar als historisch, alleen-lezen boekjaar (besluiten 122–124, v0.4.8).
     - Opgelost: rapportkolommen (tekst `3*`, bedragen `1*`; de viewer las de vaste breedte als verhouding) en de underscore op 6 accentknoppen (DataTemplate `Toegangstekst` met AccessText; het Fluent-sjabloon `AccentButtonStyle` herkent geen toegangstoets). Beide met een test.
     - Tests: 645 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 9; ViewModel-tests 137/139 (de 2 Windows-padtests). Nog op Windows te draaien: de nieuwe layouttest en een visuele controle van saldibalans, afdruk en de blauwe knoppen.
     - Volgende stap daarna: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
