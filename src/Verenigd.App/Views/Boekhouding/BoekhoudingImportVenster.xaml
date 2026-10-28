@@ -67,6 +67,8 @@
                            Text="Verenigd leest het werkblad 'Voorblad': het rekeningschema met rubrieken en de eindbalans per 31-12, die de beginbalans van het volgende jaar wordt. De boekingen zelf worden niet overgenomen." />
                 <TextBlock Style="{StaticResource Toelichting}"
                            Text="Het Excel-bestand wordt alleen gelezen en niet bewaard. De overname kan één keer, in een lege administratie; vooraf wordt een back-up gemaakt." />
+                <CheckBox Content="Daarna ook de _historie van dit jaar overnemen (T-rekeningen, alleen-lezen)" ContentTemplate="{StaticResource Toegangstekst}"
+                          IsChecked="{Binding OokHistorie}" Margin="0,12,0,0" AutomationProperties.AutomationId="OokHistorie" />
             </StackPanel>
 
             <!-- ===== Stap 2: rekeningen ===== -->

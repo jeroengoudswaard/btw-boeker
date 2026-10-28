@@ -1,0 +1,100 @@
+<Window x:Class="Verenigd.App.Views.Boekhouding.HistorieImportVenster"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:HistorieImportViewModel}"
+        Title="Historie overnemen uit Excel"
+        Width="920" Height="640" MinWidth="680" MinHeight="480"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        AutomationProperties.AutomationId="HistorieImport">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <StackPanel Orientation="Horizontal" AutomationProperties.Name="Stappen">
+                <StackPanel.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Margin" Value="0,0,24,0" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                </StackPanel.Resources>
+                <TextBlock x:Name="Stap1" Text="1  Bestand" />
+                <TextBlock x:Name="Stap2" Text="2  Voorbeeld" />
+                <TextBlock x:Name="Stap3" Text="3  Klaar" />
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="24,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <ProgressBar DockPanel.Dock="Left" Width="120" Height="4" IsIndeterminate="True" VerticalAlignment="Center"
+                             Visibility="{Binding IsBezig, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.Name="Bezig" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="&lt; V_orige" Style="{StaticResource DialoogKnop}" Command="{Binding VorigeCommand}"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="HistorieVorige" />
+                    <Button Style="{StaticResource DialoogKnop}" IsDefault="True" Command="{Binding VolgendeCommand}"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="HistorieVolgende">
+                        <AccessText Text="{Binding Volgendetekst, StringFormat='_{0} &gt;'}" />
+                    </Button>
+                    <Button Content="Annuleren" Style="{StaticResource DialoogKnop}" IsCancel="True"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="HistorieAnnuleren" />
+                    <Button Content="Sluiten" Style="{StaticResource DialoogKnop}" IsDefault="True" Click="Sluiten_Click"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="HistorieSluiten" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <TextBlock DockPanel.Dock="Bottom" Margin="24,0,24,8" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" TextWrapping="Wrap"
+                   Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Assertive" />
+
+        <Grid Margin="24,16">
+            <!-- ===== Stap 1: bestand ===== -->
+            <StackPanel MaxWidth="600" HorizontalAlignment="Left"
+                        Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Bestand}">
+                <TextBlock Style="{StaticResource Sectietitel}"><Run Text="Bestand: " /><Run Text="{Binding Bestandsnaam, Mode=OneWay}" /></TextBlock>
+                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
+                           Text="Verenigd leest de T-rekeningen op alle werkbladen en vergelijkt ze per rekening met het Voorblad. Het jaar wordt een historisch, alleen-lezen boekjaar: de regels zijn niet dubbel geboekt en tellen niet mee in het grootboek." />
+                <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap"
+                           Text="Het Excel-bestand wordt alleen gelezen en niet bewaard. Vooraf wordt een back-up gemaakt." />
+            </StackPanel>
+
+            <!-- ===== Stap 2: voorbeeld ===== -->
+            <DockPanel Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Voorbeeld}">
+                <TextBlock DockPanel.Dock="Top" Text="{Binding Titel}" Style="{StaticResource Sectietitel}" />
+                <TextBlock DockPanel.Dock="Top" Text="{Binding Overzicht}" Style="{StaticResource Toelichting}" Margin="0,0,0,8" AutomationProperties.AutomationId="HistorieOverzicht" />
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <ItemsControl ItemsSource="{Binding Meldingen}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Style="{StaticResource Foutmelding}" TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <CheckBox Content="Rekeningen die niet in het rekeningschema staan _toevoegen als inactieve rekening (anders overslaan)"
+                              ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding OnbekendeToevoegen}" Margin="0,8,0,0"
+                              AutomationProperties.AutomationId="OnbekendeToevoegen" />
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding Rekeningen}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                          AutomationProperties.Name="Rekeningen met historie" AutomationProperties.AutomationId="HistorieRekeningen">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" Width="Auto" />
+                        <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="2*" />
+                        <DataGridTextColumn Header="Regels" Binding="{Binding AantalRegels}" Width="Auto" />
+                        <DataGridTextColumn Header="Saldo regels" Binding="{Binding SaldoRegels}" Width="*" />
+                        <DataGridTextColumn Header="Saldo Voorblad" Binding="{Binding SaldoVoorblad}" Width="*" />
+                        <DataGridTextColumn Header="Controle" Binding="{Binding Status}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <!-- ===== Stap 3: klaar ===== -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="560"
+                        Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}">
+                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE930;" FontSize="48" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                <TextBlock Text="Historie overgenomen" Style="{StaticResource Sectietitel}" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Samenvatting}" Style="{StaticResource Toelichting}" TextWrapping="Wrap" AutomationProperties.AutomationId="HistorieSamenvatting" />
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

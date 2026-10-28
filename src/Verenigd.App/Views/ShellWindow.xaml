@@ -92,6 +92,8 @@
                               AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                     <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
+                    <MenuItem Header="_Historie uit Excel..." Command="{Binding ImporteerHistorieCommand}"
+                              AutomationProperties.AutomationId="Menu_ImporteerHistorie" />
                     <MenuItem Header="_Rekeningschema-sjabloon..." Command="{Binding ImporteerSjabloonCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerSjabloon" />
                 </MenuItem>

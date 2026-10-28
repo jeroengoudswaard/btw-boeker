@@ -144,6 +144,16 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     [ObservableProperty]
     public partial RapportTabel? KaartTabel { get; private set; }
 
+    /// <summary>Bij een historisch jaar: het saldo volgens het Voorblad, met een ⚠ als het afwijkt (besluit 126).</summary>
+    [ObservableProperty]
+    public partial string? KaartVoorbladtekst { get; private set; }
+
+    [ObservableProperty]
+    public partial bool KaartWijktAf { get; private set; }
+
+    /// <summary>Het gekozen boekjaar is historisch: alleen-lezen, overgenomen uit Excel (besluit 122).</summary>
+    public bool IsHistorischJaar => _stand?.IsHistorisch(Jaar) == true;
+
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
@@ -267,10 +277,12 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         {
             var posten = _stand.Posten.Where(p => p.Datum.Year == boekjaar.Jaar).ToList();
             Jaren.Add(new JaarRegel(
-                boekjaar.Jaar, boekjaar.IsOpen, boekjaar.IsOpen ? "Open" : "Afgesloten", posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt)));
+                boekjaar.Jaar, boekjaar.IsOpen, boekjaar.IsHistorisch ? "Historisch" : boekjaar.IsOpen ? "Open" : "Afgesloten",
+                posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt), boekjaar.IsHistorisch));
         }
 
         _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p))];
+        OnPropertyChanged(nameof(IsHistorischJaar));
         PasPostfilterToe(postSelectie);
         if (postSelectie is null || GeselecteerdePost is null)
         {
@@ -360,7 +372,44 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
             ShellLog.BoekhoudingVerschilGeboekt(_logger, Soort.ToString(), wizard.Verschiltekst, rekening);
         }
 
+        if (wizard.OokHistorie)
+        {
+            ToonHistorie(pad);
+        }
+
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+    }
+
+    /// <summary>Bestand › Importeren › Historie uit Excel: het historische boekjaar (besluiten 122–125).</summary>
+    [RelayCommand]
+    private async Task HistorieInlezenAsync()
+    {
+        if (!IsIngericht)
+        {
+            _dialogen.ToonInformatie("Historie uit Excel", "Neem eerst het rekeningschema over (Boekhouding uit Excel); daarna kan de historie worden toegevoegd.");
+            return;
+        }
+
+        var historisch = _stand?.Boekjaren.FirstOrDefault(b => b.IsHistorisch);
+        if (historisch is not null)
+        {
+            _dialogen.ToonInformatie("Historie uit Excel", $"Het historische boekjaar {historisch.Jaar} bestaat al; de historie kan maar één keer worden overgenomen.");
+            return;
+        }
+
+        if (_dialogen.KiesExcelBestand() is not { } pad || !ToonHistorie(pad))
+        {
+            return;
+        }
+
+        await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+        Melding = "De historie is overgenomen als alleen-lezen boekjaar.";
+    }
+
+    private bool ToonHistorie(string pad)
+    {
+        var wizard = new HistorieImportViewModel(new HistorieDienst(_sessie, _tijd), _hulpmiddelen.Lezer, Soort, pad);
+        return _dialogen.ToonHistorieImport(wizard) && wizard.IsKlaar;
     }
 
     /// <summary>Inrichten met het ingebouwde standaardschema van deze administratie (besluiten 114 en 118).</summary>
@@ -583,6 +632,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         StelKaartperiodeIn();
         BerekenRapport();
         BerekenKaart();
+        OnPropertyChanged(nameof(IsHistorischJaar));
     }
 
     // ---- Rekeningschema ---------------------------------------------------------------------
@@ -655,6 +705,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     private void BerekenKaart()
     {
         KaartMutaties.Clear();
+        KaartVoorbladtekst = null;
+        KaartWijktAf = false;
         if (_stand is null || KaartRekening is null || KaartVan is null || KaartTot is null || KaartTot < KaartVan)
         {
             KaartBeginsaldo = KaartEindsaldo = string.Empty;
@@ -671,6 +723,13 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
         KaartBeginsaldo = new Bedrag(kaart.Beginsaldo).ToString();
         KaartEindsaldo = new Bedrag(kaart.Eindsaldo).ToString();
+        if (kaart.IsHistorisch)
+        {
+            KaartWijktAf = kaart.TotaalVolgensVoorblad is { } totaal && totaal != kaart.Eindsaldo;
+            KaartVoorbladtekst = kaart.TotaalVolgensVoorblad is { } voorblad
+                ? $"Totaal volgens Voorblad: {new Bedrag(voorblad)}" + (KaartWijktAf ? " ⚠ wijkt af van de regels; zoek het uit in Excel." : " ✓")
+                : "Deze rekening staat niet op het Voorblad.";
+        }
         KaartTabel = Rapporten.Kaart(kaart, Administratienaam);
         OnPropertyChanged(nameof(Afdruktabel));
     }

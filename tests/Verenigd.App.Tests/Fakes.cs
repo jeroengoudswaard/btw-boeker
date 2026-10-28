@@ -128,9 +128,14 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public void ToonFout(string titel, string melding) => Fouten.Add(melding);
 
-    public void ToonInformatie(string titel, string melding)
-    {
-    }
+    public string? Informatie { get; private set; }
+
+    public void ToonInformatie(string titel, string melding) => Informatie = melding;
+
+    public Func<ViewModels.Boekhouding.HistorieImportViewModel, Task<bool>>? HistorieImport { get; set; }
+
+    public bool ToonHistorieImport(ViewModels.Boekhouding.HistorieImportViewModel wizard) =>
+        HistorieImport is not null && HistorieImport(wizard).GetAwaiter().GetResult();
 }
 
 internal sealed class FakeDatabaseBeheer : IDatabaseBeheer

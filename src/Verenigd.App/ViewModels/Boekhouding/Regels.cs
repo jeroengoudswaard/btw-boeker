@@ -120,8 +120,10 @@ public sealed record KaartRegel(KaartMutatie Mutatie)
     public string Saldo => new Bedrag(Mutatie.LopendSaldo).ToString();
 }
 
-public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt)
+public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt, bool IsHistorisch = false)
 {
     public string Jaartekst => Jaar.ToString(CultureInfo.InvariantCulture);
-    public bool IsAfgesloten => !IsOpen;
+
+    /// <summary>Een historisch jaar (besluit 122) is afgesloten maar kan niet worden heropend.</summary>
+    public bool IsAfgesloten => !IsOpen && !IsHistorisch;
 }

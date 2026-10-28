@@ -146,6 +146,8 @@ internal sealed class WpfDialoogService : IDialoogService
 
     public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
 
+    public bool ToonHistorieImport(HistorieImportViewModel wizard) => ToonModaal(new HistorieImportVenster(wizard));
+
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)
     {
         var venster = new WachtwoordVenster(databaseNaam, foutmelding);

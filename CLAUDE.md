@@ -210,11 +210,16 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Tests: 643 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 8; ViewModel-tests 137/139 (de 2 Windows-padtests). **Windows-test (2026-10-27, commit `b5c5e3e`): 643/643 geslaagd**, inclusief alle FlaUI-UI-tests.
     - Pull request: één PR voor v0.4.3 t/m v0.4.6 (4c-2, standaardinrichting en bugfixes), geopend na de geslaagde Windows-run.
     - Daarna: de gebruiker doet zelf de proefimport van de echte Excel-boekhouding en bankafschriften op Windows (de bestanden blijven buiten Git). Nog niet uitgevoerd: de proefimport van de echte Excel-boekhouding en van de echte bankafschriften (die doet de gebruiker zelf).
-  - **v0.4.7 (in uitvoering): bevindingen uit de proefimport.** De gebruiker test met de echte bestanden en verzamelt bevindingen; die worden samen opgelost in één PR (keuze 3A).
+  - **v0.4.7: bevindingen uit de proefimport.** De gebruiker test met de echte bestanden en verzamelt bevindingen; die worden samen opgelost in één PR (keuze 3A).
     - Antwoord bij de proefimport: het boekjaar is 2026, omdat de eindbalans 2025 de openingsbalans 2026 wordt (besluit 62). 2025 wordt zichtbaar als historisch, alleen-lezen boekjaar (besluiten 122–124, v0.4.8).
     - Opgelost: rapportkolommen (tekst `3*`, bedragen `1*`; de viewer las de vaste breedte als verhouding) en de underscore op 6 accentknoppen en 6 selectievakjes (DataTemplate `Toegangstekst` met AccessText; de Fluent-sjablonen van `AccentButtonStyle` en CheckBox herkennen geen toegangstoets). Beide met een test.
     - Tests: 645 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 9; ViewModel-tests 137/139 (de 2 Windows-padtests). Nog op Windows te draaien: de nieuwe layouttest en een visuele controle van saldibalans, afdruk en de blauwe knoppen.
-    - Volgende stappen: v0.4.8 historisch boekjaar 2025 (besluiten 122–126), v0.4.9 weergaven Eenvoudig/Expert (besluiten 127–132), daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+    - Ook opgelost in v0.4.7: de underscore op 6 selectievakjes (CheckBox-sjabloon van Fluent; dezelfde `Toegangstekst`).
+  - **v0.4.8 Historisch boekjaar 2025: gereed** (2026-10-28). Besluiten 122–126. HistorieInlezer (T-rekeningen op alle werkbladen, SUM-regels overgeslagen), HistorieDienst, eigen tabellen (migratie Historie), wizard *Historie* (na de Excel-overname of via *Bestand › Importeren › Historie uit Excel…*), band "Historisch boekjaar", kaart met *Totaal volgens Voorblad* en ⚠, rapporten 2025 uit het Voorblad.
+    - Uitwerking: de "wizardstap Historie" is een eigen wizard die de Excel-overname direct na afloop opent (selectievakje *Daarna ook de historie…*, standaard aan); zo is er één wizard voor beide routes.
+    - Proef met de echte Excel 2025 (in de cloudsessie, niet bewaard): 61 rekeningen, 275 regels, 37 kloppen met het Voorblad, 4 wijken af (600, 1000, 1700, 8330), 19 zonder regels, 4 niet op het Voorblad.
+    - Tests: 661 in totaal. In de Linux-cloudsessie groen: Domain 211, Application 231, Infrastructure 57, Architectuur 10; ViewModel-tests 141/143 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 661/661), de layouttest en een visuele controle.
+    - Volgende stappen: v0.4.9 weergaven Eenvoudig/Expert (besluiten 127–132, eerst het ontwerp van debet/credit voor balanspotjes), daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 

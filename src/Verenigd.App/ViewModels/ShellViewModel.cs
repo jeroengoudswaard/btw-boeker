@@ -74,7 +74,7 @@ public sealed partial class ShellViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(NieuweIncassorunCommand))]
+        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(ImporteerHistorieCommand), nameof(NieuweIncassorunCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -314,6 +314,31 @@ public sealed partial class ShellViewModel : ObservableObject
             }
 
             await boekhouding.SjabloonInlezenCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>
+    /// Bestand › Importeren › Historie uit Excel (besluit 125): opent Boekhouding voor de administratie van het actieve
+    /// tabblad, anders de Vereniging (besluit 17), en neemt de historie over.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
+    private async Task ImporteerHistorieAsync()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        {
+            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await boekhouding.HistorieInlezenCommand.ExecuteAsync(null);
         }
     }
 

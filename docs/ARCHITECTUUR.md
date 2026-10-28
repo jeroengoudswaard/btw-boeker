@@ -272,3 +272,24 @@ Ingerichte administratie ► Rekeningsjablonen.UitStand ► Schrijf ► .vsjablo
   - Application: geldige ingebouwde sjablonen, speltakrekeningen, schrijven en lezen zonder verlies, weigeren van ongeldige bestanden, inrichten met beginsaldi en terug exporteren.
   - App: de wizard voor Vereniging en Stichting (speltak toevoegen, verplichte reserve, ongeldig bedrag, verschilrekening), een waarschuwing bij een sjabloon voor de andere administratie, inrichten en exporteren vanuit het tabblad, een ongeldig sjabloonbestand.
   - FlaUI: de wizard opent vanuit het startscherm.
+
+## Historisch boekjaar (v0.4.8, besluiten 122–126)
+
+```
+Excel (alle werkbladen) ─► IWerkbladLezer.LeesAlle ─► HistorieInlezer
+    Voorblad: rekeningen + totalen (balans I/J, W&V G/H)
+    overige bladen: T-rekeningen naast elkaar (rij 2: nummer · naam · "Debet" · "Credit"), SUM-regels overgeslagen
+  ─► HistorieVoorstel (per rekening: regels, saldo regels, saldo Voorblad, Klopt) ─► HistorieImportViewModel (voorbeeld)
+  ─► HistorieDienst.ImporteerAsync ─► Boekjaar.Historisch (afgesloten) + HistorischeRegels + HistorischeTotalen (eigen tabellen)
+Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeTotalen; Kaart uit HistorischeRegels (+ TotaalVolgensVoorblad)
+```
+
+- **Niet dubbel geboekt.** De Excel bevat losse T-rekeningen (de bank in maandtotalen), dus er zijn geen journaalposten. Historische regels staan in eigen tabellen en zijn geen `Journaalregel`. De architectuurtest `Historische_regels_worden_alleen_gebruikt_door_model_grootboek_en_historie` houdt bank, contributie, facturen en de jaarafsluiting erbuiten.
+- **Alleen-lezen.** `Boekjaar.Historisch` is afgesloten, en `Heropen` weigert. Boeken in het jaar wordt al geweigerd doordat het jaar niet open is.
+- **Datums (besluit 123).** Een regel zonder datum is een `Saldoregel` op 1 januari. Een datum buiten het jaar wordt 1 januari, en de oorspronkelijke datum komt als "(dd-MM-jjjj)" in de omschrijving.
+- **Teststrategie:**
+  - Domain: het historische boekjaar en de regels.
+  - Application: een synthetische Excel met SUM-regels, regels zonder datum en met een oude datum, een afwijking en een onbekende rekening. Getest worden de import, de rapporten van 2025, en dat er niets meetelt in 2026.
+  - Infrastructure: een xlsx met ClosedXML en de opslag.
+  - App: de wizard, de keten vanuit de Excel-overname, het menu, de band, de kaart en Boekjaren.
+  - FlaUI: het menu-item.

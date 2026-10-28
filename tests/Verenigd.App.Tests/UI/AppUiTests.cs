@@ -71,6 +71,14 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ESCAPE); // submenu dicht
         Keyboard.Press(VirtualKeyShort.ESCAPE); // menumodus uit
 
+        Zoek(venster, "Menu_Bestand").AsMenuItem().Expand();
+        Zoek(venster, "Menu_Importeren").AsMenuItem().Expand();
+        Assert.False(Zoek(venster, "Menu_ImporteerHistorie").IsEnabled); // zonder database
+        Zoek(venster, "Menu_ImporteerSjabloon");
+        Keyboard.Press(VirtualKeyShort.ESCAPE);
+        Keyboard.Press(VirtualKeyShort.ESCAPE);
+        Keyboard.Press(VirtualKeyShort.ESCAPE);
+
         Sluit(venster);
     }
 
