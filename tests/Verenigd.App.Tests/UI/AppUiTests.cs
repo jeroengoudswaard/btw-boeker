@@ -71,13 +71,15 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ESCAPE); // submenu dicht
         Keyboard.Press(VirtualKeyShort.ESCAPE); // menumodus uit
 
-        Zoek(venster, "Menu_Bestand").AsMenuItem().Expand();
-        Zoek(venster, "Menu_Importeren").AsMenuItem().Expand();
+        // Dichtklappen via UI Automation: na Expand() heeft het menu niet altijd de toetsenbordfocus, dus Escape is onbetrouwbaar.
+        var bestand = Zoek(venster, "Menu_Bestand").AsMenuItem();
+        bestand.Expand();
+        var importeren = Zoek(venster, "Menu_Importeren").AsMenuItem();
+        importeren.Expand();
         Assert.False(Zoek(venster, "Menu_ImporteerHistorie").IsEnabled); // zonder database
         Zoek(venster, "Menu_ImporteerSjabloon");
-        Keyboard.Press(VirtualKeyShort.ESCAPE);
-        Keyboard.Press(VirtualKeyShort.ESCAPE);
-        Keyboard.Press(VirtualKeyShort.ESCAPE);
+        importeren.Collapse();
+        bestand.Collapse();
 
         Sluit(venster);
     }
@@ -298,8 +300,14 @@ public sealed class AppUiTests : IDisposable
 
     private void Sluit(Window venster)
     {
+        var voorSluiten = Diagnose(venster);
         venster.Close();
-        Assert.True(Retry.WhileFalse(() => _app!.HasExited, Wachttijd).Result, "De applicatie sloot niet af.");
+        if (!Retry.WhileFalse(() => _app!.HasExited, Wachttijd).Result)
+        {
+            var vensters = _app!.GetAllTopLevelWindows(_automation).Select(v => $"{v.ControlType} '{v.Title}'");
+            throw new Xunit.Sdk.XunitException(
+                $"De applicatie sloot niet af. Vóór het sluiten: {voorSluiten}. Nog open: {string.Join(", ", vensters)}.");
+        }
     }
 
     private static void Bewaar(AutomationElement element, string naam)
