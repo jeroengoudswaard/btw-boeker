@@ -128,9 +128,14 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public void ToonFout(string titel, string melding) => Fouten.Add(melding);
 
-    public void ToonInformatie(string titel, string melding)
-    {
-    }
+    public string? Informatie { get; private set; }
+
+    public void ToonInformatie(string titel, string melding) => Informatie = melding;
+
+    public Func<ViewModels.Boekhouding.HistorieImportViewModel, Task<bool>>? HistorieImport { get; set; }
+
+    public bool ToonHistorieImport(ViewModels.Boekhouding.HistorieImportViewModel wizard) =>
+        HistorieImport is not null && HistorieImport(wizard).GetAwaiter().GetResult();
 }
 
 internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
@@ -496,6 +501,8 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
             Relaties = [.. _gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Relaties.Relatie>().OrderBy(r => r.Naam, StringComparer.CurrentCulture)],
             Verkoopfacturen = [.. lijst.OfType<Domain.Financien.Facturen.Verkoopfactuur>()],
             Factuurinstellingen = lijst.OfType<Domain.Financien.Facturen.Factuurinstellingen>().SingleOrDefault(),
+            HistorischeRegels = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischeRegel>()],
+            HistorischeTotalen = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischTotaal>()],
         };
     }
 }
@@ -525,6 +532,12 @@ internal sealed class FakeWerkbladLezer : Verenigd.Application.Boekhouding.IWerk
 
     public Verenigd.Application.Boekhouding.Werkblad Lees(string pad, string werkblad) =>
         Blad ?? throw new InvalidOperationException("Het Excel-bestand kan niet worden gelezen.");
+
+    /// <summary>Alle werkbladen; standaard alleen het Voorblad.</summary>
+    public IReadOnlyList<Verenigd.Application.Boekhouding.GenoemdWerkblad>? Bladen { get; set; }
+
+    public IReadOnlyList<Verenigd.Application.Boekhouding.GenoemdWerkblad> LeesAlle(string pad) =>
+        Bladen ?? [new(Verenigd.Application.Boekhouding.VoorbladInlezer.Werkbladnaam, Lees(pad, Verenigd.Application.Boekhouding.VoorbladInlezer.Werkbladnaam))];
 }
 
 internal sealed class FakeSpreadsheetSchrijver : Verenigd.Application.Boekhouding.ISpreadsheetSchrijver

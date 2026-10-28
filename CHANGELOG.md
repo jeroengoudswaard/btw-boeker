@@ -2,6 +2,55 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.9] - 2026-10-28: Weergaven Expert en Eenvoudig
+
+### Toegevoegd
+- **Weergave Eenvoudig** voor het tabblad Financiën (besluiten 127–133), naast de bestaande weergave *Expert*:
+  - Wisselen via *Beeld › Weergave › Expert / Eenvoudig*, direct en zonder herstart. De keuze wordt onthouden; een nieuwe installatie begint in *Expert*.
+  - Gewone woorden, bijvoorbeeld Journaal → *Alle boekingen*, Rekeningschema → *Potjes*, Grootboekkaart → *Inhoud van een potje*, Saldibalans → *Stand van alle potjes*, Balans → *Bezittingen en schulden*, Staat van baten en lasten → *Inkomsten en uitgaven*, Concept → *Nog niet definitief*, Boeken → *Definitief maken*.
+  - Lastige begrippen krijgen in Eenvoudig een uitleg als tooltip.
+  - Kolomkoppen op de Grootboekkaart: inkomsten- en uitgavenpotjes *Uitgave* / *Inkomst*, geldpotjes (bank, kas) *Erbij* / *Eraf*, overige balanspotjes *Debet* / *Credit* met uitleg.
+  - Ook de meldingen, de tabtitel (*Financiën*) en het menu *Modules* volgen de weergave.
+- Alleen visueel: de database blijft formeel en afdrukken en export gebruiken altijd de Expert-termen.
+- Een architectuurtest bewaakt dat de XAML alleen termen uit de woordenlijst gebruikt.
+- 679 geautomatiseerde tests (was 661).
+
+## [0.4.8] - 2026-10-28: Historisch boekjaar 2025
+
+### Toegevoegd
+- **Historisch boekjaar uit de Excel-boekhouding** (besluiten 122–126), als afgesloten, alleen-lezen boekjaar:
+  - Verenigd leest de T-rekeningen op alle werkbladen: per rekening datum, omschrijving, debet en credit. SUM-totaalregels worden overgeslagen.
+  - Regels zonder datum zijn begin- of tussensaldi. Die en regels met een datum buiten het jaar krijgen 1 januari; een oudere datum komt in de omschrijving.
+  - **Voorbeeld per rekening** met het aantal regels, het saldo van de regels, het saldo volgens het Voorblad en een controle (✓, ⚠ met het verschil, *Geen regels* of *Niet op het Voorblad*). Een afwijking wordt overgenomen met een ⚠.
+  - Rekeningen die niet in het rekeningschema staan: overslaan, of toevoegen als inactieve rekening.
+  - **Twee manieren om te starten:** het selectievakje *Daarna ook de historie van dit jaar overnemen* in de Excel-overname (standaard aan), of *Bestand › Importeren › Historie uit Excel…* voor een al ingerichte administratie. Vooraf wordt een back-up gemaakt.
+- **In het tabblad Boekhouding** bij het historische jaar:
+  - Een band "Historisch boekjaar, overgenomen uit Excel, niet dubbel geboekt".
+  - Het Journaal is leeg.
+  - De Grootboekkaart toont de oorspronkelijke regels en *Totaal volgens Voorblad*, met een ⚠ als dat afwijkt.
+  - Saldibalans, Balans en Staat van baten en lasten komen uit de totalen van het Voorblad.
+  - Bij Boekjaren staat het jaar als *Historisch*; het kan niet worden heropend en er kan niet in worden geboekt.
+- Een architectuurtest bewaakt dat historische regels en totalen in de applicatielaag alleen door het model, de grootboekberekeningen en de historie-import worden gebruikt. Bank, contributie, facturen en de jaarafsluiting blijven er dus buiten.
+- 661 geautomatiseerde tests (was 645).
+
+### Proef met de echte Excel-boekhouding 2025 (niet bewaard)
+- 61 rekeningen en 275 regels.
+- 37 rekeningen kloppen met het Voorblad; 4 wijken af (600, 1000, 1700 en 8330).
+- 19 rekeningen zonder regels en 4 die niet op het Voorblad staan.
+
+## [0.4.7] - 2026-10-28: Bevindingen uit de proefimport
+
+### Opgelost
+- **Saldibalans en andere rapporten:** de kolom *Rekening* was één letter breed, met één letter per regel. De viewer las de vaste breedte van de bedragkolommen als verhouding. Alle kolommen hebben nu een verhoudingsbreedte (tekst 3 delen, elk bedrag 1 deel); dat geldt op het scherm én bij Afdrukken.
+- **Underscore zichtbaar op blauwe knoppen en selectievakjes** (bijvoorbeeld "_Toewijzen"): de accentknop en het selectievakje van het Fluent-thema herkennen geen toegangstoets. Ze tonen hun tekst nu via de sjabloon `Toegangstekst`, zodat Alt+letter weer werkt.
+  - Knoppen: *Standaardschema gebruiken*, *Boeken*, *Bankafschrift inlezen*, *Toewijzen*, *Definitief maken* en *Nieuwe incassorun*.
+  - Selectievakjes: *Het verschil bewust boeken* (twee wizards), *Alleen met waarschuwing*, *Alleen openstaande posten*, *Toon uitgeschreven* en de controle in de incassowizard.
+
+### Toegevoegd
+- Een architectuurtest die faalt bij een accentknop of selectievakje met toegangstoets zonder `Toegangstekst`.
+- Een Windows-test die de layout van de saldibalans in een getoond venster meet.
+- 645 geautomatiseerde tests (was 643).
+
 ## [0.4.6] - 2026-10-28: Toegankelijkheid van groepen
 
 ### Opgelost

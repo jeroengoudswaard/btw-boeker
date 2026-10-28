@@ -35,7 +35,7 @@
                         <TextBox x:Name="Zoekveld" Width="220" Margin="0,0,16,0" VerticalAlignment="Center"
                                  Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}" ToolTip="Naam of lidnummer (Ctrl+F)"
                                  AutomationProperties.Name="Zoeken op naam of lidnummer" />
-                        <CheckBox Content="Alleen met _waarschuwing" IsChecked="{Binding AlleenWaarschuwingen}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <CheckBox Content="Alleen met _waarschuwing" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenWaarschuwingen}" VerticalAlignment="Center" Margin="0,0,16,0" />
                         <Button Command="{Binding VoorstellenOvernemenCommand}" VerticalAlignment="Center" AutomationProperties.AutomationId="VoorstellenOvernemen">
                             <TextBlock><Run Text="Voorstellen _overnemen (" /><Run Text="{Binding AantalVoorstellen, Mode=OneWay}" /><Run Text=")" /></TextBlock>
                         </Button>
@@ -208,7 +208,7 @@
             <TabItem Header="_Incassoruns" AutomationProperties.AutomationId="SubtabRuns">
                 <DockPanel Margin="0,12,0,0">
                     <Button DockPanel.Dock="Top" Content="Nieuwe _incassorun..." HorizontalAlignment="Left" Margin="0,0,0,12"
-                            Style="{DynamicResource AccentButtonStyle}" Command="{Binding NieuweRunCommand}" AutomationProperties.AutomationId="NieuweIncassorun" />
+                            Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" Command="{Binding NieuweRunCommand}" AutomationProperties.AutomationId="NieuweIncassorun" />
                     <DataGrid ItemsSource="{Binding Runs}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                               AutomationProperties.Name="Incassoruns">
                         <DataGrid.Columns>
@@ -246,7 +246,7 @@
             <TabItem Header="Open_staand" AutomationProperties.AutomationId="SubtabOpenstaand">
                 <DockPanel Margin="0,12,0,0">
                     <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                        <CheckBox Content="_Alleen openstaande posten" IsChecked="{Binding AlleenOpenstaand}" VerticalAlignment="Center" Margin="0,0,24,0"
+                        <CheckBox Content="_Alleen openstaande posten" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenOpenstaand}" VerticalAlignment="Center" Margin="0,0,24,0"
                                   AutomationProperties.AutomationId="AlleenOpenstaand" />
                         <TextBlock VerticalAlignment="Center">
                             <Run Text="Totaal openstaand " /><Run Text="{Binding TotaalOpenstaand, Mode=OneWay}" FontWeight="SemiBold" />

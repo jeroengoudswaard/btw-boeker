@@ -10,4 +10,9 @@ public interface IAfdrukDienst
 }
 
 /// <summary>Wat het tabblad Boekhouding nodig heeft van buiten de ViewModels.</summary>
-public sealed record BoekhoudingHulpmiddelen(IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, Application.Facturen.IFactuurPdfMaker Pdf);
+public sealed record BoekhoudingHulpmiddelen(
+    IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, Application.Facturen.IFactuurPdfMaker Pdf, ViewModels.Woordenboek? Woordenboek = null)
+{
+    /// <summary>De woorden van de gekozen weergave, gedeeld door de hele app (besluit 127).</summary>
+    public ViewModels.Woordenboek Woorden { get; } = Woordenboek ?? new ViewModels.Woordenboek();
+}

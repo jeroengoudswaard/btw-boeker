@@ -26,6 +26,8 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Dagboek> Dagboeken => Set<Dagboek>();
     public DbSet<Boekjaar> Boekjaren => Set<Boekjaar>();
     public DbSet<Journaalpost> Journaalposten => Set<Journaalpost>();
+    public DbSet<HistorischeRegel> HistorischeRegels => Set<HistorischeRegel>();
+    public DbSet<HistorischTotaal> HistorischeTotalen => Set<HistorischTotaal>();
     public DbSet<Domain.Financien.Bank.Bankafschrift> Bankafschriften => Set<Domain.Financien.Bank.Bankafschrift>();
     public DbSet<Domain.Financien.Bank.Bankmutatie> Bankmutaties => Set<Domain.Financien.Bank.Bankmutatie>();
     public DbSet<Domain.Financien.Bank.Boekingsregel> Boekingsregels => Set<Domain.Financien.Bank.Boekingsregel>();

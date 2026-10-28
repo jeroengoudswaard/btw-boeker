@@ -87,4 +87,7 @@ public interface IDialoogService
 
     /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
     bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
+
+    /// <returns><c>true</c> als de historie is overgenomen.</returns>
+    bool ToonHistorieImport(HistorieImportViewModel wizard);
 }

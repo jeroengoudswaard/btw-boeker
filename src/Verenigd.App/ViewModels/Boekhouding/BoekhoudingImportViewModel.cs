@@ -95,6 +95,10 @@ public sealed partial class BoekhoudingImportViewModel : ObservableObject
     [ObservableProperty]
     public partial bool VerschilBewustBoeken { get; set; }
 
+    /// <summary>Na de overname ook de historie van het jaar zelf overnemen (besluit 125).</summary>
+    [ObservableProperty]
+    public partial bool OokHistorie { get; set; } = true;
+
     [ObservableProperty]
     public partial string Verschilnummer { get; set; } = VerschilKeuze.Standaard.Nummer.ToString(CultureInfo.InvariantCulture);
 

@@ -480,7 +480,9 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
     private static bool HeeftBoekingen(BoekhoudingStand stand, Grootboekrekening rekening) =>
         stand.Posten.Any(p => p.IsGeboekt && p.Regels.Any(r => Grootboek.ZelfdeRekening(r.Rekening, rekening)));
 
-    private string BackupPad(string reden) =>
+    private string BackupPad(string reden) => BackupPad(sessie, tijd, reden);
+
+    internal static string BackupPad(IDatabaseSessie sessie, TimeProvider tijd, string reden) =>
         Path.Combine(
             Path.GetDirectoryName(Path.GetFullPath(sessie.Pad))!,
             $"{Path.GetFileNameWithoutExtension(sessie.Pad)}-voor-{reden}-{tijd.GetLocalNow().ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture)}.vbak");

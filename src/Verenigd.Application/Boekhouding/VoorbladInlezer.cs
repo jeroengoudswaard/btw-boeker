@@ -14,12 +14,15 @@ public sealed class Werkblad
 
     public int Rijen { get; private set; }
 
+    public int Kolommen { get; private set; }
+
     public Cel? this[int rij, int kolom] => _cellen.GetValueOrDefault((rij, kolom));
 
     public void Zet(int rij, int kolom, object? waarde, string? formule = null)
     {
         _cellen[(rij, kolom)] = new Cel(waarde, formule);
         Rijen = Math.Max(Rijen, rij);
+        Kolommen = Math.Max(Kolommen, kolom);
     }
 }
 
@@ -27,11 +30,23 @@ public interface IWerkbladLezer
 {
     /// <exception cref="InvalidOperationException">Het bestand of het werkblad kan niet worden gelezen.</exception>
     Werkblad Lees(string pad, string werkblad);
+
+    /// <summary>Alle werkbladen, in de volgorde van het bestand.</summary>
+    /// <exception cref="InvalidOperationException">Het bestand kan niet worden gelezen.</exception>
+    IReadOnlyList<GenoemdWerkblad> LeesAlle(string pad);
 }
+
+public sealed record GenoemdWerkblad(string Naam, Werkblad Blad);
 
 /// <summary>Eén rekening uit het Voorblad, met het eindsaldo als beginbalans van het volgende jaar.</summary>
 public sealed record VoorbladRekening(
-    int Nummer, string Naam, string? Rubriek, RekeningSoort Soort, RekeningRol Rol, bool Overslaan, Bedrag Debet, Bedrag Credit);
+    int Nummer, string Naam, string? Rubriek, RekeningSoort Soort, RekeningRol Rol, bool Overslaan, Bedrag Debet, Bedrag Credit)
+{
+    /// <summary>De W&amp;V-kolommen (G/H) van het jaar zelf; voor het historische boekjaar (besluit 122).</summary>
+    public Bedrag WenvDebet { get; init; }
+
+    public Bedrag WenvCredit { get; init; }
+}
 
 public sealed record VoorbladVoorstel(int Jaar, IReadOnlyList<VoorbladRekening> Rekeningen, IReadOnlyList<string> Meldingen)
 {
@@ -134,7 +149,10 @@ public static class VoorbladInlezer
                 }
             }
 
-            rekeningen.Add(new VoorbladRekening(nummer, naam, rubriek, soort, rol, overslaan, debet, credit));
+            rekeningen.Add(new VoorbladRekening(nummer, naam, rubriek, soort, rol, overslaan, debet, credit)
+            {
+                WenvDebet = Centen(blad[rij, KolomWenvDebet]), WenvCredit = Centen(blad[rij, KolomWenvCredit]),
+            });
         }
 
         if (rekeningen.Count == 0)
@@ -161,7 +179,7 @@ public static class VoorbladInlezer
             _ => true,
         });
 
-    private static double? Getal(Cel? cel) => cel?.Waarde switch
+    internal static double? Getal(Cel? cel) => cel?.Waarde switch
     {
         double d => d,
         int i => i,
@@ -170,9 +188,9 @@ public static class VoorbladInlezer
         _ => null,
     };
 
-    private static string? Tekst(Cel? cel) => cel?.Waarde is string s && !string.IsNullOrWhiteSpace(s) ? s.Trim() : null;
+    internal static string? Tekst(Cel? cel) => cel?.Waarde is string s && !string.IsNullOrWhiteSpace(s) ? s.Trim() : null;
 
-    private static Bedrag Centen(Cel? cel) =>
+    internal static Bedrag Centen(Cel? cel) =>
         Getal(cel) is { } waarde ? new Bedrag((long)Math.Round((decimal)waarde * 100m, MidpointRounding.AwayFromZero)) : Bedrag.Nul;
 
     internal static string Jaar(int jaar) => jaar.ToString(CultureInfo.InvariantCulture);

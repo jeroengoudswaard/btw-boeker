@@ -1,4 +1,4 @@
-<Window x:Class="Verenigd.App.Views.ShellWindow"
+﻿<Window x:Class="Verenigd.App.Views.ShellWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -92,6 +92,8 @@
                               AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                     <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
+                    <MenuItem Header="_Historie uit Excel..." Command="{Binding ImporteerHistorieCommand}"
+                              AutomationProperties.AutomationId="Menu_ImporteerHistorie" />
                     <MenuItem Header="_Rekeningschema-sjabloon..." Command="{Binding ImporteerSjabloonCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerSjabloon" />
                 </MenuItem>
@@ -127,6 +129,14 @@
                               IsChecked="{Binding Thema, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Thema.Licht}}" />
                     <MenuItem Header="_Donker" Command="{Binding KiesThemaCommand}" CommandParameter="{x:Static inst:Thema.Donker}"
                               IsChecked="{Binding Thema, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Thema.Donker}}" />
+                </MenuItem>
+                <MenuItem Header="_Weergave" AutomationProperties.AutomationId="Menu_Weergave">
+                    <MenuItem Header="_Expert" Command="{Binding KiesWeergaveCommand}" CommandParameter="{x:Static inst:Weergavemodus.Expert}"
+                              ToolTip="Boekhoudtermen: journaal, grootboekkaart, debet en credit"
+                              IsChecked="{Binding Weergave, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Weergavemodus.Expert}}" />
+                    <MenuItem Header="Een_voudig" Command="{Binding KiesWeergaveCommand}" CommandParameter="{x:Static inst:Weergavemodus.Eenvoudig}"
+                              ToolTip="Gewone woorden: alle boekingen, potjes, inkomsten en uitgaven"
+                              IsChecked="{Binding Weergave, Mode=OneWay, Converter={StaticResource GelijkAan}, ConverterParameter={x:Static inst:Weergavemodus.Eenvoudig}}" />
                 </MenuItem>
                 <Separator />
                 <MenuItem Header="_Volgend tabblad" InputGestureText="Ctrl+Tab" Command="{Binding VolgendTabbladCommand}" />
