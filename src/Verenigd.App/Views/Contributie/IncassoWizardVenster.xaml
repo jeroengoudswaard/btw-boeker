@@ -120,7 +120,7 @@
                 </ItemsControl>
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12"
                            Text="Met 'Definitief maken' wordt eerst een back-up gemaakt. Daarna wordt de run vastgelegd en kunt u het incassobestand (pain.008) opslaan. Een definitieve run kan niet meer worden gewijzigd, alleen geannuleerd als de bank hem niet heeft uitgevoerd." />
-                <CheckBox Content="Ik heb de posten en de lijst 'zelf te innen' _gecontroleerd" IsChecked="{Binding IsGecontroleerd}"
+                <CheckBox Content="Ik heb de posten en de lijst 'zelf te innen' _gecontroleerd" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsGecontroleerd}"
                           AutomationProperties.AutomationId="IncassoGecontroleerd" />
             </StackPanel>
 

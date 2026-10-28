@@ -158,8 +158,8 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// De accentknop van het Fluent-thema herkent geen toegangstoets en toont "_Boeken" letterlijk. Een knop met
-    /// AccentButtonStyle en een underscore in de tekst gebruikt daarom ContentTemplate Toegangstekst (App.xaml).
+    /// De accentknop en het selectievakje van het Fluent-thema herkennen geen toegangstoets en tonen "_Boeken" letterlijk.
+    /// Een accentknop of CheckBox met een underscore in de tekst gebruikt daarom ContentTemplate Toegangstekst (App.xaml).
     /// </summary>
     [Fact]
     public void Accentknop_met_toegangstoets_gebruikt_de_toegangstekst()
@@ -167,10 +167,10 @@ public class ArchitectuurTests
         var fouten = new List<string>();
         foreach (var bestand in XamlBestanden())
         {
-            foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(bestand), "<Button\\b[^<>]*>"))
+            foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(bestand), "<(Button|CheckBox)\\b[^<>]*>"))
             {
                 var tag = m.Value;
-                if (tag.Contains("AccentButtonStyle", StringComparison.Ordinal)
+                if ((tag.StartsWith("<CheckBox", StringComparison.Ordinal) || tag.Contains("AccentButtonStyle", StringComparison.Ordinal))
                     && System.Text.RegularExpressions.Regex.Match(tag, "Content=\"([^\"]*)\"") is { Success: true } inhoud
                     && inhoud.Groups[1].Value.Contains('_', StringComparison.Ordinal)
                     && !tag.Contains("ContentTemplate=\"{StaticResource Toegangstekst}\"", StringComparison.Ordinal))
@@ -180,7 +180,7 @@ public class ArchitectuurTests
             }
         }
 
-        Assert.True(fouten.Count == 0, "Accentknop zonder Toegangstekst: " + string.Join(", ", fouten));
+        Assert.True(fouten.Count == 0, "Accentknop of selectievakje zonder Toegangstekst: " + string.Join(", ", fouten));
     }
 
     private static IEnumerable<string> XamlBestanden()

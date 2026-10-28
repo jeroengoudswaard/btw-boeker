@@ -42,7 +42,7 @@
                 <Setter Property="TextWrapping" Value="Wrap" />
                 <Setter Property="Margin" Value="0,8,0,0" />
             </Style>
-            <!-- De accentknop van het Fluent-thema herkent geen toegangstoets ("_Boeken" verschijnt letterlijk);
+            <!-- De accentknop en het selectievakje van het Fluent-thema herkennen geen toegangstoets ("_Boeken" verschijnt letterlijk);
                  deze sjabloon toont de tekst als AccessText, zodat Alt+letter weer werkt. -->
             <DataTemplate x:Key="Toegangstekst">
                 <AccessText Text="{Binding}" />

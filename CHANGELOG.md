@@ -6,10 +6,12 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ### Opgelost
 - **Saldibalans en andere rapporten:** de kolom *Rekening* was één letter breed, met één letter per regel. De viewer las de vaste breedte van de bedragkolommen als verhouding. Alle kolommen hebben nu een verhoudingsbreedte (tekst 3 delen, elk bedrag 1 deel); dat geldt op het scherm én bij Afdrukken.
-- **Underscore zichtbaar op blauwe knoppen** (bijvoorbeeld "_Toewijzen"): de accentknop van het Fluent-thema herkent geen toegangstoets. Zes knoppen tonen hun tekst nu via de sjabloon `Toegangstekst`, zodat Alt+letter weer werkt: *Standaardschema gebruiken*, *Boeken*, *Bankafschrift inlezen*, *Toewijzen*, *Definitief maken* en *Nieuwe incassorun*.
+- **Underscore zichtbaar op blauwe knoppen en selectievakjes** (bijvoorbeeld "_Toewijzen"): de accentknop en het selectievakje van het Fluent-thema herkennen geen toegangstoets. Ze tonen hun tekst nu via de sjabloon `Toegangstekst`, zodat Alt+letter weer werkt.
+  - Knoppen: *Standaardschema gebruiken*, *Boeken*, *Bankafschrift inlezen*, *Toewijzen*, *Definitief maken* en *Nieuwe incassorun*.
+  - Selectievakjes: *Het verschil bewust boeken* (twee wizards), *Alleen met waarschuwing*, *Alleen openstaande posten*, *Toon uitgeschreven* en de controle in de incassowizard.
 
 ### Toegevoegd
-- Een architectuurtest die faalt bij een accentknop met toegangstoets zonder `Toegangstekst`.
+- Een architectuurtest die faalt bij een accentknop of selectievakje met toegangstoets zonder `Toegangstekst`.
 - Een Windows-test die de layout van de saldibalans in een getoond venster meet.
 - 645 geautomatiseerde tests (was 643).
 

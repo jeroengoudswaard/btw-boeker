@@ -125,7 +125,7 @@
                             <TextBlock Style="{StaticResource Foutmelding}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite">
                                 <Run Text="De beginbalans is niet in evenwicht: verschil " /><Run Text="{Binding Verschiltekst, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=". Zonder keuze wordt er niets geïmporteerd." />
                             </TextBlock>
-                            <CheckBox Content="Het verschil _bewust boeken op een tussenrekening (te onderzoeken)" IsChecked="{Binding VerschilBewustBoeken}"
+                            <CheckBox Content="Het verschil _bewust boeken op een tussenrekening (te onderzoeken)" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding VerschilBewustBoeken}"
                                       AutomationProperties.AutomationId="VerschilBewustBoeken" />
                             <StackPanel Orientation="Horizontal" Margin="24,8,0,0" IsEnabled="{Binding VerschilBewustBoeken}">
                                 <Label Content="_Rekening" Target="{Binding ElementName=Verschilnummer}" VerticalAlignment="Center" Padding="0,0,8,0" />
