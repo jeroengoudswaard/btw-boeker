@@ -162,6 +162,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 124 | Planning historisch boekjaar | Na de proefimport, als aparte stap vóór 4c-3 (v0.4.8); eerst een uitgewerkt ontwerp ter goedkeuring |
 | 125 | Ontwerp historisch boekjaar | Goedgekeurd (2026-10-28): HistorieInlezer slaat SUM-regels over; voorbeeld per rekening (aantal regels, saldo T-rekening, saldo Voorblad, ✓/⚠); Boekjaar 2025 met IsHistorisch, plus aparte tabellen voor historische regels en totalen (architectuurtest: telt nooit mee in het grootboek); wizardstap *Historie 2025* én *Bestand › Importeren › Historie uit Excel…*; band "Historisch boekjaar"; Journaal leeg; Grootboekkaart met originele regels en *Totaal volgens Voorblad*; rapporten 2025 uit het Voorblad; onbekende rekeningen: overslaan of als inactief toevoegen |
 | 126 | Afwijkende saldi historie | Importeren met ⚠ en het totaal volgens het Voorblad; de gebruiker zoekt het in Excel uit |
+| 127 | Weergaven Eenvoudig/Expert | Alleen visueel: de database en alle opgeslagen gegevens blijven formeel. Wisselen (toggle) via *Beeld › Weergave*, direct zonder herstart; de keuze wordt onthouden. Teksten uit twee woordenlijsten (zoals licht/donker thema), ook voor meldingen; een architectuurtest bewaakt dat elk woord in beide lijsten staat. Eenvoudig toont uitleg als tooltip bij lastige begrippen |
+| 128 | Woordenlijst Eenvoudig | Eerste versie zoals voorgesteld (2026-10-28), o.a. Journaal → Alle boekingen, Bank → Banktransacties, Rekeningschema → Potjes, Grootboekkaart → Inhoud van een potje, Saldibalans → Stand van alle potjes, Balans → Bezittingen en schulden, W&V → Inkomsten en uitgaven; bijstellen tijdens gebruik |
+| 129 | Debet/credit in Eenvoudig | Kolommen *Inkomst* en *Uitgave*, gezien vanuit de vereniging; de precieze regel voor balanspotjes (bank, kas, reserve, debiteuren) wordt in het ontwerp van v0.4.9 voorgelegd |
+| 130 | Reikwijdte weergaven | Alleen Financiën (de boekhouding) |
+| 131 | Afdrukken en export | Altijd de Expert-termen (bijv. voor de kascommissie) |
+| 132 | Standaardweergave en volgorde | Een nieuwe database begint in *Expert*. Eerst het historische boekjaar (v0.4.8), daarna de weergaven (v0.4.9) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -208,7 +214,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Antwoord bij de proefimport: het boekjaar is 2026, omdat de eindbalans 2025 de openingsbalans 2026 wordt (besluit 62). 2025 wordt zichtbaar als historisch, alleen-lezen boekjaar (besluiten 122–124, v0.4.8).
     - Opgelost: rapportkolommen (tekst `3*`, bedragen `1*`; de viewer las de vaste breedte als verhouding) en de underscore op 6 accentknoppen en 6 selectievakjes (DataTemplate `Toegangstekst` met AccessText; de Fluent-sjablonen van `AccentButtonStyle` en CheckBox herkennen geen toegangstoets). Beide met een test.
     - Tests: 645 in totaal. In de Linux-cloudsessie groen: Domain 207, Application 225, Infrastructure 56, Architectuur 9; ViewModel-tests 137/139 (de 2 Windows-padtests). Nog op Windows te draaien: de nieuwe layouttest en een visuele controle van saldibalans, afdruk en de blauwe knoppen.
-    - Volgende stap daarna: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+    - Volgende stappen: v0.4.8 historisch boekjaar 2025 (besluiten 122–126), v0.4.9 weergaven Eenvoudig/Expert (besluiten 127–132), daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 
