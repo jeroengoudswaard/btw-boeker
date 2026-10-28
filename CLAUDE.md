@@ -224,7 +224,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **v0.4.9 Weergaven Expert en Eenvoudig: gereed** (2026-10-28). Besluiten 127–134. Woordenlijst (Application) met per term Expert, Eenvoudig en uitleg; Woordenboek (App) met indexer, aantallen en kolomkoppen per potje; app-resources `T.`/`U.` via `WoordenResources`, dus wisselen zonder herstart; *Beeld › Weergave*; keuze in de gebruikersinstellingen (enum `Weergavemodus`, standaard Expert); kolomkoppen Grootboekkaart via `Bindingsproxy`.
     - Tests: 679 in totaal. In de Linux-cloudsessie groen: Domain 211, Application 243, Infrastructure 57, Architectuur 11; ViewModel-tests 145/147 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 679/679, inclusief de nieuwe test `WoordenResourcesTests`) en een visuele controle van beide weergaven.
     - **Windows-test (2026-10-28, commit `3f0a8ff`):** 678/679 geslaagd. De UI-test `Start_zonder_database…` sloot de app niet af: de in v0.4.8 toegevoegde stap *Bestand › Importeren* klapte de menu's open via UI Automation en probeerde ze met Escape te sluiten (vermoedelijk zonder toetsenbordfocus). Opgelost in commit `00dfb30` met `Collapse()` en een diagnose bij een mislukte afsluiting (testprobleem, de app is ongewijzigd).
-    - Volgende stappen: Windows-run (verwacht 679/679), dan één pull request voor v0.4.7 t/m v0.4.9 (besluit 134); daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+    - **Windows-test (2026-10-28, commit `e869c5c`): 679/679 geslaagd**, inclusief alle FlaUI-UI-tests.
+    - Pull request: één PR voor v0.4.7 t/m v0.4.9 (besluit 134), geopend na de geslaagde Windows-run.
+    - Volgende stap: ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 
