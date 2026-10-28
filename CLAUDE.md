@@ -168,6 +168,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 130 | Reikwijdte weergaven | Alleen Financiën (de boekhouding) |
 | 131 | Afdrukken en export | Altijd de Expert-termen (bijv. voor de kascommissie) |
 | 132 | Standaardweergave en volgorde | Een nieuwe database begint in *Expert*. Eerst het historische boekjaar (v0.4.8), daarna de weergaven (v0.4.9) |
+| 133 | Kolommen in Eenvoudig | Inkomsten- en uitgavenpotjes (resultaat): *Inkomst* / *Uitgave*; geldpotjes (bank, kas, spaar): *Erbij* / *Eraf*; overige balanspotjes (reserve, nog te ontvangen/betalen): *Debet* / *Credit* met uitleg als tooltip |
+| 134 | Pull request v0.4.7–v0.4.9 | Direct door met v0.4.9; daarna één pull request voor v0.4.7 t/m v0.4.9 na een Windows-run |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
