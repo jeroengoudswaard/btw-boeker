@@ -211,4 +211,21 @@ public class ArchitectuurTests
 
         Assert.Empty(overtredingen);
     }
+
+    /// <summary>Elke tekst van de weergaven (besluit 127) die de XAML gebruikt, staat in de woordenlijst.</summary>
+    [Fact]
+    public void Xaml_gebruikt_alleen_termen_uit_de_woordenlijst()
+    {
+        var bekend = Verenigd.Application.Weergaven.Woordenlijst.Termen.Select(t => t.Sleutel).ToHashSet(StringComparer.Ordinal);
+        var onbekend = XamlBestanden()
+            .SelectMany(b => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(b), "DynamicResource [TU]\\.([A-Za-z0-9.]+)\\}")
+                .Select(m => (Bestand: Path.GetFileName(b), Sleutel: m.Groups[1].Value)))
+            .Where(x => !bekend.Contains(x.Sleutel))
+            .Select(x => $"{x.Bestand}: {x.Sleutel}")
+            .Distinct()
+            .ToList();
+
+        Assert.Empty(onbekend);
+        Assert.True(bekend.Count > 20);
+    }
 }

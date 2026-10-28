@@ -137,7 +137,7 @@ public sealed partial class BoekhoudingViewModel
         var aantal = _stand?.Bankmutaties.Count(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.Concept) ?? 0;
         if (aantal == 0)
         {
-            Melding = "Er zijn geen bankconcepten om te boeken.";
+            Melding = Woorden["Melding.GeenBankconcepten"];
             return;
         }
 
@@ -151,7 +151,7 @@ public sealed partial class BoekhoudingViewModel
         {
             var uitkomst = await Bankdienst.BoekConceptenAsync(Soort, null);
             await LaadAsync(Editor?.Id);
-            Melding = string.Create(CultureInfo.CurrentCulture, $"{uitkomst.Aantal} {(uitkomst.Aantal == 1 ? "post" : "posten")} geboekt.");
+            Melding = $"{Woorden.Aantal(uitkomst.Aantal, "Post", "Posten")} {Woorden["Melding.Geboekt"]}.";
             if (uitkomst.Fouten.Count > 0)
             {
                 Foutmelding = string.Create(CultureInfo.CurrentCulture, $"{uitkomst.Fouten.Count} niet geboekt; bijvoorbeeld {uitkomst.Fouten[0]}");

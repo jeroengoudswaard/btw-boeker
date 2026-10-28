@@ -293,3 +293,12 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
   - Infrastructure: een xlsx met ClosedXML en de opslag.
   - App: de wizard, de keten vanuit de Excel-overname, het menu, de band, de kaart en Boekjaren.
   - FlaUI: het menu-item.
+
+## Weergaven Expert en Eenvoudig (v0.4.9, besluiten 127–133)
+
+- **Alleen visueel.** De database, de domeinmodellen, afdrukken en export blijven formeel (besluit 131). De keuze staat in de gebruikersinstellingen (`GebruikersInstellingen.Weergave`, standaard `Expert`), niet in de database.
+- **Woordenlijst** (`Application/Weergaven/Woordenlijst.cs`): per sleutel een Expert-tekst, een Eenvoudig-tekst en optioneel een uitleg. Eén record per begrip, dus elk woord staat altijd in beide lijsten.
+- **Woordenboek** (`App/ViewModels/Woordenboek.cs`): één exemplaar in `BoekhoudingHulpmiddelen`. Het geeft teksten via de indexer, de uitleg (alleen in Eenvoudig), aantallen ("3 boekingen") en de kolomkoppen van een potje (besluit 133). Een wissel meldt `Item[]`.
+- **XAML:** `{DynamicResource T.Sleutel}` voor teksten en `{DynamicResource U.Sleutel}` voor de uitleg als tooltip. `Diensten/WoordenResources` houdt deze app-resources gelijk aan het woordenboek, zodat de weergave direct wisselt zonder herstart. De kolomkoppen van de Grootboekkaart lopen via een `Bindingsproxy` (Freezable), omdat een DataGrid-kolom buiten de visuele boom staat.
+- **ViewModels:** tabtitel, statusteksten, rapportkeuzes en meldingen komen uit het woordenboek; `BoekhoudingViewModel` ververst ze bij een wissel.
+- **Bewaking:** de architectuurtest `Xaml_gebruikt_alleen_termen_uit_de_woordenlijst` controleert dat elke `T.`/`U.`-sleutel in de XAML in de woordenlijst staat. De unittests controleren dat elke term een Expert- en een Eenvoudig-tekst heeft.

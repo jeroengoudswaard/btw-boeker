@@ -2,6 +2,19 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.9] - 2026-10-28: Weergaven Expert en Eenvoudig
+
+### Toegevoegd
+- **Weergave Eenvoudig** voor het tabblad Financiën (besluiten 127–133), naast de bestaande weergave *Expert*:
+  - Wisselen via *Beeld › Weergave › Expert / Eenvoudig*, direct en zonder herstart. De keuze wordt onthouden; een nieuwe installatie begint in *Expert*.
+  - Gewone woorden, bijvoorbeeld Journaal → *Alle boekingen*, Rekeningschema → *Potjes*, Grootboekkaart → *Inhoud van een potje*, Saldibalans → *Stand van alle potjes*, Balans → *Bezittingen en schulden*, Staat van baten en lasten → *Inkomsten en uitgaven*, Concept → *Nog niet definitief*, Boeken → *Definitief maken*.
+  - Lastige begrippen krijgen in Eenvoudig een uitleg als tooltip.
+  - Kolomkoppen op de Grootboekkaart: inkomsten- en uitgavenpotjes *Uitgave* / *Inkomst*, geldpotjes (bank, kas) *Erbij* / *Eraf*, overige balanspotjes *Debet* / *Credit* met uitleg.
+  - Ook de meldingen, de tabtitel (*Financiën*) en het menu *Modules* volgen de weergave.
+- Alleen visueel: de database blijft formeel en afdrukken en export gebruiken altijd de Expert-termen.
+- Een architectuurtest bewaakt dat de XAML alleen termen uit de woordenlijst gebruikt.
+- 679 geautomatiseerde tests (was 661).
+
 ## [0.4.8] - 2026-10-28: Historisch boekjaar 2025
 
 ### Toegevoegd

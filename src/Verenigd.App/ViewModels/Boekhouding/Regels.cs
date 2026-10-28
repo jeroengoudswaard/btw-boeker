@@ -31,7 +31,7 @@ public enum BoekhoudingSubtab
 }
 
 /// <summary>Eén journaalpost in de lijst.</summary>
-public sealed record PostRegel(Journaalpost Post)
+public sealed record PostRegel(Journaalpost Post, Woordenboek? Woorden = null)
 {
     public Guid Id => Post.Id;
     public string Nummer => Post.Nummer;
@@ -40,7 +40,7 @@ public sealed record PostRegel(Journaalpost Post)
     public string Dagboek => Post.Dagboek.Code;
     public string Omschrijving => Post.Omschrijving;
     public string Bedrag => Post.TotaalDebet.ToString();
-    public string Status => Post.IsGeboekt ? "Geboekt" : "Concept";
+    public string Status => Post.IsGeboekt ? Woorden?["Geboekt"] ?? "Geboekt" : Woorden?["Concept"] ?? "Concept";
     public bool IsGeboekt => Post.IsGeboekt;
     public bool IsConcept => !Post.IsGeboekt;
 

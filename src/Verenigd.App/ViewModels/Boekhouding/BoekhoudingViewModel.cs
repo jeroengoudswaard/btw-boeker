@@ -48,7 +48,13 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         SluitBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(SluitBoekjaarAsync, j => !IsBezig && j?.IsOpen == true);
         HeropenBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(HeropenBoekjaarAsync, j => !IsBezig && j?.IsAfgesloten == true);
         Jaar = Vandaag.Year;
+        Woorden.PropertyChanged += WoordenGewijzigd;
     }
+
+    /// <summary>De woorden van de gekozen weergave (besluit 127); alleen visueel.</summary>
+    public Woordenboek Woorden => _hulpmiddelen.Woorden;
+
+    protected override string Moduletitel => Woorden["Boekhouding"];
 
     public IAsyncRelayCommand VernieuwCommand { get; }
 
@@ -86,8 +92,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
     public IReadOnlyList<RekeningRol> Rollen { get; } = Enum.GetValues<RekeningRol>();
 
-    public IReadOnlyList<Rapportkeuze> Rapportkeuzes { get; } =
-        [new(Rapportsoort.Saldibalans, "Saldibalans"), new(Rapportsoort.Balans, "Balans"), new(Rapportsoort.WinstEnVerlies, "Staat van baten en lasten")];
+    public IReadOnlyList<Rapportkeuze> Rapportkeuzes =>
+        [new(Rapportsoort.Saldibalans, Woorden["Saldibalans"]), new(Rapportsoort.Balans, Woorden["Balans"]), new(Rapportsoort.WinstEnVerlies, Woorden["WinstEnVerlies"])];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLeeg))]
@@ -147,6 +153,17 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     /// <summary>Bij een historisch jaar: het saldo volgens het Voorblad, met een ⚠ als het afwijkt (besluit 126).</summary>
     [ObservableProperty]
     public partial string? KaartVoorbladtekst { get; private set; }
+
+    /// <summary>Kolomkoppen van de kaart per soort potje (besluit 133).</summary>
+    [ObservableProperty]
+    public partial string KaartDebetkop { get; private set; } = "Debet";
+
+    [ObservableProperty]
+    public partial string KaartCreditkop { get; private set; } = "Credit";
+
+    /// <summary>Uitleg bij debet en credit als tooltip, alleen in Eenvoudig.</summary>
+    [ObservableProperty]
+    public partial string? KaartKoptip { get; private set; }
 
     [ObservableProperty]
     public partial bool KaartWijktAf { get; private set; }
@@ -236,6 +253,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         KoppelEditor(null);
         KoppelRekeningen(false);
         KoppelRelaties(false);
+        Woorden.PropertyChanged -= WoordenGewijzigd;
         base.Opruimen();
     }
 
@@ -281,7 +299,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
                 posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt), boekjaar.IsHistorisch));
         }
 
-        _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p))];
+        _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p, Woorden))];
         OnPropertyChanged(nameof(IsHistorischJaar));
         PasPostfilterToe(postSelectie);
         if (postSelectie is null || GeselecteerdePost is null)
@@ -506,7 +524,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         {
             var nummer = await _dienst.BoekAsync(Soort, editor.Invoer);
             Foutmelding = null;
-            Melding = $"Post {nummer} is geboekt.";
+            Melding = string.Format(CultureInfo.CurrentCulture, Woorden["Melding.PostGeboekt"], nummer);
             await LaadAsync(null);
             if (_allePosten.FirstOrDefault(p => p.Nummer == nummer) is { } geboekt)
             {
@@ -559,7 +577,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         await VoerUitAsync(async () =>
         {
             var nummer = await _dienst.TegenboekAsync(Soort, post.Id, datum);
-            Melding = $"Tegenboeking {nummer} is geboekt.";
+            Melding = string.Format(CultureInfo.CurrentCulture, Woorden["Melding.Tegenboeking"], nummer);
             await LaadAsync(null);
             PasPostfilterToe(_allePosten.FirstOrDefault(p => p.Nummer == nummer)?.Id);
         }, null);
@@ -706,6 +724,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     {
         KaartMutaties.Clear();
         KaartVoorbladtekst = null;
+        ZetKaartkoppen();
         KaartWijktAf = false;
         if (_stand is null || KaartRekening is null || KaartVan is null || KaartTot is null || KaartTot < KaartVan)
         {
@@ -732,6 +751,28 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         }
         KaartTabel = Rapporten.Kaart(kaart, Administratienaam);
         OnPropertyChanged(nameof(Afdruktabel));
+    }
+
+    private void ZetKaartkoppen()
+    {
+        var rekening = KaartRekening;
+        var geldpotje = rekening is not null && (rekening.Rol == RekeningRol.Kas || _stand?.Dagboeken.Any(d =>
+            d.Soort is DagboekSoort.Bank or DagboekSoort.Kas && d.Rekening is { } r && (ReferenceEquals(r, rekening) || (r.Id != 0 && r.Id == rekening.Id))) == true);
+        (KaartDebetkop, KaartCreditkop) = rekening is null ? (Woorden["Debet"], Woorden["Credit"]) : Woorden.Kolomkoppen(rekening, geldpotje);
+        KaartKoptip = KaartDebetkop == Woorden["Debet"] ? Woorden.Uitleg("Debet") : null;
+    }
+
+    private void WoordenGewijzigd(object? sender, PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(Titel));
+        OnPropertyChanged(nameof(Rapportkeuzes));
+        if (_stand is not null)
+        {
+            _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p, Woorden))];
+            PasPostfilterToe(GeselecteerdePost?.Id);
+        }
+
+        ZetKaartkoppen();
     }
 
     private void BerekenRapport()

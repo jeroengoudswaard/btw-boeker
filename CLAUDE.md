@@ -221,7 +221,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerking: de "wizardstap Historie" is een eigen wizard die de Excel-overname direct na afloop opent (selectievakje *Daarna ook de historie…*, standaard aan); zo is er één wizard voor beide routes.
     - Proef met de echte Excel 2025 (in de cloudsessie, niet bewaard): 61 rekeningen, 275 regels, 37 kloppen met het Voorblad, 4 wijken af (600, 1000, 1700, 8330), 19 zonder regels, 4 niet op het Voorblad.
     - Tests: 661 in totaal. In de Linux-cloudsessie groen: Domain 211, Application 231, Infrastructure 57, Architectuur 10; ViewModel-tests 141/143 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 661/661), de layouttest en een visuele controle.
-    - Volgende stappen: v0.4.9 weergaven Eenvoudig/Expert (besluiten 127–132, eerst het ontwerp van debet/credit voor balanspotjes), daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
+  - **v0.4.9 Weergaven Expert en Eenvoudig: gereed** (2026-10-28). Besluiten 127–134. Woordenlijst (Application) met per term Expert, Eenvoudig en uitleg; Woordenboek (App) met indexer, aantallen en kolomkoppen per potje; app-resources `T.`/`U.` via `WoordenResources`, dus wisselen zonder herstart; *Beeld › Weergave*; keuze in de gebruikersinstellingen (enum `Weergavemodus`, standaard Expert); kolomkoppen Grootboekkaart via `Bindingsproxy`.
+    - Tests: 679 in totaal. In de Linux-cloudsessie groen: Domain 211, Application 243, Infrastructure 57, Architectuur 11; ViewModel-tests 145/147 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 679/679, inclusief de nieuwe test `WoordenResourcesTests`) en een visuele controle van beide weergaven.
+    - Volgende stappen: Windows-run, dan één pull request voor v0.4.7 t/m v0.4.9 (besluit 134); daarna ontwerp 4c-3 Bijlagen (besluiten 83–88, 96, 97).
 
 ## Privacy
 

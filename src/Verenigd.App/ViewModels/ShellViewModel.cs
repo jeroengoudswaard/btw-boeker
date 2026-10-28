@@ -80,6 +80,10 @@ public sealed partial class ShellViewModel : ObservableObject
     [ObservableProperty]
     public partial Thema Thema { get; set; }
 
+    /// <summary>Expert of Eenvoudig voor het tabblad Financiën (besluit 127); alleen visueel.</summary>
+    [ObservableProperty]
+    public partial Weergavemodus Weergave { get; set; }
+
     [ObservableProperty]
     public partial string Statusmelding { get; set; } = "Gereed";
 
@@ -104,6 +108,9 @@ public sealed partial class ShellViewModel : ObservableObject
         _instellingen = _opslag.Laad();
         Thema = _instellingen.Thema;
         _thema.PasToe(Thema);
+        Weergave = _instellingen.Weergave;
+        _boekhouding.Woorden.Weergave = Weergave;
+        BouwModuleMenu();
 
         if (_instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad))
         {
@@ -413,6 +420,17 @@ public sealed partial class ShellViewModel : ObservableObject
         _thema.PasToe(thema);
         _instellingen = _instellingen with { Thema = thema };
         _opslag.Bewaar(_instellingen);
+    }
+
+    /// <summary>Beeld › Weergave: direct wisselen, zonder herstart; de keuze wordt onthouden.</summary>
+    [RelayCommand]
+    private void KiesWeergave(Weergavemodus weergave)
+    {
+        Weergave = weergave;
+        _boekhouding.Woorden.Weergave = weergave;
+        _instellingen = _instellingen with { Weergave = weergave };
+        _opslag.Bewaar(_instellingen);
+        BouwModuleMenu();
     }
 
     // ---- Tabbladen -------------------------------------------------------------------------
@@ -727,8 +745,10 @@ public sealed partial class ShellViewModel : ObservableObject
     private void BouwModuleMenu()
     {
         ModuleMenu.Clear();
-        foreach (var definitie in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
+        foreach (var module in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
         {
+            // Financiën volgt de weergave (besluit 127); de overige modules houden hun naam.
+            var definitie = module.Soort == ModuleSoort.Boekhouding ? module with { Titel = _boekhouding.Woorden["Boekhouding"] } : module;
             var sneltoets = $"Ctrl+{definitie.Sneltoetsnummer}";
             if (definitie.AlleenVoor is { } vast)
             {

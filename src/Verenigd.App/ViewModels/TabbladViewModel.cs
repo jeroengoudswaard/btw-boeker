@@ -21,7 +21,10 @@ public abstract class TabbladViewModel : ObservableObject
 
     public AdministratieViewModel? Administratie { get; }
 
-    public string Titel => Administratie is null ? Module.Titel : $"{Module.Titel} · {Administratie.Naam}";
+    public string Titel => Administratie is null ? Moduletitel : $"{Moduletitel} · {Administratie.Naam}";
+
+    /// <summary>De naam van de module in de tabtitel; Financiën volgt de weergave (besluit 127).</summary>
+    protected virtual string Moduletitel => Module.Titel;
 
     public bool KanSluiten => Module.KanSluiten;
 
