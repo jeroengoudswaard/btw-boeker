@@ -2,6 +2,11 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [Onuitgebracht]
+
+### Gewijzigd
+- App-icoon zonder lege rand: de tegel vult nu het hele vierkant, zodat het icoon in de taakbalk even groot is als andere apps (besluit 158).
+
 ## [0.5.0] - 2026-10-29: Begroting Vereniging (fase 5a)
 
 ### Toegevoegd
