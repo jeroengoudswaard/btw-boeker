@@ -22,6 +22,15 @@ public static class Grootboek
             .Where(r => totEnMet is null || r.Post.Datum <= totEnMet)
             .Sum(r => r.Regel.Saldo);
 
+    /// <summary>
+    /// Saldo (debet positief) van een resultaatrekening in het jaar, zonder de afsluitpost; bij een historisch jaar uit het
+    /// Voorblad. Voor de begroting (besluit 148).
+    /// </summary>
+    public static long Resultaat(BoekhoudingStand stand, Grootboekrekening rekening, int jaar, DateOnly? totEnMet = null) =>
+        stand.IsHistorisch(jaar) ? Totaal(stand, rekening, jaar)?.Saldo ?? 0 : Regels(stand, rekening, jaar)
+            .Where(r => r.Post.Soort != PostSoort.Afsluiting && (totEnMet is null || r.Post.Datum <= totEnMet))
+            .Sum(r => r.Regel.Saldo);
+
     public static Saldibalans Saldibalans(BoekhoudingStand stand, int jaar)
     {
         if (stand.IsHistorisch(jaar))

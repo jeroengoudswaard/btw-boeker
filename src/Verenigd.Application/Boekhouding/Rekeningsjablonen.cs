@@ -8,7 +8,7 @@ namespace Verenigd.Application.Boekhouding;
 
 public sealed record SjabloonRubriek(string Naam);
 
-public sealed record SjabloonRekening(int Nummer, string Naam, string? Rubriek, RekeningSoort Soort, RekeningRol Rol = RekeningRol.Geen);
+public sealed record SjabloonRekening(int Nummer, string Naam, string? Rubriek, RekeningSoort Soort, RekeningRol Rol = RekeningRol.Geen, ResultaatKant? Kant = null);
 
 /// <summary>Eén contributierekening per speltak: <c>Vanaf</c>, <c>Vanaf + Stap</c>, …; <c>{speltak}</c> in de naam wordt ingevuld.</summary>
 public sealed record SjabloonSpeltakken(string Rubriek, int Vanaf, int Stap, string Naam, IReadOnlyList<string> Standaard);
@@ -74,7 +74,7 @@ public static class Rekeningsjablonen
             bestand.Administratie,
             [.. (bestand.Rubrieken ?? []).Select(r => new SjabloonRubriek(r.Naam?.Trim() ?? string.Empty))],
             [.. (bestand.Rekeningen ?? []).Select(r => new SjabloonRekening(r.Nummer, r.Naam?.Trim() ?? string.Empty,
-                string.IsNullOrWhiteSpace(r.Rubriek) ? null : r.Rubriek.Trim(), r.Soort, r.Rol))],
+                string.IsNullOrWhiteSpace(r.Rubriek) ? null : r.Rubriek.Trim(), r.Soort, r.Rol, r.Kant))],
             bestand.Speltakken);
         Controleer(sjabloon);
         return sjabloon;
@@ -90,7 +90,7 @@ public static class Rekeningsjablonen
             Naam = sjabloon.Naam,
             Administratie = sjabloon.Administratie,
             Rubrieken = [.. sjabloon.Rubrieken.Select(r => new BestandRubriek { Naam = r.Naam })],
-            Rekeningen = [.. sjabloon.Rekeningen.Select(r => new BestandRekening { Nummer = r.Nummer, Naam = r.Naam, Rubriek = r.Rubriek, Soort = r.Soort, Rol = r.Rol })],
+            Rekeningen = [.. sjabloon.Rekeningen.Select(r => new BestandRekening { Nummer = r.Nummer, Naam = r.Naam, Rubriek = r.Rubriek, Soort = r.Soort, Rol = r.Rol, Kant = r.Kant })],
             Speltakken = sjabloon.Speltakken,
         };
         return JsonSerializer.Serialize(bestand, Opties) + Environment.NewLine;
@@ -106,7 +106,7 @@ public static class Rekeningsjablonen
             [.. rubrieken.Select(r => new SjabloonRubriek(r.Naam))],
             [.. rekeningen
                 .OrderBy(r => r.Rubriek is null ? int.MaxValue : rubrieken.FindIndex(g => g.Id == r.Rubriek.Id)).ThenBy(r => r.Nummer)
-                .Select(r => new SjabloonRekening(r.Nummer, r.Naam, r.Rubriek?.Naam, r.Soort, r.Rol))]);
+                .Select(r => new SjabloonRekening(r.Nummer, r.Naam, r.Rubriek?.Naam, r.Soort, r.Rol, r.Soort == RekeningSoort.Resultaat ? r.Kant : null))]);
     }
 
     /// <summary>
@@ -137,7 +137,7 @@ public static class Rekeningsjablonen
         var volgorde = sjabloon.Rubrieken.Select(r => r.Naam).ToList();
         return [.. alle
             .OrderBy(r => r.Rubriek is null ? int.MaxValue : volgorde.IndexOf(r.Rubriek)).ThenBy(r => r.Nummer)
-            .Select(r => new VoorbladRekening(r.Nummer, r.Naam, r.Rubriek, r.Soort, r.Rol, false, Bedrag.Nul, Bedrag.Nul))];
+            .Select(r => new VoorbladRekening(r.Nummer, r.Naam, r.Rubriek, r.Soort, r.Rol, false, Bedrag.Nul, Bedrag.Nul) { Kant = r.Kant })];
     }
 
     /// <summary>Het voorstel voor <see cref="BoekhoudingDienst.ImporteerAsync"/>: dezelfde route als de Excel-overname.</summary>
@@ -181,6 +181,11 @@ public static class Rekeningsjablonen
             if (!Enum.IsDefined(rekening.Soort) || !Enum.IsDefined(rekening.Rol) || (rekening.Rol != RekeningRol.Geen && rekening.Soort != RekeningSoort.Balans))
             {
                 throw new InvalidOperationException($"Rekening {rekening.Nummer} heeft een ongeldige soort of rol.");
+            }
+
+            if (rekening.Kant is { } kant && (rekening.Soort != RekeningSoort.Resultaat || kant is not (ResultaatKant.Baten or ResultaatKant.Lasten)))
+            {
+                throw new InvalidOperationException($"Rekening {rekening.Nummer}: baten of lasten kan alleen bij een resultaatrekening.");
             }
         }
 
@@ -229,5 +234,9 @@ public static class Rekeningsjablonen
         public string? Rubriek { get; set; }
         public RekeningSoort Soort { get; set; }
         public RekeningRol Rol { get; set; }
+
+        /// <summary>Optioneel (besluit 152); ontbreekt het, dan geldt de standaard (vanaf 8000 baten).</summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public ResultaatKant? Kant { get; set; }
     }
 }

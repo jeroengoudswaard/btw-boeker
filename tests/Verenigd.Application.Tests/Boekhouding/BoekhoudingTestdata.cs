@@ -2,6 +2,7 @@ using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Begrotingen;
 using Verenigd.Domain.Financien.Bijlagen;
 using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Facturen;
@@ -53,6 +54,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<HistorischeRegel> HistorischeRegels { get; } = [];
     public List<HistorischTotaal> HistorischeTotalen { get; } = [];
     public List<Bijlage> Bijlagen { get; } = [];
+    public List<Begroting> Begrotingen { get; } = [];
     public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
 
     /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
@@ -80,6 +82,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         HistorischeRegels = HistorischeRegels.ToList(),
         HistorischeTotalen = HistorischeTotalen.ToList(),
         Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
+        Begrotingen = Begrotingen.ToList(),
         Incassoruns = Incassoruns(),
         Herincassos = Herincassos(),
     };
@@ -155,6 +158,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
                 case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
                 case Bijlage bijlage: Bijlagen.Add(bijlage); break;
+                case Begroting begroting: Begrotingen.Add(MetId(begroting)); break;
                 case BijlageInhoud inhoud: Bijlageinhoud[inhoud.BijlageId] = inhoud.Gegevens; break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }

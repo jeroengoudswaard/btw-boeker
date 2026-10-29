@@ -1,6 +1,7 @@
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Begrotingen;
 using Verenigd.Domain.Financien.Bijlagen;
 using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Facturen;
@@ -49,6 +50,9 @@ public sealed record BoekhoudingStand(
     /// <summary>De bijlagen zonder inhoud (besluit 84); de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
     public IReadOnlyList<Bijlage> Bijlagen { get; init; } = [];
 
+    /// <summary>Alle versies van alle begrotingen (besluit 149); nooit onderdeel van het grootboek.</summary>
+    public IReadOnlyList<Begroting> Begrotingen { get; init; } = [];
+
     public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
 
     public bool HeeftBijlage(Guid postId) => Bijlagen.Any(b => b.PostId == postId);
@@ -94,7 +98,8 @@ public sealed record RegelInvoerId(int RekeningId, string? Omschrijving, Bedrag 
 
 public sealed record PostInvoer(Guid? Id, int DagboekId, DateOnly Datum, string Omschrijving, IReadOnlyList<RegelInvoerId> Regels);
 
-public sealed record RekeningInvoer(int? Id, int Nummer, string Naam, int? RubriekId, RekeningSoort Soort, RekeningRol Rol, bool IsActief);
+/// <param name="Kant">Baten of lasten bij een resultaatrekening (besluit 152); <c>null</c> = ongewijzigd of de standaard.</param>
+public sealed record RekeningInvoer(int? Id, int Nummer, string Naam, int? RubriekId, RekeningSoort Soort, RekeningRol Rol, bool IsActief, ResultaatKant? Kant = null);
 
 public sealed record RubriekInvoer(int? Id, string Naam, int Volgorde);
 

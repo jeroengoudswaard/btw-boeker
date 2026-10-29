@@ -11,6 +11,15 @@ public enum RekeningSoort
 }
 
 /// <summary>Bijzondere rol van een rekening, nodig voor automatische boekingen.</summary>
+/// <summary>Of een resultaatrekening baten of lasten bevat (besluit 152); nodig voor de begroting, die nog geen saldo heeft.</summary>
+public enum ResultaatKant
+{
+    /// <summary>Balansrekening.</summary>
+    Geen = 0,
+    Baten = 1,
+    Lasten = 2,
+}
+
 public enum RekeningRol
 {
     Geen = 0,
@@ -78,6 +87,7 @@ public sealed class Grootboekrekening
         Soort = soort;
         Rubriek = rubriek;
         Rol = rol;
+        Kant = StandaardKant(soort, nummer);
         IsActief = true;
     }
 
@@ -89,6 +99,9 @@ public sealed class Grootboekrekening
     public RekeningSoort Soort { get; private set; }
     public RekeningRol Rol { get; private set; }
 
+    /// <summary>Baten of lasten bij een resultaatrekening; <see cref="ResultaatKant.Geen"/> bij een balansrekening.</summary>
+    public ResultaatKant Kant { get; private set; }
+
     /// <summary>Een rekening met boekingen wordt nooit verwijderd, alleen inactief gemaakt.</summary>
     public bool IsActief { get; private set; }
 
@@ -96,10 +109,32 @@ public sealed class Grootboekrekening
     {
         Naam = ValideerNaam(naam);
         Rubriek = rubriek;
+        if (soort != Soort)
+        {
+            Kant = StandaardKant(soort, Nummer);
+        }
+
         Soort = soort;
     }
 
     public void WijzigRol(RekeningRol rol) => Rol = rol;
+
+    /// <exception cref="ArgumentException">Een balansrekening, of geen kant bij een resultaatrekening.</exception>
+    public void WijzigKant(ResultaatKant kant)
+    {
+        if (Soort == RekeningSoort.Balans ? kant != ResultaatKant.Geen : kant == ResultaatKant.Geen)
+        {
+            throw new ArgumentException(Soort == RekeningSoort.Balans
+                ? "Een balansrekening is geen baten- of lastenrekening."
+                : "Kies baten of lasten.", nameof(kant));
+        }
+
+        Kant = kant;
+    }
+
+    /// <summary>Het gebruikelijke rekeningschema: rekeningen vanaf 8000 zijn baten, andere resultaatrekeningen lasten.</summary>
+    public static ResultaatKant StandaardKant(RekeningSoort soort, int nummer) =>
+        soort == RekeningSoort.Balans ? ResultaatKant.Geen : nummer is >= 8000 and <= 9999 ? ResultaatKant.Baten : ResultaatKant.Lasten;
 
     public void Deactiveer() => IsActief = false;
 

@@ -232,6 +232,72 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Boekingsregels", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Begroting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AangemaaktUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Jaar")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Omschrijving")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly?>("VastgesteldOp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Versie")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Administratie", "Jaar", "Versie")
+                        .IsUnique();
+
+                    b.ToTable("Begrotingen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Begrotingsregel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Bedrag")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BegrotingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RekeningId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Toelichting")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RekeningId");
+
+                    b.HasIndex("BegrotingId", "RekeningId")
+                        .IsUnique();
+
+                    b.ToTable("Begrotingsregels", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Betaler", b =>
                 {
                     b.Property<Guid>("Id")
@@ -424,6 +490,9 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActief")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Kant")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Naam")
@@ -1416,6 +1485,23 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.Navigation("Rekening");
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Begrotingsregel", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Begrotingen.Begroting", null)
+                        .WithMany("Regels")
+                        .HasForeignKey("BegrotingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Grootboekrekening", "Rekening")
+                        .WithMany()
+                        .HasForeignKey("RekeningId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rekening");
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.BetalerLid", b =>
                 {
                     b.HasOne("Verenigd.Domain.Financien.Betaler", null)
@@ -1636,6 +1722,11 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasForeignKey("PersoonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Begroting", b =>
+                {
+                    b.Navigation("Regels");
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>

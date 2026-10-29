@@ -155,6 +155,11 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             }
 
             rekening.WijzigRol(invoer.Rol);
+            if (invoer.Kant is { } kant && rekening.Soort == RekeningSoort.Resultaat)
+            {
+                rekening.WijzigKant(kant);
+            }
+
             if (invoer.IsActief)
             {
                 rekening.Activeer();
@@ -317,6 +322,11 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             {
                 var rekening = new Grootboekrekening(administratie, bron.Nummer, bron.Naam, bron.Soort,
                     bron.Rubriek is null ? null : rubrieken[bron.Rubriek], bron.Rol);
+                if (bron.VoorgesteldeKant is { } kant)
+                {
+                    rekening.WijzigKant(kant);
+                }
+
                 rekeningen.Add((bron, rekening));
                 wijziging.Toevoegen.Add(rekening);
             }
