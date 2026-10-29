@@ -192,6 +192,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 154 | Eenvoudig-termen begroting | Begroting → *Begroting*, Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe* |
 | 155 | Afdruk begroting | Per rubriek met subtotalen en de kolommen *Werkelijk vorig jaar*, *Begroot dit jaar* en *Begroot volgend jaar* (voor de ALV) |
 | 156 | App-icoon | Vinkje-icoon van de gebruiker: één `Verenigd.ico` met 16–256 px (gemaakt uit de aangeleverde PNG's; het aangeleverde .ico had alleen 16×16), alleen als app-icoon. Android-iconen ongewijzigd in `assets/android/` voor fase 7. Mee in de pull request van v0.5.0 |
+| 157 | Module Begroting (Ctrl+5) | *Modules › Begroting* en Ctrl+5 openen het tabblad Boekhouding van de actieve administratie (besluit 17) op het subtabblad *Begroting*; geen apart tabblad |
+| 158 | App-icoon versie 3 | Nieuw ontwerp van de gebruiker (2026-10-29; aangeleverd als JPG met ingebakken schaakbord). De tegel is uitgeknipt met afgeronde hoeken en echte transparantie; daaruit opnieuw gemaakt: `Verenigd.ico` (16–256 px) en de Android-set. Bron: `assets/bron/verenigd-icoon-1024.png` |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -262,9 +264,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
 - **Fase 5 (Begroting & meerjarenplan):** besluiten 146–156 vastgesteld (2026-10-29).
   - **5a Begroting Vereniging: gereed**, v0.5.0 (2026-10-29). Subtabblad *Begroting* in Boekhouding (jaar, versie, overnemen + % afgerond op tientallen, vaststellen, herzien, naar rato per dag, Ctrl+S, Ctrl+P = ALV-afdruk), rapport *Begroting en werkelijk*, kolom *Baten/lasten* in het rekeningschema (`ResultaatKant`, migratie *Begroting* met voorstel uit het saldo via `MigratieSql.KantVoorstellen`). App-icoon (besluit 156).
-    - Uitwerkingen: het overnemen en vaststellen staan in de werkbalk van het subtabblad (geen aparte dialogen); naar rato rekent per dag; een ongunstig verschil is rood. De bestaande module *Begroting* (Ctrl+5, placeholder sinds fase 1) is nog ongewijzigd; voorgelegd aan de gebruiker.
+    - Uitwerkingen: het overnemen en vaststellen staan in de werkbalk van het subtabblad (geen aparte dialogen); naar rato rekent per dag; een ongunstig verschil is rood.
+    - **Windows-test (2026-10-29, commit `7a7c015`): 773/773 geslaagd** (gemeld door de gebruiker).
+    - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
-    - Volgende stap: Windows-run, daarna een eigen pull request voor 5a; daarna ontwerp 5b Meerjarenplan Stichting (besluit 146).
+    - Pull request: eigen PR voor 5a (v0.5.0). Daarna ontwerp 5b Meerjarenplan Stichting (besluit 146).
 
 ## Privacy
 

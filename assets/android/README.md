@@ -1,6 +1,6 @@
 # Android-iconen (voor later)
 
-Launcher-iconen van Verenigd, aangeleverd door de gebruiker (2026-10-29, `verenigd_app_icons_v2.zip`), ongewijzigd bewaard voor een eventuele app of PWA bij fase 7 (webapp groepsleiders, besluiten 33–37).
+Launcher-iconen van Verenigd voor een eventuele app of PWA bij fase 7 (webapp groepsleiders, besluiten 33–37). Versie 3 (2026-10-29): opnieuw gemaakt uit het aangeleverde ontwerp (`assets/bron/verenigd-icoon-1024.png`), met echte transparantie rond de afgeronde tegel.
 
 | Map | Formaat |
 |---|---|

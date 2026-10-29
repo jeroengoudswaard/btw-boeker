@@ -14,9 +14,10 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Rapport *Begroting en werkelijk*** bij Rapporten.
 - **Kolom *Baten/lasten*** in het Rekeningschema (besluit 152). Bestaande rekeningen krijgen een voorstel uit het saldo (zonder afsluitposten, inclusief de historie); zonder saldo geldt vanaf 8000 baten. Ook de Excel-overname en sjabloonbestanden kennen de kant.
 - Weergave Eenvoudig: Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe*, Baten/lasten → *Inkomst/uitgave*.
-- **App-icoon** (besluit 156): het vinkje-icoon in alle Windows-formaten (16–256 px) voor programmabestand, taakbalk en titelbalken. De Android-iconen staan voor later in `assets/android/`.
+- **App-icoon** (besluiten 156 en 158): het vinkje-icoon (versie 3) in alle Windows-formaten (16–256 px) voor programmabestand, taakbalk en titelbalken, met echte transparantie rond de afgeronde tegel. De Android-iconen staan voor later in `assets/android/`, de bron in `assets/bron/`.
+- ***Modules › Begroting* (Ctrl+5)** opent het tabblad Boekhouding op het subtabblad Begroting (besluit 157); de placeholder uit fase 1 is vervallen.
 - Architectuurtests: de begroting telt nooit mee in grootboek, jaarafsluiting of bank; het app-icoon bevat alle formaten.
-- 773 geautomatiseerde tests (was 740).
+- 774 geautomatiseerde tests (was 740).
 
 ## [0.4.10] - 2026-10-29: Bijlagen (stap 4c-3)
 

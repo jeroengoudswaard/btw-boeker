@@ -444,6 +444,18 @@ public sealed partial class ShellViewModel : ObservableObject
             return;
         }
 
+        // Besluit 157: de begroting is een subtabblad van Boekhouding; Modules › Begroting (Ctrl+5) opent dat.
+        if (verzoek.Module == ModuleSoort.Begroting)
+        {
+            OpenModule(verzoek with { Module = ModuleSoort.Boekhouding });
+            if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+            {
+                boekhouding.Subtab = BoekhoudingSubtab.Begroting;
+            }
+
+            return;
+        }
+
         var bestaand = Tabbladen.FirstOrDefault(t => t.Module.Soort == verzoek.Module && t.Administratie?.Soort == verzoek.Administratie);
         if (bestaand is not null)
         {
