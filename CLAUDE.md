@@ -191,6 +191,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 153 | Afronding overnemen | Bij overnemen met een percentage afronden op tientallen euro's |
 | 154 | Eenvoudig-termen begroting | Begroting → *Begroting*, Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe* |
 | 155 | Afdruk begroting | Per rubriek met subtotalen en de kolommen *Werkelijk vorig jaar*, *Begroot dit jaar* en *Begroot volgend jaar* (voor de ALV) |
+| 156 | App-icoon | Vinkje-icoon van de gebruiker: één `Verenigd.ico` met 16–256 px (gemaakt uit de aangeleverde PNG's; het aangeleverde .ico had alleen 16×16), alleen als app-icoon. Android-iconen ongewijzigd in `assets/android/` voor fase 7. Mee in de pull request van v0.5.0 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 

@@ -7,6 +7,8 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>Verenigd</AssemblyName>
     <RootNamespace>Verenigd.App</RootNamespace>
+    <!-- App-icoon (16–256 px) voor programmabestand, taakbalk en titelbalken -->
+    <ApplicationIcon>Assets\Verenigd.ico</ApplicationIcon>
     <!-- WPF Fluent ThemeMode is nog als experimenteel gemarkeerd -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
@@ -18,6 +20,9 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Verenigd.ico" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Verenigd.App.Tests" />

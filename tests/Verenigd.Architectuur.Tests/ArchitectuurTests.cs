@@ -45,6 +45,18 @@ public class ArchitectuurTests
     }
 
     [Fact]
+    public void App_icoon_bevat_alle_windows_formaten_en_is_ingesteld()
+    {
+        var map = Path.Combine(Repositorymap(), "src", "Verenigd.App");
+        var icoon = File.ReadAllBytes(Path.Combine(map, "Assets", "Verenigd.ico"));
+        Assert.Equal(1, BitConverter.ToUInt16(icoon, 2)); // type: icoon
+        var aantal = BitConverter.ToUInt16(icoon, 4);
+        var maten = Enumerable.Range(0, aantal).Select(i => icoon[6 + (16 * i)] == 0 ? 256 : icoon[6 + (16 * i)]).ToHashSet();
+        Assert.Superset(new HashSet<int> { 16, 24, 32, 48, 256 }, maten);
+        Assert.Contains("<ApplicationIcon>Assets\\Verenigd.ico</ApplicationIcon>", File.ReadAllText(Path.Combine(map, "Verenigd.App.csproj")), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PdfPig_wordt_alleen_in_infrastructure_gebruikt()
     {
         Assert.DoesNotContain(Verwijzingen(Domain).Concat(Verwijzingen(Application)), n => n.StartsWith("UglyToad", StringComparison.Ordinal));
