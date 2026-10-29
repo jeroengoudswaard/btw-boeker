@@ -16,6 +16,8 @@
     <PackageVersion Include="ClosedXML" Version="0.105.0" />
     <PackageVersion Include="PDFsharp-MigraDoc" Version="6.2.4" />
     <PackageVersion Include="QRCoder" Version="1.8.1" />
+    <!-- Tekst uit PDF-bonnen lezen (besluit 135), Apache-2.0 -->
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
     <!-- PDFsharp 6.2.4 is de laatste MIT-versie (6.5 is AGPL); zijn afhankelijkheid Pkcs 8.0.1 heeft bekende kwetsbaarheden. -->
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <!-- Tests -->

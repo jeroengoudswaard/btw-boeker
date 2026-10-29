@@ -1,6 +1,7 @@
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Bijlagen;
 using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Facturen;
 using Verenigd.Domain.Financien.Relaties;
@@ -45,6 +46,13 @@ public sealed record BoekhoudingStand(
 
     public IReadOnlyList<HistorischTotaal> HistorischeTotalen { get; init; } = [];
 
+    /// <summary>De bijlagen zonder inhoud (besluit 84); de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
+    public IReadOnlyList<Bijlage> Bijlagen { get; init; } = [];
+
+    public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
+
+    public bool HeeftBijlage(Guid postId) => Bijlagen.Any(b => b.PostId == postId);
+
     /// <summary>Het jaar is historisch (overgenomen uit Excel): rapporten komen uit de totalen van het Voorblad.</summary>
     public bool IsHistorisch(int jaar) => Boekjaar(jaar) is { IsHistorisch: true };
 
@@ -73,6 +81,9 @@ public sealed class BoekhoudingWijziging<T>(T waarde)
 public interface IBoekhoudingRepository
 {
     Task<BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default);
+
+    /// <summary>De bestandsinhoud van één bijlage, of <c>null</c> als die niet bestaat.</summary>
+    Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default);
 
     /// <summary>Laadt de (gevolgde) stand, past <paramref name="wijziging"/> toe en slaat alles in één transactie op.</summary>
     Task<T> PasToeAsync<T>(AdministratieSoort administratie, Func<BoekhoudingStand, BoekhoudingWijziging<T>> wijziging,

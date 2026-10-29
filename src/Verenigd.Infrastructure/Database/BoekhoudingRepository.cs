@@ -13,6 +13,13 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
         return await LaadAsync(context, administratie, annulering).ConfigureAwait(false);
     }
 
+    public async Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default)
+    {
+        await using var context = maakContext();
+        return await context.BijlageInhoud.AsNoTracking().Where(i => i.BijlageId == bijlageId).Select(i => i.Gegevens)
+            .SingleOrDefaultAsync(annulering).ConfigureAwait(false);
+    }
+
     public async Task<T> PasToeAsync<T>(
         AdministratieSoort administratie, Func<BoekhoudingStand, BoekhoudingWijziging<T>> wijziging, CancellationToken annulering = default)
     {
@@ -77,6 +84,9 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             .OrderBy(r => r.Jaar).ThenBy(r => r.Datum).ThenBy(r => r.Volgorde).ToListAsync(annulering).ConfigureAwait(false);
         var historischeTotalen = await context.HistorischeTotalen.Include(t => t.Rekening).Where(t => t.Administratie == administratie)
             .ToListAsync(annulering).ConfigureAwait(false);
+        // Zonder inhoud: die wordt pas geladen bij bekijken of exporteren.
+        var bijlagen = await context.Bijlagen.Where(b => b.Administratie == administratie).OrderBy(b => b.ToegevoegdUtc)
+            .ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
             [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
         {
@@ -91,6 +101,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             Factuurinstellingen = factuurinstellingen,
             HistorischeRegels = historischeRegels,
             HistorischeTotalen = historischeTotalen,
+            Bijlagen = bijlagen,
         };
     }
 }
