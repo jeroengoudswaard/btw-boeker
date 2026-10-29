@@ -175,6 +175,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 137 | Bestandstypen bijlagen | PDF, JPG en PNG |
 | 138 | "Zonder bon" | Een uitgave is geld dat van de bank of uit de kas gaat (bank- en kasdagboeken), boven de drempel van besluit 97 |
 | 139 | Restpunten in 4c-3 | De twee tooltips met Expert-woorden en de IBAN-waarschuwing (besluit 22) gaan mee in de pull request van 4c-3 |
+| 140 | Bijlagen bij een post | Blok *Bijlagen* onder de regels in de post-editor (Toevoegen, Bekijken, Verwijderen, slepen); een paperclip-kolom in het Journaal toont welke posten een bijlage hebben |
+| 141 | Afwijkend IBAN uit SOL3 | Waarschuwing in het voorbeeldoverzicht van de import, met per lid een keuze *IBAN uit SOL3 overnemen* (standaard uit); zonder vinkje blijft de koppeling in Verenigd staan. Aanvulling op besluiten 21 en 22 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -232,7 +234,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-28, commit `e869c5c`): 679/679 geslaagd**, inclusief alle FlaUI-UI-tests.
     - Pull request: één PR voor v0.4.7 t/m v0.4.9 (besluit 134), geopend na de geslaagde Windows-run.
     - Gemerged als PR #7 (2026-10-28, `cdbe6d2`).
-  - **4c-3 Bijlagen: in ontwerp.** Besluiten 135–139 vastgesteld (2026-10-28); uitgewerkt ontwerp ter goedkeuring voorgelegd.
+  - **4c-3 Bijlagen: in ontwerp.** Besluiten 135–141 vastgesteld (2026-10-28); uitgewerkt ontwerp voorgelegd, wacht op akkoord om te bouwen (v0.4.10).
 
 ## Privacy
 
