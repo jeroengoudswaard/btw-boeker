@@ -194,6 +194,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 156 | App-icoon | Vinkje-icoon van de gebruiker: één `Verenigd.ico` met 16–256 px (gemaakt uit de aangeleverde PNG's; het aangeleverde .ico had alleen 16×16), alleen als app-icoon. Android-iconen ongewijzigd in `assets/android/` voor fase 7. Mee in de pull request van v0.5.0 |
 | 157 | Module Begroting (Ctrl+5) | *Modules › Begroting* en Ctrl+5 openen het tabblad Boekhouding van de actieve administratie (besluit 17) op het subtabblad *Begroting*; geen apart tabblad |
 | 158 | App-icoon versie 3 | Nieuw ontwerp van de gebruiker (2026-10-29; aangeleverd als JPG met ingebakken schaakbord). De tegel is uitgeknipt met afgeronde hoeken en echte transparantie; daaruit opnieuw gemaakt: `Verenigd.ico` (16–256 px) en de Android-set. Bron: `assets/bron/verenigd-icoon-1024.png` |
+| 159 | Meerjarenplan: posten | Per grootboekrekening (resultaatrekeningen) uit het rekeningschema van de Stichting, zoals de begroting; de Stichting richt daarvoor eerst een rekeningschema in (bijv. het standaardschema), zonder te boeken |
+| 160 | Meerjarenplan: invullen | Een raster met per rekening een bedrag per jaar; geen cycli of automatische verdeling |
+| 161 | Meerjarenplan: indexatie | Geen indexatie; alle bedragen in de prijzen van het jaar zelf |
+| 162 | Meerjarenplan: overzicht | Alleen baten en lasten per jaar met het resultaat per jaar; geen geldprognose |
+| 163 | Meerjarenplan: plaats | Subtabblad *Meerjarenplan* in het tabblad Boekhouding van de Stichting; Ctrl+5 opent bij de Stichting het meerjarenplan en bij de Vereniging de begroting |
+| 164 | Meerjarenplan: versies | Zoals de begroting: concept → *Vastgesteld* (alleen-lezen) → herziening als nieuwe versie |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -269,7 +275,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
     - Gemerged als PR #9 (2026-10-29, `e973ee1`), na groene CI (keuze van de gebruiker: mergen zonder extra Windows-run voor icoon en Ctrl+5).
-  - **5b Meerjarenplan Stichting: in ontwerp.** Voorstel met 6 vragen voorgelegd (2026-10-29).
+  - **5b Meerjarenplan Stichting: in ontwerp.** Besluiten 159–164 vastgesteld (2026-10-29); uitgewerkt ontwerp voorgelegd.
 
 ## Privacy
 
