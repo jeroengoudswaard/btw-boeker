@@ -88,7 +88,9 @@ public sealed class BijlageTests
 
         Assert.Equal(new DateOnly(2026, 10, 12), bijlage.Datum);
         Assert.Equal(new Bedrag(2345), bijlage.Bedrag);
-        Assert.Throws<ArgumentException>(() => bijlage.ZetGegevens(null, new Bedrag(-1)));
+
+        bijlage.ZetGegevens(null, new Bedrag(-1500)); // creditnota (besluit 142)
+        Assert.Equal(new Bedrag(-1500), bijlage.Bedrag);
     }
 
     [Fact]

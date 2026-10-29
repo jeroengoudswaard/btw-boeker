@@ -5,7 +5,10 @@ using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Bijlagen;
 
-/// <summary>Stelt bij een bon uit het postvak posten voor (besluit 85): precies hetzelfde bedrag, datum hooguit 7 dagen ernaast.</summary>
+/// <summary>
+/// Stelt bij een bon uit het postvak posten voor (besluit 85): precies hetzelfde bedrag, datum hooguit 7 dagen ernaast. Een
+/// creditnota (negatief bedrag) hoort bij een post waarbij hetzelfde bedrag op bank of kas binnenkomt (besluit 143).
+/// </summary>
 public static class KoppelVoorsteller
 {
     public const int MaximaalAantalDagen = 7;
@@ -33,7 +36,8 @@ public static class KoppelVoorsteller
     private static Journaalpost[] Zoek(BoekhoudingStand stand, DateOnly datum, Bedrag bedrag)
     {
         return [.. stand.Posten
-            .Where(p => p.TotaalDebet == bedrag && Math.Abs(p.Datum.DayNumber - datum.DayNumber) <= MaximaalAantalDagen)
+            .Where(p => (bedrag.Centen < 0 ? ZonderBon.Geldbeweging(p).Centen == bedrag.Centen : p.TotaalDebet == bedrag)
+                && Math.Abs(p.Datum.DayNumber - datum.DayNumber) <= MaximaalAantalDagen)
             .OrderBy(p => stand.HeeftBijlage(p.Id))
             .ThenBy(p => Math.Abs(p.Datum.DayNumber - datum.DayNumber))
             .ThenBy(p => p.Datum)];
@@ -41,8 +45,8 @@ public static class KoppelVoorsteller
 }
 
 /// <summary>
-/// Uitgaven zonder bon (besluiten 88, 97 en 138): posten in een bank- of kasdagboek waarbij er geld van de bank of uit de
-/// kas gaat, boven de drempel, zonder bijlage. Concepten tellen mee.
+/// Zonder bon (besluiten 88, 97, 138 en 145): posten in een bank- of kasdagboek waarbij er geld van de bank of uit de kas
+/// gaat of erbij komt, boven de drempel, zonder bijlage. Concepten tellen mee.
 /// </summary>
 public static class ZonderBon
 {
@@ -52,11 +56,14 @@ public static class ZonderBon
     public static IReadOnlyList<Journaalpost> Posten(BoekhoudingStand stand, Bedrag drempel)
     {
         ArgumentNullException.ThrowIfNull(stand);
-        return [.. stand.Posten.Where(p => Uitgave(p) > drempel && !stand.HeeftBijlage(p.Id))];
+        return [.. stand.Posten.Where(p => Math.Abs(Geldbeweging(p).Centen) > drempel.Centen && !stand.HeeftBijlage(p.Id))];
     }
 
-    /// <summary>Wat er per saldo van de bank of uit de kas gaat; nul als het geen uitgave is.</summary>
-    public static Bedrag Uitgave(Journaalpost post)
+    /// <summary>
+    /// Wat er per saldo van de bank of uit de kas gaat (positief) of erbij komt (negatief), zoals op een bon of creditnota;
+    /// nul buiten een bank- of kasdagboek.
+    /// </summary>
+    public static Bedrag Geldbeweging(Journaalpost post)
     {
         ArgumentNullException.ThrowIfNull(post);
         if (post.Dagboek is not { Soort: DagboekSoort.Bank or DagboekSoort.Kas, Rekening: { } geld })
@@ -64,7 +71,6 @@ public static class ZonderBon
             return Bedrag.Nul;
         }
 
-        var eraf = post.Regels.Where(r => r.Rekening.Nummer == geld.Nummer).Sum(r => r.Credit.Centen - r.Debet.Centen);
-        return eraf > 0 ? new Bedrag(eraf) : Bedrag.Nul;
+        return new Bedrag(post.Regels.Where(r => r.Rekening.Nummer == geld.Nummer).Sum(r => r.Credit.Centen - r.Debet.Centen));
     }
 }

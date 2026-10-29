@@ -54,6 +54,19 @@ public sealed class BijlagenTests
     }
 
     [Fact]
+    public void Een_creditnota_wordt_voorgesteld_bij_een_ontvangst_met_hetzelfde_bedrag()
+    {
+        var bankboek = _data.Bankdagboek("BNK", "NL91ABNA0417164300");
+        Post(bankboek, new DateOnly(2026, 10, 10), "Gamma", (_data.Energie, 1500, 0), (_data.Bank, 0, 1500)); // uitgave van 15,00
+        var retour = Post(bankboek, new DateOnly(2026, 10, 11), "Gamma retour", (_data.Bank, 1500, 0), (_data.Energie, 0, 1500));
+        Post(_data.Memoriaal, new DateOnly(2026, 10, 11), "Memoriaal", (_data.Energie, 1500, 0), (_data.Reserve, 0, 1500));
+        var creditnota = new Bijlage(BoekhoudingTestdata.Ver, "creditnota.pdf", Pdf(), Nu);
+        creditnota.ZetGegevens(new DateOnly(2026, 10, 12), new Bedrag(-1500));
+
+        Assert.Equal([retour], KoppelVoorsteller.Voorstellen(_data.Stand, creditnota));
+    }
+
+    [Fact]
     public void Zonder_datum_of_bedrag_is_er_geen_voorstel()
     {
         Kasuitgave(new DateOnly(2026, 10, 12), 2345);
@@ -80,13 +93,13 @@ public sealed class BijlagenTests
     // ---- Zonder bon ---------------------------------------------------------------------------
 
     [Fact]
-    public void Zonder_bon_zijn_uitgaven_van_bank_of_kas_boven_10_euro_zonder_bijlage()
+    public void Zonder_bon_zijn_uitgaven_en_ontvangsten_van_bank_of_kas_boven_10_euro_zonder_bijlage()
     {
         var bankboek = _data.Bankdagboek("BNK", "NL91ABNA0417164300");
         var groteKas = Kasuitgave(new DateOnly(2026, 10, 1), 2500);
         Kasuitgave(new DateOnly(2026, 10, 2), 1000); // precies de drempel: niet erboven
         var bankUit = Post(bankboek, new DateOnly(2026, 10, 3), "Gamma", (_data.Energie, 5000, 0), (_data.Bank, 0, 5000));
-        Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Welpen, 0, 9000)); // geld erbij
+        var ontvangst = Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Welpen, 0, 9000)); // geld erbij (besluit 145)
         Post(_data.Memoriaal, new DateOnly(2026, 10, 5), "Memoriaal", (_data.Energie, 7000, 0), (_data.Reserve, 0, 7000)); // geen bank of kas
         var metBon = Kasuitgave(new DateOnly(2026, 10, 6), 3000);
         var bon = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);
@@ -94,9 +107,10 @@ public sealed class BijlagenTests
         _data.Bijlagen.Add(bon);
         var concept = Kasuitgave(new DateOnly(2026, 10, 7), 4000, boeken: false);
 
-        Assert.Equal([groteKas, bankUit, concept], ZonderBon.Posten(_data.Stand, ZonderBon.StandaardDrempel));
+        Assert.Equal([groteKas, bankUit, ontvangst, concept], ZonderBon.Posten(_data.Stand, ZonderBon.StandaardDrempel));
         Assert.Equal(new Bedrag(1000), ZonderBon.StandaardDrempel);
-        Assert.Equal(new Bedrag(5000), ZonderBon.Uitgave(bankUit));
+        Assert.Equal(new Bedrag(5000), ZonderBon.Geldbeweging(bankUit));
+        Assert.Equal(new Bedrag(-9000), ZonderBon.Geldbeweging(ontvangst));
     }
 
     // ---- Dienst -------------------------------------------------------------------------------

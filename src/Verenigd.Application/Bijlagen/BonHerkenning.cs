@@ -15,7 +15,8 @@ public sealed record BonGegevens(DateOnly? Datum, Bedrag? Bedrag);
 /// <summary>
 /// Datum en totaalbedrag uit de tekst van een bon of factuur (besluit 96). De datum is de eerste geldige datum
 /// (dag-maand-jaar, jjjj-mm-dd of "1 oktober 2026"); het bedrag komt van de regel "te betalen", anders de laatste
-/// regel met "totaal" (niet subtotaal, excl. of btw), anders het hoogste bedrag.
+/// regel met "totaal" (niet subtotaal, excl. of btw), anders het bedrag dat het grootst is zonder minteken. Een minteken
+/// vóór of achter het bedrag blijft behouden, zoals bij een creditnota (besluit 142).
 /// </summary>
 public static partial class BonHerkenning
 {
@@ -77,18 +78,37 @@ public static partial class BonHerkenning
         }
 
         var alle = Bedragen(tekst);
-        return alle.Count == 0 ? null : alle.Max();
+        return alle.Count == 0 ? null : alle.MaxBy(b => Math.Abs(b.Centen));
+    }
+
+    /// <summary>Invoer in het postvak: zoals <see cref="Bedrag.TryParse"/>, maar een minteken vóór of achter mag (besluit 142).</summary>
+    public static bool TryParseBedrag(string? invoer, out Bedrag bedrag)
+    {
+        var tekst = (invoer ?? string.Empty).Trim();
+        var negatief = tekst.StartsWith('-') || tekst.EndsWith('-') || tekst.StartsWith("€ -", StringComparison.Ordinal) || tekst.StartsWith("€-", StringComparison.Ordinal);
+        tekst = tekst.Replace("-", string.Empty, StringComparison.Ordinal).Trim();
+        if (!Bedrag.TryParse(tekst, out bedrag))
+        {
+            bedrag = Bedrag.Nul;
+            return false;
+        }
+
+        bedrag = negatief ? new Bedrag(-bedrag.Centen) : bedrag;
+        return true;
     }
 
     private static List<Bedrag> Bedragen(string tekst)
     {
-        var komma = Kommabedrag().Matches(tekst).Select(m => Maak(m.Groups["e"].Value.Replace(".", string.Empty, StringComparison.Ordinal), m.Groups["c"].Value)).ToList();
+        var komma = Kommabedrag().Matches(tekst).Select(m => Maak(m, m.Groups["e"].Value.Replace(".", string.Empty, StringComparison.Ordinal))).ToList();
         return komma.Count > 0
             ? komma
-            : Puntbedrag().Matches(tekst).Select(m => Maak(m.Groups["e"].Value, m.Groups["c"].Value)).ToList();
+            : Puntbedrag().Matches(tekst).Select(m => Maak(m, m.Groups["e"].Value)).ToList();
 
-        static Bedrag Maak(string euro, string centen) =>
-            new((long.Parse(euro, CultureInfo.InvariantCulture) * 100) + int.Parse(centen, CultureInfo.InvariantCulture));
+        static Bedrag Maak(Match m, string euro)
+        {
+            var centen = (long.Parse(euro, CultureInfo.InvariantCulture) * 100) + int.Parse(m.Groups["c"].Value, CultureInfo.InvariantCulture);
+            return new(m.Groups["min"].Success || m.Groups["na"].Success ? -centen : centen);
+        }
     }
 
     private static int Getal(Match m, string groep) => int.Parse(m.Groups[groep].Value, CultureInfo.InvariantCulture);
@@ -102,10 +122,13 @@ public static partial class BonHerkenning
     [GeneratedRegex(@"(?<!\d)(?<d>\d{1,2})\s+(?<m>jan(uari)?|feb(ruari)?|maart|mrt|apr(il)?|mei|jun(i)?|jul(i)?|aug(ustus)?|sep(t(ember)?)?|okt(ober)?|nov(ember)?|dec(ember)?)\.?\s+(?<j>\d{4})(?!\d)", RegexOptions.IgnoreCase)]
     private static partial Regex TekstDatum();
 
-    [GeneratedRegex(@"(?<![\d.,])(?<e>\d{1,3}(?:\.\d{3})+|\d+),(?<c>\d{2})(?![\d,])")]
+    /// <summary>Optioneel minteken vóór (<c>-15,00</c>, <c>- 15,00</c>, <c>€ -15,00</c>, <c>-€ 15,00</c>) of direct achter (<c>15,00-</c>).</summary>
+    private const string Voor = @"(?:(?<![\w.,-])(?<min>-)\s?(?:€\s?)?|(?<![\w.,-])€\s?(?<min>-)\s?)?";
+
+    [GeneratedRegex(Voor + @"(?<![\d.,])(?<e>\d{1,3}(?:\.\d{3})+|\d+),(?<c>\d{2})(?![\d,])(?<na>-(?!\d))?")]
     private static partial Regex Kommabedrag();
 
-    [GeneratedRegex(@"(?<![\d.,])(?<e>\d+)\.(?<c>\d{2})(?![\d.])")]
+    [GeneratedRegex(Voor + @"(?<![\d.,])(?<e>\d+)\.(?<c>\d{2})(?![\d.])(?<na>-(?!\d))?")]
     private static partial Regex Puntbedrag();
 
     [GeneratedRegex(@"\b(totaal|total|bedrag)\b", RegexOptions.IgnoreCase)]

@@ -422,7 +422,7 @@ public sealed class AppUiTests : IDisposable
 
     private static string ExePad()
     {
-        // tests/Verenigd.App.Tests/bin/<Configuratie>/net10.0-windows/ -> src/Verenigd.App/bin/<Configuratie>/net10.0-windows/
+        // tests/Verenigd.App.Tests/bin/<Configuratie>/<tfm>/ -> src/Verenigd.App/bin/<Configuratie>/<tfm>/ (nu net10.0-windows10.0.19041.0)
         var testmap = new DirectoryInfo(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar));
         var configuratie = testmap.Parent!.Name;
         var root = testmap.Parent.Parent!.Parent!.Parent!.Parent!.FullName;

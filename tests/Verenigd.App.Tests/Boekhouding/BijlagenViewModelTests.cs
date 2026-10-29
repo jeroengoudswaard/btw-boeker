@@ -193,6 +193,30 @@ public sealed class BijlagenViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Postvak_accepteert_een_negatief_bedrag_en_stelt_een_ontvangst_voor()
+    {
+        var dienst = await InrichtenAsync();
+        var stand = await dienst.LaadAsync(Ver);
+        var invoer = new PostInvoer(null, stand.Dagboeken.Single(d => d.Code == "KAS").Id, new DateOnly(2026, 6, 10), "Retour",
+        [
+            new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1000).Id, null, new Bedrag(1500), Bedrag.Nul),
+            new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4115).Id, null, Bedrag.Nul, new Bedrag(1500)),
+        ]);
+        var retour = await dienst.BewaarConceptAsync(Ver, invoer);
+        var vm = await OpenAsync();
+        await vm.BonnenSlepenCommand.ExecuteAsync([Bestand("creditnota.jpg", [0xFF, 0xD8, 0xFF, 9])]);
+        var bon = Assert.Single(vm.Postvak);
+
+        bon.Datum = new DateTime(2026, 6, 11);
+        bon.Bedragtekst = "-15,00";
+
+        Assert.Null(bon.Fout);
+        Assert.Equal(new Bedrag(-1500), bon.Bedrag);
+        Assert.True(bon.IsNegatief);
+        Assert.Equal(retour, bon.GekozenPost?.Post.Id);
+    }
+
+    [Fact]
     public async Task Postvak_bon_verwijderen_na_bevestiging()
     {
         var vm = await OpenAsync();

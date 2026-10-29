@@ -68,7 +68,7 @@ public sealed class Bijlage
     /// <summary>De datum op de bon: herkend uit de PDF-tekst of ingevuld (besluit 96).</summary>
     public DateOnly? Datum { get; private set; }
 
-    /// <summary>Het totaalbedrag op de bon: herkend uit de PDF-tekst of ingevuld (besluit 96).</summary>
+    /// <summary>Het totaalbedrag op de bon: herkend uit de PDF-tekst of ingevuld (besluit 96); negatief bij een creditnota (besluit 142).</summary>
     public Bedrag? Bedrag { get; private set; }
 
     public DateTime ToegevoegdUtc { get; private set; }
@@ -96,14 +96,8 @@ public sealed class Bijlage
     /// <summary>Terug naar het postvak.</summary>
     public void Ontkoppel() => PostId = null;
 
-    /// <exception cref="ArgumentException">Een negatief bedrag.</exception>
     public void ZetGegevens(DateOnly? datum, Bedrag? bedrag)
     {
-        if (bedrag is { Centen: < 0 })
-        {
-            throw new ArgumentException("Het bedrag kan niet negatief zijn.", nameof(bedrag));
-        }
-
         Datum = datum;
         Bedrag = bedrag;
     }

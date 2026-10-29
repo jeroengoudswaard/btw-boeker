@@ -54,7 +54,7 @@ public sealed class BonHerkenningTests
     }
 
     [Fact]
-    public void Creditnota_geeft_het_bedrag_zonder_minteken()
+    public void Creditnota_houdt_het_minteken()
     {
         const string tekst = """
             Creditnota
@@ -62,7 +62,38 @@ public sealed class BonHerkenningTests
             Totaal -15,00
             """;
 
-        Assert.Equal(new BonGegevens(new DateOnly(2026, 10, 5), new Bedrag(1500)), BonHerkenning.Herken(tekst));
+        Assert.Equal(new BonGegevens(new DateOnly(2026, 10, 5), new Bedrag(-1500)), BonHerkenning.Herken(tekst));
+    }
+
+    [Theory]
+    [InlineData("Totaal € -15,00", -1500)]
+    [InlineData("Totaal -€ 15,00", -1500)]
+    [InlineData("Totaal - 15,00", -1500)]
+    [InlineData("Totaal 15,00-", -1500)]
+    [InlineData("Te betalen -1.234,50", -123450)]
+    [InlineData("Totaal 15,00", 1500)]
+    public void Minteken_voor_of_achter_het_bedrag(string tekst, long centen)
+    {
+        Assert.Equal(new Bedrag(centen), BonHerkenning.Herken(tekst).Bedrag);
+    }
+
+    [Fact]
+    public void Retourbon_zonder_totaalregel_kiest_het_grootste_bedrag_met_minteken()
+    {
+        Assert.Equal(new Bedrag(-2000), BonHerkenning.Herken("Retour\nArtikel A -5,00\nArtikel B -20,00").Bedrag);
+    }
+
+    [Theory]
+    [InlineData("-15,00", true, -1500)]
+    [InlineData("€ -15,00", true, -1500)]
+    [InlineData("15,00-", true, -1500)]
+    [InlineData("23,45", true, 2345)]
+    [InlineData("abc", false, 0)]
+    [InlineData("", false, 0)]
+    public void Bonbedrag_invoer_mag_negatief_zijn(string invoer, bool geldig, long centen)
+    {
+        Assert.Equal(geldig, BonHerkenning.TryParseBedrag(invoer, out var bedrag));
+        Assert.Equal(new Bedrag(centen), bedrag);
     }
 
     [Fact]

@@ -108,8 +108,8 @@
                                 <TextBox x:Name="Zoekveld" Width="200" VerticalAlignment="Center" Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
                                          ToolTip="Zoeken op nummer of omschrijving (Ctrl+F)" AutomationProperties.Name="Zoeken op nummer of omschrijving" />
                                 <CheckBox Content="{DynamicResource T.Knop.ZonderBon}" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenZonderBon}"
-                                          Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="Uitgaven van bank of kas boven € 10 zonder bijlage"
-                                          AutomationProperties.Name="Alleen uitgaven zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
+                                          Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="Uitgaven en ontvangsten van bank of kas boven € 10 zonder bijlage"
+                                          AutomationProperties.Name="Alleen boekingen zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
                             </WrapPanel>
                             <TextBlock DockPanel.Dock="Bottom" Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                             <DataGrid ItemsSource="{Binding Posten}" SelectedItem="{Binding GeselecteerdePost}" AutoGenerateColumns="False" IsReadOnly="True"
@@ -435,7 +435,19 @@
                                     <DataGridTextColumn Header="Bestand" Binding="{Binding Bestandsnaam}" Width="2*" />
                                     <DataGridTextColumn Header="Soort" Binding="{Binding Soort}" Width="Auto" />
                                     <DataGridTextColumn Header="Datum" Binding="{Binding Datumtekst}" Width="Auto" />
-                                    <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedragtekst}" Width="Auto" />
+                                    <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedragtekst}" Width="Auto">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                                <Style.Triggers>
+                                                    <!-- Creditnota in groen; het minteken blijft (besluit 144). -->
+                                                    <DataTrigger Binding="{Binding IsNegatief}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="Voorstel" Binding="{Binding Voorsteltekst}" Width="2*" />
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -453,7 +465,17 @@
                                 <DatePicker x:Name="Bondatum" SelectedDate="{Binding Datum}" Width="160" HorizontalAlignment="Left" AutomationProperties.AutomationId="BonDatum" />
                                 <Label Content="B_edrag" Target="{Binding ElementName=Bonbedrag}" Padding="0,12,0,4" />
                                 <TextBox x:Name="Bonbedrag" Text="{Binding Bedragtekst, UpdateSourceTrigger=PropertyChanged}" Width="160" HorizontalAlignment="Left"
-                                         TextAlignment="Right" AutomationProperties.AutomationId="BonBedrag" />
+                                         TextAlignment="Right" AutomationProperties.AutomationId="BonBedrag" ToolTip="Bij een creditnota met minteken, bijvoorbeeld -15,00">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsNegatief}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
                                 <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}" AutomationProperties.LiveSetting="Assertive" />
                                 <Label Content="_Hoort bij post" Target="{Binding ElementName=Bonpost}" Padding="0,12,0,4" />
                                 <ComboBox x:Name="Bonpost" ItemsSource="{Binding Postkeuzes}" SelectedItem="{Binding GekozenPost}" DisplayMemberPath="Tekst"

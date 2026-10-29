@@ -60,7 +60,7 @@ public sealed partial class BonRegel : ObservableObject
     public partial DateTime? Datum { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Bedrag), nameof(Fout), nameof(IsGewijzigd))]
+    [NotifyPropertyChangedFor(nameof(Bedrag), nameof(Fout), nameof(IsGewijzigd), nameof(IsNegatief))]
     public partial string Bedragtekst { get; set; }
 
     [ObservableProperty]
@@ -71,9 +71,13 @@ public sealed partial class BonRegel : ObservableObject
     public partial PostKeuze? GekozenPost { get; set; }
 
     /// <summary><c>null</c> als het veld leeg of ongeldig is.</summary>
-    public Bedrag? Bedrag => Domain.Financien.Bedrag.TryParse(Bedragtekst, out var bedrag) ? bedrag : null;
+    /// <summary>Negatief bij een creditnota (besluit 142).</summary>
+    public Bedrag? Bedrag => Application.Bijlagen.BonHerkenning.TryParseBedrag(Bedragtekst, out var bedrag) ? bedrag : null;
 
-    public string? Fout => Bedragtekst.Trim().Length > 0 && Bedrag is null ? "Vul een bedrag in zoals 23,45." : null;
+    /// <summary>Een creditnota: het bedrag wordt groen getoond (besluit 144).</summary>
+    public bool IsNegatief => Bedrag is { Centen: < 0 };
+
+    public string? Fout => Bedragtekst.Trim().Length > 0 && Bedrag is null ? "Vul een bedrag in zoals 23,45 (of -15,00 bij een creditnota)." : null;
 
     public bool IsGewijzigd => Weergave.AlsDatum(Datum) != Bijlage.Datum || Bedrag != Bijlage.Bedrag;
 
