@@ -268,7 +268,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-29, commit `7a7c015`): 773/773 geslaagd** (gemeld door de gebruiker).
     - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
-    - Pull request: eigen PR voor 5a (v0.5.0). Daarna ontwerp 5b Meerjarenplan Stichting (besluit 146).
+    - Gemerged als PR #9 (2026-10-29, `e973ee1`), na groene CI (keuze van de gebruiker: mergen zonder extra Windows-run voor icoon en Ctrl+5).
+  - **5b Meerjarenplan Stichting: in ontwerp.** Voorstel met 6 vragen voorgelegd (2026-10-29).
 
 ## Privacy
 
