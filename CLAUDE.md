@@ -181,6 +181,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 143 | Koppelen creditnota | Een negatieve bon wordt voorgesteld bij posten waarbij geld binnenkomt op bank of kas, met hetzelfde bedrag zonder minteken; een positieve bon werkt zoals voorheen |
 | 144 | Weergave creditnota | Alleen het negatieve bedrag (geen apart label), in groen; het minteken blijft, zodat kleur niet het enige kenmerk is |
 | 145 | "Zonder bon" ook ontvangsten | Wijziging van besluit 138: het filter toont uitgaven én ontvangsten van bank of kas boven de drempel zonder bijlage |
+| 146 | Opdeling fase 5 | 5a Begroting Vereniging → 5b Meerjarenplan Stichting, elk een eigen pull request. 5b na 5a, als losstaand plan (10 jaar, onderhoud, investeringen, afschrijvingen, huur, indexatie) tot de boekhouding van de Stichting er is |
+| 147 | Niveau begroting | Per grootboekrekening (resultaatrekeningen); rapporten tellen op per rubriek |
+| 148 | Periode begroting | Alleen een jaarbedrag; het lopende jaar wordt naar rato vergeleken |
+| 149 | Status begroting | Concept → *Vastgesteld* (alleen-lezen); een *Herziening* is mogelijk, de oorspronkelijke versie blijft bewaard |
+| 150 | Opstellen begroting | Overnemen van de werkelijke cijfers of de begroting van vorig jaar, met een optioneel percentage; elk bedrag blijft met de hand bij te stellen |
+| 151 | Jaarrekeningindeling | Nog niet in 5a: de begroting volgt de rubrieken uit het rekeningschema; een eigen indeling (besluit 69) volgt later |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -249,7 +255,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitvoermap van de app: `src/Verenigd.App/bin/<Config>/net10.0-windows10.0.19041.0/Verenigd.exe`.
     - **Windows-test (2026-10-29, commit `ae37699`): 740/740 geslaagd** (gemeld door de gebruiker).
     - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
-    - Volgende stap: ontwerp fase 5 (begroting Vereniging en meerjarenplan Stichting), eerst een voorstel ter goedkeuring.
+- **Fase 5 (Begroting & meerjarenplan): in ontwerp.** Besluiten 146–151 vastgesteld (2026-10-29). Uitgewerkt ontwerp 5a Begroting Vereniging voorgelegd ter goedkeuring.
 
 ## Privacy
 
