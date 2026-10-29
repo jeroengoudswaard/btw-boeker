@@ -247,7 +247,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Nog na te gaan door de gebruiker: kan het venster in de menumodus met Alt+F4 worden gesloten? Zo niet, dan is het een app-bug en volgt een regressietest.
     - **Creditnota's (besluiten 142–145), na de Windows-run:** minteken vóór of achter het bonbedrag blijft behouden en mag worden ingevuld (`BonHerkenning.TryParseBedrag`), koppelvoorstel bij een ontvangst op bank of kas, negatief bedrag in groen, *Zonder bon* ook voor ontvangsten (`ZonderBon.Geldbeweging`). Tests: 740. In de Linux-cloudsessie groen: Domain 218, Application 278, Infrastructure 62, Architectuur 12; ViewModel-tests 155/157 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 740/740) en de groene weergave in het postvak.
     - Uitvoermap van de app: `src/Verenigd.App/bin/<Config>/net10.0-windows10.0.19041.0/Verenigd.exe`.
-    - Pull request: eigen PR voor 4c-3 (besluit 89), geopend na de geslaagde Windows-run, inclusief de creditnota-wijziging.
+    - **Windows-test (2026-10-29, commit `ae37699`): 740/740 geslaagd** (gemeld door de gebruiker).
+    - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
+    - Volgende stap: ontwerp fase 5 (begroting Vereniging en meerjarenplan Stichting), eerst een voorstel ter goedkeuring.
 
 ## Privacy
 
