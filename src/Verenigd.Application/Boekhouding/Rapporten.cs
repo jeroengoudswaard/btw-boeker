@@ -49,6 +49,72 @@ public static class Rapporten
         return new RapportTabel($"Balans per 31-12-{Jaar(balans.Jaar)}", administratie, [new("Omschrijving", false), new("Bedrag", true)], rijen);
     }
 
+    /// <summary>Begroot tegenover werkelijk (besluit 148), altijd in Expert-termen (besluit 131).</summary>
+    public static RapportTabel Begroting(Begrotingen.Begrotingsoverzicht overzicht, string administratie)
+    {
+        ArgumentNullException.ThrowIfNull(overzicht);
+        var rijen = new List<RapportRij>();
+        foreach (var (kop, rubrieken) in new[] { ("Baten", overzicht.Baten), ("Lasten", overzicht.Lasten) })
+        {
+            rijen.Add(new RapportRij([kop, null, null, null, null, null], true, false));
+            foreach (var rubriek in rubrieken)
+            {
+                rijen.AddRange(rubriek.Regels.Select(r => new RapportRij(
+                    [r.Rekening.ToString(), r.WerkelijkVorigJaar, r.Begroot, r.Werkelijk, r.NaarRato, new Bedrag(r.Verschil)], false, false)));
+                rijen.Add(new RapportRij([$"Totaal {rubriek.Naam}", rubriek.Totaal(r => r.WerkelijkVorigJaar), rubriek.Totaal(r => r.Begroot),
+                    rubriek.Totaal(r => r.Werkelijk), rubriek.Totaal(r => r.NaarRato), null], false, true));
+            }
+        }
+
+        var jaar = Jaar(overzicht.Jaar);
+        return new RapportTabel($"Begroting en werkelijk {jaar}", administratie,
+        [
+            new("Rekening", false), new($"Werkelijk {Jaar(overzicht.Jaar - 1)}", true), new($"Begroot {jaar}", true),
+            new($"Werkelijk {jaar}", true), new("Naar rato", true), new("Verschil", true),
+        ], rijen);
+    }
+
+    /// <summary>
+    /// De begroting voor de ALV (besluit 155): per rubriek met subtotalen en de kolommen werkelijk twee jaar eerder, begroot
+    /// vorig jaar en begroot <paramref name="begrotingsjaar"/>.
+    /// </summary>
+    public static RapportTabel BegrotingAlv(BoekhoudingStand stand, int begrotingsjaar, string administratie)
+    {
+        ArgumentNullException.ThrowIfNull(stand);
+        var vorige = Begrotingen.Begrotingsrekenaar.Geldend(stand, begrotingsjaar - 1);
+        var deze = Begrotingen.Begrotingsrekenaar.Geldend(stand, begrotingsjaar);
+        var rekeningen = stand.Rekeningen.Where(r => r.Soort == Domain.Financien.Boekhouding.RekeningSoort.Resultaat)
+            .Select(r => (Rekening: r, Werkelijk: Begrotingen.Begrotingsrekenaar.Werkelijk(stand, r, begrotingsjaar - 2),
+                Vorig: vorige?.Bedrag(r) ?? Bedrag.Nul, Begroot: deze?.Bedrag(r) ?? Bedrag.Nul))
+            .Where(r => r.Werkelijk != Bedrag.Nul || r.Vorig != Bedrag.Nul || r.Begroot != Bedrag.Nul)
+            .ToList();
+        var rijen = new List<RapportRij>();
+        var totalen = new Dictionary<Domain.Financien.Boekhouding.ResultaatKant, Bedrag[]>();
+        foreach (var (kop, kant) in new[] { ("Baten", Domain.Financien.Boekhouding.ResultaatKant.Baten), ("Lasten", Domain.Financien.Boekhouding.ResultaatKant.Lasten) })
+        {
+            var deel = rekeningen.Where(r => (r.Rekening.Kant == Domain.Financien.Boekhouding.ResultaatKant.Baten) == (kant == Domain.Financien.Boekhouding.ResultaatKant.Baten)).ToList();
+            rijen.Add(new RapportRij([kop, null, null, null], true, false));
+            foreach (var rubriek in deel.GroupBy(r => r.Rekening.Rubriek).OrderBy(g => g.Key?.Volgorde ?? int.MaxValue))
+            {
+                rijen.AddRange(rubriek.OrderBy(r => r.Rekening.Nummer).Select(r => new RapportRij([r.Rekening.ToString(), r.Werkelijk, r.Vorig, r.Begroot], false, false)));
+                rijen.Add(new RapportRij([$"Totaal {rubriek.Key?.Naam ?? "Overig"}", rubriek.Select(r => r.Werkelijk).Som(), rubriek.Select(r => r.Vorig).Som(),
+                    rubriek.Select(r => r.Begroot).Som()], false, true));
+            }
+
+            totalen[kant] = [deel.Select(r => r.Werkelijk).Som(), deel.Select(r => r.Vorig).Som(), deel.Select(r => r.Begroot).Som()];
+            rijen.Add(new RapportRij([$"Totaal {kop.ToLowerInvariant()}", .. totalen[kant].Cast<object?>()], false, true));
+        }
+
+        var b = totalen[Domain.Financien.Boekhouding.ResultaatKant.Baten];
+        var l = totalen[Domain.Financien.Boekhouding.ResultaatKant.Lasten];
+        rijen.Add(new RapportRij(["Resultaat (baten min lasten)", .. Enumerable.Range(0, 3).Select(i => (object?)new Bedrag(b[i].Centen - l[i].Centen))], false, true));
+        return new RapportTabel($"Begroting {Jaar(begrotingsjaar)}", administratie,
+        [
+            new("Omschrijving", false), new($"Werkelijk {Jaar(begrotingsjaar - 2)}", true), new($"Begroot {Jaar(begrotingsjaar - 1)}", true),
+            new($"Begroot {Jaar(begrotingsjaar)}", true),
+        ], rijen);
+    }
+
     public static RapportTabel Kaart(Grootboekkaart kaart, string administratie)
     {
         ArgumentNullException.ThrowIfNull(kaart);

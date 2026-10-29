@@ -181,6 +181,19 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 143 | Koppelen creditnota | Een negatieve bon wordt voorgesteld bij posten waarbij geld binnenkomt op bank of kas, met hetzelfde bedrag zonder minteken; een positieve bon werkt zoals voorheen |
 | 144 | Weergave creditnota | Alleen het negatieve bedrag (geen apart label), in groen; het minteken blijft, zodat kleur niet het enige kenmerk is |
 | 145 | "Zonder bon" ook ontvangsten | Wijziging van besluit 138: het filter toont uitgaven én ontvangsten van bank of kas boven de drempel zonder bijlage |
+| 146 | Opdeling fase 5 | 5a Begroting Vereniging → 5b Meerjarenplan Stichting, elk een eigen pull request. 5b na 5a, als losstaand plan (10 jaar, onderhoud, investeringen, afschrijvingen, huur, indexatie) tot de boekhouding van de Stichting er is |
+| 147 | Niveau begroting | Per grootboekrekening (resultaatrekeningen); rapporten tellen op per rubriek |
+| 148 | Periode begroting | Alleen een jaarbedrag; het lopende jaar wordt naar rato vergeleken |
+| 149 | Status begroting | Concept → *Vastgesteld* (alleen-lezen); een *Herziening* is mogelijk, de oorspronkelijke versie blijft bewaard |
+| 150 | Opstellen begroting | Overnemen van de werkelijke cijfers of de begroting van vorig jaar, met een optioneel percentage; elk bedrag blijft met de hand bij te stellen |
+| 151 | Jaarrekeningindeling | Nog niet in 5a: de begroting volgt de rubrieken uit het rekeningschema; een eigen indeling (besluit 69) volgt later |
+| 152 | Baten of lasten | Nieuwe eigenschap *Baten/Lasten* per resultaatrekening in het rekeningschema; bij bestaande rekeningen voorgesteld uit het saldo van vorig jaar (anders 8xxx = baten), door de gebruiker aan te passen |
+| 153 | Afronding overnemen | Bij overnemen met een percentage afronden op tientallen euro's |
+| 154 | Eenvoudig-termen begroting | Begroting → *Begroting*, Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe* |
+| 155 | Afdruk begroting | Per rubriek met subtotalen en de kolommen *Werkelijk vorig jaar*, *Begroot dit jaar* en *Begroot volgend jaar* (voor de ALV) |
+| 156 | App-icoon | Vinkje-icoon van de gebruiker: één `Verenigd.ico` met 16–256 px (gemaakt uit de aangeleverde PNG's; het aangeleverde .ico had alleen 16×16), alleen als app-icoon. Android-iconen ongewijzigd in `assets/android/` voor fase 7. Mee in de pull request van v0.5.0 |
+| 157 | Module Begroting (Ctrl+5) | *Modules › Begroting* en Ctrl+5 openen het tabblad Boekhouding van de actieve administratie (besluit 17) op het subtabblad *Begroting*; geen apart tabblad |
+| 158 | App-icoon versie 3 | Nieuw ontwerp van de gebruiker (2026-10-29; aangeleverd als JPG met ingebakken schaakbord). De tegel is uitgeknipt met afgeronde hoeken en echte transparantie; daaruit opnieuw gemaakt: `Verenigd.ico` (16–256 px) en de Android-set. Bron: `assets/bron/verenigd-icoon-1024.png` |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -247,7 +260,15 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Nog na te gaan door de gebruiker: kan het venster in de menumodus met Alt+F4 worden gesloten? Zo niet, dan is het een app-bug en volgt een regressietest.
     - **Creditnota's (besluiten 142–145), na de Windows-run:** minteken vóór of achter het bonbedrag blijft behouden en mag worden ingevuld (`BonHerkenning.TryParseBedrag`), koppelvoorstel bij een ontvangst op bank of kas, negatief bedrag in groen, *Zonder bon* ook voor ontvangsten (`ZonderBon.Geldbeweging`). Tests: 740. In de Linux-cloudsessie groen: Domain 218, Application 278, Infrastructure 62, Architectuur 12; ViewModel-tests 155/157 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 740/740) en de groene weergave in het postvak.
     - Uitvoermap van de app: `src/Verenigd.App/bin/<Config>/net10.0-windows10.0.19041.0/Verenigd.exe`.
-    - Pull request: eigen PR voor 4c-3 (besluit 89), geopend na de geslaagde Windows-run, inclusief de creditnota-wijziging.
+    - **Windows-test (2026-10-29, commit `ae37699`): 740/740 geslaagd** (gemeld door de gebruiker).
+    - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
+- **Fase 5 (Begroting & meerjarenplan):** besluiten 146–156 vastgesteld (2026-10-29).
+  - **5a Begroting Vereniging: gereed**, v0.5.0 (2026-10-29). Subtabblad *Begroting* in Boekhouding (jaar, versie, overnemen + % afgerond op tientallen, vaststellen, herzien, naar rato per dag, Ctrl+S, Ctrl+P = ALV-afdruk), rapport *Begroting en werkelijk*, kolom *Baten/lasten* in het rekeningschema (`ResultaatKant`, migratie *Begroting* met voorstel uit het saldo via `MigratieSql.KantVoorstellen`). App-icoon (besluit 156).
+    - Uitwerkingen: het overnemen en vaststellen staan in de werkbalk van het subtabblad (geen aparte dialogen); naar rato rekent per dag; een ongunstig verschil is rood.
+    - **Windows-test (2026-10-29, commit `7a7c015`): 773/773 geslaagd** (gemeld door de gebruiker).
+    - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
+    - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
+    - Pull request: eigen PR voor 5a (v0.5.0). Daarna ontwerp 5b Meerjarenplan Stichting (besluit 146).
 
 ## Privacy
 

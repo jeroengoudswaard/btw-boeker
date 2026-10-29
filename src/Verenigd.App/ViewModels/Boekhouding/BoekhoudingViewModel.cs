@@ -93,7 +93,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
     public IReadOnlyList<RekeningRol> Rollen { get; } = Enum.GetValues<RekeningRol>();
 
     public IReadOnlyList<Rapportkeuze> Rapportkeuzes =>
-        [new(Rapportsoort.Saldibalans, Woorden["Saldibalans"]), new(Rapportsoort.Balans, Woorden["Balans"]), new(Rapportsoort.WinstEnVerlies, Woorden["WinstEnVerlies"])];
+        [new(Rapportsoort.Saldibalans, Woorden["Saldibalans"]), new(Rapportsoort.Balans, Woorden["Balans"]), new(Rapportsoort.WinstEnVerlies, Woorden["WinstEnVerlies"]),
+            new(Rapportsoort.Begroting, Woorden["Rapport.Begroting"])];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLeeg))]
@@ -185,17 +186,24 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd || BegrotingGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
         && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && FacturenGeldig;
+        && FacturenGeldig
+        && BegrotingGeldig;
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
-    public RapportTabel? Afdruktabel => Subtab == BoekhoudingSubtab.Grootboekkaart && KaartTabel is not null ? KaartTabel : Rapport;
+    public RapportTabel? Afdruktabel => Subtab switch
+    {
+        BoekhoudingSubtab.Grootboekkaart when KaartTabel is not null => KaartTabel,
+        // De begroting voor de ALV (besluit 155), altijd in Expert-termen (besluit 131).
+        BoekhoudingSubtab.Begroting when _stand is not null && HeeftBegroting => Rapporten.BegrotingAlv(_stand, Begrotingsjaar, Administratienaam),
+        _ => Rapport,
+    };
 
     private DateOnly Vandaag => DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
 
@@ -220,6 +228,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
             }
 
             await BewaarRegelsAsync();
+            await BewaarBegrotingAsync();
             var factuur = await BewaarFacturenAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
@@ -319,6 +328,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         LaadBank();
         LaadFacturen(null);
         LaadBijlagen();
+        LaadBegroting(GekozenBegrotingsversie?.Id);
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -780,6 +790,10 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         }
 
         ZetKaartkoppen();
+        if (_stand is not null)
+        {
+            BerekenBegrotingstotalen();
+        }
     }
 
     private void BerekenRapport()
@@ -788,6 +802,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         {
             Rapportsoort.Balans => Rapporten.Balans(Grootboek.Balans(_stand, Jaar), Administratienaam),
             Rapportsoort.WinstEnVerlies => Rapporten.WinstEnVerlies(Grootboek.WinstEnVerlies(_stand, Jaar), Administratienaam),
+            Rapportsoort.Begroting => Rapporten.Begroting(Application.Begrotingen.Begrotingsrekenaar.Overzicht(_stand, Jaar, Vandaag), Administratienaam),
             _ => Rapporten.Saldibalans(Grootboek.Saldibalans(_stand, Jaar), Administratienaam),
         };
         OnPropertyChanged(nameof(Afdruktabel));
@@ -934,5 +949,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BankCommandsVernieuwen();
         FactuurCommandsVernieuwen();
         BijlageCommandsVernieuwen();
+        BegrotingCommandsVernieuwen();
     }
 }

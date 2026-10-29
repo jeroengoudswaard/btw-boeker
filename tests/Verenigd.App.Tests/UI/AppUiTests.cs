@@ -254,7 +254,7 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
-        foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabBoekingsregels", "SubtabFacturen", "SubtabRelaties", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBoekjaren" })
+        foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabPostvak", "SubtabBoekingsregels", "SubtabFacturen", "SubtabRelaties", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBegroting", "SubtabBoekjaren" })
         {
             Zoek(venster, subtab);
         }

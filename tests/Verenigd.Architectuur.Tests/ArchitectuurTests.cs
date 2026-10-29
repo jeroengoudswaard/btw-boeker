@@ -45,6 +45,18 @@ public class ArchitectuurTests
     }
 
     [Fact]
+    public void App_icoon_bevat_alle_windows_formaten_en_is_ingesteld()
+    {
+        var map = Path.Combine(Repositorymap(), "src", "Verenigd.App");
+        var icoon = File.ReadAllBytes(Path.Combine(map, "Assets", "Verenigd.ico"));
+        Assert.Equal(1, BitConverter.ToUInt16(icoon, 2)); // type: icoon
+        var aantal = BitConverter.ToUInt16(icoon, 4);
+        var maten = Enumerable.Range(0, aantal).Select(i => icoon[6 + (16 * i)] == 0 ? 256 : icoon[6 + (16 * i)]).ToHashSet();
+        Assert.Superset(new HashSet<int> { 16, 24, 32, 48, 256 }, maten);
+        Assert.Contains("<ApplicationIcon>Assets\\Verenigd.ico</ApplicationIcon>", File.ReadAllText(Path.Combine(map, "Verenigd.App.csproj")), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PdfPig_wordt_alleen_in_infrastructure_gebruikt()
     {
         Assert.DoesNotContain(Verwijzingen(Domain).Concat(Verwijzingen(Application)), n => n.StartsWith("UglyToad", StringComparison.Ordinal));
@@ -220,6 +232,28 @@ public class ArchitectuurTests
             .Where(f => File.ReadAllText(f) is var tekst
                 && (tekst.Contains("HistorischeRegel", StringComparison.Ordinal) || tekst.Contains("HistorischTotaal", StringComparison.Ordinal)
                     || tekst.Contains("HistorischeTotalen", StringComparison.Ordinal)))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.Empty(overtredingen);
+    }
+
+    /// <summary>
+    /// De begroting telt nooit mee in het grootboek (fase 5a): in de applicatielaag gebruiken alleen het model, de
+    /// begrotingsonderdelen en de rapporten haar; grootboek, jaarafsluiting, bank en boekhoudingdienst niet.
+    /// </summary>
+    [Fact]
+    public void Begroting_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
+    {
+        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs"];
+        var overtredingen = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}Begrotingen{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
+            .Where(f => File.ReadAllText(f) is var tekst
+                && (tekst.Contains("Financien.Begrotingen", StringComparison.Ordinal) || tekst.Contains("Application.Begrotingen", StringComparison.Ordinal)
+                    || tekst.Contains("Begrotingsrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Begrotingen", StringComparison.Ordinal)))
             .Select(Path.GetFileName)
             .ToList();
 

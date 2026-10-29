@@ -87,6 +87,9 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
         // Zonder inhoud: die wordt pas geladen bij bekijken of exporteren.
         var bijlagen = await context.Bijlagen.Where(b => b.Administratie == administratie).OrderBy(b => b.ToegevoegdUtc)
             .ToListAsync(annulering).ConfigureAwait(false);
+        var begrotingen = await context.Begrotingen.Include(b => b.Regels).ThenInclude(r => r.Rekening)
+            .Where(b => b.Administratie == administratie).OrderBy(b => b.Jaar).ThenBy(b => b.Versie)
+            .AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
             [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
         {
@@ -102,6 +105,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext)
             HistorischeRegels = historischeRegels,
             HistorischeTotalen = historischeTotalen,
             Bijlagen = bijlagen,
+            Begrotingen = begrotingen,
         };
     }
 }

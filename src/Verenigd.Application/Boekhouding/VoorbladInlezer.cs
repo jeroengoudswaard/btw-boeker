@@ -46,6 +46,21 @@ public sealed record VoorbladRekening(
     public Bedrag WenvDebet { get; init; }
 
     public Bedrag WenvCredit { get; init; }
+
+    /// <summary>Baten of lasten volgens een sjabloon; <c>null</c> = uit het saldo van de W&amp;V-kolommen.</summary>
+    public ResultaatKant? Kant { get; init; }
+
+    /// <summary>
+    /// Besluit 152: de kant uit het sjabloon, anders uit het saldo van vorig jaar (credit = baten, debet = lasten); zonder
+    /// saldo <c>null</c>, zodat de standaard (vanaf 8000 baten) geldt.
+    /// </summary>
+    public ResultaatKant? VoorgesteldeKant => Soort != RekeningSoort.Resultaat ? null
+        : Kant ?? (WenvCredit.Centen - WenvDebet.Centen) switch
+        {
+            > 0 => ResultaatKant.Baten,
+            < 0 => ResultaatKant.Lasten,
+            _ => null,
+        };
 }
 
 public sealed record VoorbladVoorstel(int Jaar, IReadOnlyList<VoorbladRekening> Rekeningen, IReadOnlyList<string> Meldingen)
