@@ -211,11 +211,11 @@ public sealed class ShellViewModelTests
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
 
-        shell.OpenModuleViaSneltoetsCommand.Execute("5"); // Begroting: het open tabblad Boekhouding, op het subtabblad Begroting
+        shell.OpenModuleViaSneltoetsCommand.Execute("5"); // bij de Stichting: het meerjarenplan (besluit 163)
 
         var boekhouding = Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
-        Assert.Equal(ViewModels.Boekhouding.BoekhoudingSubtab.Begroting, boekhouding.Subtab);
+        Assert.Equal(ViewModels.Boekhouding.BoekhoudingSubtab.Meerjarenplan, boekhouding.Subtab);
         Assert.Single(shell.Tabbladen, t => t.Module.Soort == ModuleSoort.Boekhouding);
     }
 

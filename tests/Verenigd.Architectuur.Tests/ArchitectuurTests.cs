@@ -243,7 +243,7 @@ public class ArchitectuurTests
     /// begrotingsonderdelen en de rapporten haar; grootboek, jaarafsluiting, bank en boekhoudingdienst niet.
     /// </summary>
     [Fact]
-    public void Begroting_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
+    public void Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
     {
         string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs"];
         var overtredingen = Directory
@@ -253,7 +253,8 @@ public class ArchitectuurTests
             .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
             .Where(f => File.ReadAllText(f) is var tekst
                 && (tekst.Contains("Financien.Begrotingen", StringComparison.Ordinal) || tekst.Contains("Application.Begrotingen", StringComparison.Ordinal)
-                    || tekst.Contains("Begrotingsrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Begrotingen", StringComparison.Ordinal)))
+                    || tekst.Contains("Begrotingsrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Begrotingen", StringComparison.Ordinal)
+                    || tekst.Contains("Meerjarenrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Meerjarenplannen", StringComparison.Ordinal)))
             .Select(Path.GetFileName)
             .ToList();
 
