@@ -187,6 +187,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 149 | Status begroting | Concept → *Vastgesteld* (alleen-lezen); een *Herziening* is mogelijk, de oorspronkelijke versie blijft bewaard |
 | 150 | Opstellen begroting | Overnemen van de werkelijke cijfers of de begroting van vorig jaar, met een optioneel percentage; elk bedrag blijft met de hand bij te stellen |
 | 151 | Jaarrekeningindeling | Nog niet in 5a: de begroting volgt de rubrieken uit het rekeningschema; een eigen indeling (besluit 69) volgt later |
+| 152 | Baten of lasten | Nieuwe eigenschap *Baten/Lasten* per resultaatrekening in het rekeningschema; bij bestaande rekeningen voorgesteld uit het saldo van vorig jaar (anders 8xxx = baten), door de gebruiker aan te passen |
+| 153 | Afronding overnemen | Bij overnemen met een percentage afronden op tientallen euro's |
+| 154 | Eenvoudig-termen begroting | Begroting → *Begroting*, Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe* |
+| 155 | Afdruk begroting | Per rubriek met subtotalen en de kolommen *Werkelijk vorig jaar*, *Begroot dit jaar* en *Begroot volgend jaar* (voor de ALV) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -255,7 +259,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitvoermap van de app: `src/Verenigd.App/bin/<Config>/net10.0-windows10.0.19041.0/Verenigd.exe`.
     - **Windows-test (2026-10-29, commit `ae37699`): 740/740 geslaagd** (gemeld door de gebruiker).
     - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
-- **Fase 5 (Begroting & meerjarenplan): in ontwerp.** Besluiten 146–151 vastgesteld (2026-10-29). Uitgewerkt ontwerp 5a Begroting Vereniging voorgelegd ter goedkeuring.
+- **Fase 5 (Begroting & meerjarenplan): in ontwerp.** Besluiten 146–155 vastgesteld (2026-10-29). Uitgewerkt ontwerp 5a Begroting Vereniging voorgelegd; wacht op akkoord om te bouwen (v0.5.0).
 
 ## Privacy
 
