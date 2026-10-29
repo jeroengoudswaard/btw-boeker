@@ -200,6 +200,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 162 | Meerjarenplan: overzicht | Alleen baten en lasten per jaar met het resultaat per jaar; geen geldprognose |
 | 163 | Meerjarenplan: plaats | Subtabblad *Meerjarenplan* in het tabblad Boekhouding van de Stichting; Ctrl+5 opent bij de Stichting het meerjarenplan en bij de Vereniging de begroting |
 | 164 | Meerjarenplan: versies | Zoals de begroting: concept → *Vastgesteld* (alleen-lezen) → herziening als nieuwe versie |
+| 165 | Afdruk meerjarenplan | Liggend A4, alle 10 jaren op één pagina, met kleinere letters voor de bedragen |
+| 166 | Invulhulp meerjarenplan | Per rij een knop *Naar de volgende jaren kopiëren*: het bedrag van het gekozen jaar gaat naar alle latere jaren; daarna blijft elk bedrag aan te passen |
+| 167 | Startjaar meerjarenplan | Vrij te kiezen, standaard het volgende jaar; een nieuw plan begint los van het vorige |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -275,7 +278,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
     - Gemerged als PR #9 (2026-10-29, `e973ee1`), na groene CI (keuze van de gebruiker: mergen zonder extra Windows-run voor icoon en Ctrl+5).
-  - **5b Meerjarenplan Stichting: in ontwerp.** Besluiten 159–164 vastgesteld (2026-10-29); uitgewerkt ontwerp voorgelegd.
+  - **5b Meerjarenplan Stichting: in ontwerp.** Besluiten 159–167 vastgesteld (2026-10-29); uitgewerkt ontwerp voorgelegd, wacht op akkoord om te bouwen (v0.6.0).
 
 ## Privacy
 
