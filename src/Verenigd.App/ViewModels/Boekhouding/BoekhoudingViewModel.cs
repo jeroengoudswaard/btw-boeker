@@ -299,7 +299,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
                 posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt), boekjaar.IsHistorisch));
         }
 
-        _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p, Woorden))];
+        _allePosten = MaakPostregels();
+        BerekenZonderBon();
         OnPropertyChanged(nameof(IsHistorischJaar));
         PasPostfilterToe(postSelectie);
         if (postSelectie is null || GeselecteerdePost is null)
@@ -317,6 +318,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BerekenKaart();
         LaadBank();
         LaadFacturen(null);
+        LaadBijlagen();
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -324,6 +326,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         var zoek = Zoektekst.Trim();
         var zichtbaar = _allePosten
             .Where(p => p.DatumWaarde.Year == Jaar)
+            .Where(p => !AlleenZonderBon || _zonderBon.Contains(p.Id))
             .Where(p => zoek.Length == 0
                 || p.Nummer.Contains(zoek, StringComparison.CurrentCultureIgnoreCase)
                 || p.Omschrijving.Contains(zoek, StringComparison.CurrentCultureIgnoreCase))
@@ -635,7 +638,11 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
     private void EditorGewijzigd(object? sender, PropertyChangedEventArgs e) => CommandsVernieuwen();
 
-    partial void OnEditorChanged(PostEditor? value) => CommandsVernieuwen();
+    partial void OnEditorChanged(PostEditor? value)
+    {
+        LaadPostbijlagen();
+        CommandsVernieuwen();
+    }
 
     partial void OnZoektekstChanged(string value) => PasPostfilterToe(GeselecteerdePost?.Id);
 
@@ -768,7 +775,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         OnPropertyChanged(nameof(Rapportkeuzes));
         if (_stand is not null)
         {
-            _allePosten = [.. _stand.Posten.Select(p => new PostRegel(p, Woorden))];
+            _allePosten = MaakPostregels();
             PasPostfilterToe(GeselecteerdePost?.Id);
         }
 
@@ -926,5 +933,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
         BankCommandsVernieuwen();
         FactuurCommandsVernieuwen();
+        BijlageCommandsVernieuwen();
     }
 }

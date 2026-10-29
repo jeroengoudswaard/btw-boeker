@@ -49,6 +49,9 @@ internal static partial class ShellLog
     [LoggerMessage(15, LogLevel.Information, "Bankafschriften {Administratie} ingelezen: {Nieuw} nieuw, {Herkend} herkend, {Werkvoorraad} in de werkvoorraad")]
     public static partial void BankafschriftIngelezen(ILogger logger, string administratie, int nieuw, int herkend, int werkvoorraad);
 
+    [LoggerMessage(16, LogLevel.Information, "Bijlage verwijderd uit {Administratie}")]
+    public static partial void BijlageVerwijderd(ILogger logger, string administratie);
+
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 }

@@ -10,6 +10,8 @@ using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Excel;
 using Verenigd.Infrastructure.Pdf;
 
+using Verenigd.Tests.Gedeeld;
+
 namespace Verenigd.Infrastructure.Tests.Bijlagen;
 
 /// <summary>Bijlagen in de echte, versleutelde database en het lezen van PDF-tekst (besluiten 84, 96 en 135). Gegevens zijn verzonnen.</summary>
@@ -35,43 +37,6 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     public async Task DisposeAsync() => await _sessie.DisposeAsync();
 
     public void Dispose() => _map.Dispose();
-
-    /// <summary>Een kleine, geldige PDF met tekst in Helvetica (zonder ingesloten lettertype).</summary>
-    internal static byte[] TestPdf(params string[] regels)
-    {
-        var inhoud = new StringBuilder("BT /F1 12 Tf 50 750 Td 14 TL\n");
-        foreach (var regel in regels)
-        {
-            inhoud.Append('(').Append(regel.Replace("(", "\\(", StringComparison.Ordinal).Replace(")", "\\)", StringComparison.Ordinal)).Append(") Tj T*\n");
-        }
-
-        inhoud.Append("ET");
-        string[] objecten =
-        [
-            "<< /Type /Catalog /Pages 2 0 R >>",
-            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-            $"<< /Length {inhoud.Length} >>\nstream\n{inhoud}\nendstream",
-            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-        ];
-        var pdf = new StringBuilder("%PDF-1.4\n");
-        var posities = new List<int>();
-        for (var i = 0; i < objecten.Length; i++)
-        {
-            posities.Add(pdf.Length);
-            pdf.Append(CultureInfo.InvariantCulture, $"{i + 1} 0 obj\n{objecten[i]}\nendobj\n");
-        }
-
-        var xref = pdf.Length;
-        pdf.Append(CultureInfo.InvariantCulture, $"xref\n0 {objecten.Length + 1}\n0000000000 65535 f \n");
-        foreach (var positie in posities)
-        {
-            pdf.Append(CultureInfo.InvariantCulture, $"{positie:D10} 00000 n \n");
-        }
-
-        pdf.Append(CultureInfo.InvariantCulture, $"trailer\n<< /Size {objecten.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
-        return Encoding.Latin1.GetBytes(pdf.ToString());
-    }
 
     private async Task<Guid> ConceptAsync(bool boeken = false)
     {
@@ -110,7 +75,7 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     public void PdfPig_leest_de_tekst_en_een_ongeldige_pdf_geeft_null()
     {
         var lezer = new PdfPigTekstLezer();
-        var tekst = lezer.LeesTekst(TestPdf("Bouwmarkt Voorbeeld", "Datum 12-10-2026", "Te betalen 23,45"));
+        var tekst = lezer.LeesTekst(Testpdf.Maak("Bouwmarkt Voorbeeld", "Datum 12-10-2026", "Te betalen 23,45"));
 
         Assert.NotNull(tekst);
         Assert.Contains("Datum 12-10-2026", tekst, StringComparison.Ordinal);
@@ -121,7 +86,7 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task Bijlage_wordt_opgeslagen_zonder_inhoud_in_de_stand_en_de_inhoud_apart_geladen()
     {
-        var pdf = TestPdf("Datum 12-10-2026", "Totaal 23,45");
+        var pdf = Testpdf.Maak("Datum 12-10-2026", "Totaal 23,45");
 
         var resultaat = await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", pdf)], postId: null);
 
@@ -139,7 +104,7 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     public async Task Koppelen_aan_een_geboekte_post_en_verwijderen_ruimt_de_inhoud_op()
     {
         var post = await ConceptAsync(boeken: true);
-        var bijlage = Assert.Single((await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", TestPdf("bon"))], post)).Toegevoegd);
+        var bijlage = Assert.Single((await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", Testpdf.Maak("bon"))], post)).Toegevoegd);
         Assert.Equal(bijlage.Id, Assert.Single((await _boekhouding.LaadAsync(Ver)).BijlagenVan(post)).Id);
 
         await _bijlagen.VerwijderAsync(Ver, bijlage.Id);
@@ -162,7 +127,7 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task Bijlagen_gaan_mee_in_de_backup()
     {
-        var pdf = TestPdf("bewaren");
+        var pdf = Testpdf.Maak("bewaren");
         var id = Assert.Single((await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", pdf)], null)).Toegevoegd).Id;
         var backup = _map.Bestand("backup.vbak");
         await _sessie.MaakBackupAsync(backup);

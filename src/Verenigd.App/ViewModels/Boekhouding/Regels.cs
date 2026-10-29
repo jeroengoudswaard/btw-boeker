@@ -21,6 +21,7 @@ public enum BoekhoudingSubtab
 {
     Journaal,
     Bank,
+    Postvak,
     Boekingsregels,
     Facturen,
     Relaties,
@@ -31,8 +32,11 @@ public enum BoekhoudingSubtab
 }
 
 /// <summary>Eén journaalpost in de lijst.</summary>
-public sealed record PostRegel(Journaalpost Post, Woordenboek? Woorden = null)
+public sealed record PostRegel(Journaalpost Post, Woordenboek? Woorden = null, int AantalBijlagen = 0)
 {
+    /// <summary>Paperclip-kolom in het Journaal (besluit 140).</summary>
+    public bool HeeftBijlage => AantalBijlagen > 0;
+
     public Guid Id => Post.Id;
     public string Nummer => Post.Nummer;
     public DateOnly DatumWaarde => Post.Datum;

@@ -107,12 +107,28 @@
                                         AutomationProperties.AutomationId="NieuwePost" />
                                 <TextBox x:Name="Zoekveld" Width="200" VerticalAlignment="Center" Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
                                          ToolTip="Zoeken op nummer of omschrijving (Ctrl+F)" AutomationProperties.Name="Zoeken op nummer of omschrijving" />
+                                <CheckBox Content="{DynamicResource T.Knop.ZonderBon}" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenZonderBon}"
+                                          Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="Uitgaven van bank of kas boven € 10 zonder bijlage"
+                                          AutomationProperties.Name="Alleen uitgaven zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
                             </WrapPanel>
                             <TextBlock DockPanel.Dock="Bottom" Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                             <DataGrid ItemsSource="{Binding Posten}" SelectedItem="{Binding GeselecteerdePost}" AutoGenerateColumns="False" IsReadOnly="True"
                                       SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Journaalposten"
                                       AutomationProperties.AutomationId="Journaalposten">
                                 <DataGrid.Columns>
+                                    <DataGridTemplateColumn Width="Auto" SortMemberPath="HeeftBijlage">
+                                        <DataGridTemplateColumn.Header>
+                                            <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE723;" ToolTip="{DynamicResource T.Bijlagen}"
+                                                       AutomationProperties.Name="{DynamicResource T.Bijlagen}" />
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate DataType="{x:Type vm:PostRegel}">
+                                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE723;" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           ToolTip="{Binding AantalBijlagen}" AutomationProperties.Name="Heeft een bijlage"
+                                                           Visibility="{Binding HeeftBijlage, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" Width="Auto" />
                                     <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
                                     <DataGridTextColumn Header="Omschrijving" Binding="{Binding Omschrijving}" Width="*" />
@@ -172,9 +188,45 @@
                                                 Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
                                         <Button Content="{DynamicResource T.Knop.Tegenboeken}"
                                                 Command="{Binding DataContext.TegenboekenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                ToolTip="Een geboekte post corrigeren met een post met omgekeerde bedragen" AutomationProperties.AutomationId="Tegenboeken"
+                                                ToolTip="{DynamicResource T.Tip.Tegenboeken}" AutomationProperties.AutomationId="Tegenboeken"
                                                 Visibility="{Binding IsAlleenLezen, Converter={StaticResource BoolNaarZichtbaar}}" />
                                     </StackPanel>
+
+                                    <!-- ===== Bijlagen (besluiten 83–86, 136 en 140) ===== -->
+                                    <tg:Groepspaneel Margin="0,16,0,0" AllowDrop="True" Background="Transparent" DragOver="Bijlagen_DragOver" Drop="Postbijlagen_Drop"
+                                                     DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                     AutomationProperties.Name="{DynamicResource T.Bijlagen}" AutomationProperties.AutomationId="PostBijlagen">
+                                        <DockPanel Margin="0,0,0,4">
+                                            <Button DockPanel.Dock="Right" Content="{DynamicResource T.Knop.BijlageToevoegen}" Command="{Binding BijlageToevoegenCommand}"
+                                                    ToolTip="PDF, JPG of PNG, maximaal 10 MB" AutomationProperties.AutomationId="BijlageToevoegen" />
+                                            <TextBlock Text="{DynamicResource T.Bijlagen}" FontWeight="SemiBold" VerticalAlignment="Center" ToolTip="{DynamicResource U.Bijlagen}" />
+                                        </DockPanel>
+                                        <ItemsControl ItemsSource="{Binding Postbijlagen}" AutomationProperties.AutomationId="PostBijlagenlijst" Focusable="False">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type vm:BijlageRegel}">
+                                                    <DockPanel Margin="0,2">
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" Margin="4,0,0,0"
+                                                                ToolTip="Verwijderen" AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Verwijder {0}}"
+                                                                Command="{Binding DataContext.BijlageVerwijderenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}" />
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74E;" Padding="6,2" Margin="4,0,0,0"
+                                                                ToolTip="Opslaan als..." AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Sla {0} op als}"
+                                                                Command="{Binding DataContext.BijlageOpslaanCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}" />
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE8A7;" Padding="6,2" Margin="4,0,0,0"
+                                                                ToolTip="Bekijken" AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Bekijk {0}}"
+                                                                Command="{Binding DataContext.BijlageBekijkenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                CommandParameter="{Binding}" />
+                                                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                        <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" AutomationProperties.Name="{Binding Toegankelijkenaam}">
+                                                            <Run Text="{Binding Bestandsnaam, Mode=OneWay}" /><Run Text="  " /><Run Text="{Binding Grootte, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                        </TextBlock>
+                                                    </DockPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Style="{StaticResource Toelichting}" Margin="0,4,0,0" Text="{Binding Bijlagenuitleg}" TextWrapping="Wrap" />
+                                    </tg:Groepspaneel>
                                 </StackPanel>
 
                                 <Button DockPanel.Dock="Bottom" Content="_Regel toevoegen" HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding NieuweRegelCommand}"
@@ -345,7 +397,7 @@
                                         </tg:Groepskader>
                                         <StackPanel Orientation="Horizontal">
                                             <Button Content="{DynamicResource T.Knop.Toewijzen}" MinWidth="96" Margin="0,0,8,0" Command="{Binding ToewijzenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
-                                                    ToolTip="Maakt een conceptpost (Enter)" AutomationProperties.AutomationId="Toewijzen"
+                                                    ToolTip="{DynamicResource T.Tip.Toewijzen}" AutomationProperties.AutomationId="Toewijzen"
                                                     Visibility="{Binding GeselecteerdeMutatie.IsTeVerwerken, Converter={StaticResource BoolNaarZichtbaar}}" />
                                             <Button Content="Regel _maken van deze boeking..." Command="{Binding RegelMakenCommand}"
                                                     AutomationProperties.AutomationId="RegelMaken" />
@@ -357,6 +409,73 @@
                             </tg:Groepskader>
                         </Grid>
                     </DockPanel>
+                </TabItem>
+
+                <!-- ===== Postvak bonnen (besluiten 85, 96 en 135) ===== -->
+                <TabItem Header="{DynamicResource T.Tab.Postvak}" ToolTip="{DynamicResource U.Tab.Postvak}" AutomationProperties.AutomationId="SubtabPostvak">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="2*" MinWidth="360" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel>
+                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Button Content="_Bonnen toevoegen..." Command="{Binding BonnenToevoegenCommand}" Margin="0,0,16,0"
+                                        ToolTip="PDF, JPG of PNG, maximaal 10 MB per bestand" AutomationProperties.AutomationId="BonnenToevoegen" />
+                                <TextBlock Text="{Binding Postvaktekst}" Style="{StaticResource Toelichting}" VerticalAlignment="Center"
+                                           AutomationProperties.LiveSetting="Polite" />
+                            </WrapPanel>
+                            <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
+                                       Text="Sleep bonnen op deze lijst. Van een PDF leest Verenigd datum en bedrag; bij een foto vult u die zelf in." />
+                            <DataGrid ItemsSource="{Binding Postvak}" SelectedItem="{Binding GeselecteerdeBon}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      SelectionMode="Single" HeadersVisibility="Column" AllowDrop="True" DragOver="Bijlagen_DragOver" Drop="Postvak_Drop"
+                                      AutomationProperties.Name="Postvak bonnen" AutomationProperties.AutomationId="Postvak">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Bestand" Binding="{Binding Bestandsnaam}" Width="2*" />
+                                    <DataGridTextColumn Header="Soort" Binding="{Binding Soort}" Width="Auto" />
+                                    <DataGridTextColumn Header="Datum" Binding="{Binding Datumtekst}" Width="Auto" />
+                                    <DataGridTextColumn Header="Bedrag" Binding="{Binding Bedragtekst}" Width="Auto" />
+                                    <DataGridTextColumn Header="Voorstel" Binding="{Binding Voorsteltekst}" Width="2*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <TextBlock Grid.Column="2" Text="Kies een bon in de lijst." Style="{StaticResource Toelichting}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding GeselecteerdeBon, Converter={StaticResource NullNaarZichtbaar}}" />
+                        <tg:Groepskader Grid.Column="2" Style="{StaticResource Kaart}" DataContext="{Binding GeselecteerdeBon}" d:DataContext="{d:DesignInstance Type=vm:BonRegel}"
+                                        Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}"
+                                        AutomationProperties.Name="Bon" AutomationProperties.AutomationId="BonDetail">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Bestandsnaam}" Style="{StaticResource Sectietitel}" TextTrimming="CharacterEllipsis" />
+                                <Label Content="_Datum op de bon" Target="{Binding ElementName=Bondatum}" Padding="0,0,0,4" />
+                                <DatePicker x:Name="Bondatum" SelectedDate="{Binding Datum}" Width="160" HorizontalAlignment="Left" AutomationProperties.AutomationId="BonDatum" />
+                                <Label Content="B_edrag" Target="{Binding ElementName=Bonbedrag}" Padding="0,12,0,4" />
+                                <TextBox x:Name="Bonbedrag" Text="{Binding Bedragtekst, UpdateSourceTrigger=PropertyChanged}" Width="160" HorizontalAlignment="Left"
+                                         TextAlignment="Right" AutomationProperties.AutomationId="BonBedrag" />
+                                <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}" AutomationProperties.LiveSetting="Assertive" />
+                                <Label Content="_Hoort bij post" Target="{Binding ElementName=Bonpost}" Padding="0,12,0,4" />
+                                <ComboBox x:Name="Bonpost" ItemsSource="{Binding Postkeuzes}" SelectedItem="{Binding GekozenPost}" DisplayMemberPath="Tekst"
+                                          IsTextSearchEnabled="True" TextSearch.TextPath="Tekst" AutomationProperties.AutomationId="BonPost"
+                                          ToolTip="Voorstellen (✓) hebben precies hetzelfde bedrag en een datum binnen 7 dagen" />
+                                <WrapPanel Margin="0,16,0,0">
+                                    <Button Content="Koppele_n" MinWidth="96" Margin="0,0,8,8" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
+                                            Command="{Binding DataContext.BonKoppelenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            AutomationProperties.AutomationId="BonKoppelen" />
+                                    <Button Content="_Tonen..." Margin="0,0,8,8"
+                                            Command="{Binding DataContext.BonBekijkenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            AutomationProperties.AutomationId="BonBekijken" />
+                                    <Button Content="Datum en bedrag be_waren" Margin="0,0,8,8"
+                                            Command="{Binding DataContext.BonGegevensOpslaanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            AutomationProperties.AutomationId="BonBewaren" />
+                                    <Button Content="_Uit postvak verwijderen..." Margin="0,0,8,8"
+                                            Command="{Binding DataContext.BonVerwijderenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            AutomationProperties.AutomationId="BonVerwijderen" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </tg:Groepskader>
+                    </Grid>
                 </TabItem>
 
                 <!-- ===== Boekingsregels ===== -->

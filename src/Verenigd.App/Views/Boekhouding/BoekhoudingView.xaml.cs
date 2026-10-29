@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Verenigd.App.ViewModels.Boekhouding;
@@ -9,6 +10,35 @@ public partial class BoekhoudingView : UserControl
     public BoekhoudingView()
     {
         InitializeComponent();
+    }
+
+    private BoekhoudingViewModel? ViewModel => DataContext as BoekhoudingViewModel;
+
+    /// <summary>Alleen bestanden mogen worden neergezet (besluit 85).</summary>
+    private void Bijlagen_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void Postbijlagen_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] paden && ViewModel?.BijlagenSlepenCommand.CanExecute(paden) == true)
+        {
+            ViewModel.BijlagenSlepenCommand.Execute(paden);
+        }
+
+        e.Handled = true;
+    }
+
+    private void Postvak_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] paden)
+        {
+            ViewModel?.BonnenSlepenCommand.Execute(paden);
+        }
+
+        e.Handled = true;
     }
 
     private void Zoeken_Executed(object sender, ExecutedRoutedEventArgs e)

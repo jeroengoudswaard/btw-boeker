@@ -15,11 +15,23 @@ public static class KoppelVoorsteller
     {
         ArgumentNullException.ThrowIfNull(stand);
         ArgumentNullException.ThrowIfNull(bijlage);
-        if (bijlage is not { Datum: { } datum, Bedrag: { } bedrag })
+        return Voorstellen(stand, bijlage.Datum, bijlage.Bedrag);
+    }
+
+    /// <summary>Voor datum en bedrag die de gebruiker nog aan het invullen is.</summary>
+    public static IReadOnlyList<Journaalpost> Voorstellen(BoekhoudingStand stand, DateOnly? datum, Bedrag? bedrag)
+    {
+        ArgumentNullException.ThrowIfNull(stand);
+        if (datum is not { } d || bedrag is not { } b)
         {
             return [];
         }
 
+        return Zoek(stand, d, b);
+    }
+
+    private static Journaalpost[] Zoek(BoekhoudingStand stand, DateOnly datum, Bedrag bedrag)
+    {
         return [.. stand.Posten
             .Where(p => p.TotaalDebet == bedrag && Math.Abs(p.Datum.DayNumber - datum.DayNumber) <= MaximaalAantalDagen)
             .OrderBy(p => stand.HeeftBijlage(p.Id))
