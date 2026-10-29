@@ -43,6 +43,16 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesExcelBestand() => ExcelBestand;
 
+    public IReadOnlyList<string> Bijlagen { get; set; } = [];
+    public string? BijlageDoel { get; set; }
+    public ViewModels.Boekhouding.BijlageVoorbeeldViewModel? GetoondeBijlage { get; private set; }
+
+    public IReadOnlyList<string> KiesBijlagen() => Bijlagen;
+
+    public string? KiesBijlageDoel(string voorgesteldeNaam) => BijlageDoel;
+
+    public void ToonBijlage(ViewModels.Boekhouding.BijlageVoorbeeldViewModel voorbeeld) => GetoondeBijlage = voorbeeld;
+
     public IReadOnlyList<string>? CamtBestanden { get; set; }
     public Func<ViewModels.Boekhouding.BankImportViewModel, Task<bool>>? BankImport { get; set; }
 
@@ -455,6 +465,10 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
     public Task<Verenigd.Application.Boekhouding.BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default) =>
         Task.FromResult(Stand(administratie));
 
+    public Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default) =>
+        Task.FromResult(_gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Bijlagen.BijlageInhoud>()
+            .FirstOrDefault(i => i.BijlageId == bijlageId)?.Gegevens);
+
     public Task<T> PasToeAsync<T>(
         AdministratieSoort administratie,
         Func<Verenigd.Application.Boekhouding.BoekhoudingStand, Verenigd.Application.Boekhouding.BoekhoudingWijziging<T>> wijziging,
@@ -465,12 +479,16 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
         foreach (var item in resultaat.Verwijderen)
         {
             lijst.Remove(item);
+            if (item is Domain.Financien.Bijlagen.Bijlage bijlage)
+            {
+                lijst.RemoveAll(i => i is Domain.Financien.Bijlagen.BijlageInhoud inhoud && inhoud.BijlageId == bijlage.Id);
+            }
         }
 
         foreach (var item in resultaat.Toevoegen)
         {
-            var id = item.GetType().GetProperty("Id")!;
-            if (id.PropertyType == typeof(int) && (int)id.GetValue(item)! == 0)
+            var id = item.GetType().GetProperty("Id");
+            if (id is not null && id.PropertyType == typeof(int) && (int)id.GetValue(item)! == 0)
             {
                 id.SetValue(item, _id++);
             }
@@ -503,6 +521,7 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
             Factuurinstellingen = lijst.OfType<Domain.Financien.Facturen.Factuurinstellingen>().SingleOrDefault(),
             HistorischeRegels = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischeRegel>()],
             HistorischeTotalen = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischTotaal>()],
+            Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
         };
     }
 }

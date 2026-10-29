@@ -44,6 +44,20 @@ public class ArchitectuurTests
         Assert.DoesNotContain(Verwijzingen(Infrastructure), n => n is "Verenigd" || n.StartsWith("Presentation", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void PdfPig_wordt_alleen_in_infrastructure_gebruikt()
+    {
+        Assert.DoesNotContain(Verwijzingen(Domain).Concat(Verwijzingen(Application)), n => n.StartsWith("UglyToad", StringComparison.Ordinal));
+        Assert.Contains(Verwijzingen(Infrastructure), n => n.StartsWith("UglyToad.PdfPig", StringComparison.Ordinal));
+        var buiten = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "src"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}Verenigd.Infrastructure{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => File.ReadAllText(f).Contains("UglyToad", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.Empty(buiten);
+    }
+
     [Theory]
     [InlineData("Leden", "Financien")]
     [InlineData("Financien", "Leden")]

@@ -11,8 +11,17 @@ public interface IAfdrukDienst
 
 /// <summary>Wat het tabblad Boekhouding nodig heeft van buiten de ViewModels.</summary>
 public sealed record BoekhoudingHulpmiddelen(
-    IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, Application.Facturen.IFactuurPdfMaker Pdf, ViewModels.Woordenboek? Woordenboek = null)
+    IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, Application.Facturen.IFactuurPdfMaker Pdf, ViewModels.Woordenboek? Woordenboek = null,
+    Application.Bijlagen.IPdfTekstLezer? Tekstlezer = null)
 {
+    /// <summary>Leest datum en bedrag uit PDF-bonnen (besluit 96); zonder lezer vult de gebruiker ze zelf in.</summary>
+    public Application.Bijlagen.IPdfTekstLezer PdfTekst { get; } = Tekstlezer ?? new GeenTekst();
+
     /// <summary>De woorden van de gekozen weergave, gedeeld door de hele app (besluit 127).</summary>
     public ViewModels.Woordenboek Woorden { get; } = Woordenboek ?? new ViewModels.Woordenboek();
+}
+
+internal sealed class GeenTekst : Application.Bijlagen.IPdfTekstLezer
+{
+    public string? LeesTekst(byte[] pdf) => null;
 }

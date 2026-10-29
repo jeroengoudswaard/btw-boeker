@@ -90,4 +90,13 @@ public interface IDialoogService
 
     /// <returns><c>true</c> als de historie is overgenomen.</returns>
     bool ToonHistorieImport(HistorieImportViewModel wizard);
+
+    /// <summary>Eén of meer bonnen of facturen (PDF, JPG, PNG); leeg bij annuleren.</summary>
+    IReadOnlyList<string> KiesBijlagen();
+
+    /// <summary><i>Opslaan als…</i> voor een bijlage; <c>null</c> bij annuleren.</summary>
+    string? KiesBijlageDoel(string voorgesteldeNaam);
+
+    /// <summary>Toont het voorbeeldvenster van een bijlage (besluit 86).</summary>
+    void ToonBijlage(BijlageVoorbeeldViewModel voorbeeld);
 }

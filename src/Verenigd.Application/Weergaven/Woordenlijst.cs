@@ -42,6 +42,8 @@ public static class Woordenlijst
         new("Inkomst", "Credit", "Inkomst"),
         new("Erbij", "Debet", "Erbij"),
         new("Eraf", "Credit", "Eraf"),
+        new("Bijlage", "Bijlage", "Bon"),
+        new("Bijlagen", "Bijlagen", "Bonnen", "Bonnen en facturen bij een boeking; ze worden versleuteld bewaard en gaan mee in de back-up."),
 
         // Subtabbladen en knoppen (met toegangstoets)
         new("Tab.Journaal", "_Journaal", "_Alle boekingen"),
@@ -61,6 +63,11 @@ public static class Woordenlijst
         new("Knop.RubriekToevoegen", "R_ubriek toevoegen", "_Groep toevoegen"),
         new("Label.Dagboek", "Dag_boek", "Soort boekin_g"),
         new("Label.Rekening", "Re_kening", "Pot_je"),
+        new("Tab.Postvak", "Post_vak bonnen", "Post_vak bonnen", "Zet hier bonnen neer; de app stelt voor bij welke boeking ze horen."),
+        new("Knop.ZonderBon", "_Zonder bon", "_Zonder bon", "Uitgaven en ontvangsten van bank of kas boven € 10 zonder bon."),
+        new("Knop.BijlageToevoegen", "Bijlag_e toevoegen...", "Bon toevo_egen..."),
+        new("Tip.Toewijzen", "Maakt een conceptpost (Enter)", "Maakt een voorlopige boeking (Enter)"),
+        new("Tip.Tegenboeken", "Een geboekte post corrigeren met een post met omgekeerde bedragen", "Een definitieve boeking terugdraaien met een correctieboeking"),
 
         // Zinnen
         new("Tekst.SelecteerPost", "Selecteer een post of kies Nieuwe post (Ctrl+N).", "Selecteer een boeking of kies Nieuwe boeking (Ctrl+N)."),

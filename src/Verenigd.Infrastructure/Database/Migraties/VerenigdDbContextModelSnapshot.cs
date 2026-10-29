@@ -281,6 +281,67 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("BetalerLeden", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bijlagen.Bijlage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("Bedrag")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Bestandsnaam")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Controlecode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Grootte")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Soort")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ToegevoegdUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Administratie");
+
+                    b.HasIndex("Controlecode");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Bijlagen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bijlagen.BijlageInhoud", b =>
+                {
+                    b.Property<Guid>("BijlageId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Gegevens")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("BijlageId");
+
+                    b.ToTable("BijlageInhoud", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Boekjaar", b =>
                 {
                     b.Property<int>("Id")
@@ -1361,6 +1422,23 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .WithMany()
                         .HasForeignKey("BetalerId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bijlagen.Bijlage", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Journaalpost", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Bijlagen.BijlageInhoud", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Bijlagen.Bijlage", null)
+                        .WithOne()
+                        .HasForeignKey("Verenigd.Domain.Financien.Bijlagen.BijlageInhoud", "BijlageId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

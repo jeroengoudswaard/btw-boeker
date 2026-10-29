@@ -76,6 +76,18 @@ public sealed partial class UitschrijfRegel(string lidnummer, string naam) : Obs
     public partial bool Uitschrijven { get; set; } = true;
 }
 
+/// <summary>Besluit 141: een afwijkend IBAN uit SOL3 alleen overnemen als het is aangevinkt (standaard uit).</summary>
+public sealed partial class IbanKeuzeRegel(string lidnummer, string naam, string huidig, string sol3) : ObservableObject
+{
+    public string Lidnummer { get; } = lidnummer;
+    public string Naam { get; } = naam;
+    public string Huidig { get; } = huidig;
+    public string Sol3 { get; } = sol3;
+
+    [ObservableProperty]
+    public partial bool Overnemen { get; set; }
+}
+
 /// <summary>
 /// Importwizard SOL3: 1 bestanden kiezen, 2 nieuwe groepen indelen, 3 controleren (voorbeeldoverzicht), 4 klaar.
 /// Pas in stap 3 wordt er (na een automatische back-up) iets gewijzigd.
@@ -107,6 +119,8 @@ public sealed partial class ImportWizardViewModel : ObservableObject
     public ObservableCollection<WijzigingRegel> Gewijzigd { get; } = [];
 
     public ObservableCollection<UitschrijfRegel> Uitgeschreven { get; } = [];
+
+    public ObservableCollection<IbanKeuzeRegel> IbanVerschillen { get; } = [];
 
     public ObservableCollection<MeldingRegel> Waarschuwingen { get; } = [];
 
@@ -141,6 +155,10 @@ public sealed partial class ImportWizardViewModel : ObservableObject
     public string NieuwKop => $"Nieuw ({Nieuw.Count.ToString(CultureInfo.CurrentCulture)})";
 
     public string GewijzigdKop => $"Gewijzigd ({Gewijzigd.Select(g => g.Lidnummer).Distinct().Count().ToString(CultureInfo.CurrentCulture)})";
+
+    public string IbanVerschillenKop => $"IBAN-verschillen ({IbanVerschillen.Count.ToString(CultureInfo.CurrentCulture)})";
+
+    public bool HeeftIbanVerschillen => IbanVerschillen.Count > 0;
 
     public string UitgeschrevenKop => $"Uitgeschreven ({Uitgeschreven.Count.ToString(CultureInfo.CurrentCulture)})";
 
@@ -232,6 +250,7 @@ public sealed partial class ImportWizardViewModel : ObservableObject
         Vul(Nieuw, voorstel.Nieuw.Select(r => new WijzigingRegel(r.Lidnummer.Waarde, r.Naam, string.Empty, null, null)));
         Vul(Gewijzigd, voorstel.Gewijzigd.SelectMany(r => r.Wijzigingen.Select(w => new WijzigingRegel(r.Lidnummer.Waarde, r.Naam, w.Veld, w.Oud, w.Nieuw))));
         Vul(Uitgeschreven, voorstel.Uitgeschreven.Select(r => new UitschrijfRegel(r.Lidnummer.Waarde, r.Naam)));
+        Vul(IbanVerschillen, voorstel.IbanVerschillen.Select(v => new IbanKeuzeRegel(v.Lidnummer.Waarde, v.Naam, v.Huidig.ToString(), v.Sol3.ToString())));
         Vul(Waarschuwingen, voorstel.Meldingen.Select(m => new MeldingRegel(
             m.Export is { } e ? ExportHerkenning.Omschrijving(e) : "Controle",
             m.Regel?.ToString(CultureInfo.InvariantCulture),
@@ -242,6 +261,8 @@ public sealed partial class ImportWizardViewModel : ObservableObject
         OnPropertyChanged(nameof(NieuwKop));
         OnPropertyChanged(nameof(GewijzigdKop));
         OnPropertyChanged(nameof(UitgeschrevenKop));
+        OnPropertyChanged(nameof(IbanVerschillenKop));
+        OnPropertyChanged(nameof(HeeftIbanVerschillen));
         OnPropertyChanged(nameof(WaarschuwingenKop));
         WaarschuwingenOpslaanCommand.NotifyCanExecuteChanged();
         Stap = Groepen.Count > 0 ? ImportStap.Groepen : ImportStap.Controleren;
@@ -254,7 +275,13 @@ public sealed partial class ImportWizardViewModel : ObservableObject
             _analyse!.Voorstel.Uitgeschreven
                 .Where(r => Uitgeschreven.Any(u => u.Uitschrijven && u.Lidnummer == r.Lidnummer.Waarde))
                 .Select(r => r.Lidnummer)
-                .ToHashSet());
+                .ToHashSet())
+        {
+            IbanOvernemen = _analyse.Voorstel.IbanVerschillen
+                .Where(v => IbanVerschillen.Any(r => r.Overnemen && r.Lidnummer == v.Lidnummer.Waarde))
+                .Select(v => v.Lidnummer)
+                .ToHashSet(),
+        };
         Resultaat = await _dienst.VoerUitAsync(_analyse, keuzes);
         OnPropertyChanged(nameof(Samenvatting));
         Stap = ImportStap.Klaar;

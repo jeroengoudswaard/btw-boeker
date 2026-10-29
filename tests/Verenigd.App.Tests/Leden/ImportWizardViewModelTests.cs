@@ -172,6 +172,39 @@ public sealed class ImportWizardViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Afwijkend_iban_wordt_alleen_overgenomen_als_het_is_aangevinkt()
+    {
+        string[] Bestanden(string achtervoegsel, string iban1, string iban2) =>
+        [
+            Schrijf($"leden{achtervoegsel}.csv", Csv(KopLeden, Lid("100000001"), Lid("100000002", voornaam: "Bo"))),
+            Schrijf($"huishouden{achtervoegsel}.csv", Csv(KopHuishouden, Huishouden("100000001", iban: iban1), Huishouden("100000002", iban: iban2))),
+            Schrijf($"voogden{achtervoegsel}.csv", Csv(KopVoogden, Voogden("100000001"))),
+            Schrijf($"functies{achtervoegsel}.csv", Csv(KopFuncties, Functie("100000001"), Functie("100000002"))),
+        ];
+        var eerste = Maak();
+        eerste.VoegBestandenToe(Bestanden("1", "NL91ABNA0417164300", "NL91ABNA0417164300"));
+        await eerste.VolgendeCommand.ExecuteAsync(null);
+        await eerste.VolgendeCommand.ExecuteAsync(null);
+        await eerste.VolgendeCommand.ExecuteAsync(null);
+
+        var tweede = Maak();
+        tweede.VoegBestandenToe(Bestanden("2", "BE68539007547034", "BE68539007547034"));
+        await tweede.VolgendeCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, tweede.IbanVerschillen.Count);
+        Assert.All(tweede.IbanVerschillen, r => Assert.False(r.Overnemen));
+        Assert.Equal("IBAN-verschillen (2)", tweede.IbanVerschillenKop);
+        tweede.IbanVerschillen.Single(r => r.Lidnummer == "100000002").Overnemen = true;
+
+        await tweede.VolgendeCommand.ExecuteAsync(null);
+
+        var stand = _opslag.Stand;
+        Assert.Equal(2, stand.Betalers.Count);
+        Assert.NotEqual(stand.Koppelingen.Single(k => k.Lidnummer.Waarde == "100000001").BetalerId,
+            stand.Koppelingen.Single(k => k.Lidnummer.Waarde == "100000002").BetalerId);
+    }
+
+    [Fact]
     public async Task Ongewijzigde_import_kan_niet_worden_uitgevoerd()
     {
         var wizard = Maak();

@@ -36,6 +36,8 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Financien.Relaties.Relatie> Relaties => Set<Domain.Financien.Relaties.Relatie>();
     public DbSet<Domain.Financien.Facturen.Verkoopfactuur> Verkoopfacturen => Set<Domain.Financien.Facturen.Verkoopfactuur>();
     public DbSet<Domain.Financien.Facturen.Factuurinstellingen> Factuurinstellingen => Set<Domain.Financien.Facturen.Factuurinstellingen>();
+    public DbSet<Domain.Financien.Bijlagen.Bijlage> Bijlagen => Set<Domain.Financien.Bijlagen.Bijlage>();
+    public DbSet<Domain.Financien.Bijlagen.BijlageInhoud> BijlageInhoud => Set<Domain.Financien.Bijlagen.BijlageInhoud>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,5 +75,6 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
         IncassoConfiguratie.Configureer(modelBuilder);
         BoekhoudingConfiguratie.Configureer(modelBuilder);
         FactuurConfiguratie.Configureer(modelBuilder);
+        BijlageConfiguratie.Configureer(modelBuilder);
     }
 }

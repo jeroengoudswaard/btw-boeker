@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <!-- Windows 10 versie 2004 of nieuwer: Windows.Data.Pdf voor het voorbeeld van PDF-bijlagen (besluit 135) -->
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>
     <AssemblyName>Verenigd</AssemblyName>
     <RootNamespace>Verenigd.App</RootNamespace>

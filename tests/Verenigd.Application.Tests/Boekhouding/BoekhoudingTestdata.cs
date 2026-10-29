@@ -2,6 +2,7 @@ using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Bijlagen;
 using Verenigd.Domain.Financien.Debiteuren;
 using Verenigd.Domain.Financien.Facturen;
 using Verenigd.Domain.Financien.Relaties;
@@ -51,6 +52,8 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public Factuurinstellingen? Factuurinstellingen { get; set; }
     public List<HistorischeRegel> HistorischeRegels { get; } = [];
     public List<HistorischTotaal> HistorischeTotalen { get; } = [];
+    public List<Bijlage> Bijlagen { get; } = [];
+    public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
 
     /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
     public Func<IReadOnlyList<Incassorun>> Incassoruns { get; set; } = () => [];
@@ -76,6 +79,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Factuurinstellingen = Factuurinstellingen,
         HistorischeRegels = HistorischeRegels.ToList(),
         HistorischeTotalen = HistorischeTotalen.ToList(),
+        Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
         Incassoruns = Incassoruns(),
         Herincassos = Herincassos(),
     };
@@ -113,6 +117,9 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
 
     public Task<BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default) => Task.FromResult(Stand);
 
+    public Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default) =>
+        Task.FromResult(Bijlageinhoud.GetValueOrDefault(bijlageId));
+
     public Task<T> PasToeAsync<T>(AdministratieSoort administratie, Func<BoekhoudingStand, BoekhoudingWijziging<T>> wijziging, CancellationToken annulering = default)
     {
         var resultaat = wijziging(Stand);
@@ -124,6 +131,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Boekingsregel regel: Boekingsregels.Remove(regel); break;
                 case Debiteurmutatie mutatie: Debiteurmutaties.Remove(mutatie); break;
                 case Verkoopfactuur factuur: Verkoopfacturen.Remove(factuur); break;
+                case Bijlage bijlage: Bijlagen.Remove(bijlage); Bijlageinhoud.Remove(bijlage.Id); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }
@@ -146,6 +154,8 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Factuurinstellingen instellingen: Factuurinstellingen = MetId(instellingen); break;
                 case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
                 case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
+                case Bijlage bijlage: Bijlagen.Add(bijlage); break;
+                case BijlageInhoud inhoud: Bijlageinhoud[inhoud.BijlageId] = inhoud.Gegevens; break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
         }

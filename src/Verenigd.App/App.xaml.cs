@@ -43,7 +43,8 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IInstellingenOpslag>(_ => new JsonInstellingenOpslag(Paden.Instellingenbestand));
         builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
         builder.Services.AddSingleton<IThemaService, WpfThemaService>();
-        var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(), new Infrastructure.Pdf.FactuurPdfMaker());
+        var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(), new Infrastructure.Pdf.FactuurPdfMaker(),
+            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer());
         WoordenResources.Koppel(Resources, hulpmiddelen.Woorden);
         builder.Services.AddSingleton(hulpmiddelen);
         builder.Services.AddSingleton<ShellViewModel>();

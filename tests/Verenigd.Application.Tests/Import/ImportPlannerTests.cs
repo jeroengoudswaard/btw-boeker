@@ -139,21 +139,60 @@ public class ImportPlannerTests
     }
 
     [Fact]
-    public void Gewijzigde_iban_koppelt_aan_andere_betaler_lege_iban_laat_koppeling_staan()
+    public void Afwijkend_iban_uit_sol3_geeft_waarschuwing_en_laat_de_koppeling_standaard_staan()
     {
         var stand = VoerUit(ImportStand.Leeg, Import(Lid("1", iban: "NL91ABNA0417164300"), Lid("2", voornaam: "Bo", iban: "NL91ABNA0417164300")));
+        var betaler = Assert.Single(stand.Betalers);
 
         var import = Import(Lid("1", iban: "BE68539007547034"), Lid("2", voornaam: "Bo"));
         var voorstel = ImportPlanner.Plan(stand, import, Importdatum);
+
         var regel = Assert.Single(voorstel.Gewijzigd);
         Assert.Equal(new Veldwijziging("IBAN", "NL91 ABNA 0417 1643 00", "BE68 5390 0754 7034"), Assert.Single(regel.Wijzigingen));
+        var verschil = Assert.Single(voorstel.IbanVerschillen);
+        Assert.Equal(Lidnummer.Parse("1"), verschil.Lidnummer);
+        Assert.Equal(Iban.Maak("NL91ABNA0417164300"), verschil.Huidig);
+        Assert.Equal(Iban.Maak("BE68539007547034"), verschil.Sol3);
+        var melding = Assert.Single(voorstel.Meldingen, m => m.Lidnummer == "1");
+        Assert.Contains("wijkt af", melding.Tekst, StringComparison.Ordinal);
+        Assert.DoesNotContain("0417", melding.Tekst, StringComparison.Ordinal); // geen volledig IBAN in meldingen
+        Assert.Empty(ImportKeuzes.Standaard(voorstel).IbanOvernemen);
 
         stand = VoerUit(stand, import);
+
+        Assert.Same(betaler, Assert.Single(stand.Betalers));
+        Assert.All(stand.Koppelingen, k => Assert.Equal(betaler.Id, k.BetalerId));
+    }
+
+    [Fact]
+    public void Afwijkend_iban_wordt_overgenomen_als_de_gebruiker_dat_kiest()
+    {
+        var stand = VoerUit(ImportStand.Leeg, Import(Lid("1", iban: "NL91ABNA0417164300"), Lid("2", voornaam: "Bo", iban: "NL91ABNA0417164300")));
+        var import = Import(Lid("1", iban: "BE68539007547034"), Lid("2", voornaam: "Bo"));
+        var keuzes = ImportKeuzes.Standaard(ImportPlanner.Plan(stand, import, Importdatum)) with { IbanOvernemen = new HashSet<Lidnummer> { Lidnummer.Parse("1") } };
+
+        stand = VoerUit(stand, import, keuzes);
+
         Assert.Equal(2, stand.Betalers.Count);
         var koppeling1 = stand.Koppelingen.Single(k => k.Lidnummer.Waarde == "1");
         var koppeling2 = stand.Koppelingen.Single(k => k.Lidnummer.Waarde == "2");
         Assert.NotEqual(koppeling1.BetalerId, koppeling2.BetalerId);
+        Assert.Equal(Iban.Maak("BE68539007547034"), stand.Betalers.Single(b => b.Id == koppeling1.BetalerId).Iban);
         Assert.True(ImportPlanner.Plan(stand, import, Importdatum).IsLeeg);
+    }
+
+    [Fact]
+    public void Een_nieuw_lid_of_een_lid_zonder_betaler_neemt_het_iban_uit_sol3_gewoon_over()
+    {
+        var stand = VoerUit(ImportStand.Leeg, Import(Lid("1")));
+        var import = Import(Lid("1", iban: "NL91ABNA0417164300"), Lid("2", voornaam: "Bo", iban: "BE68539007547034"));
+
+        var voorstel = ImportPlanner.Plan(stand, import, Importdatum);
+        stand = VoerUit(stand, import);
+
+        Assert.Empty(voorstel.IbanVerschillen);
+        Assert.Equal(2, stand.Betalers.Count);
+        Assert.Equal(2, stand.Koppelingen.Count);
     }
 
     [Fact]

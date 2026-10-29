@@ -143,6 +143,23 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </TabItem>
+                    <TabItem Header="{Binding IbanVerschillenKop}" Visibility="{Binding HeeftIbanVerschillen, Converter={StaticResource BoolNaarZichtbaar}}"
+                             AutomationProperties.AutomationId="WizardIbanVerschillen">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,8" TextWrapping="Wrap"
+                                       Text="SOL3 levert bij deze leden een ander IBAN dan in Verenigd. Standaard blijft het IBAN in Verenigd staan. Vink aan als het nieuwe IBAN klopt; een nieuw IBAN vraagt meestal om een nieuwe machtiging." />
+                            <DataGrid ItemsSource="{Binding IbanVerschillen}" AutoGenerateColumns="False" HeadersVisibility="Column"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" AutomationProperties.Name="Afwijkende IBAN's">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Header="IBAN uit SOL3 overnemen" Binding="{Binding Overnemen, UpdateSourceTrigger=PropertyChanged}" Width="Auto" />
+                                    <DataGridTextColumn Header="Lidnummer" Binding="{Binding Lidnummer}" IsReadOnly="True" Width="Auto" />
+                                    <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" IsReadOnly="True" Width="*" />
+                                    <DataGridTextColumn Header="IBAN in Verenigd" Binding="{Binding Huidig}" IsReadOnly="True" Width="Auto" />
+                                    <DataGridTextColumn Header="IBAN uit SOL3" Binding="{Binding Sol3}" IsReadOnly="True" Width="Auto" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </TabItem>
                     <TabItem Header="{Binding UitgeschrevenKop}">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,8"

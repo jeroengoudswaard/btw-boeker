@@ -17,6 +17,7 @@ public static class ImportPlanner
         var nieuw = new List<ImportRegel>();
         var gewijzigd = new List<ImportRegel>();
         var meldingen = new List<Importmelding>(import.Meldingen);
+        var ibanVerschillen = new List<IbanVerschil>();
 
         foreach (var lid in import.Leden)
         {
@@ -37,6 +38,14 @@ public static class ImportPlanner
             wijzigingen.AddRange(persoon.VergelijkVoogden(lid.Voogden));
             wijzigingen.AddRange(persoon.VergelijkFuncties(lid.Functies, importdatum));
             wijzigingen.AddRange(VergelijkBetaler(stand, lid));
+            if (AfwijkendIban(stand, lid) is { } huidig)
+            {
+                ibanVerschillen.Add(new IbanVerschil(lid.Lidnummer, persoon.VolledigeNaam, huidig, lid.Iban!.Value));
+                meldingen.Add(new Importmelding(null, null, lid.Lidnummer.Waarde,
+                    $"Het IBAN uit SOL3 (eindigend op {Laatste4(lid.Iban!.Value)}) wijkt af van het IBAN in Verenigd (eindigend op {Laatste4(huidig)}). "
+                    + "Standaard blijft het IBAN in Verenigd staan; vink 'IBAN uit SOL3 overnemen' aan als het nieuwe klopt. Een nieuw IBAN vraagt meestal om een nieuwe machtiging."));
+            }
+
             if (wijzigingen.Count > 0)
             {
                 gewijzigd.Add(new ImportRegel(lid.Lidnummer, persoon.VolledigeNaam, wijzigingen));
@@ -57,7 +66,7 @@ public static class ImportPlanner
             .Select(g => new NieuweGroep(g, Groep.VoorgesteldeSoort(g)))
             .ToList();
 
-        return new ImportVoorstel(nieuw, gewijzigd, uitgeschrevenRegels, nieuweGroepen, meldingen);
+        return new ImportVoorstel(nieuw, gewijzigd, uitgeschrevenRegels, nieuweGroepen, meldingen) { IbanVerschillen = ibanVerschillen };
     }
 
     /// <summary>Besluiten 22 en 29: een gevuld IBAN uit SOL3 bepaalt de betaler; een leeg IBAN wijzigt niets.</summary>
@@ -81,6 +90,17 @@ public static class ImportPlanner
             yield return new Veldwijziging("Rekeninghouder", doel?.Rekeninghouder, lid.Rekeninghouder);
         }
     }
+
+    /// <summary>Het IBAN van de huidige betaler als SOL3 een ander IBAN levert; anders <c>null</c> (besluit 141).</summary>
+    internal static Iban? AfwijkendIban(ImportStand stand, ImportLid lid)
+    {
+        var koppeling = stand.Koppelingen.FirstOrDefault(k => k.Lidnummer == lid.Lidnummer);
+        var huidig = koppeling is null ? null : stand.Betalers.FirstOrDefault(b => b.Id == koppeling.BetalerId);
+        return lid.Iban is { } iban && huidig is not null && huidig.Iban != iban ? huidig.Iban : null;
+    }
+
+    /// <summary>Alleen de laatste vier cijfers, zodat een melding geen volledig IBAN bevat.</summary>
+    private static string Laatste4(Iban iban) => iban.Waarde[^4..];
 
     /// <summary>Besluit 23: niet automatisch samenvoegen, wel waarschuwen.</summary>
     private static void MeldMogelijkDubbel(ImportLid lid, ImportStand stand, Sol3Import import, List<Importmelding> meldingen)
@@ -155,7 +175,11 @@ public static class ImportToepasser
 
             persoon.WerkVoogdenBij(lid.Voogden, nuUtc);
             persoon.WerkFunctiesBij(lid.Functies, groepen, importdatum, nuUtc);
-            KoppelBetaler(lid);
+            // Besluit 141: een afwijkend IBAN alleen overnemen als de gebruiker dat per lid kiest.
+            if (ImportPlanner.AfwijkendIban(stand, lid) is null || keuzes.IbanOvernemen.Contains(lid.Lidnummer))
+            {
+                KoppelBetaler(lid);
+            }
         }
 
         var uitgeschreven = 0;

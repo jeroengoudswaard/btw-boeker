@@ -148,6 +148,33 @@ internal sealed class WpfDialoogService : IDialoogService
 
     public bool ToonHistorieImport(HistorieImportViewModel wizard) => ToonModaal(new HistorieImportVenster(wizard));
 
+    public IReadOnlyList<string> KiesBijlagen()
+    {
+        var dialoog = new OpenFileDialog
+        {
+            Title = "Bonnen of facturen kiezen",
+            Filter = "Bon of factuur (*.pdf;*.jpg;*.jpeg;*.png)|*.pdf;*.jpg;*.jpeg;*.png",
+            CheckFileExists = true,
+            Multiselect = true,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileNames : [];
+    }
+
+    public string? KiesBijlageDoel(string voorgesteldeNaam)
+    {
+        var extensie = Path.GetExtension(voorgesteldeNaam);
+        var dialoog = new SaveFileDialog
+        {
+            Title = "Bijlage opslaan als",
+            Filter = string.IsNullOrEmpty(extensie) ? "Alle bestanden (*.*)|*.*" : $"Bestand (*{extensie})|*{extensie}|Alle bestanden (*.*)|*.*",
+            DefaultExt = extensie,
+            FileName = voorgesteldeNaam,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
+    public void ToonBijlage(BijlageVoorbeeldViewModel voorbeeld) => ToonModaal(new BijlageVenster(voorbeeld));
+
     public WachtwoordInvoer? VraagWachtwoord(string databaseNaam, string? foutmelding)
     {
         var venster = new WachtwoordVenster(databaseNaam, foutmelding);
