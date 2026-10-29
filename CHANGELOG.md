@@ -16,6 +16,11 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - Weergave Eenvoudig: Bijlagen heet *Bonnen*; de tooltips bij *Toewijzen* en *Tegenboeken* volgen nu ook de woordenlijst.
 - 724 geautomatiseerde tests (was 679).
 
+### Tests (na de Windows-run van 2026-10-29)
+- Het voorbeeldvenster wordt nu end-to-end in de echte app getest (`Bijlage_bekijken_toont_de_pdf_in_het_voorbeeldvenster`). De losse venstertest is vervangen door een test van alleen het laden van een afbeelding, omdat een venster zonder `Application` de app-resources mist.
+- UI-tests beëindigen vóór toetsenbordinvoer en vóór het sluiten de menumodus (en controleren dat), zetten het venster op de voorgrond, hebben een harde time-out van 3 minuten en sluiten hun app-proces altijd af, ook als het sluiten mislukt.
+- 725 geautomatiseerde tests.
+
 ### Gewijzigd
 - Doelplatform van de app: `net10.0-windows10.0.19041.0` (Windows 10 versie 2004 of nieuwer), voor `Windows.Data.Pdf`.
 - Nieuwe afhankelijkheid: PdfPig 0.1.16 (Apache-2.0), alleen in Infrastructure.

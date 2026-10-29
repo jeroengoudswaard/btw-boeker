@@ -1,14 +1,19 @@
 ﻿using System.Diagnostics;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Definitions;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
+using Verenigd.Application.Bijlagen;
+using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
 using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Instellingen;
+using Verenigd.Infrastructure.Pdf;
+using Verenigd.Tests.Gedeeld;
 using static Verenigd.Application.Tests.Import.Sol3Voorbeeld;
 using FlauiApplicatie = FlaUI.Core.Application;
 
@@ -17,6 +22,8 @@ namespace Verenigd.App.Tests.UI;
 /// <summary>
 /// End-to-end tests die de echte applicatie starten en via UI Automation bedienen.
 /// Vereist een interactieve Windows-sessie. Filter: <c>dotnet test --filter Categorie=UI</c>.
+/// Typ of klik niet tijdens deze tests: FlaUI gebruikt het echte toetsenbord en de echte muis.
+/// Elke test heeft een harde time-out, zodat een vastgelopen venster de run niet blokkeert; het eigen app-proces wordt altijd afgesloten.
 /// Stel <c>VERENIGD_SCREENSHOTS</c> in op een map om schermafbeeldingen te bewaren.
 /// </summary>
 [Trait("Categorie", "UI")]
@@ -24,6 +31,7 @@ namespace Verenigd.App.Tests.UI;
 public sealed class AppUiTests : IDisposable
 {
     private const string Wachtwoord = "scouting kampvuur 2026";
+    private const int Timeout = 180_000;
     private static readonly TimeSpan Wachttijd = TimeSpan.FromSeconds(20);
     private readonly string _datamap = Path.Combine(Path.GetTempPath(), "verenigd-ui", Guid.NewGuid().ToString("N"));
     private readonly UIA3Automation _automation = new();
@@ -33,9 +41,17 @@ public sealed class AppUiTests : IDisposable
 
     public void Dispose()
     {
-        if (_app is { HasExited: false })
+        try
         {
-            _app.Kill();
+            if (_app is { HasExited: false })
+            {
+                _app.Kill();
+                Retry.WhileFalse(() => _app.HasExited, TimeSpan.FromSeconds(5));
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Het proces was al afgesloten.
         }
 
         _app?.Dispose();
@@ -49,9 +65,10 @@ public sealed class AppUiTests : IDisposable
         }
     }
 
-    [Fact]
-    public void Start_zonder_database_toont_startpagina_menubalk_en_uitgeschakelde_modules()
+    [Fact(Timeout = Timeout)]
+    public async Task Start_zonder_database_toont_startpagina_menubalk_en_uitgeschakelde_modules()
     {
+        await Task.Yield();
         var venster = Start();
 
         Assert.Equal("Verenigd", venster.Title);
@@ -84,7 +101,7 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
-    [Fact]
+    [Fact(Timeout = Timeout)]
     public async Task Laatste_database_openen_met_wachtwoord_en_modules_via_sneltoetsen()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
@@ -104,12 +121,12 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
-        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, Diagnose(venster));
         Zoek(venster, "AdministratieBand");
         Bewaar(venster, "03-boekhouding-vereniging");
 
-        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.OEM_COMMA); // Instellingen
+        Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
         Zoek(venster, "InstellingenOpslaan");
         Bewaar(venster, "04-instellingen");
 
@@ -119,7 +136,7 @@ public sealed class AppUiTests : IDisposable
         Assert.Contains(bewaard.OpenTabbladen, t => t.Module == Application.Modules.ModuleSoort.Boekhouding);
     }
 
-    [Fact]
+    [Fact(Timeout = Timeout)]
     public async Task Geimporteerde_leden_staan_in_tabblad_leden_en_wizard_opent_via_menu()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
@@ -155,7 +172,7 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ENTER);
         Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
-        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_2); // Leden
+        Sneltoets(venster, VirtualKeyShort.KEY_2); // Leden
         Zoek(venster, "Ledenlijst");
         Assert.True(
             Retry.WhileFalse(() => Zoek(venster, "LedenAantal").Name == "2 van 2 personen", Wachttijd).Result,
@@ -173,7 +190,7 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
-    [Fact]
+    [Fact(Timeout = Timeout)]
     public async Task Contributie_toont_subtabbladen_en_incassowizard()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
@@ -188,7 +205,7 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ENTER);
         Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
-        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
         Zoek(venster, "ContributieTabblad");
         foreach (var subtab in new[] { "SubtabLeden", "SubtabBetalers", "SubtabTarieven", "SubtabRuns", "SubtabOpenstaand" })
         {
@@ -208,7 +225,7 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
-    [Fact]
+    [Fact(Timeout = Timeout)]
     public async Task Boekhouding_leeg_beginnen_toont_subtabbladen_en_nieuwe_post()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
@@ -223,7 +240,7 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ENTER);
         Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
-        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
         Zoek(venster, "OvernemenUitExcel");
         Zoek(venster, "SjabloonInlezen");
@@ -265,9 +282,62 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
-    [Fact]
-    public void Donker_thema_wordt_toegepast_zonder_fouten()
+    [Fact(Timeout = Timeout)]
+    public async Task Bijlage_bekijken_toont_de_pdf_in_het_voorbeeldvenster()
     {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        await using (var sessie = await new DatabaseBeheer().OpenAsync(db, Wachtwoord))
+        {
+            var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
+            var ver = Domain.Administraties.AdministratieSoort.Vereniging;
+            await dienst.RichtInAsync(ver);
+            var energie = await dienst.BewaarRekeningAsync(ver, new RekeningInvoer(null, 4115, "Energie", null, Domain.Financien.Boekhouding.RekeningSoort.Resultaat, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+            var bank = await dienst.BewaarRekeningAsync(ver, new RekeningInvoer(null, 1100, "Bank", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+            var stand = await dienst.LaadAsync(ver);
+            var post = await dienst.BewaarConceptAsync(ver, new PostInvoer(null, stand.Dagboeken.Single().Id, DateOnly.FromDateTime(DateTime.Today), "Bouwmarkt",
+            [
+                new RegelInvoerId(energie, null, new Domain.Financien.Bedrag(2345), Domain.Financien.Bedrag.Nul),
+                new RegelInvoerId(bank, null, Domain.Financien.Bedrag.Nul, new Domain.Financien.Bedrag(2345)),
+            ]));
+            await new BijlageDienst(sessie, new PdfPigTekstLezer(), TimeProvider.System)
+                .VoegToeAsync(ver, [new BijlageBestand("bon.pdf", Testpdf.Maak("Bouwmarkt Voorbeeld", "Te betalen 23,45"))], post);
+        }
+
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        var posten = Zoek(venster, "Journaalposten").AsGrid();
+        Assert.True(Retry.WhileFalse(() => posten.RowCount == 1, Wachttijd).Result, "De post staat niet in het Journaal.");
+        posten.Rows[0].Select();
+        var bekijken = Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByName("Bekijk bon.pdf")), Wachttijd).Result
+            ?? throw new Xunit.Sdk.XunitException("Knop 'Bekijk bon.pdf' niet gevonden.");
+        Bewaar(venster, "16-bijlagen");
+        bekijken.AsButton().Invoke();
+
+        var voorbeeld = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        Assert.Equal("bon.pdf – Bijlage", voorbeeld.Title);
+        var paginas = Zoek(voorbeeld, "BijlagePaginas");
+        Assert.True(Retry.WhileFalse(() => paginas.Name == "1 pagina", Wachttijd).Result, $"Paginatekst: '{paginas.Name}'.");
+        Bewaar(voorbeeld, "17-bijlage-voorbeeld");
+        Zoek(voorbeeld, "BijlageSluiten").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
+    }
+
+    [Fact(Timeout = Timeout)]
+    public async Task Donker_thema_wordt_toegepast_zonder_fouten()
+    {
+        await Task.Yield();
         new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
             .Bewaar(new GebruikersInstellingen { Thema = Thema.Donker });
 
@@ -285,6 +355,7 @@ public sealed class AppUiTests : IDisposable
         _app = FlauiApplicatie.Launch(info);
         var venster = _app.GetMainWindow(_automation, Wachttijd);
         Assert.NotNull(venster);
+        venster.SetForeground();
         return venster;
     }
 
@@ -298,13 +369,39 @@ public sealed class AppUiTests : IDisposable
         return $"Titel: '{venster.Title}'; focus: {focus?.ControlType} '{focus?.Name}' (proces {focus?.Properties.ProcessId.ValueOrDefault}, app {_app?.ProcessId})";
     }
 
+    /// <summary>Toetsenbordinvoer gaat alleen naar de app als die de voorgrond heeft en niet in de menumodus staat.</summary>
+    private void Sneltoets(Window venster, VirtualKeyShort toets)
+    {
+        EindigMenumodus(venster);
+        Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, toets);
+    }
+
+    /// <summary>
+    /// Na het openklappen van een menu via UI Automation kan het venster in de menumodus blijven (focus op een MenuItem);
+    /// dan komen sneltoetsen en <c>Close()</c> niet aan. Escape beëindigt de menumodus.
+    /// </summary>
+    private void EindigMenumodus(Window venster)
+    {
+        venster.SetForeground();
+        for (var poging = 0; poging < 4 && _automation.FocusedElement()?.ControlType == ControlType.MenuItem; poging++)
+        {
+            Keyboard.Press(VirtualKeyShort.ESCAPE);
+            Thread.Sleep(200);
+        }
+
+        Assert.True(_automation.FocusedElement()?.ControlType != ControlType.MenuItem, "De menumodus eindigt niet. " + Diagnose(venster));
+    }
+
     private void Sluit(Window venster)
     {
+        EindigMenumodus(venster);
         var voorSluiten = Diagnose(venster);
         venster.Close();
         if (!Retry.WhileFalse(() => _app!.HasExited, Wachttijd).Result)
         {
-            var vensters = _app!.GetAllTopLevelWindows(_automation).Select(v => $"{v.ControlType} '{v.Title}'");
+            var vensters = _app!.GetAllTopLevelWindows(_automation).Select(v => $"{v.ControlType} '{v.Title}'").ToList();
+            // Altijd opruimen, zodat een achtergebleven venster de volgende tests niet beïnvloedt.
+            _app.Kill();
             throw new Xunit.Sdk.XunitException(
                 $"De applicatie sloot niet af. Vóór het sluiten: {voorSluiten}. Nog open: {string.Join(", ", vensters)}.");
         }
