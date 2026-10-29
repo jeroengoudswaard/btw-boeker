@@ -2,6 +2,25 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.4.10] - 2026-10-29: Bijlagen (stap 4c-3)
+
+### Toegevoegd
+- **Bijlagen bij een post** (besluiten 83–86, 136, 137 en 140): een blok *Bijlagen* onder de regels in de post-editor met *Bijlage toevoegen…*, slepen, *Bekijken*, *Opslaan als…* en *Verwijderen*. Werkt ook bij een geboekte post; de boeking zelf verandert niet. Verwijderen vraagt altijd om bevestiging.
+- **Paperclip-kolom** in het Journaal voor posten met een bijlage.
+- **Filter *Zonder bon*** in het Journaal (besluiten 88, 97 en 138): uitgaven van bank of kas boven € 10 zonder bijlage.
+- **Subtabblad *Postvak bonnen*** (besluiten 85 en 96): bonnen toevoegen of erop slepen; van een PDF leest Verenigd datum en totaalbedrag. Een post met precies hetzelfde bedrag en een datum binnen 7 dagen wordt voorgesteld (✓); met *Koppelen* hangt de bon aan die post. Bij een foto vult u datum en bedrag zelf in. Hetzelfde bestand twee keer toevoegen geeft een melding.
+- **Voorbeeldvenster** (besluiten 86 en 135): PDF's via de PDF-functie van Windows zelf, afbeeldingen direct; zoomen (Ctrl+plus/min, Ctrl+0) en *Opslaan als…* (Ctrl+S).
+- Toegestaan: PDF, JPG en PNG, herkend aan de inhoud en niet aan de extensie; maximaal 10 MB per bijlage.
+- Bijlagen staan versleuteld in de database en gaan mee in de back-up. Ze komen nooit onversleuteld op schijf, behalve met *Opslaan als…*. Een verwijderd concept zet zijn bijlagen terug in het postvak.
+- **SOL3-import, afwijkend IBAN** (besluit 141, aanvulling op 21 en 22): levert SOL3 een ander IBAN dan de betaler in Verenigd, dan volgt een waarschuwing en een tabblad *IBAN-verschillen* met per lid *IBAN uit SOL3 overnemen* (standaard uit). Zonder vinkje blijft de koppeling in Verenigd staan. De melding toont alleen de laatste vier cijfers.
+- Weergave Eenvoudig: Bijlagen heet *Bonnen*; de tooltips bij *Toewijzen* en *Tegenboeken* volgen nu ook de woordenlijst.
+- 724 geautomatiseerde tests (was 679).
+
+### Gewijzigd
+- Doelplatform van de app: `net10.0-windows10.0.19041.0` (Windows 10 versie 2004 of nieuwer), voor `Windows.Data.Pdf`.
+- Nieuwe afhankelijkheid: PdfPig 0.1.16 (Apache-2.0), alleen in Infrastructure.
+- De SOL3-import neemt een afwijkend IBAN niet meer automatisch over (zie hierboven).
+
 ## [0.4.9] - 2026-10-28: Weergaven Expert en Eenvoudig
 
 ### Toegevoegd

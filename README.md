@@ -14,7 +14,7 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 
 ## Vereisten
 
-- Windows 10 (1809+) of Windows 11
+- Windows 10 (versie 2004 of nieuwer) of Windows 11; het PDF-voorbeeld van bijlagen gebruikt de PDF-functie van Windows zelf
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (10.0.4xx), of `winget install Microsoft.DotNet.SDK.10`
 - Optioneel: Visual Studio 2026 met de workload **.NET desktop development**
 
@@ -82,6 +82,7 @@ Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`,
 | ClosedXML (MIT) | Excel lezen (overname boekhouding) en schrijven (export rapporten) |
 | PDFsharp-MigraDoc 6.2.4 (MIT) | PDF van de verkoopfactuur. Bewust de laatste MIT-versie: vanaf 6.5 is de licentie AGPL-3.0 |
 | QRCoder (MIT) | Betaal-QR-code (EPC-QR, "girocode") op de factuur |
+| PdfPig 0.1.16 (Apache-2.0) | Tekst uit PDF-bonnen lezen (datum en bedrag) voor het postvak bonnen |
 | System.Security.Cryptography.Pkcs | Vastgezet op een gepatchte versie; PDFsharp 6.2.4 trekt anders een kwetsbare versie mee |
 | Serilog (+ Extensions.Hosting, Sinks.File) | Logging naar bestand |
 | xUnit, FlaUI.UIA3 | Unit- en UI-tests |

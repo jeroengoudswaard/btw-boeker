@@ -30,14 +30,23 @@ public sealed record ImportVoorstel(
 {
     public bool IsLeeg => Nieuw.Count == 0 && Gewijzigd.Count == 0 && Uitgeschreven.Count == 0 && NieuweGroepen.Count == 0;
 
+    /// <summary>Leden waarvan SOL3 een ander IBAN levert dan hun betaler in Verenigd (besluit 141).</summary>
+    public IReadOnlyList<IbanVerschil> IbanVerschillen { get; init; } = [];
+
     /// <summary>Alleen aantallen; geschikt voor het logboek.</summary>
     public string Samenvatting =>
         $"{Nieuw.Count} nieuw, {Gewijzigd.Count} gewijzigd, {Uitgeschreven.Count} uitgeschreven, {Meldingen.Count} waarschuwingen";
 }
 
 /// <summary>De keuzes van de gebruiker in de importwizard.</summary>
+/// <summary>Een lid met een betaler in Verenigd waarvoor SOL3 een ander IBAN levert (besluiten 22 en 141).</summary>
+public sealed record IbanVerschil(Lidnummer Lidnummer, string Naam, Iban Huidig, Iban Sol3);
+
 public sealed record ImportKeuzes(IReadOnlyDictionary<string, GroepSoort> GroepSoorten, IReadOnlySet<Lidnummer> Uitschrijven)
 {
+    /// <summary>Besluit 141: alleen bij deze leden het afwijkende IBAN uit SOL3 overnemen; standaard geen.</summary>
+    public IReadOnlySet<Lidnummer> IbanOvernemen { get; init; } = new HashSet<Lidnummer>();
+
     /// <summary>Voorgestelde groepsoorten en alle verdwenen leden uitschrijven.</summary>
     public static ImportKeuzes Standaard(ImportVoorstel voorstel)
     {

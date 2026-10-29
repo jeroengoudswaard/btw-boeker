@@ -234,7 +234,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-28, commit `e869c5c`): 679/679 geslaagd**, inclusief alle FlaUI-UI-tests.
     - Pull request: één PR voor v0.4.7 t/m v0.4.9 (besluit 134), geopend na de geslaagde Windows-run.
     - Gemerged als PR #7 (2026-10-28, `cdbe6d2`).
-  - **4c-3 Bijlagen: in ontwerp.** Besluiten 135–141 vastgesteld (2026-10-28); uitgewerkt ontwerp voorgelegd, wacht op akkoord om te bouwen (v0.4.10).
+  - **4c-3 Bijlagen: gereed**, v0.4.10 (2026-10-29). Besluiten 135–141. Bijlagen bij een post (ook geboekt), paperclip-kolom, filter *Zonder bon*, subtabblad *Postvak bonnen* met herkenning van datum en bedrag (PdfPig) en koppelvoorstel, voorbeeldvenster via `Windows.Data.Pdf`, tabellen `Bijlagen` en `BijlageInhoud` (migratie Bijlagen). Restpunten: tooltips via de woordenlijst en de IBAN-keuze in de SOL3-import (besluit 141).
+    - Uitwerkingen: in het postvak kiest u de post in een keuzelijst (voorstellen met ✓ bovenaan, daarna de andere posten van dat jaar) in plaats van een aparte dialoog *Andere post kiezen…*; een verwijderd concept zet zijn bijlagen terug in het postvak; het doelplatform van de app is nu `net10.0-windows10.0.19041.0`.
+    - Tests: 724 in totaal. In de Linux-cloudsessie groen: Domain 218, Application 264, Infrastructure 62, Architectuur 12; ViewModel-tests 154/156 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 724/724, inclusief de nieuwe `BijlageVoorbeeldTests`) en een visuele controle van het bijlagenblok, het postvak en het voorbeeldvenster met een echte bon.
+    - Volgende stap: Windows-run, daarna een eigen pull request voor 4c-3 (besluit 89).
 
 ## Privacy
 
