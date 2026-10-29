@@ -12,6 +12,9 @@ public enum Rapportsoort
     Saldibalans,
     Balans,
     WinstEnVerlies,
+
+    /// <summary>Begroot tegenover werkelijk (fase 5a).</summary>
+    Begroting,
 }
 
 public sealed record Rapportkeuze(Rapportsoort Soort, string Naam);
@@ -28,6 +31,7 @@ public enum BoekhoudingSubtab
     Rekeningschema,
     Grootboekkaart,
     Rapporten,
+    Begroting,
     Boekjaren,
 }
 
@@ -65,6 +69,7 @@ public sealed partial class RekeningRegel : ObservableObject
         Soort = rekening?.Soort ?? RekeningSoort.Balans;
         Rol = rekening?.Rol ?? RekeningRol.Geen;
         IsActief = rekening?.IsActief ?? true;
+        Kant = rekening?.Kant ?? ResultaatKant.Geen;
         GekozenRubriek = rubriek;
         Saldotekst = rekening is null ? string.Empty : new Bedrag(saldo).ToString();
         _origineel = Momentopname();
@@ -85,8 +90,17 @@ public sealed partial class RekeningRegel : ObservableObject
     public partial string Naam { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(KantIsKiesbaar))]
     public partial RekeningSoort Soort { get; set; }
+
+    /// <summary>Baten of lasten (besluit 152); alleen bij een resultaatrekening.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
+    public partial ResultaatKant Kant { get; set; }
+
+    public bool KantIsKiesbaar => Soort == RekeningSoort.Resultaat;
+
+    public static IReadOnlyList<ResultaatKant> Kanten { get; } = [ResultaatKant.Baten, ResultaatKant.Lasten];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
@@ -108,9 +122,14 @@ public sealed partial class RekeningRegel : ObservableObject
         : string.IsNullOrWhiteSpace(Naam) ? "Vul de naam in."
         : null;
 
-    internal RekeningInvoer Invoer => new(Id, Nummer!.Value, Naam.Trim(), GekozenRubriek?.Id, Soort, Rol, IsActief);
+    internal RekeningInvoer Invoer => new(Id, Nummer!.Value, Naam.Trim(), GekozenRubriek?.Id, Soort, Rol, IsActief,
+        Soort == RekeningSoort.Resultaat && Kant != ResultaatKant.Geen ? Kant : null);
 
-    private string Momentopname() => string.Join('|', Nummertekst?.Trim(), Naam?.Trim(), Soort, Rol, IsActief, GekozenRubriek?.Id);
+    partial void OnSoortChanged(RekeningSoort value) =>
+        Kant = value == RekeningSoort.Balans ? ResultaatKant.Geen
+            : Kant == ResultaatKant.Geen ? Grootboekrekening.StandaardKant(value, Nummer ?? 0) : Kant;
+
+    private string Momentopname() => string.Join('|', Nummertekst?.Trim(), Naam?.Trim(), Soort, Rol, IsActief, GekozenRubriek?.Id, Kant);
 }
 
 public sealed record KaartRegel(KaartMutatie Mutatie)

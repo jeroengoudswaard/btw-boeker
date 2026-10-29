@@ -2,6 +2,22 @@
 
 De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de versienummering [SemVer](https://semver.org/lang/nl/).
 
+## [0.5.0] - 2026-10-29: Begroting Vereniging (fase 5a)
+
+### Toegevoegd
+- **Subtabblad *Begroting* in Boekhouding** (besluiten 146–155):
+  - Per jaar een bedrag per resultaatrekening (baten en lasten), met een toelichting per regel.
+  - Een kolom *Vorig jaar*, *Werkelijk* (tot en met vandaag), *Naar rato* (het jaarbedrag naar het deel van het jaar dat voorbij is, per dag) en *Verschil* (rood bij een ongunstig verschil). Een totaalregel toont baten, lasten en resultaat.
+  - *Overnemen* van de werkelijke cijfers of de begroting van een ander jaar, met een percentage erbij en afgerond op tientallen euro's. Daarna kun je elk bedrag zelf aanpassen.
+  - Status *Concept* → *Vastgesteld* (alleen-lezen, met datum en omschrijving). *Herzien* maakt een nieuwe conceptversie; de vastgestelde versie blijft bewaard. Een keuzelijst toont alle versies.
+  - Ctrl+S slaat de bedragen op; Ctrl+P drukt de begroting voor de ALV af (per rubriek met subtotalen en *Werkelijk* twee jaar terug, *Begroot* vorig jaar en *Begroot* dit jaar). Export naar xlsx werkt ook.
+- **Rapport *Begroting en werkelijk*** bij Rapporten.
+- **Kolom *Baten/lasten*** in het Rekeningschema (besluit 152). Bestaande rekeningen krijgen een voorstel uit het saldo (zonder afsluitposten, inclusief de historie); zonder saldo geldt vanaf 8000 baten. Ook de Excel-overname en sjabloonbestanden kennen de kant.
+- Weergave Eenvoudig: Begroot → *Verwacht*, Werkelijk → *Uitgegeven/ontvangen*, Naar rato → *Verwacht tot nu toe*, Baten/lasten → *Inkomst/uitgave*.
+- **App-icoon** (besluit 156): het vinkje-icoon in alle Windows-formaten (16–256 px) voor programmabestand, taakbalk en titelbalken. De Android-iconen staan voor later in `assets/android/`.
+- Architectuurtests: de begroting telt nooit mee in grootboek, jaarafsluiting of bank; het app-icoon bevat alle formaten.
+- 773 geautomatiseerde tests (was 740).
+
 ## [0.4.10] - 2026-10-29: Bijlagen (stap 4c-3)
 
 ### Toegevoegd

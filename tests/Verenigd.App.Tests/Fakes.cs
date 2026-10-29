@@ -522,6 +522,7 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
             HistorischeRegels = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischeRegel>()],
             HistorischeTotalen = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischTotaal>()],
             Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
+            Begrotingen = [.. lijst.OfType<Domain.Financien.Begrotingen.Begroting>().OrderBy(b => b.Jaar).ThenBy(b => b.Versie)],
         };
     }
 }

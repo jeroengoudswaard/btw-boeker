@@ -238,6 +238,28 @@ public class ArchitectuurTests
         Assert.Empty(overtredingen);
     }
 
+    /// <summary>
+    /// De begroting telt nooit mee in het grootboek (fase 5a): in de applicatielaag gebruiken alleen het model, de
+    /// begrotingsonderdelen en de rapporten haar; grootboek, jaarafsluiting, bank en boekhoudingdienst niet.
+    /// </summary>
+    [Fact]
+    public void Begroting_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
+    {
+        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs"];
+        var overtredingen = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}Begrotingen{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
+            .Where(f => File.ReadAllText(f) is var tekst
+                && (tekst.Contains("Financien.Begrotingen", StringComparison.Ordinal) || tekst.Contains("Application.Begrotingen", StringComparison.Ordinal)
+                    || tekst.Contains("Begrotingsrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Begrotingen", StringComparison.Ordinal)))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.Empty(overtredingen);
+    }
+
     /// <summary>Elke tekst van de weergaven (besluit 127) die de XAML gebruikt, staat in de woordenlijst.</summary>
     [Fact]
     public void Xaml_gebruikt_alleen_termen_uit_de_woordenlijst()

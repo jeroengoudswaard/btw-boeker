@@ -311,3 +311,12 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **PDF:** tekst lezen met PdfPig (`Infrastructure/Pdf/PdfPigTekstLezer`, regels gegroepeerd op hoogte); het voorbeeld via `Windows.Data.Pdf` (`App/Diensten/PdfPaginas`). Beide in het geheugen; de bijlage komt alleen via *Opslaan als…* op schijf. Een architectuurtest bewaakt dat PdfPig alleen in Infrastructure wordt gebruikt.
 - **App:** partial `BoekhoudingViewModel.Bijlagen` (blok bij de post, postvak, filter), `BijlageRegel`, `BonRegel` (herberekent voorstellen bij elke wijziging van datum of bedrag), `BijlageVoorbeeldViewModel` en `BijlageVenster`. Slepen gaat via de code-behind van `BoekhoudingView` naar de commands.
 - **SOL3-import (besluit 141):** `ImportVoorstel.IbanVerschillen` en `ImportKeuzes.IbanOvernemen`; `ImportToepasser` koppelt een lid met een afwijkend IBAN alleen om als het is aangevinkt.
+
+## Begroting (v0.5.0, fase 5a, besluiten 146–155)
+
+- **Domein** (`Domain/Financien/Begrotingen`): `Begroting` (administratie, jaar, versie, status *Concept*/*Vastgesteld*, omschrijving, vastgesteld op) met `Begrotingsregel` (rekening, bedrag, toelichting). Een vastgestelde versie is alleen-lezen; `Herzie()` maakt een nieuwe conceptversie als kopie. Bedragen zijn positief in de richting van de rekening.
+- **Baten of lasten:** `Grootboekrekening.Kant` (`ResultaatKant`). Standaard vanaf 8000 baten; bij de Excel-overname uit het W&V-saldo van het Voorblad; bij bestaande databases via `MigratieSql.KantVoorstellen` (saldo zonder afsluitposten, plus de historie). Instelbaar in het Rekeningschema en mee in sjabloonbestanden (optioneel veld `kant`).
+- **Application** (`Application/Begrotingen`): `Begrotingsrekenaar` (geldende versie = laatste vastgestelde, anders het concept; overnemen met percentage, afgerond op tientallen; overzicht per rubriek met naar rato per dag) en `BegrotingDienst`. `Grootboek.Resultaat` geeft het saldo van een resultaatrekening zonder afsluitpost. Rapporten: `Rapporten.Begroting` en `Rapporten.BegrotingAlv`.
+- **Opslag:** tabellen `Begrotingen` (uniek per administratie, jaar en versie) en `Begrotingsregels` (uniek per begroting en rekening), migratie *Begroting*.
+- **App:** partial `BoekhoudingViewModel.Begroting`, `BegrotingRij` en `BegrotingVersie`; Ctrl+S via `BewaarAsync`, Ctrl+P via `Afdruktabel` (op het subtabblad Begroting de ALV-afdruk).
+- **Bewaking:** de architectuurtest `Begroting_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank`.

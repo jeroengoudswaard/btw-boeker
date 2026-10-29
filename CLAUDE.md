@@ -260,7 +260,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitvoermap van de app: `src/Verenigd.App/bin/<Config>/net10.0-windows10.0.19041.0/Verenigd.exe`.
     - **Windows-test (2026-10-29, commit `ae37699`): 740/740 geslaagd** (gemeld door de gebruiker).
     - Gemerged als PR #8 (2026-10-29, `d159768`). Fase 4c is daarmee gereed.
-- **Fase 5 (Begroting & meerjarenplan): in ontwerp.** Besluiten 146–155 vastgesteld (2026-10-29). Uitgewerkt ontwerp 5a Begroting Vereniging voorgelegd; wacht op akkoord om te bouwen (v0.5.0).
+- **Fase 5 (Begroting & meerjarenplan):** besluiten 146–156 vastgesteld (2026-10-29).
+  - **5a Begroting Vereniging: gereed**, v0.5.0 (2026-10-29). Subtabblad *Begroting* in Boekhouding (jaar, versie, overnemen + % afgerond op tientallen, vaststellen, herzien, naar rato per dag, Ctrl+S, Ctrl+P = ALV-afdruk), rapport *Begroting en werkelijk*, kolom *Baten/lasten* in het rekeningschema (`ResultaatKant`, migratie *Begroting* met voorstel uit het saldo via `MigratieSql.KantVoorstellen`). App-icoon (besluit 156).
+    - Uitwerkingen: het overnemen en vaststellen staan in de werkbalk van het subtabblad (geen aparte dialogen); naar rato rekent per dag; een ongunstig verschil is rood. De bestaande module *Begroting* (Ctrl+5, placeholder sinds fase 1) is nog ongewijzigd; voorgelegd aan de gebruiker.
+    - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
+    - Volgende stap: Windows-run, daarna een eigen pull request voor 5a; daarna ontwerp 5b Meerjarenplan Stichting (besluit 146).
 
 ## Privacy
 
