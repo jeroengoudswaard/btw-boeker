@@ -141,7 +141,9 @@
                     <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
                                Text="Lees de vier exports uit SOL3 in. U ziet eerst een voorbeeld en er wordt vooraf een back-up gemaakt." />
                     <Button Content="SOL3-_bestanden inlezen..." Command="{Binding LedenInlezenCommand}" Style="{DynamicResource AccentButtonStyle}"
-                            ContentTemplate="{StaticResource Toegangstekst}" HorizontalAlignment="Left" AutomationProperties.AutomationId="StartwizardLeden" />
+                            ContentTemplate="{StaticResource Toegangstekst}" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.AutomationId="StartwizardLeden" />
+                    <TextBlock Text="Welke exports maakt u in SOL3?" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <g:Sol3Uitleg AutomationProperties.AutomationId="StartwizardSol3Uitleg" />
                 </StackPanel>
 
                 <!-- ===== Boekhouding ===== -->

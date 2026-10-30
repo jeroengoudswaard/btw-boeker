@@ -334,3 +334,8 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Opslag:** tabel `Startwizard` (één rij), migratie *Startwizard*.
 - **App:** `StartwizardViewModel` is de regisseur; het hoofdvenster implementeert `IStartwizardRegie` en voert de bestaande opdrachten uit (nieuwe database, SOL3-import, de vier inrichtingsroutes van Boekhouding, bankimport, Contributie › Tarieven via `ContributieSubtab`). Naam en kleur (`AdministratieKaart`) en incasso (`IncassoKaart`) zijn gedeelde UserControls in `Views/Gedeeld`. `StartwizardVenster` is een eigen modaal venster; ✕ werkt als *Later verder*.
 - **Eerste start:** `GebruikersInstellingen.StartwizardGetoond` zorgt dat de wizard maar één keer vanzelf opent.
+
+## Uitleg SOL3-exports (v0.7.1, besluiten 185–187)
+
+- `Application/Import/Sol3Exportuitleg.cs`: per export de titel, het doel en de kolommen in de volgorde van SOL3. *Verplicht* komt uit `ExportHerkenning.VerplichteKolommen`; de overige kolommen zijn wat SOL3 daarnaast levert. `Sol3ExportuitlegTests` vergelijkt dit met de kopregels in `Sol3Voorbeeld`.
+- `Views/Gedeeld/Sol3Uitleg.xaml`: gedeeld door de startwizard en de importwizard; *Kolomnamen kopiëren* vult alleen het klembord (code-behind, geen logica).

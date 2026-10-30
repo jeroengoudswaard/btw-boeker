@@ -310,7 +310,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-30, Windows 11, commit `b14bb81`): 805/805 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 300, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Nog door de gebruiker te doen: visuele controle van de wizard, de kleurrondjes in Instellingen, het subtabblad Meerjarenplan en de liggende afdruk.
   - Pull request: één PR voor v0.6.0 t/m v0.7.1 (besluiten 176 en 189), geopend 2026-10-30.
   - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
-  - **Taak voor later (gebruiker, 2026-10-30):** de startwizard moet meer uitleg geven over de vier SOL3-exports (besluit 20): per export welke kolomkoppen nodig zijn en in welk formaat de export moet worden gedownload. Bron voor de kolomkoppen: `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Eerst een ontwerp ter goedkeuring.
+  - **Uitleg SOL3-exports: gereed**, v0.7.1 (2026-10-30). Besluiten 185–188. `Sol3Exportuitleg` (Application, verplicht uit `ExportHerkenning`) en het gedeelde onderdeel `Sol3Uitleg` in de stap Leden van de startwizard en (uitklapbaar) in stap 1 van de SOL3-importwizard.
+    - Tests: 812 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 307, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 812/812, de UI-test van de importwizard controleert nu ook de uitleg) en een visuele controle.
+    - Open: de klikroute in SOL3 (besluit 187) volgt van de gebruiker.
 
 ## Privacy
 

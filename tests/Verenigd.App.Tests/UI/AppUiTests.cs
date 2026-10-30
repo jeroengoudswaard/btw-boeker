@@ -184,6 +184,10 @@ public sealed class AppUiTests : IDisposable
         var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
         Assert.Equal("SOL3-import", wizard.Title);
         Assert.False(Zoek(wizard, "WizardVolgende").IsEnabled); // nog geen bestanden gekozen
+        var uitleg = Zoek(wizard, "WizardSol3Uitleg"); // besluit 185
+        uitleg.Patterns.ExpandCollapse.Pattern.Expand();
+        Assert.NotNull(Retry.WhileNull(() => uitleg.FindFirstDescendant(c => c.ByName("Kolomnamen kopiëren van Export 4 · Functies")), Wachttijd).Result);
+        uitleg.Patterns.ExpandCollapse.Pattern.Collapse();
         Bewaar(wizard, "07-importwizard");
         Zoek(wizard, "WizardAnnuleren").AsButton().Invoke();
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);

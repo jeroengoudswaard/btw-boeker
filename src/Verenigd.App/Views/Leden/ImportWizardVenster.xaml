@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Leden"
+        xmlns:g="clr-namespace:Verenigd.App.Views.Gedeeld"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ImportWizardViewModel}"
         Title="SOL3-import"
@@ -63,6 +64,11 @@
                            Text="Kies de vier SOL3-exports (of sleep ze naar dit venster). De app herkent ze aan hun kopregel. Vóór het importeren wordt automatisch een back-up gemaakt." />
                 <Button DockPanel.Dock="Bottom" Content="_Bladeren..." HorizontalAlignment="Left" Margin="0,16,0,0" MinWidth="96"
                         Command="{Binding BladerenCommand}" AutomationProperties.AutomationId="WizardBladeren" />
+                <Expander DockPanel.Dock="Bottom" Header="_Welke exports en kolommen?" Margin="0,16,0,0" AutomationProperties.AutomationId="WizardSol3Uitleg">
+                    <ScrollViewer MaxHeight="260" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                        <g:Sol3Uitleg />
+                    </ScrollViewer>
+                </Expander>
                 <ItemsControl ItemsSource="{Binding Bestanden}" Focusable="False">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:ExportBestandRegel}">
