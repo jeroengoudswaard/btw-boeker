@@ -356,7 +356,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Opgelost (2026-10-30, alleen testcode):** alle 6 keer `Keyboard.Press` in AppUiTests.cs vervangen door `Keyboard.Type`; `Dispose()` laat Alt, Ctrl, Shift, Escape en Enter los (`LaatToetsenLos`); architectuurtest `Ui_tests_drukken_geen_toets_in_zonder_hem_los_te_laten` verbiedt `Keyboard.Press(` in de UI-tests. Tests: 890 (Architectuur 28). **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 890/890).
   - **Windows-test (2026-10-30, Windows 11, commit `43a3677`): 890/890 geslaagd in 2 opeenvolgende runs**, inclusief alle FlaUI-UI-tests (Domain 241, Application 329, Architectuur 28, Infrastructure 69, App 223); build zonder waarschuwingen. Na elke run geen ingedrukte toets meer (`GetAsyncKeyState` voor Alt, Ctrl, Shift, Escape en Enter), geen achtergebleven testproces.
     - Eenmalige hang: de allereerste poging bleef ±10 minuten hangen in `Verenigd.App.Tests` (testhost zonder app-venster, vrijwel geen CPU) en is afgebroken. Daarna niet meer: een extra App-run (223/223) en de 2 volledige runs liepen met `--blame-hang --blame-hang-timeout 4m` zonder hang. Welke test hing is onbekend. Advies: Windows-runs voortaan met `--blame-hang --blame-hang-timeout 4m`; komt de hang terug, dan met `--blame-hang-dump-type mini` de test vastleggen.
-    - De pull request voor v0.8.0 en v0.9.0 kan open. Nog door de gebruiker te doen: visuele controle van v0.8.0 en een echte koppeling met Gmail.
+    - Pull request voor v0.8.0 en v0.9.0 geopend: PR #12 (2026-10-30). Nog door de gebruiker te doen: visuele controle van v0.8.0 en een echte koppeling met Gmail.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
