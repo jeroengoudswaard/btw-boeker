@@ -203,6 +203,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 165 | Afdruk meerjarenplan | Liggend A4, alle 10 jaren op één pagina, met kleinere letters voor de bedragen |
 | 166 | Invulhulp meerjarenplan | Per rij een knop *Naar de volgende jaren kopiëren*: het bedrag van het gekozen jaar gaat naar alle latere jaren; daarna blijft elk bedrag aan te passen |
 | 167 | Startjaar meerjarenplan | Vrij te kiezen, standaard het volgende jaar; een nieuw plan begint los van het vorige |
+| 168 | Herinrichting UI (wijzigt besluit 9) | Volledige herinrichting naar het model van Clipchamp: navigatiebalk links, geen tabbladen, de klassieke menubalk alleen in de Expert-weergave; per scherm één hoofdactie, lege schermen met uitleg en één knop, kaarten op het startscherm, vaste statusteksten (✓/⚠/✕, "wat er gebeurde + wat nu"). Gevolgen voor besluiten 10–12, 17 en 127 worden in het ontwerp voorgelegd |
+| 169 | Startwizard: moment | Automatisch bij de eerste start (geen database); daarna altijd via *Bestand › Startwizard…* |
+| 170 | Startwizard: stappen | Welkom → Database → Vereniging en Stichting → Leden → Boekhouding → Bank → Contributie → Klaar; elke stap over te slaan, *Later verder* bewaart de voortgang; de bestaande wizards en diensten worden hergebruikt |
+| 171 | Volgorde | Eerst 5b afmaken, dan de startwizard, dan de herinrichting van de UI |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -278,7 +282,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
     - Gemerged als PR #9 (2026-10-29, `e973ee1`), na groene CI (keuze van de gebruiker: mergen zonder extra Windows-run voor icoon en Ctrl+5).
-  - **5b Meerjarenplan Stichting: in ontwerp.** Besluiten 159–167 vastgesteld (2026-10-29); uitgewerkt ontwerp voorgelegd, wacht op akkoord om te bouwen (v0.6.0).
+  - **5b Meerjarenplan Stichting: gereed**, v0.6.0 (2026-10-30). Besluiten 159–167. Subtabblad *Meerjarenplan* (alleen Stichting): raster 10 jaar per resultaatrekening, knop → per rij (vanaf het jaar bij *Kopiëren vanaf*), resultaat per jaar, vaststellen en herzien, liggende afdruk (`RapportTabel.IsLiggend`), Ctrl+5 per administratie. Tabellen `Meerjarenplannen`, `Meerjarenposten`, `Meerjarenbedragen` (migratie *Meerjarenplan*).
+    - Uitwerking: de knop per rij kopieert vanaf het jaar dat in de werkbalk bij *Kopiëren vanaf* staat (één keuze voor alle rijen).
+    - Tests: 791 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 296, Infrastructure 66, Architectuur 14; ViewModel-tests 168/170 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 791/791) en een visuele controle van het subtabblad Meerjarenplan en de liggende afdruk.
+- **Startwizard en herinrichting UI:** besluiten 168–171 vastgesteld (2026-10-30). Volgende stap: uitgewerkt ontwerp van de startwizard ter goedkeuring.
 
 ## Privacy
 

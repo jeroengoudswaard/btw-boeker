@@ -4,6 +4,20 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.6.0] - 2026-10-30: Meerjarenplan Stichting (fase 5b)
+
+### Toegevoegd
+- **Subtabblad *Meerjarenplan* in Boekhouding van de Stichting** (besluiten 159–167):
+  - Een raster met per resultaatrekening van de Stichting een bedrag per jaar, over 10 jaar, met een toelichting per rij. Bedragen in de prijzen van het jaar zelf (geen indexatie).
+  - Het startjaar is vrij te kiezen, standaard het volgende jaar; een nieuw plan begint leeg.
+  - Per rij een knop → *Naar de volgende jaren kopiëren*: het bedrag van het jaar bij *Kopiëren vanaf* gaat naar alle latere jaren; daarna blijft elk bedrag aan te passen.
+  - Onderaan het resultaat (baten min lasten) per jaar.
+  - Status *Concept* → *Vastgesteld* (alleen-lezen); *Herzien* maakt een nieuwe conceptversie, de vastgestelde versie blijft bewaard.
+  - Ctrl+S slaat op; Ctrl+P drukt het plan liggend af op A4, met alle 10 jaren op één pagina.
+- **Ctrl+5 / *Modules › Begroting*** opent bij de Stichting het meerjarenplan en bij de Vereniging de begroting (besluit 163).
+- Architectuurtest: ook het meerjarenplan telt nooit mee in grootboek, jaarafsluiting of bank.
+- 791 geautomatiseerde tests (was 774).
+
 ### Gewijzigd
 - App-icoon zonder lege rand: de tegel vult nu het hele vierkant, zodat het icoon in de taakbalk even groot is als andere apps (besluit 158).
 

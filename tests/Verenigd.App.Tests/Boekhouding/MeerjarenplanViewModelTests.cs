@@ -63,10 +63,11 @@ public sealed class MeerjarenplanViewModelTests : IDisposable
         await vm.MeerjarenplanMakenCommand.ExecuteAsync(null);
         var huur = vm.Meerjarenrijen.Single(r => r.Rekeningtekst == "8100 Huur van de Vereniging");
         huur.Cellen[1].Tekst = "6.000,00";
-        vm.GeselecteerdeMeerjarenrij = huur;
         vm.KopieerVanafJaar = 2028;
+        Assert.Equal(Enumerable.Range(2027, 10), vm.MeerjarenJaren);
 
-        vm.NaarVolgendeJarenKopierenCommand.Execute(null);
+        Assert.True(vm.NaarVolgendeJarenKopierenCommand.CanExecute(huur));
+        vm.NaarVolgendeJarenKopierenCommand.Execute(huur);
 
         Assert.Equal(string.Empty, huur.Cellen[0].Tekst);
         Assert.All(huur.Cellen.Skip(2), c => Assert.Equal("6000,00", c.Tekst));

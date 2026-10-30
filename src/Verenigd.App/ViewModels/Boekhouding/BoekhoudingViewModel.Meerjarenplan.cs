@@ -36,7 +36,7 @@ public sealed partial class BoekhoudingViewModel
     public partial IReadOnlyList<MeerjarenVersie> Meerjarenversies { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HeeftMeerjarenplan), nameof(IsMeerjarenplanBewerkbaar))]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerjarenplan), nameof(IsMeerjarenplanBewerkbaar), nameof(MeerjarenJaren))]
     public partial MeerjarenVersie? GekozenMeerjarenversie { get; set; }
 
     /// <summary>De jaren als kolomkoppen.</summary>
@@ -47,10 +47,6 @@ public sealed partial class BoekhoudingViewModel
     public partial string Meerjarentotalen { get; private set; } = string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(NaarVolgendeJarenKopierenCommand))]
-    public partial MeerjarenRij? GeselecteerdeMeerjarenrij { get; set; }
-
-    [ObservableProperty]
     public partial int KopieerVanafJaar { get; set; }
 
     [ObservableProperty]
@@ -58,6 +54,9 @@ public sealed partial class BoekhoudingViewModel
 
     [ObservableProperty]
     public partial string MeerjarenVaststellenOmschrijving { get; set; } = string.Empty;
+
+    /// <summary>De jaren van het gekozen plan, voor de keuze "vanaf jaar" bij kopiëren.</summary>
+    public IReadOnlyList<int> MeerjarenJaren => GekozenMeerjarenversie is { } versie ? [.. versie.Plan.Jaren] : [];
 
     public bool HeeftMeerjarenplan => GekozenMeerjarenversie is not null;
 
@@ -188,9 +187,9 @@ public sealed partial class BoekhoudingViewModel
             Melding = $"Het meerjarenplan {MeerjarenStartjaar}–{MeerjarenStartjaar + 9} is aangemaakt.";
         }, null);
 
-    /// <summary>Besluit 166: het bedrag van het gekozen jaar naar alle latere jaren van de gekozen rij.</summary>
+    /// <summary>Besluit 166: een knop per rij; het bedrag van het gekozen jaar gaat naar alle latere jaren van die rij.</summary>
     [RelayCommand(CanExecute = nameof(KanKopieren))]
-    private void NaarVolgendeJarenKopieren() => GeselecteerdeMeerjarenrij!.KopieerNaarVolgendeJaren(KopieerVanafJaar);
+    private void NaarVolgendeJarenKopieren(MeerjarenRij? rij) => rij?.KopieerNaarVolgendeJaren(KopieerVanafJaar);
 
     [RelayCommand(CanExecute = nameof(KanMeerjarenplanWijzigen))]
     private async Task MeerjarenplanVaststellenAsync()
@@ -225,7 +224,7 @@ public sealed partial class BoekhoudingViewModel
 
     private bool KanMeerjarenplanWijzigen() => !IsBezig && IsMeerjarenplanBewerkbaar;
 
-    private bool KanKopieren() => IsMeerjarenplanBewerkbaar && GeselecteerdeMeerjarenrij is not null;
+    private bool KanKopieren(MeerjarenRij? rij) => IsMeerjarenplanBewerkbaar && rij is not null;
 
     private bool KanMeerjarenplanHerzien() =>
         !IsBezig && GekozenMeerjarenversie is { Plan.IsVastgesteld: true } versie && versie.Id == Meerjarenversies[^1].Id;

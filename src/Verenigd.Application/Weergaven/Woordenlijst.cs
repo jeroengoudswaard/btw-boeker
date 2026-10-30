@@ -74,7 +74,6 @@ public static class Woordenlijst
         new("Tab.Begroting", "B_egroting", "B_egroting"),
         new("Tab.Meerjarenplan", "_Meerjarenplan", "_Meerjarenplan", "Wat de Stichting de komende 10 jaar verwacht te ontvangen en uit te geven, per potje en per jaar."),
         new("Knop.MeerjarenplanMaken", "Plan _maken", "Plan _maken"),
-        new("Knop.NaarVolgendeJaren", "_Naar volgende jaren kopiëren", "_Naar volgende jaren kopiëren"),
         new("Knop.BegrotingMaken", "Begroting _maken", "Begroting _maken"),
         new("Knop.Overnemen", "_Overnemen", "_Overnemen"),
         new("Knop.Vaststellen", "Vast_stellen...", "Vast_stellen..."),
