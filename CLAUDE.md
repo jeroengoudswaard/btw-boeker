@@ -244,6 +244,13 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 206 | E-mail: vooraankondiging | Direct na *Definitief maken* van een incassorun aanbieden, per betaler met bedrag, uitvoerdatum en mandaatkenmerk |
 | 207 | E-mail: facturen | Na *Definitief maken* van een factuur aanbieden om te mailen met de PDF als bijlage; bij een vervallen factuur een knop *Herinnering sturen* |
 | 208 | Opdeling fase 6 | Alles in één versie (v0.9.0): koppeling, sjablonen, opstellen, verzonden en de berichten vanuit de modules |
+| 209 | Stichting volwaardig (vervangt besluiten 61 en 107) | Boekhouding, bank en facturen ook voor de Stichting (v0.10.0): factuurgegevens per administratie, bankstap van de startwizard per administratie; het datamodel was al per administratie |
+| 210 | Bankrekeningen Stichting | Een Rabobank-betaalrekening en een -spaarrekening, elk een eigen bankdagboek (zoals besluit 76) |
+| 211 | Gmail per administratie | Elke administratie heeft een eigen Gmail-account en koppeling; bij Opstellen kiest u de afzender (standaard de Vereniging; bij een bericht uit een pagina de administratie van die pagina). Daglimiet en logboek per afzender |
+| 212 | Huur Vereniging–Stichting | Geen koppeling tussen de administraties: elk boekt zelf (Stichting 8100 huur, Vereniging huisvesting), eventueel met een factuur van de Stichting aan de relatie "Vereniging" |
+| 213 | Begroting Stichting | Geen jaarbegroting; het meerjarenplan volstaat |
+| 214 | Drempel "zonder bon" | Instelbaar per administratie (uitwerking van besluit 97), in v0.10.1 |
+| 215 | Groepsindeling wijzigen | Instellingen › Groepen: per groep het soort (speltak, bestuur, technisch, overig), ook buiten de import (aanvulling op besluit 43), in v0.10.1 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -357,6 +364,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Windows-test (2026-10-30, Windows 11, commit `43a3677`): 890/890 geslaagd in 2 opeenvolgende runs**, inclusief alle FlaUI-UI-tests (Domain 241, Application 329, Architectuur 28, Infrastructure 69, App 223); build zonder waarschuwingen. Na elke run geen ingedrukte toets meer (`GetAsyncKeyState` voor Alt, Ctrl, Shift, Escape en Enter), geen achtergebleven testproces.
     - Eenmalige hang: de allereerste poging bleef ±10 minuten hangen in `Verenigd.App.Tests` (testhost zonder app-venster, vrijwel geen CPU) en is afgebroken. Daarna niet meer: een extra App-run (223/223) en de 2 volledige runs liepen met `--blame-hang --blame-hang-timeout 4m` zonder hang. Welke test hing is onbekend. Advies: Windows-runs voortaan met `--blame-hang --blame-hang-timeout 4m`; komt de hang terug, dan met `--blame-hang-dump-type mini` de test vastleggen.
     - Pull request voor v0.8.0 en v0.9.0 geopend: PR #12 (2026-10-30). Nog door de gebruiker te doen: visuele controle van v0.8.0 en een echte koppeling met Gmail.
+
+- **v0.10.0 Stichting volwaardig en v0.10.1 kleine punten: in aanbouw.** Besluiten 209–215 vastgesteld (2026-10-30, keuzes 1B 2B 3A 4A 5B 6B). Eén pull request voor beide na een Windows-run.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
