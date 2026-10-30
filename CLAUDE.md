@@ -216,6 +216,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 178 | Herinrichting: onderdelen Boekhouding | Inklapbare subitems in de navigatiebalk (Journaal, Bank, Postvak …), elk met één klik bereikbaar |
 | 179 | Herinrichting: menubalk | In Expert zichtbaar; in Eenvoudig verborgen, Alt toont hem tijdelijk (zoals Verkenner). Sneltoetsen werken altijd. Eenvoudig/Expert geldt daarmee voor de menubalk app-breed; de eenvoudige woorden blijven alleen in Financiën (aanvulling op 130) |
 | 180 | Herinrichting: aanpak | Alles in één versie (v0.8.0): schil, startpagina met kaarten, één hoofdactie per pagina en lege schermen |
+| 181 | Herinrichting: Contributie | De subtabbladen van Contributie worden ook subitems in de navigatiebalk, zoals Boekhouding |
+| 182 | Herinrichting: wisselen van administratie | Dezelfde pagina blijft staan voor de andere administratie; bestaat die daar niet (Contributie bij de Stichting), dan naar Start |
+| 183 | Herinrichting: startkaarten | Alle 8: inrichting afmaken, banktransacties te verwerken, conceptposten, bonnen in het postvak, incassorun van deze maand, openstaande storneringen, vervallen facturen, zonder bon; alleen zichtbaar als er iets te doen is |
+| 184 | Volgorde v0.8.0 | Eerst de Windows-run en de merge van v0.6.0–v0.7.0, daarna bouwen |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -300,7 +304,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests).
     - **Windows-test (2026-10-30, Windows 11, commit `b14bb81`): 805/805 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 300, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Nog door de gebruiker te doen: visuele controle van de wizard, de kleurrondjes in Instellingen, het subtabblad Meerjarenplan en de liggende afdruk.
   - Pull request: één PR voor v0.6.0 en v0.7.0 na de Windows-run (besluit 176). Nog niet geopend (keuze van de gebruiker, 2026-10-30).
-  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–180, 2026-10-30); technische uitwerking voorgelegd.
+  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
   - **Taak voor later (gebruiker, 2026-10-30):** de startwizard moet meer uitleg geven over de vier SOL3-exports (besluit 20): per export welke kolomkoppen nodig zijn en in welk formaat de export moet worden gedownload. Bron voor de kolomkoppen: `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Eerst een ontwerp ter goedkeuring.
 
 ## Privacy
