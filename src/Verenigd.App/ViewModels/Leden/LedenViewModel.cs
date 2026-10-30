@@ -12,7 +12,7 @@ namespace Verenigd.App.ViewModels.Leden;
 public sealed record Lidtypekeuze(Lidtype? Waarde, string Tekst);
 
 /// <summary>Tabblad Leden: ledenlijst met filters en de gegevens van het geselecteerde lid.</summary>
-public sealed partial class LedenViewModel : TabbladViewModel
+public sealed partial class LedenViewModel : TabbladViewModel, IPaginameldingen
 {
     public const string AlleGroepen = "Alle groepen";
     private static readonly StringComparer Sortering = StringComparer.Create(CultureInfo.GetCultureInfo("nl-NL"), ignoreCase: true);

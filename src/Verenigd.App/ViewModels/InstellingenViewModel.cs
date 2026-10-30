@@ -8,7 +8,7 @@ using Verenigd.Domain.Administraties;
 
 namespace Verenigd.App.ViewModels;
 
-public sealed partial class InstellingenViewModel : TabbladViewModel
+public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginameldingen
 {
     private readonly IAdministratieRepository _repository;
 

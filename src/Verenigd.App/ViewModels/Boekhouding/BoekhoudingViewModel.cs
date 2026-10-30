@@ -17,7 +17,7 @@ namespace Verenigd.App.ViewModels.Boekhouding;
 /// Tabblad Boekhouding van één administratie (stap 4a) met de subtabbladen Journaal, Rekeningschema, Grootboekkaart,
 /// Rapporten en Boekjaren. Geboekte posten zijn onveranderlijk; corrigeren gaat via tegenboeken (besluit 71).
 /// </summary>
-public sealed partial class BoekhoudingViewModel : TabbladViewModel
+public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameldingen
 {
     private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
@@ -739,7 +739,18 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
     partial void OnRapportsoortChanged(Rapportsoort value) => BerekenRapport();
 
-    partial void OnSubtabChanged(BoekhoudingSubtab value) => OnPropertyChanged(nameof(Afdruktabel));
+    partial void OnSubtabChanged(BoekhoudingSubtab value)
+    {
+        OnPropertyChanged(nameof(Afdruktabel));
+        OnPropertyChanged(nameof(Onderdeel));
+    }
+
+    /// <summary>Het onderdeel in de navigatiebalk (besluit 178).</summary>
+    public override int? Onderdeel
+    {
+        get => (int)Subtab;
+        set => Subtab = value is { } i ? (BoekhoudingSubtab)i : BoekhoudingSubtab.Journaal;
+    }
 
     private void BerekenKaart()
     {

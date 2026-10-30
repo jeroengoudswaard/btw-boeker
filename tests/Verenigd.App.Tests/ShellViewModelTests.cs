@@ -276,13 +276,13 @@ public sealed class ShellViewModelTests
     }
 
     [Fact]
-    public async Task Bewaard_tabblad_contributie_stichting_wordt_niet_hersteld()
+    public async Task Bewaarde_pagina_contributie_stichting_wordt_niet_hersteld()
     {
         _beheer.Voeg(Pad, Wachtwoord);
         _instellingen.Instellingen = new GebruikersInstellingen
         {
             LaatsteDatabase = Pad,
-            OpenTabbladen = [new OpenTabblad(ModuleSoort.Contributie, AdministratieSoort.Stichting)],
+            LaatstePagina = new LaatstePagina(ModuleSoort.Contributie, AdministratieSoort.Stichting, null),
         };
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
         var shell = MaakShell();
@@ -290,53 +290,19 @@ public sealed class ShellViewModelTests
         await shell.InitialiseerAsync();
 
         Assert.Single(shell.Tabbladen);
+        Assert.Equal(AdministratieSoort.Stichting, shell.GekozenAdministratie!.Soort);
     }
 
     [Fact]
-    public async Task Tabblad_sluiten_selecteert_buurman()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Email, null));
-        var leden = shell.Tabbladen[1];
-        shell.GeselecteerdTabblad = leden;
-
-        await shell.SluitTabbladCommand.ExecuteAsync(leden);
-
-        Assert.Equal(2, shell.Tabbladen.Count);
-        Assert.Equal(ModuleSoort.Email, shell.GeselecteerdTabblad!.Module.Soort);
-    }
-
-    [Fact]
-    public async Task Overzicht_kan_niet_gesloten_worden()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        Assert.False(shell.SluitTabbladCommand.CanExecute(shell.Tabbladen[0]));
-    }
-
-    [Fact]
-    public async Task Volgend_en_vorig_tabblad_lopen_rond()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
-
-        shell.VolgendTabbladCommand.Execute(null);
-        Assert.Equal(ModuleSoort.Overzicht, shell.GeselecteerdTabblad!.Module.Soort);
-
-        shell.VorigTabbladCommand.Execute(null);
-        Assert.Equal(ModuleSoort.Leden, shell.GeselecteerdTabblad!.Module.Soort);
-    }
-
-    [Fact]
-    public async Task Onopgeslagen_wijzigingen_annuleren_houdt_tabblad_open()
+    public async Task Onopgeslagen_wijzigingen_annuleren_houdt_de_database_open()
     {
         var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
         _dialogen.OpslaanAntwoord = OpslaanKeuze.Annuleren;
 
-        await shell.SluitTabbladCommand.ExecuteAsync(instellingen);
+        await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Contains(instellingen, shell.Tabbladen);
+        Assert.True(shell.IsDatabaseOpen);
+        Assert.Same(instellingen, shell.GeselecteerdTabblad);
         Assert.Equal(["Instellingen"], _dialogen.OpslaanVragen);
     }
 
@@ -346,9 +312,10 @@ public sealed class ShellViewModelTests
         var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
         _dialogen.OpslaanAntwoord = OpslaanKeuze.Opslaan;
 
-        await shell.SluitTabbladCommand.ExecuteAsync(instellingen);
+        await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
         Assert.DoesNotContain(instellingen, shell.Tabbladen);
+        Assert.False(shell.IsDatabaseOpen);
         Assert.Equal(1, _beheer.Repository.AantalKeerBewaard);
     }
 
@@ -358,7 +325,7 @@ public sealed class ShellViewModelTests
         var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
         _dialogen.OpslaanAntwoord = OpslaanKeuze.NietOpslaan;
 
-        await shell.SluitTabbladCommand.ExecuteAsync(instellingen);
+        await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
         Assert.DoesNotContain(instellingen, shell.Tabbladen);
         Assert.Equal(0, _beheer.Repository.AantalKeerBewaard);
@@ -388,7 +355,7 @@ public sealed class ShellViewModelTests
     // ---- Sessie-overgangen -----------------------------------------------------------------
 
     [Fact]
-    public async Task Open_tabbladen_worden_bewaard_bij_sluiten_en_hersteld_bij_openen()
+    public async Task Laatste_pagina_wordt_bewaard_bij_sluiten_en_hersteld_bij_openen()
     {
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
@@ -402,13 +369,12 @@ public sealed class ShellViewModelTests
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Equal(
-            ["Overzicht", "Leden", "Boekhouding · Scouting Stichting"],
-            shell.Tabbladen.Select(t => t.Titel));
+        Assert.Equal("Boekhouding · Scouting Stichting", shell.GeselecteerdTabblad!.Titel);
+        Assert.Equal(AdministratieSoort.Stichting, shell.GekozenAdministratie!.Soort);
     }
 
     [Fact]
-    public async Task Afsluiten_bewaart_tabbladen_en_sluit_database()
+    public async Task Afsluiten_bewaart_de_laatste_pagina_en_sluit_database()
     {
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
@@ -417,7 +383,7 @@ public sealed class ShellViewModelTests
 
         Assert.True(mag);
         Assert.True(_beheer.LaatsteSessie!.Gesloten);
-        Assert.Contains(new OpenTabblad(ModuleSoort.Leden, null), _instellingen.Instellingen.OpenTabbladen);
+        Assert.Equal(new LaatstePagina(ModuleSoort.Leden, null, null), _instellingen.Instellingen.LaatstePagina);
     }
 
     // ---- Thema, back-up en status ----------------------------------------------------------

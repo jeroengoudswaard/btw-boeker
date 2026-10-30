@@ -117,6 +117,11 @@
             <!-- ===== Beginsaldi (besluit 120) ===== -->
             <DockPanel Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Beginsaldi}">
                 <TextBlock DockPanel.Dock="Top" Text="{Binding Beginsaldititel}" Style="{StaticResource Sectietitel}" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <Label Content="Begin_jaar" Target="{Binding ElementName=BeginjaarKeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                    <ComboBox x:Name="BeginjaarKeuze" ItemsSource="{Binding Beginjaren}" SelectedItem="{Binding Beginjaar}" Width="90"
+                              ToolTip="Het eerste boekjaar in Verenigd; de beginsaldi gelden per 1 januari van dat jaar" AutomationProperties.AutomationId="InrichtenBeginjaar" />
+                </StackPanel>
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,8" TextWrapping="Wrap"
                            Text="Vul de saldi in waarmee de groep begint, bijvoorbeeld het banksaldo (debet) en de reserve (credit). Leeg laten mag; dan begint u zonder openingsbalans." />
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">

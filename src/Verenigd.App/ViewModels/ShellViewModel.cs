@@ -25,7 +25,10 @@ public sealed record ModuleVerzoek(ModuleSoort Module, AdministratieSoort? Admin
     public static ModuleVerzoek Instellingen { get; } = new(ModuleSoort.Instellingen, null);
 }
 
-/// <summary>Hoofdvenster: database-sessie, tabbladen, menu's en statusbalk.</summary>
+/// <summary>
+/// Hoofdvenster: database-sessie, navigatiebalk met administratiewisselaar (besluiten 168 en 177–183), menu's en statusregel.
+/// De geopende pagina's blijven bewaard in <see cref="Tabbladen"/> (de naam stamt uit de tijd van de tabbladen).
+/// </summary>
 public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 {
     private readonly IDatabaseBeheer _beheer;
@@ -70,7 +73,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
-    [NotifyCanExecuteChangedFor(nameof(SluitTabbladCommand), nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand))]
     public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
 
     [ObservableProperty]
@@ -85,14 +88,29 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     /// <summary>Expert of Eenvoudig voor het tabblad Financiën (besluit 127); alleen visueel.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar))]
     public partial Weergavemodus Weergave { get; set; }
 
     [ObservableProperty]
     public partial string Statusmelding { get; set; } = "Gereed";
 
+    /// <summary>Besluit 168: ✓ gelukt, ⚠ waarschuwing, ✕ fout; zonder teken bij een gewone melding.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Statusteken))]
+    public partial Statussoort Statussoort { get; private set; }
+
+    public string Statusteken => Statussoort switch
+    {
+        Statussoort.Gelukt => "✓",
+        Statussoort.Waarschuwing => "⚠",
+        Statussoort.Fout => "✕",
+        _ => string.Empty,
+    };
+
     public bool IsDatabaseOpen => DatabaseNaam is not null;
 
-    public AdministratieViewModel? ActieveAdministratie => GeselecteerdTabblad?.Administratie;
+    /// <summary>Besluit 177: de administratie uit de wisselaar bovenaan geldt voor de hele app.</summary>
+    public AdministratieViewModel? ActieveAdministratie => GekozenAdministratie;
 
     public string? ActieveAdministratieNaam => ActieveAdministratie?.Naam;
 
@@ -154,8 +172,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             var herstelsleutel = await _beheer.MaakAanAsync(pad, wachtwoord);
             ShellLog.DatabaseAangemaakt(_logger, Path.GetFileName(pad));
             _dialogen.ToonHerstelsleutel(herstelsleutel);
-            _instellingen = _instellingen with { OpenTabbladen = [] };
-            await NaOpenenAsync(await _beheer.OpenAsync(pad, wachtwoord), herstelTabbladen: false);
+            _instellingen = _instellingen with { LaatstePagina = null };
+            await NaOpenenAsync(await _beheer.OpenAsync(pad, wachtwoord), herstelPagina: false);
         }
         catch (Exception ex) when (ex is DatabaseBestandException or ArgumentException or IOException or UnauthorizedAccessException)
         {
@@ -182,7 +200,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     {
         if (GeselecteerdTabblad is { } tab && await tab.BewaarAsync())
         {
-            Statusmelding = "Opgeslagen";
+            ZetStatus(Statussoort.Gelukt, "Opgeslagen.");
         }
 
         OpslaanCommand.NotifyCanExecuteChanged();
@@ -211,7 +229,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         {
             await _sessie.MaakBackupAsync(doel);
             ShellLog.BackupGemaakt(_logger);
-            Statusmelding = $"Back-up opgeslagen als {Path.GetFileName(doel)}";
+            ZetStatus(Statussoort.Gelukt, $"Back-up opgeslagen als {Path.GetFileName(doel)}.");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -238,9 +256,9 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         if (wizard.Resultaat is { } resultaat)
         {
             ShellLog.Sol3Geimporteerd(_logger, resultaat.Nieuw, resultaat.Gewijzigd, resultaat.Uitgeschreven);
-            Statusmelding = string.Create(
+            ZetStatus(Statussoort.Gelukt, string.Create(
                 CultureInfo.CurrentCulture,
-                $"Import voltooid: {resultaat.Nieuw} nieuw, {resultaat.Gewijzigd} gewijzigd, {resultaat.Uitgeschreven} uitgeschreven");
+                $"Import voltooid: {resultaat.Nieuw} nieuw, {resultaat.Gewijzigd} gewijzigd, {resultaat.Uitgeschreven} uitgeschreven."));
         }
 
         var verzoek = new ModuleVerzoek(ModuleSoort.Leden, null);
@@ -527,6 +545,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _instellingen = _instellingen with { Weergave = weergave };
         _opslag.Bewaar(_instellingen);
         BouwModuleMenu();
+        BouwNavigatie();
     }
 
     // ---- Tabbladen -------------------------------------------------------------------------
@@ -537,7 +556,14 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         if (verzoek.Module == ModuleSoort.Overzicht)
         {
             GeselecteerdTabblad = _overzicht;
+            _ = VernieuwStartkaartenAsync();
             return;
+        }
+
+        // Besluit 177: een pagina van een andere administratie opent, dan wisselt de keuze bovenaan mee.
+        if (verzoek.Administratie is { } gevraagd && GekozenAdministratie?.Soort != gevraagd)
+        {
+            KiesAdministratieZonderWisselen(gevraagd);
         }
 
         // Besluiten 157 en 163: Modules › Begroting (Ctrl+5) opent Boekhouding op de begroting, bij de Stichting op het meerjarenplan.
@@ -610,7 +636,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             && (verzoek.Administratie is null || Administraties.Any(a => a.Soort == verzoek.Administratie));
     }
 
-    /// <summary>Ctrl+1...6. Financiële modules openen voor de administratie van het actieve tabblad (anders de Vereniging).</summary>
+    /// <summary>Ctrl+1...6. Financiële modules openen voor de gekozen administratie (besluit 177; anders de Vereniging).</summary>
     [RelayCommand]
     private void OpenModuleViaSneltoets(string? nummer)
     {
@@ -631,42 +657,24 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    [RelayCommand(CanExecute = nameof(KanTabbladSluiten))]
-    private async Task SluitTabbladAsync(TabbladViewModel? tab)
-    {
-        tab ??= GeselecteerdTabblad;
-        if (tab is null || !tab.KanSluiten || !await MagTabbladSluitenAsync(tab))
-        {
-            return;
-        }
 
-        var index = Tabbladen.IndexOf(tab);
-        var wasGeselecteerd = ReferenceEquals(GeselecteerdTabblad, tab);
-        Tabbladen.RemoveAt(index);
-        tab.Opruimen();
-        if (wasGeselecteerd || GeselecteerdTabblad is null)
-        {
-            GeselecteerdTabblad = Tabbladen[Math.Min(index, Tabbladen.Count - 1)];
-        }
-    }
-
-    private bool KanTabbladSluiten(TabbladViewModel? tab) => (tab ?? GeselecteerdTabblad)?.KanSluiten == true;
-
+    /// <summary>Ctrl+Tab: de volgende regel in de navigatiebalk.</summary>
     [RelayCommand]
-    private void VolgendTabblad() => SelecteerRelatief(+1);
+    private void VolgendePagina() => SelecteerRelatief(+1);
 
+    /// <summary>Ctrl+Shift+Tab: de vorige regel in de navigatiebalk.</summary>
     [RelayCommand]
-    private void VorigTabblad() => SelecteerRelatief(-1);
+    private void VorigePagina() => SelecteerRelatief(-1);
 
     private void SelecteerRelatief(int stap)
     {
-        if (Tabbladen.Count == 0)
+        if (Navigatie.Count == 0)
         {
             return;
         }
 
-        var index = GeselecteerdTabblad is null ? 0 : Tabbladen.IndexOf(GeselecteerdTabblad);
-        GeselecteerdTabblad = Tabbladen[((index + stap) % Tabbladen.Count + Tabbladen.Count) % Tabbladen.Count];
+        var index = GeselecteerdeNavigatie is null ? 0 : Navigatie.IndexOf(GeselecteerdeNavigatie);
+        GeselecteerdeNavigatie = Navigatie[((index + stap) % Navigatie.Count + Navigatie.Count) % Navigatie.Count];
     }
 
     partial void OnGeselecteerdTabbladChanged(TabbladViewModel? oldValue, TabbladViewModel? newValue)
@@ -680,13 +688,26 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         {
             newValue.PropertyChanged += ActiefTabbladGewijzigd;
         }
+
+        BouwNavigatie();
     }
 
     private void ActiefTabbladGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(TabbladViewModel.KanOpslaan))
+        switch (e.PropertyName)
         {
-            OpslaanCommand.NotifyCanExecuteChanged();
+            case nameof(TabbladViewModel.KanOpslaan):
+                OpslaanCommand.NotifyCanExecuteChanged();
+                break;
+            case nameof(TabbladViewModel.Onderdeel):
+                SynchroniseerNavigatie();
+                break;
+            case nameof(IPaginameldingen.Melding) when sender is IPaginameldingen { Melding: { Length: > 0 } melding }:
+                ZetStatus(Statussoort.Gelukt, melding);
+                break;
+            case nameof(IPaginameldingen.Foutmelding) when sender is IPaginameldingen { Foutmelding: { Length: > 0 } fout }:
+                ZetStatus(Statussoort.Fout, fout);
+                break;
         }
     }
 
@@ -731,7 +752,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 }
 
                 var zelfdeAlsVorige = string.Equals(pad, _instellingen.LaatsteDatabase, StringComparison.OrdinalIgnoreCase);
-                await NaOpenenAsync(sessie, herstelTabbladen: zelfdeAlsVorige);
+                await NaOpenenAsync(sessie, herstelPagina: zelfdeAlsVorige);
                 return;
             }
             catch (OngeldigeSleutelException ex)
@@ -748,7 +769,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    private async Task NaOpenenAsync(IDatabaseSessie sessie, bool herstelTabbladen)
+    private async Task NaOpenenAsync(IDatabaseSessie sessie, bool herstelPagina)
     {
         _sessie = sessie;
         foreach (var administratie in await sessie.Administraties.HaalAlleAsync())
@@ -758,23 +779,29 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             Administraties.Add(vm);
         }
 
-        var teHerstellen = herstelTabbladen ? _instellingen.OpenTabbladen : [];
-        _instellingen = _instellingen with { LaatsteDatabase = sessie.Pad, OpenTabbladen = teHerstellen };
+        var laatste = herstelPagina ? _instellingen.LaatstePagina : null;
+        _instellingen = _instellingen with { LaatsteDatabase = sessie.Pad, LaatstePagina = laatste };
         _opslag.Bewaar(_instellingen);
 
+        // Besluit 177: de wisselaar begint bij de laatst gekozen administratie, anders de Vereniging.
+        KiesAdministratieZonderWisselen(laatste?.Administratie ?? AdministratieSoort.Vereniging);
         DatabaseNaam = Path.GetFileName(sessie.Pad);
         BouwModuleMenu();
-        foreach (var tab in teHerstellen)
+        GeselecteerdTabblad = _overzicht;
+        if (laatste is { Module: not ModuleSoort.Overzicht } && KanModuleOpenen(new ModuleVerzoek(laatste.Module, laatste.Administratie)))
         {
-            var verzoek = new ModuleVerzoek(tab.Module, tab.Administratie);
-            if (KanModuleOpenen(verzoek))
+            OpenModule(new ModuleVerzoek(laatste.Module, laatste.Administratie));
+            if (laatste.Onderdeel is { } onderdeel && GeselecteerdTabblad is { } pagina)
             {
-                OpenModule(verzoek);
+                pagina.Onderdeel = onderdeel;
             }
         }
+        else
+        {
+            _ = VernieuwStartkaartenAsync();
+        }
 
-        GeselecteerdTabblad = _overzicht;
-        Statusmelding = "Gereed";
+        ZetStatus(Statussoort.Info, "Gereed");
         ShellLog.DatabaseGeopend(_logger, DatabaseNaam);
 
         // Besluit 170: was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
@@ -810,10 +837,9 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
         _instellingen = _instellingen with
         {
-            OpenTabbladen = Tabbladen
-                .Where(t => t.Module.Soort != ModuleSoort.Overzicht)
-                .Select(t => new OpenTabblad(t.Module.Soort, t.Administratie?.Soort))
-                .ToList(),
+            LaatstePagina = GeselecteerdTabblad is { Module.Soort: not ModuleSoort.Overzicht } pagina
+                ? new LaatstePagina(pagina.Module.Soort, pagina.Administratie?.Soort, pagina.Onderdeel)
+                : null,
         };
         _opslag.Bewaar(_instellingen);
 
@@ -830,10 +856,13 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
 
         Administraties.Clear();
+        KiesAdministratieZonderWisselen(null);
+        _overzicht.Kaarten.Clear();
         await _sessie.DisposeAsync();
         _sessie = null;
         DatabaseNaam = null;
         BouwModuleMenu();
+        BouwNavigatie();
         ShellLog.DatabaseGesloten(_logger);
         return true;
     }

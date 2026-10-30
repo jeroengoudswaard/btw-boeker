@@ -17,7 +17,7 @@ namespace Verenigd.App.ViewModels.Contributie;
 /// Tabblad Contributie (alleen Vereniging, besluit 16) met vier subtabbladen: leden &amp; categorie, betalers &amp;
 /// machtigingen, tarieven en incassoruns.
 /// </summary>
-public sealed partial class ContributieViewModel : TabbladViewModel
+public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameldingen
 {
     private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
@@ -52,7 +52,15 @@ public sealed partial class ContributieViewModel : TabbladViewModel
 
     /// <summary>Het zichtbare subtabblad; de startwizard opent hiermee de tarieven.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Onderdeel))]
     public partial ContributieSubtab Subtab { get; set; }
+
+    /// <summary>Het onderdeel in de navigatiebalk (besluit 181).</summary>
+    public override int? Onderdeel
+    {
+        get => (int)Subtab;
+        set => Subtab = value is { } i ? (ContributieSubtab)i : ContributieSubtab.Leden;
+    }
 
     public ObservableCollection<TariefRegel> Tarieven { get; } = [];
 

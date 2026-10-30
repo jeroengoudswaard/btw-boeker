@@ -20,7 +20,7 @@ public sealed class JsonInstellingenOpslagTests : IDisposable
 
         Assert.Equal(Thema.Systeem, instellingen.Thema);
         Assert.Null(instellingen.LaatsteDatabase);
-        Assert.Empty(instellingen.OpenTabbladen);
+        Assert.Null(instellingen.LaatstePagina);
     }
 
     [Fact]
@@ -31,11 +31,8 @@ public sealed class JsonInstellingenOpslagTests : IDisposable
         {
             Thema = Thema.Donker,
             LaatsteDatabase = @"C:\Data\verenigd.vdb",
-            OpenTabbladen =
-            [
-                new OpenTabblad(ModuleSoort.Leden, null),
-                new OpenTabblad(ModuleSoort.Boekhouding, AdministratieSoort.Stichting),
-            ],
+            LaatstePagina = new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Stichting, 1),
+            StartwizardGetoond = true,
         };
 
         opslag.Bewaar(origineel);
@@ -43,7 +40,8 @@ public sealed class JsonInstellingenOpslagTests : IDisposable
 
         Assert.Equal(origineel.Thema, gelezen.Thema);
         Assert.Equal(origineel.LaatsteDatabase, gelezen.LaatsteDatabase);
-        Assert.Equal(origineel.OpenTabbladen, gelezen.OpenTabbladen);
+        Assert.Equal(origineel.LaatstePagina, gelezen.LaatstePagina);
+        Assert.True(gelezen.StartwizardGetoond);
     }
 
     [Fact]

@@ -102,6 +102,7 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
         _dienst = dienst;
         _administratie = administratie;
         _sjabloon = sjabloon;
+        Beginjaren = [.. Enumerable.Range(beginjaar - 5, 6)];
         Beginjaar = beginjaar;
         foreach (var naam in sjabloon.Speltakken?.Standaard ?? [])
         {
@@ -119,7 +120,12 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
 
     public string Sjabloonnaam => _sjabloon.Naam;
 
-    public int Beginjaar { get; }
+    /// <summary>Besluit 198: ook beginnen in een eerder jaar (tot 5 jaar terug), nooit in de toekomst.</summary>
+    public IReadOnlyList<int> Beginjaren { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Beginsaldititel))]
+    public partial int Beginjaar { get; set; }
 
     public bool HeeftSpeltakken => _sjabloon.Speltakken is not null;
 
