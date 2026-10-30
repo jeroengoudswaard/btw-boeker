@@ -242,6 +242,22 @@ public class ArchitectuurTests
         static int Accentknoppen(string xaml) => System.Text.RegularExpressions.Regex.Count(xaml, "AccentButtonStyle");
     }
 
+    /// <summary>
+    /// <c>Keyboard.Press</c> van FlaUI drukt een toets alleen in. Zonder loslaten blijft bijvoorbeeld Alt ingedrukt en worden
+    /// alle volgende toetsen (ook in andere tests en runs) sneltoetsen; UI-tests gebruiken daarom <c>Keyboard.Type</c>.
+    /// </summary>
+    [Fact]
+    public void Ui_tests_drukken_geen_toets_in_zonder_hem_los_te_laten()
+    {
+        var fouten = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "tests", "Verenigd.App.Tests", "UI"), "*.cs", SearchOption.AllDirectories)
+            .Where(b => File.ReadAllText(b).Contains("Keyboard.Press(", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.True(fouten.Count == 0, "Keyboard.Press zonder Release in: " + string.Join(", ", fouten));
+    }
+
     /// <summary>Besluit 168: elke hoofdlijst krijgt een leeg scherm met uitleg (en waar mogelijk één knop).</summary>
     [Theory]
     [InlineData("BoekhoudingView.xaml", "Posten")]

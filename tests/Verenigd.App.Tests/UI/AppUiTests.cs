@@ -41,6 +41,7 @@ public sealed class AppUiTests : IDisposable
 
     public void Dispose()
     {
+        LaatToetsenLos();
         try
         {
             if (_app is { HasExited: false })
@@ -86,8 +87,8 @@ public sealed class AppUiTests : IDisposable
         Zoek(venster, "Menu_Modules").AsMenuItem().Expand();
         var leden = Zoek(venster, "Menu_Leden");
         Assert.False(leden.IsEnabled);
-        Keyboard.Press(VirtualKeyShort.ESCAPE); // submenu dicht
-        Keyboard.Press(VirtualKeyShort.ESCAPE); // menumodus uit
+        Keyboard.Type(VirtualKeyShort.ESCAPE); // submenu dicht
+        Keyboard.Type(VirtualKeyShort.ESCAPE); // menumodus uit
 
         // Dichtklappen via UI Automation: na Expand() heeft het menu niet altijd de toetsenbordfocus, dus Escape is onbetrouwbaar.
         var bestand = Zoek(venster, "Menu_Bestand").AsMenuItem();
@@ -417,9 +418,9 @@ public sealed class AppUiTests : IDisposable
         Bewaar(venster, "16-eenvoudig-zonder-menubalk");
 
         venster.SetForeground();
-        Keyboard.Press(VirtualKeyShort.ALT);
+        Keyboard.Type(VirtualKeyShort.ALT);
         Assert.NotNull(Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")), Wachttijd).Result);
-        Keyboard.Press(VirtualKeyShort.ESCAPE);
+        Keyboard.Type(VirtualKeyShort.ESCAPE);
         Assert.True(Retry.WhileFalse(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")) is null, Wachttijd).Result,
             "De tijdelijke menubalk verdween niet na Escape.");
 
@@ -457,7 +458,19 @@ public sealed class AppUiTests : IDisposable
         }
 
         Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        Keyboard.Type(VirtualKeyShort.ENTER);
+    }
+
+    /// <summary>
+    /// Vangnet: een toets die nog ingedrukt staat (bijvoorbeeld Alt) maakt van elke volgende toets een sneltoets, ook in
+    /// volgende tests. <c>Keyboard.Press</c> drukt alleen in; deze tests gebruiken daarom <c>Keyboard.Type</c> (in en uit).
+    /// </summary>
+    private static void LaatToetsenLos()
+    {
+        foreach (var toets in new[] { VirtualKeyShort.ALT, VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.ESCAPE, VirtualKeyShort.ENTER })
+        {
+            Keyboard.Release(toets);
+        }
     }
 
     /// <summary>De systeembrede focus ligt in dit app-proces (en, als opgegeven, op het element met deze AutomationId).</summary>
@@ -510,7 +523,7 @@ public sealed class AppUiTests : IDisposable
         venster.SetForeground();
         for (var poging = 0; poging < 4 && _automation.FocusedElement()?.ControlType == ControlType.MenuItem; poging++)
         {
-            Keyboard.Press(VirtualKeyShort.ESCAPE);
+            Keyboard.Type(VirtualKeyShort.ESCAPE);
             Thread.Sleep(200);
         }
 
