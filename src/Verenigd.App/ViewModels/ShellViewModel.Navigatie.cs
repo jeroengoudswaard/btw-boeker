@@ -164,25 +164,51 @@ public sealed partial class ShellViewModel
             items.Add(Module(ModuleSoort.Instellingen, "Instellingen", "Instellingen"));
         }
 
-        if (!items.Select(i => i.Sleutel).SequenceEqual(Navigatie.Select(i => i.Sleutel))
-            || !items.Select(i => i.Titel).SequenceEqual(Navigatie.Select(i => i.Titel)))
+        WerkNavigatieBij(items);
+        SynchroniseerNavigatie();
+    }
+
+    /// <summary>
+    /// Werkt de navigatiebalk bij in plaats van hem opnieuw op te bouwen: bestaande regels blijven dezelfde objecten, zodat
+    /// de gekozen regel, de toetsenbordfocus en UI Automation (schermlezers) hun element houden. Een regel met een andere
+    /// titel (andere weergave) wordt vervangen.
+    /// </summary>
+    private void WerkNavigatieBij(List<NavigatieItem> items)
+    {
+        _synchroniseren = true;
+        try
         {
-            _synchroniseren = true;
-            try
+            for (var i = Navigatie.Count - 1; i >= 0; i--)
             {
-                Navigatie.Clear();
-                foreach (var item in items)
+                var regel = Navigatie[i];
+                if (!items.Exists(n => n.Sleutel == regel.Sleutel && n.Titel == regel.Titel))
                 {
-                    Navigatie.Add(item);
+                    Navigatie.RemoveAt(i);
                 }
             }
-            finally
+
+            for (var i = 0; i < items.Count; i++)
             {
-                _synchroniseren = false;
+                var gewenst = items[i];
+                var bestaand = Navigatie.FirstOrDefault(n => n.Sleutel == gewenst.Sleutel);
+                if (bestaand is null)
+                {
+                    Navigatie.Insert(i, gewenst);
+                    continue;
+                }
+
+                bestaand.IsUitgeklapt = gewenst.IsUitgeklapt;
+                var index = Navigatie.IndexOf(bestaand);
+                if (index != i)
+                {
+                    Navigatie.Move(index, i);
+                }
             }
         }
-
-        SynchroniseerNavigatie();
+        finally
+        {
+            _synchroniseren = false;
+        }
     }
 
     /// <summary>Markeert de regel van de pagina die nu open is, zonder opnieuw te navigeren.</summary>

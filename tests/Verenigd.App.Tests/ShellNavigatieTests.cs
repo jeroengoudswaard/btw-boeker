@@ -84,6 +84,30 @@ public sealed class ShellNavigatieTests
         Assert.Equal("Bank", Item(shell, "Boekhouding.Bank").Titel); // zonder toegangstoets
     }
 
+    /// <summary>
+    /// Uitklappen werkt de lijst bij in plaats van hem opnieuw op te bouwen: de gekozen regel blijft hetzelfde element, zodat
+    /// focus en schermlezer (en UI Automation) niet hun element kwijtraken.
+    /// </summary>
+    [Fact]
+    public async Task Uitklappen_houdt_de_bestaande_regels_en_voegt_alleen_onderdelen_toe()
+    {
+        var shell = await OpenAsync();
+        var boekhouding = Item(shell, "Boekhouding");
+        var leden = Item(shell, "Leden");
+
+        await Kies(shell, "Boekhouding");
+
+        Assert.Same(boekhouding, Item(shell, "Boekhouding"));
+        Assert.Same(leden, Item(shell, "Leden"));
+        Assert.True(boekhouding.IsUitgeklapt);
+        Assert.Equal(Item(shell, "Boekhouding.Journaal"), shell.Navigatie[shell.Navigatie.IndexOf(boekhouding) + 1]);
+
+        await Kies(shell, "Leden");
+        Assert.Same(boekhouding, Item(shell, "Boekhouding"));
+        Assert.False(boekhouding.IsUitgeklapt);
+        Assert.DoesNotContain(shell.Navigatie, n => n.IsSubitem);
+    }
+
     [Fact]
     public async Task Wisselen_van_administratie_houdt_dezelfde_pagina_en_past_de_navigatie_aan()
     {

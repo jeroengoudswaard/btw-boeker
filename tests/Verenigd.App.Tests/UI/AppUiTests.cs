@@ -112,12 +112,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
 
-        // Wachtwoordvenster verschijnt automatisch voor de laatst gebruikte database.
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        Assert.Equal("Database openen", dialoog.Title);
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster); // het wachtwoordvenster verschijnt automatisch voor de laatst gebruikte database
 
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
@@ -167,10 +162,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
 
         var venster = Start();
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_2); // Leden
@@ -204,10 +196,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
 
         var venster = Start();
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
@@ -239,10 +228,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
 
         var venster = Start();
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
@@ -315,10 +301,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
 
         var venster = Start();
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
@@ -393,10 +376,7 @@ public sealed class AppUiTests : IDisposable
         BewaarInstellingen(new GebruikersInstellingen { LaatsteDatabase = db, Weergave = Weergavemodus.Eenvoudig, StartwizardGetoond = true });
 
         var venster = Start();
-        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
-        Keyboard.Type(Wachtwoord);
-        Keyboard.Press(VirtualKeyShort.ENTER);
+        VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Zoek(venster, "Administratiewisselaar");
@@ -409,6 +389,8 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Press(VirtualKeyShort.ALT);
         Assert.NotNull(Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")), Wachttijd).Result);
         Keyboard.Press(VirtualKeyShort.ESCAPE);
+        Assert.True(Retry.WhileFalse(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")) is null, Wachttijd).Result,
+            "De tijdelijke menubalk verdween niet na Escape.");
 
         Kies(venster, "Nav_Boekhouding");
         Zoek(venster, "Nav_Boekhouding.Bank");
@@ -416,6 +398,44 @@ public sealed class AppUiTests : IDisposable
     }
 
     private static void Kies(AutomationElement venster, string automationId) => Zoek(venster, automationId).AsListBoxItem().Select();
+
+    /// <summary>
+    /// Typt het wachtwoord alleen als het wachtwoordveld van déze app de toetsenbordfocus heeft. Zonder voorgrond (Windows
+    /// foreground lock) kwamen de toetsen elders terecht; nu stopt de test dan zonder te typen, zodat het testwachtwoord
+    /// nooit in een ander venster belandt.
+    /// </summary>
+    private void VoerWachtwoordIn(Window venster)
+    {
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result
+            ?? throw new Xunit.Sdk.XunitException("Het wachtwoordvenster verscheen niet. " + Diagnose(venster));
+        Assert.Equal("Database openen", dialoog.Title);
+        var veld = Zoek(dialoog, "Wachtwoord");
+        var gefocust = Retry.WhileFalse(
+            () =>
+            {
+                venster.SetForeground();
+                dialoog.SetForeground();
+                veld.Focus();
+                return HeeftEigenFocus("Wachtwoord");
+            },
+            Wachttijd,
+            TimeSpan.FromMilliseconds(500)).Result;
+        if (!gefocust)
+        {
+            throw new Xunit.Sdk.XunitException("Het wachtwoordveld kreeg geen toetsenbordfocus; er is niets getypt. " + Diagnose(venster));
+        }
+
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+    }
+
+    /// <summary>De systeembrede focus ligt in dit app-proces (en, als opgegeven, op het element met deze AutomationId).</summary>
+    private bool HeeftEigenFocus(string? automationId = null)
+    {
+        var focus = _automation.FocusedElement();
+        return focus is not null && focus.Properties.ProcessId.ValueOrDefault == _app!.ProcessId
+            && (automationId is null || focus.Properties.AutomationId.ValueOrDefault == automationId);
+    }
 
     private Window Start()
     {
@@ -442,6 +462,11 @@ public sealed class AppUiTests : IDisposable
     private void Sneltoets(Window venster, VirtualKeyShort toets)
     {
         EindigMenumodus(venster);
+        if (!Retry.WhileFalse(() => { venster.SetForeground(); return HeeftEigenFocus(); }, Wachttijd, TimeSpan.FromMilliseconds(500)).Result)
+        {
+            throw new Xunit.Sdk.XunitException("De app kreeg de voorgrond niet; de sneltoets is niet verstuurd. " + Diagnose(venster));
+        }
+
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, toets);
     }
 
