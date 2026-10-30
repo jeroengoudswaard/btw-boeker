@@ -232,6 +232,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 194 | E-mail: groepsberichten | Elke ontvanger krijgt een eigen, persoonlijk ingevulde e-mail; geen BCC |
 | 195 | E-mail: logboek | Bewaren aan wie, wanneer, onderwerp en sjabloon; niet de tekst zelf |
 | 196 | Volgorde fase 6 | Eerst v0.8.0 (herinrichting), daarna fase 6 in de nieuwe navigatie; het uitgewerkte ontwerp van fase 6 (sjablonen, moment van de welkomstmail, Google Cloud-stappen) volgt dan ter goedkeuring |
+| 197 | XAF (auditfile financieel) | Export van de volledige financiële administratie als XAF (XML, standaard van de Belastingdienst), zodat een groep kan overstappen naar een ander pakket; import van XAF als gespreksonderwerp. Beide nog niet ingepland; eerst een ontwerp als het zover is |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -315,8 +316,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
     - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests).
     - **Windows-test (2026-10-30, Windows 11, commit `b14bb81`): 805/805 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 300, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Nog door de gebruiker te doen: visuele controle van de wizard, de kleurrondjes in Instellingen, het subtabblad Meerjarenplan en de liggende afdruk.
-  - Pull request: één PR voor v0.6.0 t/m v0.7.1 (besluiten 176 en 189), geopend 2026-10-30.
-  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
+  - Pull request: één PR voor v0.6.0 t/m v0.7.1 (besluiten 176 en 189). Gemerged als PR #11 (2026-10-30, `a5a2968`), na groene CI.
+  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Wordt gebouwd (2026-10-30).
   - **Uitleg SOL3-exports: gereed**, v0.7.1 (2026-10-30). Besluiten 185–188. `Sol3Exportuitleg` (Application, verplicht uit `ExportHerkenning`) en het gedeelde onderdeel `Sol3Uitleg` in de stap Leden van de startwizard en (uitklapbaar) in stap 1 van de SOL3-importwizard.
     - Tests: 812 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 307, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 812/812, de UI-test van de importwizard controleert nu ook de uitleg) en een visuele controle.
     - **Windows-test (2026-10-30, Windows 11, commit `bc8cc09`): 813/813 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 308, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Eén Application-test meer dan de verwachte 812 (vermoedelijk toegevoegd in `bc8cc09` na de telling). Nog door de gebruiker te doen: visuele controle van de uitleg in de startwizard en de importwizard.
@@ -324,6 +325,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
 
 - **Fase 6 (E-mail via Gmail): in ontwerp.** Besluiten 191–196 vastgesteld (2026-10-30); uitgewerkt ontwerp na v0.8.0.
+
+- **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
 ## Privacy
 
