@@ -424,7 +424,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
 
         if (dagboek.Soort == DagboekSoort.Bank)
         {
-            throw new InvalidOperationException("Posten in een bankdagboek ontstaan uit het bankafschrift; gebruik het subtabblad Bank.");
+            throw new InvalidOperationException("Posten in een bankdagboek ontstaan uit het bankafschrift; gebruik Boekhouding › Bank.");
         }
 
         var post = new Journaalpost(administratie, dagboek, invoer.Datum, invoer.Omschrijving);

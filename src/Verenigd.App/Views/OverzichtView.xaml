@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Verenigd.App.ViewModels"
+             xmlns:inr="clr-namespace:Verenigd.Application.Inrichting;assembly=Verenigd.Application"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:OverzichtViewModel}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -50,41 +51,44 @@
                 </Button>
             </tg:Groepspaneel>
 
-            <!-- ===== Overzicht: database geopend ===== -->
+            <!-- ===== Start: database geopend, kaarten met de volgende stap (besluit 183) ===== -->
             <StackPanel Visibility="{Binding Shell.IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
-                <TextBlock Text="Overzicht" Style="{StaticResource Paginatitel}" />
-
-                <TextBlock Text="Administraties" Style="{StaticResource Sectietitel}" />
-                <ItemsControl ItemsSource="{Binding Shell.Administraties}">
+                <TextBlock Text="Start" Style="{StaticResource Paginatitel}" />
+                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16" MaxWidth="640" HorizontalAlignment="Left"
+                           Text="Hier staat wat er te doen is. Kies links een onderdeel; bovenaan wisselt u tussen Vereniging en Stichting." />
+                <ItemsControl ItemsSource="{Binding Kaarten}" Focusable="False" AutomationProperties.Name="Te doen" AutomationProperties.AutomationId="Startkaarten">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:AdministratieViewModel}">
-                            <Border Style="{StaticResource Kaart}" Width="280" Margin="0,0,16,16" Padding="0">
-                                <StackPanel>
-                                    <Border Height="6" CornerRadius="8,8,0,0"
-                                            Background="{Binding Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                                    <StackPanel Margin="16,12,16,16">
-                                        <TextBlock Text="{Binding Naam}" FontSize="16" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Soort}" Style="{StaticResource Toelichting}" />
-                                        <TextBlock Text="Kerncijfers verschijnen hier vanaf fase 2 (leden) en fase 4 (boekhouding)."
-                                                   Style="{StaticResource Toelichting}" Margin="0,12,0,0" />
+                        <DataTemplate DataType="{x:Type inr:Startkaart}">
+                            <Border Style="{StaticResource Kaart}" Width="300" Margin="0,0,16,16">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Bottom" Content="{Binding Knoptekst}" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                            Command="{Binding DataContext.Shell.KaartOpenenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" AutomationProperties.Name="{Binding Titel}"
+                                            AutomationProperties.AutomationId="{Binding Soort, StringFormat=Kaart_{0}}" />
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Titel}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Administratie}" Style="{StaticResource Toelichting}"
+                                                   Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                        <TextBlock Text="{Binding Tekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                                     </StackPanel>
-                                </StackPanel>
+                                </DockPanel>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-
-                <TextBlock Text="Aan de slag" Style="{StaticResource Sectietitel}" />
-                <TextBlock Style="{StaticResource Toelichting}" MaxWidth="640" HorizontalAlignment="Left">
-                    Open modules via het menu <Bold>Modules</Bold> of met <Bold>Ctrl+1</Bold> t/m <Bold>Ctrl+6</Bold>.
-                    Financiële modules openen voor de administratie van het actieve tabblad; via het menu kiest u zelf
-                    Vereniging of Stichting. Naam en kleur van een administratie wijzigt u onder <Bold>Extra › Instellingen</Bold>.
-                </TextBlock>
+                <!-- Leeg scherm: niets te doen. -->
+                <Border Style="{StaticResource Kaart}" MaxWidth="480" HorizontalAlignment="Left"
+                        Visibility="{Binding Kaarten.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}">
+                    <StackPanel>
+                        <TextBlock Text="✓ Alles is bij" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}" Text="Er staat niets klaar. Kies links een onderdeel om verder te werken." />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Grid>
     </ScrollViewer>

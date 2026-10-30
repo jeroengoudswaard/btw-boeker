@@ -743,7 +743,12 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     {
         OnPropertyChanged(nameof(Afdruktabel));
         OnPropertyChanged(nameof(Onderdeel));
+        OnPropertyChanged(nameof(IsOpslaanHoofdactie));
     }
+
+    /// <summary>Besluit 168: op de begroting en het meerjarenplan is opslaan de hoofdactie (blauwe knop); elders een gewone knop.</summary>
+    public bool IsOpslaanHoofdactie =>
+        (Subtab == BoekhoudingSubtab.Begroting && HeeftBegroting) || (Subtab == BoekhoudingSubtab.Meerjarenplan && HeeftMeerjarenplan);
 
     /// <summary>Het onderdeel in de navigatiebalk (besluit 178).</summary>
     public override int? Onderdeel

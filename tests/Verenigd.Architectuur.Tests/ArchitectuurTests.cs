@@ -209,6 +209,60 @@ public class ArchitectuurTests
         Assert.True(fouten.Count == 0, "Accentknop of selectievakje zonder Toegangstekst: " + string.Join(", ", fouten));
     }
 
+    /// <summary>
+    /// Besluit 168: één hoofdactie per pagina. Per subtabblad (TabItem) van de pagina's hooguit één accentknop, en in een
+    /// pagina zonder subtabbladen hooguit één. Buiten de subtabbladen mag één accentknop staan (het startscherm van een lege
+    /// boekhouding); <i>Opslaan</i> kiest zijn stijl met <c>HoofdactieStijl</c>.
+    /// </summary>
+    [Fact]
+    public void Elke_pagina_heeft_hooguit_een_hoofdactie()
+    {
+        var fouten = new List<string>();
+        foreach (var bestand in XamlBestanden().Where(b => b.EndsWith("View.xaml", StringComparison.Ordinal)))
+        {
+            var tekst = File.ReadAllText(bestand);
+            var tabbladen = System.Text.RegularExpressions.Regex.Matches(tekst, "<TabItem\\b.*?</TabItem>", System.Text.RegularExpressions.RegexOptions.Singleline);
+            foreach (System.Text.RegularExpressions.Match tab in tabbladen)
+            {
+                if (Accentknoppen(tab.Value) > 1)
+                {
+                    fouten.Add($"{Path.GetFileName(bestand)}: {System.Text.RegularExpressions.Regex.Match(tab.Value, "AutomationId=\"(\\w+)\"").Groups[1].Value}");
+                }
+            }
+
+            var buiten = tabbladen.Aggregate(tekst, (rest, tab) => rest.Replace(tab.Value, string.Empty, StringComparison.Ordinal));
+            if (Accentknoppen(buiten) > 1)
+            {
+                fouten.Add($"{Path.GetFileName(bestand)}: buiten de subtabbladen");
+            }
+        }
+
+        Assert.True(fouten.Count == 0, "Meer dan één hoofdactie: " + string.Join(", ", fouten));
+
+        static int Accentknoppen(string xaml) => System.Text.RegularExpressions.Regex.Count(xaml, "AccentButtonStyle");
+    }
+
+    /// <summary>Besluit 168: elke hoofdlijst krijgt een leeg scherm met uitleg (en waar mogelijk één knop).</summary>
+    [Theory]
+    [InlineData("BoekhoudingView.xaml", "Posten")]
+    [InlineData("BoekhoudingView.xaml", "Mutaties")]
+    [InlineData("BoekhoudingView.xaml", "Postvak")]
+    [InlineData("BoekhoudingView.xaml", "Boekingsregels")]
+    [InlineData("BoekhoudingView.xaml", "Facturen")]
+    [InlineData("BoekhoudingView.xaml", "Relaties")]
+    [InlineData("ContributieView.xaml", "Leden")]
+    [InlineData("ContributieView.xaml", "Betalers")]
+    [InlineData("ContributieView.xaml", "Runs")]
+    [InlineData("ContributieView.xaml", "Vorderingen")]
+    [InlineData("LedenView.xaml", "Leden")]
+    public void Hoofdlijst_heeft_een_leeg_scherm(string view, string lijst)
+    {
+        var tekst = File.ReadAllText(XamlBestanden().Single(b => Path.GetFileName(b) == view));
+
+        Assert.Contains($"<DataGrid ItemsSource=\"{{Binding {lijst}}}\"", tekst, StringComparison.Ordinal);
+        Assert.Matches($"<g:LeegScherm[^>]*Lijst=\"{lijst}\"[^>]*{lijst}\\.Count", tekst);
+    }
+
     private static IEnumerable<string> XamlBestanden()
     {
         var scheiding = Path.DirectorySeparatorChar;

@@ -126,7 +126,7 @@
                 <!-- ===== Vereniging en Stichting ===== -->
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Administraties}">
                     <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                               Text="De naam en de kleur ziet u terug in de tabbladen, de gekleurde band en de statusbalk. Met Volgende worden ze opgeslagen." />
+                               Text="De naam en de kleur ziet u terug in de wisselaar bovenaan, de gekleurde band en de statusbalk. Met Volgende worden ze opgeslagen." />
                     <ItemsControl ItemsSource="{Binding Namen}" Focusable="False">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -209,7 +209,7 @@
                 <!-- ===== Contributie ===== -->
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Contributie}">
                     <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                               Text="De gegevens uit het incassocontract; met Volgende worden ze opgeslagen. De tarieven per categorie vult u in op het subtabblad Tarieven." />
+                               Text="De gegevens uit het incassocontract; met Volgende worden ze opgeslagen. De tarieven per categorie vult u in onder Contributie › Tarieven." />
                     <g:IncassoKaart DataContext="{Binding Incasso}" Margin="0,0,0,12" />
                     <Button Content="_Tarieven invullen..." Command="{Binding TarievenInvullenCommand}" HorizontalAlignment="Left"
                             ToolTip="Slaat de incassogegevens op, onthoudt deze stap en opent Contributie › Tarieven" AutomationProperties.AutomationId="StartwizardTarieven" />

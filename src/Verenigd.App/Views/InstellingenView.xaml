@@ -26,7 +26,7 @@
                 <TextBlock Text="Instellingen" Style="{StaticResource Paginatitel}" />
                 <TextBlock Text="Administraties" Style="{StaticResource Sectietitel}" />
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                           Text="De accentkleur ziet u terug in de tabbladen, de gekleurde band en de statusbalk. Zo is altijd duidelijk in welke administratie u werkt." />
+                           Text="De accentkleur ziet u terug in de wisselaar links bovenaan, de gekleurde band en de statusbalk. Zo is altijd duidelijk in welke administratie u werkt." />
 
                 <ItemsControl ItemsSource="{Binding Regels}" Focusable="False">
                     <ItemsControl.ItemTemplate>

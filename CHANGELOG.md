@@ -4,6 +4,23 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.8.0] - 2026-10-30: Herinrichting van de app
+
+### Gewijzigd
+- **Navigatiebalk in plaats van tabbladen** (besluiten 168, 178 en 181): links Start, Leden, Contributie, Boekhouding, Begroting (bij de Stichting: Meerjarenplan), E-mail en Instellingen. De onderdelen van Boekhouding en Contributie klappen uit onder hun module en zijn met één klik bereikbaar; de tabkoppen op de pagina's zijn weg. Ctrl+Tab en Ctrl+Shift+Tab gaan naar de volgende of vorige regel.
+- **Eén wisselaar voor de administratie** (besluiten 177 en 182), links bovenaan, met de accentkleur. Hij geldt voor de hele app; bij wisselen blijft dezelfde pagina staan, en bestaat die bij de andere administratie niet (Contributie bij de Stichting), dan gaat u naar Start. Ctrl+1…6 openen bij de gekozen administratie.
+- **Herstarten** opent de laatste pagina en administratie (vervangt het herstellen van tabbladen, besluit 12).
+- **Menubalk** (besluit 179): in Expert zichtbaar; in Eenvoudig verborgen en met Alt tijdelijk op te roepen. Alle sneltoetsen blijven werken.
+- **Eén hoofdactie per pagina** (besluit 168): de blauwe knop is de belangrijkste actie (bijvoorbeeld *Nieuwe post*, *Bankafschrift inlezen*, *Bonnen toevoegen*, *Nieuwe factuur*). *Opslaan* is alleen blauw waar opslaan de hoofdactie is (begroting, meerjarenplan, categorieën, tarieven).
+- **Statusregel** met ✓ (gelukt), ⚠ (waarschuwing) of ✕ (fout) en de melding van de pagina.
+
+### Toegevoegd
+- **Startpagina met kaarten** (besluit 183): inrichting afmaken, banktransacties te verwerken, conceptposten, bonnen in het postvak, incassorun van deze maand, openstaande storneringen, vervallen facturen en boekingen zonder bon. Een kaart verschijnt alleen als er iets te doen is; de knop gaat naar de juiste pagina.
+- **Lege schermen**: een lege lijst (journaal, bank, postvak, boekingsregels, facturen, relaties, leden, betalers, incassoruns, openstaand) toont uitleg en één knop.
+- **Beginjaar kiezen** bij het inrichten met het standaardschema of een sjabloonbestand (besluit 198): ook een eerder jaar, met beginsaldi per 1 januari van dat jaar.
+- Architectuurtests: hooguit één hoofdactie per pagina; elke hoofdlijst heeft een leeg scherm.
+- 843 geautomatiseerde tests (was 816).
+
 ## [0.7.1] - 2026-10-30: Uitleg over de SOL3-exports
 
 ### Toegevoegd

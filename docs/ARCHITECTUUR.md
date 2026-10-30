@@ -340,3 +340,14 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - `Application/Import/Sol3Exportuitleg.cs`: per export de titel, het doel en de kolommen in de volgorde van SOL3. *Verplicht* komt uit `ExportHerkenning.VerplichteKolommen`; de overige kolommen zijn wat SOL3 daarnaast levert. `Sol3ExportuitlegTests` vergelijkt dit met de kopregels in `Sol3Voorbeeld`.
 - `Views/Gedeeld/Sol3Uitleg.xaml`: gedeeld door de startwizard en de importwizard; *Kolomnamen kopiëren* vult alleen het klembord (code-behind, geen logica).
 - `Sol3CsvLezer.Scheidingsteken` kiest `;` of `,`: het teken dat buiten aanhalingstekens het vaakst in de kopregel staat (bij gelijkspel `;`), besluit 190.
+
+## Herinrichting (v0.8.0, besluiten 168 en 177–183, 198)
+
+- **Schil:** `ShellViewModel` (partial `ShellViewModel.Navigatie`) houdt de navigatiebalk (`Navigatie`, `NavigatieItem` met een vaste `Sleutel`, zoals `Boekhouding.Bank`), de wisselaar (`GekozenAdministratie`) en de statusregel (`Statussoort`, `Statusteken`). De pagina's blijven `TabbladViewModel`'s (naam uit de tabbladtijd) en worden per module en administratie bewaard in `Tabbladen`; `GeselecteerdTabblad` is de zichtbare pagina.
+- **Onderdelen:** `TabbladViewModel.Onderdeel` is het subtabblad als getal (Boekhouding: `BoekhoudingSubtab`, Contributie: `ContributieSubtab`). De TabControls op de pagina's verbergen hun koppen; de navigatiebalk kiest het onderdeel en volgt een onderdeel dat de pagina zelf kiest (bijvoorbeeld Ctrl+5).
+- **Wisselen** (besluit 182): dezelfde module en hetzelfde onderdeel voor de andere administratie, anders Start. `LaatstePagina` in de gebruikersinstellingen (module, administratie, onderdeel) vervangt `OpenTabbladen`.
+- **Meldingen:** pagina's met `IPaginameldingen` (`Melding`, `Foutmelding`) vullen de statusregel.
+- **Menubalk:** `IsMenubalkZichtbaar` (Expert, of tijdelijk na Alt in Eenvoudig; `ShellWindow.OnPreviewKeyDown`).
+- **Startkaarten:** `Application/Inrichting/Startkaarten.cs` bepaalt de kaarten uit de gegevens; `KaartOpenenCommand` navigeert.
+- **Hoofdactie en lege schermen:** `HoofdactieStijlConverter` maakt *Opslaan* alleen blauw waar `IsOpslaanHoofdactie`; `Views/Gedeeld/LeegScherm` met `Lijst` (de naam van de lijst). Architectuurtests: `Elke_pagina_heeft_hooguit_een_hoofdactie` en `Hoofdlijst_heeft_een_leeg_scherm`.
+- **Beginjaar:** `StandaardinrichtingViewModel.Beginjaar` is te kiezen (tot 5 jaar terug).

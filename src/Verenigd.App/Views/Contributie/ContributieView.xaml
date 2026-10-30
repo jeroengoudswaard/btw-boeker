@@ -1,6 +1,7 @@
 <UserControl x:Class="Verenigd.App.Views.Contributie.ContributieView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:g="clr-namespace:Verenigd.App.Views.Gedeeld"
         xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,7 +20,7 @@
         <!-- ===== Opdrachtbalk onderaan ===== -->
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Button DockPanel.Dock="Right" Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}"
-                    Style="{DynamicResource AccentButtonStyle}" ToolTip="Opslaan (Ctrl+S)" AutomationProperties.AutomationId="ContributieOpslaan" />
+                    Style="{Binding IsOpslaanHoofdactie, Converter={StaticResource HoofdactieStijl}}" ToolTip="Opslaan (Ctrl+S)" AutomationProperties.AutomationId="ContributieOpslaan" />
             <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0"
                        Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
             <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0" VerticalAlignment="Center"
@@ -27,6 +28,12 @@
         </DockPanel>
 
         <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="ContributieSubtabbladen">
+                <!-- Sinds v0.8.0 kiest de navigatiebalk het onderdeel (besluiten 178 en 181); de tabkoppen zijn verborgen. -->
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </Style>
+                </TabControl.ItemContainerStyle>
             <!-- ===== Leden & categorie ===== -->
             <TabItem Header="_Leden &amp; categorie" AutomationProperties.AutomationId="SubtabLeden">
                 <DockPanel Margin="0,12,0,0">
@@ -42,6 +49,8 @@
                     </WrapPanel>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                Text="De categorie bepaalt het maandbedrag. Een nieuwe categorie geldt vanaf de ingangsdatum; voor een maand telt de categorie op de 1e (Leiding betaalt geen contributie)." />
+                    <g:LeegScherm DockPanel.Dock="Top" Lijst="Leden" Titel="Nog geen leden" Tekst="Lees eerst de leden in via Bestand › Importeren › SOL3-leden."
+                                   Visibility="{Binding Leden.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                     <DataGrid ItemsSource="{Binding Leden}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                               HeadersVisibility="Column" SelectionUnit="FullRow" AutomationProperties.Name="Leden en categorie">
                         <DataGrid.Columns>
@@ -83,11 +92,13 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
-                            <Button Content="_Nieuwe betaler" Command="{Binding NieuweBetalerCommand}" AutomationProperties.AutomationId="NieuweBetaler" />
+                            <Button Content="_Nieuwe betaler" Command="{Binding NieuweBetalerCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="NieuweBetaler" />
                             <TextBlock Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="16,0,0,0">
                                 <Run Text="{Binding AantalZonderBetaler, Mode=OneWay}" /><Run Text=" leden zonder betaler" />
                             </TextBlock>
                         </StackPanel>
+                        <g:LeegScherm DockPanel.Dock="Top" Lijst="Betalers" Titel="Nog geen betalers" Tekst="Een betaler is het IBAN met de machtiging; leden met hetzelfde IBAN vallen onder één betaler." Knoptekst="Nieuwe betaler" Opdracht="{Binding NieuweBetalerCommand}"
+                                       Visibility="{Binding Betalers.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                         <DataGrid ItemsSource="{Binding Betalers}" SelectedItem="{Binding GeselecteerdeBetaler}" AutoGenerateColumns="False"
                                   IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Betalers">
                             <DataGrid.Columns>
@@ -166,7 +177,7 @@
                                Text="Het maandbedrag wordt elke maand geïncasseerd. Leiding en Vrijgesteld staan vast op € 0,00. De opbrengstrekening geldt voor alle jaren; zonder opbrengstrekening wordt een run niet geboekt." />
                     <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
                         <TextBlock Text="Opbrengstrekening per categorie" Style="{StaticResource Sectietitel}" />
-                        <TextBlock Text="Richt eerst de boekhouding in (tabblad Boekhouding) om opbrengstrekeningen te kiezen." Style="{StaticResource Toelichting}"
+                        <TextBlock Text="Richt eerst de boekhouding in (Boekhouding in de navigatiebalk) om opbrengstrekeningen te kiezen." Style="{StaticResource Toelichting}"
                                    Visibility="{Binding IsBoekhoudingIngericht, Converter={StaticResource OnwaarNaarZichtbaar}}" />
                         <DataGrid ItemsSource="{Binding Opbrengstrekeningen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" AutomationProperties.Name="Opbrengstrekeningen" AutomationProperties.AutomationId="Opbrengstrekeningen"
@@ -209,6 +220,8 @@
                 <DockPanel Margin="0,12,0,0">
                     <Button DockPanel.Dock="Top" Content="Nieuwe _incassorun..." HorizontalAlignment="Left" Margin="0,0,0,12"
                             Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" Command="{Binding NieuweRunCommand}" AutomationProperties.AutomationId="NieuweIncassorun" />
+                    <g:LeegScherm DockPanel.Dock="Top" Lijst="Runs" Titel="Nog geen incassoruns" Tekst="Elke maand een run: Verenigd berekent per betaler het bedrag en maakt het incassobestand voor de bank." Knoptekst="Nieuwe incassorun..." Opdracht="{Binding NieuweRunCommand}"
+                                   Visibility="{Binding Runs.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                     <DataGrid ItemsSource="{Binding Runs}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                               AutomationProperties.Name="Incassoruns">
                         <DataGrid.Columns>
@@ -265,7 +278,9 @@
                         </WrapPanel>
                     </Border>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
-                               Text="Een post is 'Verwacht' tot de bank de incasso uitkeert. Een betaling door de ouders lettert u af op het subtabblad Bank van de boekhouding." />
+                               Text="Een post is 'Verwacht' tot de bank de incasso uitkeert. Een betaling door de ouders lettert u af onder Boekhouding › Bank van de boekhouding." />
+                    <g:LeegScherm DockPanel.Dock="Top" Lijst="Vorderingen" Titel="Niets openstaand" Tekst="Er zijn geen gestorneerde of openstaande contributieposten."
+                                   Visibility="{Binding Vorderingen.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                     <DataGrid ItemsSource="{Binding Vorderingen}" SelectedItem="{Binding GeselecteerdeVordering}" AutoGenerateColumns="False" IsReadOnly="True"
                               SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Openstaande contributie"
                               AutomationProperties.AutomationId="Vorderingen">

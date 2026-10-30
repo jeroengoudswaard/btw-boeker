@@ -52,8 +52,11 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
 
     /// <summary>Het zichtbare subtabblad; de startwizard opent hiermee de tarieven.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Onderdeel))]
+    [NotifyPropertyChangedFor(nameof(Onderdeel), nameof(IsOpslaanHoofdactie))]
     public partial ContributieSubtab Subtab { get; set; }
+
+    /// <summary>Besluit 168: bij de categorieën en de tarieven is opslaan de hoofdactie (blauwe knop).</summary>
+    public bool IsOpslaanHoofdactie => Subtab is ContributieSubtab.Leden or ContributieSubtab.Tarieven;
 
     /// <summary>Het onderdeel in de navigatiebalk (besluit 181).</summary>
     public override int? Onderdeel

@@ -102,3 +102,15 @@ public sealed class RapportNaarDocumentConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
 }
+
+/// <summary>
+/// Besluit 168: één hoofdactie per pagina. <c>true</c> geeft de accentstijl, <c>false</c> de gewone knop; zo kan
+/// <i>Opslaan</i> alleen op pagina's waar opslaan de hoofdactie is blauw zijn.
+/// </summary>
+public sealed class HoofdactieStijlConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        System.Windows.Application.Current?.TryFindResource(value is true ? "AccentButtonStyle" : typeof(System.Windows.Controls.Button));
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}

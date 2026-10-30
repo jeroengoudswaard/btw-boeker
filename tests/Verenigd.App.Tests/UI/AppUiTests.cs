@@ -119,7 +119,7 @@ public sealed class AppUiTests : IDisposable
         Keyboard.Type(Wachtwoord);
         Keyboard.Press(VirtualKeyShort.ENTER);
 
-        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
         Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
@@ -134,7 +134,7 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
 
         var bewaard = new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad();
-        Assert.Contains(bewaard.OpenTabbladen, t => t.Module == Application.Modules.ModuleSoort.Boekhouding);
+        Assert.Equal(Application.Modules.ModuleSoort.Instellingen, bewaard.LaatstePagina?.Module);
     }
 
     [Fact(Timeout = Timeout)]
@@ -171,7 +171,7 @@ public sealed class AppUiTests : IDisposable
         dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
         Keyboard.Type(Wachtwoord);
         Keyboard.Press(VirtualKeyShort.ENTER);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_2); // Leden
         Zoek(venster, "Ledenlijst");
@@ -208,17 +208,17 @@ public sealed class AppUiTests : IDisposable
         dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
         Keyboard.Type(Wachtwoord);
         Keyboard.Press(VirtualKeyShort.ENTER);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
         Zoek(venster, "ContributieTabblad");
-        foreach (var subtab in new[] { "SubtabLeden", "SubtabBetalers", "SubtabTarieven", "SubtabRuns", "SubtabOpenstaand" })
+        foreach (var onderdeel in new[] { "Leden", "Betalers", "Tarieven", "Runs", "Openstaand" })
         {
-            Zoek(venster, subtab);
+            Zoek(venster, $"Nav_Contributie.{onderdeel}"); // besluit 181: onderdelen in de navigatiebalk
         }
 
         Bewaar(venster, "08-contributie");
-        Zoek(venster, "SubtabRuns").AsTabItem().Select();
+        Kies(venster, "Nav_Contributie.Runs");
         Zoek(venster, "NieuweIncassorun").AsButton().Invoke();
         var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
         Assert.Equal("Nieuwe incassorun", wizard.Title);
@@ -243,7 +243,7 @@ public sealed class AppUiTests : IDisposable
         dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
         Keyboard.Type(Wachtwoord);
         Keyboard.Press(VirtualKeyShort.ENTER);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
@@ -259,28 +259,30 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
-        foreach (var subtab in new[] { "SubtabJournaal", "SubtabBank", "SubtabPostvak", "SubtabBoekingsregels", "SubtabFacturen", "SubtabRelaties", "SubtabRekeningschema", "SubtabGrootboekkaart", "SubtabRapporten", "SubtabBegroting", "SubtabBoekjaren" })
+        foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Boekingsregels", "Facturen", "Relaties", "Rekeningschema", "Grootboekkaart", "Rapporten", "Boekjaren" })
         {
-            Zoek(venster, subtab);
+            Zoek(venster, $"Nav_Boekhouding.{onderdeel}"); // besluit 178
         }
+
+        Zoek(venster, "Nav_Begroting");
 
         Zoek(venster, "NieuwePost").AsButton().Invoke();
         Zoek(venster, "PostEditor");
         Zoek(venster, "PostOmschrijving");
         Bewaar(venster, "11-boekhouding-nieuwe-post");
-        Zoek(venster, "SubtabBank").AsTabItem().Select();
+        Kies(venster, "Nav_Boekhouding.Bank");
         Zoek(venster, "BankInlezen");
         Bewaar(venster, "13-boekhouding-bank");
-        Zoek(venster, "SubtabBoekingsregels").AsTabItem().Select();
+        Kies(venster, "Nav_Boekhouding.Boekingsregels");
         Zoek(venster, "Boekingsregels");
-        Zoek(venster, "SubtabRelaties").AsTabItem().Select();
+        Kies(venster, "Nav_Boekhouding.Relaties");
         Zoek(venster, "NieuweRelatie").AsButton().Invoke();
         Zoek(venster, "RelatieNaam");
-        Zoek(venster, "SubtabFacturen").AsTabItem().Select();
+        Kies(venster, "Nav_Boekhouding.Facturen");
         Zoek(venster, "NieuweFactuur").AsButton().Invoke();
         Zoek(venster, "FactuurEditor");
         Bewaar(venster, "14-boekhouding-factuur");
-        Zoek(venster, "SubtabRapporten").AsTabItem().Select();
+        Kies(venster, "Nav_Boekhouding.Rapporten");
         Zoek(venster, "Rapport");
         Bewaar(venster, "12-boekhouding-rapport");
 
@@ -317,7 +319,7 @@ public sealed class AppUiTests : IDisposable
         dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
         Keyboard.Type(Wachtwoord);
         Keyboard.Press(VirtualKeyShort.ENTER);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
         var posten = Zoek(venster, "Journaalposten").AsGrid();
@@ -381,6 +383,39 @@ public sealed class AppUiTests : IDisposable
 
     private void BewaarInstellingen(GebruikersInstellingen instellingen) =>
         new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Bewaar(instellingen);
+
+    /// <summary>Besluit 179: in Eenvoudig is de menubalk weg; Alt toont hem tijdelijk. De wisselaar en de navigatiebalk staan links.</summary>
+    [Fact(Timeout = Timeout)]
+    public async Task Eenvoudig_verbergt_de_menubalk_en_alt_toont_hem_tijdelijk()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        BewaarInstellingen(new GebruikersInstellingen { LaatsteDatabase = db, Weergave = Weergavemodus.Eenvoudig, StartwizardGetoond = true });
+
+        var venster = Start();
+        var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
+        dialoog.FindFirstDescendant(c => c.ByAutomationId("Wachtwoord"))!.Focus();
+        Keyboard.Type(Wachtwoord);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Zoek(venster, "Administratiewisselaar");
+        Zoek(venster, "Startkaarten");
+        // Een ingeklapt element staat niet in de UI Automation-boom.
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")));
+        Bewaar(venster, "16-eenvoudig-zonder-menubalk");
+
+        venster.SetForeground();
+        Keyboard.Press(VirtualKeyShort.ALT);
+        Assert.NotNull(Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")), Wachttijd).Result);
+        Keyboard.Press(VirtualKeyShort.ESCAPE);
+
+        Kies(venster, "Nav_Boekhouding");
+        Zoek(venster, "Nav_Boekhouding.Bank");
+        Sluit(venster);
+    }
+
+    private static void Kies(AutomationElement venster, string automationId) => Zoek(venster, automationId).AsListBoxItem().Select();
 
     private Window Start()
     {

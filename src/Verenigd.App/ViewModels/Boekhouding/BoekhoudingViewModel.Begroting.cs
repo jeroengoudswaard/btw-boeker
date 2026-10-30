@@ -33,7 +33,7 @@ public sealed partial class BoekhoudingViewModel
     public partial IReadOnlyList<BegrotingVersie> Begrotingsversies { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HeeftBegroting), nameof(IsBegrotingBewerkbaar))]
+    [NotifyPropertyChangedFor(nameof(HeeftBegroting), nameof(IsBegrotingBewerkbaar), nameof(IsOpslaanHoofdactie))]
     public partial BegrotingVersie? GekozenBegrotingsversie { get; set; }
 
     [ObservableProperty]
