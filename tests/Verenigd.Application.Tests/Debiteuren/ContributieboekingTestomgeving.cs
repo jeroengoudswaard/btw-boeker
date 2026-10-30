@@ -79,6 +79,7 @@ internal sealed class ContributieboekingTestomgeving
         public ILedenImportOpslag LedenImport => throw new NotSupportedException();
         public IContributieRepository Contributie { get; } = new IncassoDienstTests.FakeRepository(omgeving.Incasso);
         public IBoekhoudingRepository Boekhouding => omgeving.Boekhouding;
+        public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

@@ -69,6 +69,7 @@ public sealed class AppUiTests : IDisposable
     public async Task Start_zonder_database_toont_startpagina_menubalk_en_uitgeschakelde_modules()
     {
         await Task.Yield();
+        BewaarInstellingen(new GebruikersInstellingen { StartwizardGetoond = true }); // geen automatische startwizard
         var venster = Start();
 
         Assert.Equal("Verenigd", venster.Title);
@@ -338,8 +339,7 @@ public sealed class AppUiTests : IDisposable
     public async Task Donker_thema_wordt_toegepast_zonder_fouten()
     {
         await Task.Yield();
-        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
-            .Bewaar(new GebruikersInstellingen { Thema = Thema.Donker });
+        BewaarInstellingen(new GebruikersInstellingen { Thema = Thema.Donker, StartwizardGetoond = true });
 
         var venster = Start();
 
@@ -347,6 +347,36 @@ public sealed class AppUiTests : IDisposable
         Bewaar(venster, "05-startpagina-donker");
         Sluit(venster);
     }
+
+    /// <summary>Besluit 169: de eerste start opent de startwizard; ✕ werkt als "Later verder" en de wizard komt niet terug.</summary>
+    [Fact(Timeout = Timeout)]
+    public async Task Eerste_start_opent_de_startwizard_en_sluiten_werkt_als_later_verder()
+    {
+        await Task.Yield();
+        var venster = Start();
+
+        var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result
+            ?? throw new Xunit.Sdk.XunitException("De startwizard verscheen niet. " + Diagnose(venster));
+        Assert.Equal("Verenigd instellen", wizard.Title);
+        Zoek(wizard, "StapWelkom");
+        Bewaar(wizard, "06-startwizard-welkom");
+
+        Zoek(wizard, "StartwizardVolgende").AsButton().Invoke();
+        Zoek(wizard, "StartwizardNieuweDatabase");
+        Assert.False(Zoek(wizard, "StartwizardVolgende").IsEnabled); // zonder database niet verder
+        Bewaar(wizard, "07-startwizard-database");
+
+        wizard.Close();
+        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result, "De startwizard sloot niet. " + Diagnose(venster));
+        Zoek(venster, "StartNieuw");
+        Sluit(venster);
+
+        var bewaard = new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad();
+        Assert.True(bewaard.StartwizardGetoond);
+    }
+
+    private void BewaarInstellingen(GebruikersInstellingen instellingen) =>
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Bewaar(instellingen);
 
     private Window Start()
     {

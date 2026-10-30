@@ -30,6 +30,9 @@ public sealed record GebruikersInstellingen
     public string? LaatsteDatabase { get; init; }
 
     public IReadOnlyList<OpenTabblad> OpenTabbladen { get; init; } = [];
+
+    /// <summary>De startwizard opent automatisch bij de eerste start, maar één keer (besluit 169).</summary>
+    public bool StartwizardGetoond { get; init; }
 }
 
 public interface IInstellingenOpslag

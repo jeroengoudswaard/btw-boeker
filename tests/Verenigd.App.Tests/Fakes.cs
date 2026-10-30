@@ -146,6 +146,25 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public bool ToonHistorieImport(ViewModels.Boekhouding.HistorieImportViewModel wizard) =>
         HistorieImport is not null && HistorieImport(wizard).GetAwaiter().GetResult();
+
+    /// <summary>Wat de "gebruiker" in de startwizard doet; standaard direct sluiten (zoals ✕).</summary>
+    public Func<ViewModels.Inrichting.StartwizardViewModel, Task>? Startwizard { get; set; }
+
+    public List<ViewModels.Inrichting.StartwizardViewModel> GetoondeStartwizards { get; } = [];
+
+    public void ToonStartwizard(ViewModels.Inrichting.StartwizardViewModel wizard)
+    {
+        GetoondeStartwizards.Add(wizard);
+        if (Startwizard is not null)
+        {
+            Startwizard(wizard).GetAwaiter().GetResult();
+        }
+
+        if (!wizard.IsGesloten)
+        {
+            wizard.LaterVerderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+        }
+    }
 }
 
 internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
@@ -156,6 +175,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     public InMemoryAdministratieRepository Repository { get; } = new();
     public InMemoryLedenOpslag Leden { get; } = new();
     public InMemoryContributieOpslag Contributie { get; } = new();
+    public InMemoryStartwizardOpslag Startwizard { get; } = new();
     public FakeSessie? LaatsteSessie { get; private set; }
     public List<(string Backup, string Doel)> Teruggezet { get; } = [];
 
@@ -187,7 +207,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
         }
 
         Contributie.Leden = Leden;
-        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie);
+        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie) { Startwizard = Startwizard };
         return Task.FromResult<IDatabaseSessie>(LaatsteSessie);
     }
 
@@ -221,6 +241,7 @@ internal sealed class FakeSessie(
     public IAdministratieRepository Administraties { get; } = administraties;
     public ILedenRepository Leden { get; } = leden;
     public ILedenImportOpslag LedenImport { get; } = leden;
+    public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard { get; init; } = new InMemoryStartwizardOpslag();
     public List<string> Backups { get; } = [];
     public bool Gesloten { get; private set; }
 
@@ -234,6 +255,19 @@ internal sealed class FakeSessie(
     {
         Gesloten = true;
         return ValueTask.CompletedTask;
+    }
+}
+
+internal sealed class InMemoryStartwizardOpslag : Verenigd.Application.Inrichting.IStartwizardOpslag
+{
+    public Verenigd.Application.Inrichting.Startwizardvoortgang Voortgang { get; set; } = Verenigd.Application.Inrichting.Startwizardvoortgang.Nieuw;
+
+    public Task<Verenigd.Application.Inrichting.Startwizardvoortgang> LaadAsync(CancellationToken annulering = default) => Task.FromResult(Voortgang);
+
+    public Task BewaarAsync(Verenigd.Application.Inrichting.Startwizardvoortgang voortgang, CancellationToken annulering = default)
+    {
+        Voortgang = voortgang;
+        return Task.CompletedTask;
     }
 }
 

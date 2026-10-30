@@ -84,6 +84,10 @@
                 <MenuItem Header="_Openen..." InputGestureText="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
                 <MenuItem Header="_Sluiten" Command="{Binding SluitDatabaseCommand}" />
                 <Separator />
+                <MenuItem Header="Start_wizard..." Command="{Binding StartwizardCommand}"
+                          ToolTip="Stap voor stap de administratie inrichten: database, leden, boekhouding, bank en contributie"
+                          AutomationProperties.AutomationId="Menu_Startwizard" />
+                <Separator />
                 <MenuItem Header="Op_slaan" InputGestureText="Ctrl+S" Command="{Binding OpslaanCommand}" />
                 <Separator />
                 <MenuItem Header="_Importeren" AutomationProperties.AutomationId="Menu_Importeren">

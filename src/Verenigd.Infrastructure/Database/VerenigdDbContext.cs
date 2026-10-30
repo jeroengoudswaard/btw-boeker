@@ -40,6 +40,7 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Financien.Begrotingen.Begroting> Begrotingen => Set<Domain.Financien.Begrotingen.Begroting>();
     public DbSet<Domain.Financien.Begrotingen.Meerjarenplan> Meerjarenplannen => Set<Domain.Financien.Begrotingen.Meerjarenplan>();
     public DbSet<Domain.Financien.Bijlagen.BijlageInhoud> BijlageInhoud => Set<Domain.Financien.Bijlagen.BijlageInhoud>();
+    internal DbSet<StartwizardRij> Startwizard => Set<StartwizardRij>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,5 +80,12 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
         FactuurConfiguratie.Configureer(modelBuilder);
         BijlageConfiguratie.Configureer(modelBuilder);
         BegrotingConfiguratie.Configureer(modelBuilder);
+        modelBuilder.Entity<StartwizardRij>(b =>
+        {
+            b.ToTable("Startwizard");
+            b.HasKey(r => r.Id);
+            b.Property(r => r.Id).ValueGeneratedNever();
+            b.Property(r => r.Stap).HasConversion<string>().HasMaxLength(20);
+        });
     }
 }

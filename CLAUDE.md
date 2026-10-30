@@ -207,6 +207,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 169 | Startwizard: moment | Automatisch bij de eerste start (geen database); daarna altijd via *Bestand › Startwizard…* |
 | 170 | Startwizard: stappen | Welkom → Database → Vereniging en Stichting → Leden → Boekhouding → Bank → Contributie → Klaar; elke stap over te slaan, *Later verder* bewaart de voortgang; de bestaande wizards en diensten worden hergebruikt |
 | 171 | Volgorde | Eerst 5b afmaken, dan de startwizard, dan de herinrichting van de UI |
+| 172 | Startwizard: bestaande wizards | De startwizard opent de bestaande wizards (SOL3, boekhouding, bank) als eigen venster en gaat daarna verder; geen herbouw |
+| 173 | Startwizard: voortgang | *Later verder* bewaart de stap in de database (hoort bij de administratie, ook na een back-up) |
+| 174 | Startwizard: venster | Een eigen venster vóór het hoofdvenster, zodat het na de herinrichting (besluit 168) blijft werken |
+| 175 | Startwizard: stap al klaar | Tonen met "Al ingericht" en de knoppen om het toch opnieuw te doen; niet automatisch overslaan |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -285,7 +289,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **5b Meerjarenplan Stichting: gereed**, v0.6.0 (2026-10-30). Besluiten 159–167. Subtabblad *Meerjarenplan* (alleen Stichting): raster 10 jaar per resultaatrekening, knop → per rij (vanaf het jaar bij *Kopiëren vanaf*), resultaat per jaar, vaststellen en herzien, liggende afdruk (`RapportTabel.IsLiggend`), Ctrl+5 per administratie. Tabellen `Meerjarenplannen`, `Meerjarenposten`, `Meerjarenbedragen` (migratie *Meerjarenplan*).
     - Uitwerking: de knop per rij kopieert vanaf het jaar dat in de werkbalk bij *Kopiëren vanaf* staat (één keuze voor alle rijen).
     - Tests: 791 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 296, Infrastructure 66, Architectuur 14; ViewModel-tests 168/170 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 791/791) en een visuele controle van het subtabblad Meerjarenplan en de liggende afdruk.
-- **Startwizard en herinrichting UI:** besluiten 168–171 vastgesteld (2026-10-30). Volgende stap: uitgewerkt ontwerp van de startwizard ter goedkeuring.
+- **Startwizard en herinrichting UI:** besluiten 168–175 vastgesteld (2026-10-30).
+  - **Startwizard: gereed**, v0.7.0 (2026-10-30). Eigen venster *Verenigd instellen* met acht stappen, automatisch bij de eerste start en via *Bestand › Startwizard…*; voortgang in tabel `Startwizard` (migratie *Startwizard*); ✓ per stap uit `Inrichtingsstatus`.
+    - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
+    - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 805/805, inclusief de nieuwe UI-test `Eerste_start_opent_de_startwizard…`) en een visuele controle van de wizard en van de kleurrondjes in Instellingen.
+  - Volgende stap: ontwerp van de herinrichting van de UI (besluit 168) ter goedkeuring.
 
 ## Privacy
 

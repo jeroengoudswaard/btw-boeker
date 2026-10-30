@@ -1536,6 +1536,23 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Voogden", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Infrastructure.Database.StartwizardRij", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsAfgerond")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Stap")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Startwizard", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankafschrift", b =>
                 {
                     b.HasOne("Verenigd.Domain.Financien.Boekhouding.Dagboek", "Dagboek")

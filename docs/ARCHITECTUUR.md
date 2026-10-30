@@ -327,3 +327,10 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Application** (`Application/Begrotingen`): `Meerjarenrekenaar` (geldende versie per startjaar; overzicht met baten, lasten en resultaat per jaar, zonder indexatie of geldprognose) en `MeerjarenplanDienst`. `Rapporten.Meerjarenplan` geeft een `RapportTabel` met `IsLiggend`; `WpfAfdrukDienst` drukt die liggend af met kleinere letters (besluit 165).
 - **Opslag:** tabellen `Meerjarenplannen` (uniek per administratie, startjaar en versie), `Meerjarenposten` (uniek per plan en rekening) en `Meerjarenbedragen` (uniek per post en jaar), migratie *Meerjarenplan*.
 - **App:** partial `BoekhoudingViewModel.Meerjarenplan`, `MeerjarenRij`, `JaarCel` en `MeerjarenVersie`. Het subtabblad is alleen zichtbaar bij de Stichting (`HeeftMeerjarenplanTab`); de jaarkolommen krijgen hun kop via `Bindingsproxy`. De knop → per rij kopieert vanaf het jaar bij *Kopiëren vanaf* (besluit 166). Ctrl+5 opent bij de Stichting het meerjarenplan, bij de Vereniging de begroting (besluit 163).
+
+## Startwizard (v0.7.0, besluiten 169–175)
+
+- **Application** (`Application/Inrichting/Startwizard.cs`): `Startstap` (de acht stappen), `Startwizardvoortgang` (laatste stap en afgerond) met `IStartwizardOpslag` op `IDatabaseSessie.Startwizard`, en `Inrichtingsstatus`: het ✓ per stap, afgeleid uit administratienamen, leden, boekhouding (rekeningen of dagboeken), bankdagboek met IBAN, incassogegevens en tarieven van het jaar.
+- **Opslag:** tabel `Startwizard` (één rij), migratie *Startwizard*.
+- **App:** `StartwizardViewModel` is de regisseur; het hoofdvenster implementeert `IStartwizardRegie` en voert de bestaande opdrachten uit (nieuwe database, SOL3-import, de vier inrichtingsroutes van Boekhouding, bankimport, Contributie › Tarieven via `ContributieSubtab`). Naam en kleur (`AdministratieKaart`) en incasso (`IncassoKaart`) zijn gedeelde UserControls in `Views/Gedeeld`. `StartwizardVenster` is een eigen modaal venster; ✕ werkt als *Later verder*.
+- **Eerste start:** `GebruikersInstellingen.StartwizardGetoond` zorgt dat de wizard maar één keer vanzelf opent.

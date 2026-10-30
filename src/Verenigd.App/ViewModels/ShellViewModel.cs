@@ -7,10 +7,12 @@ using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.App.ViewModels.Contributie;
+using Verenigd.App.ViewModels.Inrichting;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
 using Verenigd.Application.Import;
+using Verenigd.Application.Inrichting;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -24,7 +26,7 @@ public sealed record ModuleVerzoek(ModuleSoort Module, AdministratieSoort? Admin
 }
 
 /// <summary>Hoofdvenster: database-sessie, tabbladen, menu's en statusbalk.</summary>
-public sealed partial class ShellViewModel : ObservableObject
+public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 {
     private readonly IDatabaseBeheer _beheer;
     private readonly IInstellingenOpslag _opslag;
@@ -36,6 +38,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly OverzichtViewModel _overzicht;
     private GebruikersInstellingen _instellingen = new();
     private IDatabaseSessie? _sessie;
+    private bool _startwizardActief;
 
     public ShellViewModel(
         IDatabaseBeheer beheer,
@@ -115,6 +118,13 @@ public sealed partial class ShellViewModel : ObservableObject
         if (_instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad))
         {
             await OpenAsync(pad);
+        }
+        else if (!_instellingen.StartwizardGetoond)
+        {
+            // Besluit 169: de eerste start opent de startwizard, één keer.
+            _instellingen = _instellingen with { StartwizardGetoond = true };
+            _opslag.Bewaar(_instellingen);
+            await ToonStartwizardAsync(Startstap.Welkom);
         }
     }
 
@@ -411,6 +421,92 @@ public sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    // ---- Startwizard (besluiten 169–175) ----------------------------------------------------
+
+    /// <summary>Bestand › Startwizard: verder waar de gebruiker gebleven was, anders vanaf Welkom.</summary>
+    [RelayCommand]
+    private async Task StartwizardAsync()
+    {
+        var voortgang = _sessie is null ? Startwizardvoortgang.Nieuw : await _sessie.Startwizard.LaadAsync();
+        await ToonStartwizardAsync(voortgang is { KanHervatten: true, Stap: { } stap } ? stap : Startstap.Welkom);
+    }
+
+    private async Task ToonStartwizardAsync(Startstap begin)
+    {
+        if (_startwizardActief)
+        {
+            return;
+        }
+
+        _startwizardActief = true;
+        try
+        {
+            var wizard = new StartwizardViewModel(this, _tijd, begin);
+            await wizard.InitialiseerAsync();
+            _dialogen.ToonStartwizard(wizard);
+        }
+        finally
+        {
+            _startwizardActief = false;
+        }
+    }
+
+    IDatabaseSessie? IStartwizardRegie.Sessie => _sessie;
+
+    IReadOnlyList<AdministratieViewModel> IStartwizardRegie.Administraties => Administraties;
+
+    Task IStartwizardRegie.NieuweDatabaseAsync() => NieuweDatabaseCommand.ExecuteAsync(null);
+
+    Task IStartwizardRegie.OpenDatabaseAsync() => OpenDatabaseCommand.ExecuteAsync(null);
+
+    Task IStartwizardRegie.ImporteerLedenAsync() => ImporteerSol3Command.ExecuteAsync(null);
+
+    Task IStartwizardRegie.RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze) =>
+        InBoekhoudingAsync(administratie, boekhouding => keuze switch
+        {
+            Boekhoudingkeuze.Excel => boekhouding.OvernemenUitExcelCommand.ExecuteAsync(null),
+            Boekhoudingkeuze.Standaard => boekhouding.StandaardInrichtenCommand.ExecuteAsync(null),
+            Boekhoudingkeuze.Sjabloon => boekhouding.SjabloonInlezenCommand.ExecuteAsync(null),
+            _ => boekhouding.LeegBeginnenCommand.ExecuteAsync(null),
+        });
+
+    Task IStartwizardRegie.ImporteerBankafschriftAsync() =>
+        InBoekhoudingAsync(AdministratieSoort.Vereniging, boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
+
+    void IStartwizardRegie.OpenTarieven()
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging);
+        if (KanModuleOpenen(verzoek))
+        {
+            OpenModule(verzoek);
+            if (GeselecteerdTabblad is ContributieViewModel contributie)
+            {
+                contributie.Subtab = ContributieSubtab.Tarieven;
+            }
+        }
+    }
+
+    /// <summary>Opent Boekhouding voor een administratie, wacht tot die geladen is en voert dan een actie uit.</summary>
+    private async Task InBoekhoudingAsync(AdministratieSoort administratie, Func<BoekhoudingViewModel, Task> actie)
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, administratie);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        {
+            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            await actie(boekhouding);
+        }
+    }
+
     // ---- Beeld -----------------------------------------------------------------------------
 
     [RelayCommand]
@@ -680,7 +776,20 @@ public sealed partial class ShellViewModel : ObservableObject
         GeselecteerdTabblad = _overzicht;
         Statusmelding = "Gereed";
         ShellLog.DatabaseGeopend(_logger, DatabaseNaam);
+
+        // Besluit 170: was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
+        if (!_startwizardActief && await sessie.Startwizard.LaadAsync() is { KanHervatten: true, Stap: { } stap }
+            && _dialogen.Bevestig("Startwizard", $"De startwizard is nog niet afgerond; u was gebleven bij de stap '{Stapnaam(stap)}'. Wilt u daar verder gaan?"))
+        {
+            await ToonStartwizardAsync(stap);
+        }
     }
+
+    private static string Stapnaam(Startstap stap) => stap switch
+    {
+        Startstap.Administraties => "Vereniging",
+        _ => stap.ToString(),
+    };
 
     /// <returns><c>false</c> als de gebruiker het sluiten annuleert.</returns>
     private async Task<bool> SluitSessieAsync()

@@ -4,6 +4,25 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.7.0] - 2026-10-30: Startwizard
+
+### Toegevoegd
+- **Startwizard *Verenigd instellen*** (besluiten 169–175): Welkom → Database → Vereniging → Leden → Boekhouding → Bank → Contributie → Klaar.
+  - Opent automatisch bij de allereerste start (één keer) en daarna altijd via *Bestand › Startwizard…*.
+  - Elke stap is over te slaan. *Later verder* (ook ✕) onthoudt de stap in de database; bij het openen van die database biedt Verenigd aan om daar verder te gaan.
+  - Gebruikt de bestaande wizards: nieuwe database met herstelsleutel, SOL3-import, Excel-overname, standaardschema, sjabloonbestand, leeg beginnen en bankimport.
+  - Naam en kleur van de administraties en de incassogegevens vult u in de wizard zelf in; *Volgende* slaat ze op. *Tarieven invullen…* opent Contributie › Tarieven.
+  - Een stappenbalk met ✓ (klaar), ● (huidige stap) en ○ (nog te doen). Het ✓ volgt uit de gegevens zelf, dus ook bij een bestaande database ziet u wat al is ingericht ("Al ingericht").
+  - De stap *Klaar* toont per onderdeel ✓ of ⚠, met waar u het later kunt doen.
+- 805 geautomatiseerde tests (was 791).
+
+### Gewijzigd
+- Naam en kleur van een administratie en de incassogegevens staan in gedeelde onderdelen, gebruikt door Instellingen en de startwizard.
+- Dialogen openen boven het actieve venster (bijvoorbeeld de startwizard) in plaats van altijd boven het hoofdvenster.
+
+### Opgelost
+- De kleurrondjes bij *Extra › Instellingen › Administraties* deden niets: de knop zocht de opdracht bij het verkeerde onderdeel.
+
 ## [0.6.0] - 2026-10-30: Meerjarenplan Stichting (fase 5b)
 
 ### Toegevoegd
