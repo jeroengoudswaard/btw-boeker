@@ -226,6 +226,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 188 | Uitleg SOL3-exports: planning | Nu, als v0.7.1, mee in de pull request van v0.6.0–v0.7.0 |
 | 189 | Pull request v0.6.0–v0.7.1 | Direct openen (de Windows-run van v0.7.0 is groen); v0.7.1 komt er als extra commit bij |
 | 190 | Scheidingsteken SOL3-CSV | De import herkent `;` of `,` aan de kopregel (buiten aanhalingstekens, bij gelijkspel `;`). SOL3 noemt de export "door komma's gescheiden", maar levert puntkomma's (gemeld door de gebruiker) |
+| 191 | E-mail: functies | Facturen en herinneringen, vooraankondiging per incassorun, bericht bij stornering/openstaande post, vrije berichten aan leden en voogden per speltak of groep, en een welkomstmail; de gebruiker kan zelf sjablonen toevoegen en aanpassen |
+| 192 | E-mail: koppeling | Gmail-API met OAuth (alleen toestemming om te versturen, geen wachtwoord in de app); de gebruiker maakt eenmalig een Google Cloud-project, met hulp van Claude. De toegangssleutel staat versleuteld in de database |
+| 193 | E-mail: account | Een bestaand gmail.com-account van de penningmeester (adres niet in Git; ingesteld in de app). Limiet ±500 berichten per dag |
+| 194 | E-mail: groepsberichten | Elke ontvanger krijgt een eigen, persoonlijk ingevulde e-mail; geen BCC |
+| 195 | E-mail: logboek | Bewaren aan wie, wanneer, onderwerp en sjabloon; niet de tekst zelf |
+| 196 | Volgorde fase 6 | Eerst v0.8.0 (herinrichting), daarna fase 6 in de nieuwe navigatie; het uitgewerkte ontwerp van fase 6 (sjablonen, moment van de welkomstmail, Google Cloud-stappen) volgt dan ter goedkeuring |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -316,6 +322,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-30, Windows 11, commit `bc8cc09`): 813/813 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 308, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Eén Application-test meer dan de verwachte 812 (vermoedelijk toegevoegd in `bc8cc09` na de telling). Nog door de gebruiker te doen: visuele controle van de uitleg in de startwizard en de importwizard.
     - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
     - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
+
+- **Fase 6 (E-mail via Gmail): in ontwerp.** Besluiten 191–196 vastgesteld (2026-10-30); uitgewerkt ontwerp na v0.8.0.
 
 ## Privacy
 
