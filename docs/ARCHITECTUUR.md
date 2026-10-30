@@ -339,3 +339,4 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 
 - `Application/Import/Sol3Exportuitleg.cs`: per export de titel, het doel en de kolommen in de volgorde van SOL3. *Verplicht* komt uit `ExportHerkenning.VerplichteKolommen`; de overige kolommen zijn wat SOL3 daarnaast levert. `Sol3ExportuitlegTests` vergelijkt dit met de kopregels in `Sol3Voorbeeld`.
 - `Views/Gedeeld/Sol3Uitleg.xaml`: gedeeld door de startwizard en de importwizard; *Kolomnamen kopiëren* vult alleen het klembord (code-behind, geen logica).
+- `Sol3CsvLezer.Scheidingsteken` kiest `;` of `,`: het teken dat buiten aanhalingstekens het vaakst in de kopregel staat (bij gelijkspel `;`), besluit 190.

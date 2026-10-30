@@ -12,8 +12,9 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
   - een knop *Kolomnamen kopiëren* per export (één naam per regel);
   - de klikroute in SOL3 (Meer › Rapporten › Nieuw rapport … Opslaan als "invoer voor Verenigd, output #1–4" en Exporteren met "Alleen details", CSV), zoals aangeleverd door de gebruiker;
   - het formaat: Windows-1252 of UTF-8, datums als dag-maand-jaar, kolomvolgorde vrij.
+- **SOL3-import leest komma's én puntkomma's** (besluit 190): het scheidingsteken wordt herkend aan de kopregel. SOL3 noemt de export "door komma's gescheiden", maar levert puntkomma's; een komma binnen aanhalingstekens blijft gewoon in het veld.
 - Welke kolommen verplicht zijn, komt uit dezelfde bron als de import; een test bewaakt dat de uitleg en de import gelijk blijven.
-- 812 geautomatiseerde tests (was 805).
+- 816 geautomatiseerde tests (was 805).
 
 ## [0.7.0] - 2026-10-30: Startwizard
 

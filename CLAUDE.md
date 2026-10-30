@@ -225,6 +225,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 187 | Uitleg SOL3-exports: klikroute | De gebruiker levert de klikroute in SOL3 (menu, knoppen, formaat); tot dan geen klikroute in de uitleg |
 | 188 | Uitleg SOL3-exports: planning | Nu, als v0.7.1, mee in de pull request van v0.6.0–v0.7.0 |
 | 189 | Pull request v0.6.0–v0.7.1 | Direct openen (de Windows-run van v0.7.0 is groen); v0.7.1 komt er als extra commit bij |
+| 190 | Scheidingsteken SOL3-CSV | De import herkent `;` of `,` aan de kopregel (buiten aanhalingstekens, bij gelijkspel `;`). SOL3 noemt de export "door komma's gescheiden", maar levert puntkomma's (gemeld door de gebruiker) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -314,7 +315,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Tests: 812 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 307, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 812/812, de UI-test van de importwizard controleert nu ook de uitleg) en een visuele controle.
     - **Windows-test (2026-10-30, Windows 11, commit `bc8cc09`): 813/813 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 308, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Eén Application-test meer dan de verwachte 812 (vermoedelijk toegevoegd in `bc8cc09` na de telling). Nog door de gebruiker te doen: visuele controle van de uitleg in de startwizard en de importwizard.
     - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
-    - Open vraag: de import leest nu alleen puntkomma-CSV; voorgelegd of het scheidingsteken automatisch herkend moet worden.
+    - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
 
 ## Privacy
 

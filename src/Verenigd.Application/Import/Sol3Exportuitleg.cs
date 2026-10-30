@@ -25,6 +25,7 @@ public static class Sol3Exportuitleg
 {
     public const string Formaat =
         "Een CSV-bestand zoals SOL3 het exporteert met \"Alleen details\" (tekenset Windows-1252 of UTF-8). " +
+        "SOL3 noemt het \"door komma's gescheiden\", maar zet er puntkomma's tussen; Verenigd leest beide. " +
         "Datums als dag-maand-jaar, bijvoorbeeld 19-09-2025. De volgorde van de kolommen maakt niet uit: Verenigd zoekt ze op naam. " +
         "Elke export bevat het lidnummer.";
 

@@ -86,4 +86,34 @@ public class Sol3CsvLezerTests
     {
         Assert.Throws<Sol3ImportException>(() => Lees(Sol3Voorbeeld.Csv("A;A", ["1", "2"])));
     }
+
+    // ---- Scheidingsteken herkennen (besluit 190): SOL3 noemt het "door komma's gescheiden", maar levert puntkomma's ----
+
+    [Fact]
+    public void Kommagescheiden_bestand_wordt_herkend_en_een_komma_tussen_aanhalingstekens_blijft_in_het_veld()
+    {
+        var inhoud = Encoding.Latin1.GetBytes("\"Lidnummer\",\"Achternaam\",\"Rol\"\r\n\"123\",\"Vries, de\",\"Leiding\"\r\n");
+
+        var tabel = Lees(inhoud);
+
+        Assert.Equal(["Lidnummer", "Achternaam", "Rol"], tabel.Kolommen);
+        Assert.Equal("Vries, de", tabel.Regels[0]["Achternaam"]);
+    }
+
+    [Fact]
+    public void Puntkommabestand_met_komma_in_een_veld_blijft_puntkomma()
+    {
+        var tabel = Lees(Sol3Voorbeeld.Csv("Lidnummer;Achternaam", ["123", "Vries, de"]));
+
+        Assert.Equal(["Lidnummer", "Achternaam"], tabel.Kolommen);
+        Assert.Equal("Vries, de", tabel.Regels[0]["Achternaam"]);
+    }
+
+    [Fact]
+    public void Kolomnaam_met_komma_tussen_aanhalingstekens_telt_niet_mee_voor_het_scheidingsteken()
+    {
+        var inhoud = Encoding.Latin1.GetBytes("\"Lid, nummer\";\"Naam, volledig\";\"Rol\"\r\n\"1\";\"A\";\"B\"\r\n");
+
+        Assert.Equal(["Lid, nummer", "Naam, volledig", "Rol"], Lees(inhoud).Kolommen);
+    }
 }
