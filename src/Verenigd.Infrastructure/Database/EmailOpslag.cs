@@ -14,8 +14,8 @@ internal sealed class EmailOpslag(Func<VerenigdDbContext> maakContext) : IEmailO
         await using var context = maakContext();
         var sjablonen = await context.Emailsjablonen.AsNoTracking().OrderBy(s => s.Soort).ThenBy(s => s.Naam).ToListAsync(annulering).ConfigureAwait(false);
         var logboek = await context.VerzondenBerichten.AsNoTracking().OrderByDescending(b => b.Id).Take(LogboekLimiet).ToListAsync(annulering).ConfigureAwait(false);
-        var instellingen = await context.Emailinstellingen.AsNoTracking().SingleOrDefaultAsync(annulering).ConfigureAwait(false) ?? new Emailinstellingen();
-        return new EmailStand(sjablonen, logboek, instellingen);
+        var koppelingen = await context.Emailinstellingen.AsNoTracking().ToListAsync(annulering).ConfigureAwait(false);
+        return new EmailStand(sjablonen, logboek, koppelingen);
     }
 
     public async Task BewaarSjabloonAsync(Emailsjabloon sjabloon, CancellationToken annulering = default)
@@ -44,7 +44,7 @@ internal sealed class EmailOpslag(Func<VerenigdDbContext> maakContext) : IEmailO
     {
         ArgumentNullException.ThrowIfNull(instellingen);
         await using var context = maakContext();
-        if (await context.Emailinstellingen.AnyAsync(annulering).ConfigureAwait(false))
+        if (await context.Emailinstellingen.AnyAsync(i => i.Id == instellingen.Id, annulering).ConfigureAwait(false))
         {
             context.Emailinstellingen.Update(instellingen);
         }

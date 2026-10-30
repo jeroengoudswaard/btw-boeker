@@ -49,7 +49,8 @@ public sealed record Inrichtingsstatus(
     bool BoekhoudingStichting,
     bool BankVereniging,
     bool IncassoIngesteld,
-    bool TarievenIngevuld)
+    bool TarievenIngevuld,
+    bool BankStichting = false)
 {
     /// <summary>De naam die een nieuwe database aan de Vereniging geeft.</summary>
     public const string Standaardnaam = "Vereniging";
@@ -61,7 +62,7 @@ public sealed record Inrichtingsstatus(
         Startstap.Database => DatabaseOpen,
         Startstap.Administraties => NamenIngevuld,
         Startstap.Leden => HeeftLeden,
-        Startstap.Boekhouding => BoekhoudingVereniging, // de Stichting is optioneel (besluit 61)
+        Startstap.Boekhouding => BoekhoudingVereniging, // de Stichting is optioneel (besluit 209)
         Startstap.Bank => BankVereniging,
         Startstap.Contributie => IncassoIngesteld && TarievenIngevuld,
         _ => false,
@@ -85,13 +86,16 @@ public sealed record Inrichtingsstatus(
             HeeftLeden: aantalLeden > 0,
             BoekhoudingVereniging: IsIngericht(vereniging),
             BoekhoudingStichting: IsIngericht(stichting),
-            BankVereniging: vereniging.Dagboeken.Any(d => d.Soort == DagboekSoort.Bank && d.Iban is not null),
+            BankVereniging: HeeftBank(vereniging),
             IncassoIngesteld: contributie.Instellingen is not null,
-            TarievenIngevuld: contributie.Tarieven.Any(t => t.Boekjaar == jaar));
+            TarievenIngevuld: contributie.Tarieven.Any(t => t.Boekjaar == jaar),
+            BankStichting: HeeftBank(stichting));
     }
 
     /// <summary>Zoals het tabblad Boekhouding: ook <i>Leeg beginnen</i> (alleen dagboeken) telt als ingericht.</summary>
     private static bool IsIngericht(BoekhoudingStand stand) => stand.IsIngericht || stand.Dagboeken.Count > 0;
+
+    private static bool HeeftBank(BoekhoudingStand stand) => stand.Dagboeken.Any(d => d.Soort == DagboekSoort.Bank && d.Iban is not null);
 
     public static async Task<Inrichtingsstatus> BepaalAsync(IDatabaseSessie? sessie, int jaar, CancellationToken annulering = default)
     {

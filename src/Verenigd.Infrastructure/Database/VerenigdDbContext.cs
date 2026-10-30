@@ -107,6 +107,7 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
             b.Property(v => v.Onderwerp).IsRequired().HasMaxLength(300);
             b.Property(v => v.Sjabloon).IsRequired().HasMaxLength(100);
             b.Property(v => v.Fout).HasMaxLength(300);
+            b.Property(v => v.Administratie).HasDefaultValue(AdministratieSoort.Vereniging).HasSentinel((AdministratieSoort)0);
             b.HasIndex(v => v.TijdstipUtc);
         });
         modelBuilder.Entity<Domain.Communicatie.Emailinstellingen>(b =>
@@ -120,6 +121,7 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
             b.Property(i => i.ClientGeheim).HasMaxLength(300);
             b.Ignore(i => i.HeeftClient);
             b.Ignore(i => i.IsGekoppeld);
+            b.Ignore(i => i.Administratie);
         });
     }
 }

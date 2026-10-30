@@ -649,9 +649,10 @@ internal sealed class InMemoryEmailOpslag : Verenigd.Application.Email.IEmailOps
     public List<Verenigd.Domain.Communicatie.Emailsjabloon> Sjablonen { get; } = [];
     public List<Verenigd.Domain.Communicatie.VerzondenBericht> Logboek { get; } = [];
     public Verenigd.Domain.Communicatie.Emailinstellingen Instellingen { get; set; } = new();
+    public Verenigd.Domain.Communicatie.Emailinstellingen Stichting { get; set; } = new(AdministratieSoort.Stichting);
 
     public Task<Verenigd.Application.Email.EmailStand> LaadAsync(CancellationToken annulering = default) =>
-        Task.FromResult(new Verenigd.Application.Email.EmailStand([.. Sjablonen], [.. Logboek], Instellingen));
+        Task.FromResult(new Verenigd.Application.Email.EmailStand([.. Sjablonen], [.. Logboek], [Instellingen, Stichting]));
 
     public Task BewaarSjabloonAsync(Verenigd.Domain.Communicatie.Emailsjabloon sjabloon, CancellationToken annulering = default)
     {
@@ -672,6 +673,12 @@ internal sealed class InMemoryEmailOpslag : Verenigd.Application.Email.IEmailOps
 
     public Task BewaarInstellingenAsync(Verenigd.Domain.Communicatie.Emailinstellingen instellingen, CancellationToken annulering = default)
     {
+        if (instellingen.Administratie == AdministratieSoort.Stichting)
+        {
+            Stichting = instellingen;
+            return Task.CompletedTask;
+        }
+
         Instellingen = instellingen;
         return Task.CompletedTask;
     }
@@ -683,21 +690,24 @@ internal sealed class InMemoryEmailOpslag : Verenigd.Application.Email.IEmailOps
     }
 
     /// <summary>Gekoppeld met een verzonnen afzender, zodat versturen kan.</summary>
-    public void Koppel()
+    public void Koppel(AdministratieSoort administratie = AdministratieSoort.Vereniging)
     {
-        Instellingen.ZetAfzender("Penningmeester", "penningmeester@example.org");
-        Instellingen.ZetClient("id.apps.googleusercontent.com", "geheim");
-        Instellingen.Koppel("vernieuwd", DateTime.UtcNow);
+        var instellingen = administratie == AdministratieSoort.Stichting ? Stichting : Instellingen;
+        instellingen.ZetAfzender("Penningmeester", administratie == AdministratieSoort.Stichting ? "stichting@example.org" : "penningmeester@example.org");
+        instellingen.ZetClient("id.apps.googleusercontent.com", "geheim");
+        instellingen.Koppel("vernieuwd", DateTime.UtcNow);
     }
 }
 
 internal sealed class NepVerzender : Verenigd.Application.Email.IEmailVerzender
 {
     public List<Verenigd.Application.Email.Emailbericht> Verstuurd { get; } = [];
+    public List<string?> Afzenders { get; } = [];
     public string? FoutVoor { get; set; }
 
     public Task VerstuurAsync(Verenigd.Domain.Communicatie.Emailinstellingen instellingen, Verenigd.Application.Email.Emailbericht bericht, CancellationToken annulering = default)
     {
+        Afzenders.Add(instellingen.Afzenderadres);
         if (bericht.AanAdres == FoutVoor)
         {
             throw new Verenigd.Application.Email.EmailVerzendException("Adres bestaat niet.");

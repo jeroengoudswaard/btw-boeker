@@ -6,6 +6,7 @@ using Verenigd.Application.Import;
 using Verenigd.Application.Incasso;
 using Verenigd.Application.Inrichting;
 using Verenigd.Application.Leden;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 
 namespace Verenigd.Application.Tests.Email;
@@ -13,6 +14,8 @@ namespace Verenigd.Application.Tests.Email;
 /// <summary>Versturen (besluiten 192–195): per ontvanger ingevuld, logboek zonder tekst, daglimiet en proef.</summary>
 public sealed class EmailDienstTests
 {
+    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Sti = AdministratieSoort.Stichting;
     private readonly InMemoryEmailOpslag _opslag = new();
     private readonly NepVerzender _verzender = new();
     private readonly VasteTijd _tijd = new(new DateTimeOffset(2026, 11, 3, 10, 0, 0, TimeSpan.Zero));
@@ -22,11 +25,12 @@ public sealed class EmailDienstTests
     private static Emailontvanger Ontvanger(string naam, string adres) =>
         new(naam, adres, new Dictionary<string, string> { ["aanhef"] = naam, ["vereniging"] = "Scouting" });
 
-    private void Koppel()
+    private void Koppel(Emailinstellingen? instellingen = null, string adres = "penningmeester@example.org")
     {
-        _opslag.Instellingen.ZetAfzender("Penningmeester", "penningmeester@example.org");
-        _opslag.Instellingen.ZetClient("id", "geheim");
-        _opslag.Instellingen.Koppel("sleutel", DateTime.UtcNow);
+        instellingen ??= _opslag.Instellingen;
+        instellingen.ZetAfzender("Penningmeester", adres);
+        instellingen.ZetClient("id", "geheim");
+        instellingen.Koppel("sleutel", DateTime.UtcNow);
     }
 
     [Fact]
@@ -42,7 +46,7 @@ public sealed class EmailDienstTests
     public async Task Zonder_koppeling_wordt_niets_verstuurd()
     {
         var fout = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            Dienst.VerstuurAsync([Ontvanger("Anna", "anna@example.org")], "Hoi", "Beste {aanhef}", "Vrij"));
+            Dienst.VerstuurAsync(Ver, [Ontvanger("Anna", "anna@example.org")], "Hoi", "Beste {aanhef}", "Vrij"));
 
         Assert.Contains("Instellingen › E-mail", fout.Message, StringComparison.Ordinal);
         Assert.Empty(_verzender.Verstuurd);
@@ -55,7 +59,7 @@ public sealed class EmailDienstTests
         _verzender.FoutVoor = "bo@example.org";
 
         var resultaat = await Dienst.VerstuurAsync(
-            [Ontvanger("Anna", "anna@example.org"), Ontvanger("Bo", "bo@example.org"), Ontvanger("Kees", "kees@example.org")],
+            Ver, [Ontvanger("Anna", "anna@example.org"), Ontvanger("Bo", "bo@example.org"), Ontvanger("Kees", "kees@example.org")],
             "Kamp {vereniging}", "Beste {aanhef},", "Mededeling speltak");
 
         Assert.Equal(2, resultaat.Verzonden);
@@ -76,7 +80,7 @@ public sealed class EmailDienstTests
             _opslag.Logboek.Add(VerzondenBericht.Gelukt("x", "x@example.org", "o", "s", _tijd.GetUtcNow().UtcDateTime));
         }
 
-        var resultaat = await Dienst.VerstuurAsync([Ontvanger("Anna", "anna@example.org"), Ontvanger("Bo", "bo@example.org")], "o", "t", "s");
+        var resultaat = await Dienst.VerstuurAsync(Ver, [Ontvanger("Anna", "anna@example.org"), Ontvanger("Bo", "bo@example.org")], "o", "t", "s");
 
         Assert.Equal(1, resultaat.Verzonden);
         Assert.True(resultaat.GestoptOpLimiet);
@@ -88,7 +92,7 @@ public sealed class EmailDienstTests
     {
         Koppel();
 
-        await Dienst.ProefAsync(Ontvanger("Anna", "anna@example.org"), "Kamp", "Beste {aanhef}");
+        await Dienst.ProefAsync(Ver, Ontvanger("Anna", "anna@example.org"), "Kamp", "Beste {aanhef}");
 
         var bericht = Assert.Single(_verzender.Verstuurd);
         Assert.Equal("penningmeester@example.org", bericht.AanAdres);
@@ -102,11 +106,30 @@ public sealed class EmailDienstTests
     {
         _opslag.Instellingen.ZetClient("id", "geheim");
 
-        await Dienst.KoppelAsync(new NepKoppeling());
+        await Dienst.KoppelAsync(Ver, new NepKoppeling());
         var stand = await Dienst.LaadAsync();
 
-        Assert.Equal("vernieuwd", stand.Instellingen.Vernieuwingssleutel);
+        Assert.Equal("vernieuwd", stand.Instellingen(Ver).Vernieuwingssleutel);
+        Assert.False(stand.Instellingen(Sti).IsGekoppeld);
         await Assert.ThrowsAsync<InvalidOperationException>(() => Dienst.VerwijderSjabloonAsync(stand.Sjablonen[0]));
+    }
+
+    [Fact]
+    public async Task Elke_administratie_verstuurt_met_haar_eigen_koppeling_en_daglimiet()
+    {
+        Koppel(_opslag.Stichting, "penningmeester.stichting@example.org");
+        for (var i = 0; i < EmailDienst.Daglimiet; i++)
+        {
+            _opslag.Logboek.Add(VerzondenBericht.Gelukt("x", "x@example.org", "o", "s", _tijd.GetUtcNow().UtcDateTime)); // vol bij de Vereniging
+        }
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Dienst.VerstuurAsync(Ver, [Ontvanger("Anna", "anna@example.org")], "o", "t", "s"));
+        var resultaat = await Dienst.VerstuurAsync(Sti, [Ontvanger("Kerk", "kerk@example.org")], "Factuur", "t", "Factuur");
+
+        Assert.Equal(1, resultaat.Verzonden);
+        Assert.Equal("penningmeester.stichting@example.org", Assert.Single(_verzender.Afzenders));
+        Assert.Equal(Sti, _opslag.Logboek[^1].Administratie);
+        Assert.Equal(1, Dienst.VerzondenVandaag(await Dienst.LaadAsync(), Sti));
     }
 
     internal sealed class InMemoryEmailOpslag : IEmailOpslag
@@ -116,8 +139,10 @@ public sealed class EmailDienstTests
         public List<Emailsjabloon> Sjablonen { get; } = [];
         public List<VerzondenBericht> Logboek { get; } = [];
         public Emailinstellingen Instellingen { get; set; } = new();
+        public Emailinstellingen Stichting { get; set; } = new(AdministratieSoort.Stichting);
 
-        public Task<EmailStand> LaadAsync(CancellationToken annulering = default) => Task.FromResult(new EmailStand([.. Sjablonen], [.. Logboek], Instellingen));
+        public Task<EmailStand> LaadAsync(CancellationToken annulering = default) =>
+            Task.FromResult(new EmailStand([.. Sjablonen], [.. Logboek], [Instellingen, Stichting]));
 
         public Task BewaarSjabloonAsync(Emailsjabloon sjabloon, CancellationToken annulering = default)
         {
@@ -138,7 +163,15 @@ public sealed class EmailDienstTests
 
         public Task BewaarInstellingenAsync(Emailinstellingen instellingen, CancellationToken annulering = default)
         {
-            Instellingen = instellingen;
+            if (instellingen.Administratie == AdministratieSoort.Stichting)
+            {
+                Stichting = instellingen;
+            }
+            else
+            {
+                Instellingen = instellingen;
+            }
+
             return Task.CompletedTask;
         }
 
@@ -152,10 +185,12 @@ public sealed class EmailDienstTests
     internal sealed class NepVerzender : IEmailVerzender
     {
         public List<Emailbericht> Verstuurd { get; } = [];
+        public List<string?> Afzenders { get; } = [];
         public string? FoutVoor { get; set; }
 
         public Task VerstuurAsync(Emailinstellingen instellingen, Emailbericht bericht, CancellationToken annulering = default)
         {
+            Afzenders.Add(instellingen.Afzenderadres);
             if (bericht.AanAdres == FoutVoor)
             {
                 throw new EmailVerzendException("Het adres werd geweigerd.");

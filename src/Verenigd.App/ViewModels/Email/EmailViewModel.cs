@@ -6,6 +6,7 @@ using Verenigd.App.Diensten;
 using Verenigd.Application.Database;
 using Verenigd.Application.Email;
 using Verenigd.Application.Modules;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 using Verenigd.Domain.Leden;
 
@@ -19,13 +20,23 @@ public enum EmailSubtab
     Sjablonen,
 }
 
-/// <summary>Een bericht dat een andere pagina voorbereidt (besluiten 205–207): het soort, de ontvangers en waarom.</summary>
-public sealed record EmailVoorstel(Emailsoort Soort, IReadOnlyList<Emailontvanger> Ontvangers, string Aanleiding);
+/// <summary>
+/// Een bericht dat een andere pagina voorbereidt (besluiten 205–207): het soort, de ontvangers, waarom en vanuit welke
+/// administratie (besluit 211).
+/// </summary>
+public sealed record EmailVoorstel(
+    Emailsoort Soort, IReadOnlyList<Emailontvanger> Ontvangers, string Aanleiding, AdministratieSoort Administratie = AdministratieSoort.Vereniging);
+
+/// <summary>Een administratie met eigen Gmail-account (besluit 211).</summary>
+public sealed record AfzenderOptie(AdministratieSoort Administratie, string Naam)
+{
+    public override string ToString() => Naam;
+}
 
 public sealed record OntvangerkeuzeOptie(Ontvangerkeuze Keuze, string Tekst);
 
 /// <summary>Een regel in Verzonden (besluit 195): aan wie, wanneer, onderwerp en sjabloon; niet de tekst.</summary>
-public sealed record VerzondenRegel(VerzondenBericht Bericht)
+public sealed record VerzondenRegel(VerzondenBericht Bericht, string Van)
 {
     public string Tijdstip => DateTime.SpecifyKind(Bericht.TijdstipUtc, DateTimeKind.Utc).ToLocalTime().ToString("d-M-yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
 
@@ -54,24 +65,27 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
     private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
     private readonly TimeProvider _tijd;
-    private readonly Func<string> _vereniging;
+    private readonly Func<AdministratieSoort, string> _naam;
     private readonly EmailDienst _dienst;
     private IReadOnlyList<Persoon> _leden = [];
     private EmailVoorstel? _voorstel;
-    private int _verzondenVandaag;
+    private EmailStand? _stand;
 
-    public EmailViewModel(IDatabaseSessie sessie, IDialoogService dialogen, TimeProvider tijd, BoekhoudingHulpmiddelen hulpmiddelen, Func<string> vereniging)
+    public EmailViewModel(
+        IDatabaseSessie sessie, IDialoogService dialogen, TimeProvider tijd, BoekhoudingHulpmiddelen hulpmiddelen, Func<AdministratieSoort, string> naam)
         : base(ModuleCatalogus.Geef(ModuleSoort.Email), administratie: null)
     {
         ArgumentNullException.ThrowIfNull(hulpmiddelen);
         _sessie = sessie;
         _dialogen = dialogen;
         _tijd = tijd;
-        _vereniging = vereniging;
+        _naam = naam;
         _dienst = new EmailDienst(sessie, hulpmiddelen.Email, tijd);
+        GekozenOntvangerkeuze = Ontvangerkeuzes[0];
+        Afzenders = [.. Enum.GetValues<AdministratieSoort>().Select(a => new AfzenderOptie(a, naam(a)))];
+        GekozenAfzender = Afzenders[0];
         VernieuwCommand = new AsyncRelayCommand(VernieuwAsync);
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
-        GekozenOntvangerkeuze = Ontvangerkeuzes[0];
         Mislukt.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HeeftMislukt));
     }
 
@@ -110,6 +124,13 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
 
     [ObservableProperty]
     public partial OntvangerkeuzeOptie GekozenOntvangerkeuze { get; set; }
+
+    /// <summary>Besluit 211: van welke administratie (en dus welk Gmail-account) het bericht komt.</summary>
+    public IReadOnlyList<AfzenderOptie> Afzenders { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Daglimiettekst))]
+    public partial AfzenderOptie GekozenAfzender { get; set; }
 
     [ObservableProperty]
     public partial Emailsjabloon? GekozenSjabloon { get; set; }
@@ -165,7 +186,8 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
 
     public string Aantaltekst => Ontvangers.Count == 1 ? "1 ontvanger" : $"{Ontvangers.Count} ontvangers";
 
-    public string Daglimiettekst => $"Vandaag verstuurd: {_verzondenVandaag} van {EmailDienst.Daglimiet}";
+    public string Daglimiettekst =>
+        $"Vandaag verstuurd door {GekozenAfzender.Naam}: {(_stand is null ? 0 : _dienst.VerzondenVandaag(_stand, GekozenAfzender.Administratie))} van {EmailDienst.Daglimiet}";
 
     public string VoorbeeldOnderwerp => GekozenOntvanger is { } o ? Sjablooninvuller.Vul(Onderwerp, o.Velden) : Onderwerp;
 
@@ -197,19 +219,12 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
     private async Task VernieuwAsync()
     {
         var stand = await _dienst.LaadAsync();
-        _verzondenVandaag = _dienst.VerzondenVandaag(stand);
-        IsGekoppeld = stand.Instellingen is { IsGekoppeld: true, Afzenderadres: not null };
         VulSjablonen(stand.Sjablonen);
-        Logboek.Clear();
-        foreach (var bericht in stand.Logboek.OrderByDescending(b => b.TijdstipUtc))
-        {
-            Logboek.Add(new VerzondenRegel(bericht));
-        }
+        ToonLogboek(stand);
 
         _leden = await _sessie.Leden.HaalAlleAsync();
         VulGroepen();
         BepaalOntvangers();
-        OnPropertyChanged(nameof(Daglimiettekst));
     }
 
     private void VulSjablonen(IReadOnlyList<Emailsjabloon> sjablonen)
@@ -267,6 +282,15 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
 
     partial void OnGekozenOntvangerkeuzeChanged(OntvangerkeuzeOptie value) => BepaalOntvangers();
 
+    partial void OnGekozenAfzenderChanged(AfzenderOptie value)
+    {
+        IsGekoppeld = _stand?.Instellingen(value.Administratie) is { IsGekoppeld: true, Afzenderadres: not null };
+        if (_voorstel is null)
+        {
+            BepaalOntvangers(); // {vereniging} is de naam van de afzender
+        }
+    }
+
     partial void OnGekozenSjabloonChanged(Emailsjabloon? value)
     {
         if (value is not null && !_sjabloonStil)
@@ -312,6 +336,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
         Mislukt.Clear();
         Melding = null;
         Foutmelding = voorstel.Ontvangers.Count == 0 ? "Er is geen geldig e-mailadres gevonden voor dit bericht." : null;
+        GekozenAfzender = Afzenders.Single(a => a.Administratie == voorstel.Administratie);
         GekozenSjabloon = Sjablonen.FirstOrDefault(s => s.Soort == voorstel.Soort && s.IsStandaard) ?? Sjablonen.FirstOrDefault(s => s.Soort == voorstel.Soort);
         BepaalOntvangers();
         OnPropertyChanged(nameof(IsVoorbereid));
@@ -331,6 +356,11 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
 
     private void BepaalOntvangers()
     {
+        if (GekozenOntvangerkeuze is null || GekozenAfzender is null)
+        {
+            return; // tijdens het opbouwen van de pagina
+        }
+
         IReadOnlyList<Emailontvanger> ontvangers;
         if (_voorstel is not null)
         {
@@ -342,7 +372,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
             var gekozen = Groepen.Where(g => g.IsGekozen).Select(g => g.Naam).ToHashSet(StringComparer.Ordinal);
             var vandaag = Vandaag;
             var leden = _leden.Where(l => l.Functies.Any(f => f.IsActief(vandaag) && gekozen.Contains(f.Groep.Naam))).ToList();
-            ontvangers = Application.Email.Ontvangers.VoorLeden(leden, GekozenOntvangerkeuze.Keuze, vandaag, _vereniging());
+            ontvangers = Application.Email.Ontvangers.VoorLeden(leden, GekozenOntvangerkeuze.Keuze, vandaag, GekozenAfzender.Naam);
             var zonder = Application.Email.Ontvangers.ZonderAdres(leden, GekozenOntvangerkeuze.Keuze, vandaag);
             ZonderAdres = zonder.Count == 0 ? null : $"Geen geldig e-mailadres bij: {string.Join(", ", zonder.Select(l => l.VolledigeNaam))}.";
         }
@@ -379,7 +409,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
         Mislukt.Clear();
         try
         {
-            var resultaat = await _dienst.VerstuurAsync([.. Ontvangers], Onderwerp, Tekst, GekozenSjabloon?.Naam ?? "Eigen tekst",
+            var resultaat = await _dienst.VerstuurAsync(GekozenAfzender.Administratie, [.. Ontvangers], Onderwerp, Tekst, GekozenSjabloon?.Naam ?? "Eigen tekst",
                 new Melder(i => Voortgang = $"Versturen... {i} van {aantal}"));
             foreach (var mislukking in resultaat.Mislukt)
             {
@@ -416,7 +446,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
         Foutmelding = null;
         try
         {
-            await _dienst.ProefAsync(GekozenOntvanger ?? Ontvangers[0], Onderwerp, Tekst);
+            await _dienst.ProefAsync(GekozenAfzender.Administratie, GekozenOntvanger ?? Ontvangers[0], Onderwerp, Tekst);
             Melding = "Proef verstuurd naar uw eigen adres.";
         }
         catch (Exception ex) when (ex is EmailVerzendException or InvalidOperationException)
@@ -429,14 +459,16 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
         }
     }
 
-    private async Task VernieuwLogboekAsync()
+    private async Task VernieuwLogboekAsync() => ToonLogboek(await _dienst.LaadAsync());
+
+    private void ToonLogboek(EmailStand stand)
     {
-        var stand = await _dienst.LaadAsync();
-        _verzondenVandaag = _dienst.VerzondenVandaag(stand);
+        _stand = stand;
+        IsGekoppeld = stand.Instellingen(GekozenAfzender.Administratie) is { IsGekoppeld: true, Afzenderadres: not null };
         Logboek.Clear();
         foreach (var bericht in stand.Logboek.OrderByDescending(b => b.TijdstipUtc))
         {
-            Logboek.Add(new VerzondenRegel(bericht));
+            Logboek.Add(new VerzondenRegel(bericht, _naam(bericht.Administratie)));
         }
 
         OnPropertyChanged(nameof(Daglimiettekst));

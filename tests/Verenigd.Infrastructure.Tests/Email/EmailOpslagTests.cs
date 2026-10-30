@@ -1,5 +1,6 @@
 using System.Text;
 using Verenigd.Application.Email;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Email;
@@ -31,21 +32,29 @@ public sealed class EmailOpslagTests : IDisposable
             eigen.Wijzig("Kamp", "Kamp 2027: aanmelden", "Beste {aanhef}");
             await dienst.BewaarSjabloonAsync(eigen);
 
-            var instellingen = stand.Instellingen;
+            var instellingen = stand.Instellingen(AdministratieSoort.Vereniging);
             instellingen.ZetAfzender("Penningmeester", "penningmeester@example.org");
             instellingen.ZetClient("id.apps.googleusercontent.com", "geheim");
             instellingen.Koppel("vernieuwingssleutel", DateTime.UtcNow);
             await dienst.BewaarInstellingenAsync(instellingen);
             await sessie.Email.LogAsync(VerzondenBericht.Gelukt("Anna", "anna@example.org", "Kamp", "Kamp", DateTime.UtcNow));
+
+            var stichting = stand.Instellingen(AdministratieSoort.Stichting);
+            stichting.ZetAfzender("Penningmeester Stichting", "stichting@example.org");
+            await dienst.BewaarInstellingenAsync(stichting);
+            await sessie.Email.LogAsync(VerzondenBericht.Gelukt("Kerk", "kerk@example.org", "Factuur", "Factuur", DateTime.UtcNow, AdministratieSoort.Stichting));
         }
 
         await using (var sessie = await _beheer.OpenAsync(pad, Wachtwoord))
         {
             var stand = await sessie.Email.LaadAsync();
             Assert.Equal("Kamp 2027: aanmelden", stand.Sjablonen.Single(s => s.Naam == "Kamp").Onderwerp);
-            Assert.True(stand.Instellingen.IsGekoppeld);
-            Assert.Equal("penningmeester@example.org", stand.Instellingen.Afzenderadres);
-            Assert.Equal("anna@example.org", Assert.Single(stand.Logboek).Adres);
+            Assert.True(stand.Instellingen(AdministratieSoort.Vereniging).IsGekoppeld);
+            Assert.Equal("penningmeester@example.org", stand.Instellingen(AdministratieSoort.Vereniging).Afzenderadres);
+            Assert.Equal("stichting@example.org", stand.Instellingen(AdministratieSoort.Stichting).Afzenderadres);
+            Assert.False(stand.Instellingen(AdministratieSoort.Stichting).IsGekoppeld);
+            Assert.Equal(AdministratieSoort.Vereniging, stand.Logboek.Single(b => b.Adres == "anna@example.org").Administratie);
+            Assert.Equal(AdministratieSoort.Stichting, stand.Logboek.Single(b => b.Adres == "kerk@example.org").Administratie);
 
             await sessie.Email.VerwijderSjabloonAsync(stand.Sjablonen.First(s => s.IsStandaard).Id); // standaard blijft staan
             Assert.Equal(stand.Sjablonen.Count, (await sessie.Email.LaadAsync()).Sjablonen.Count);

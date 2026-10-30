@@ -199,11 +199,16 @@
 
                 <!-- ===== Bank ===== -->
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Bank}">
-                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                               Text="Lees een bankafschrift (CAMT.053) van de Vereniging in. Verenigd herkent de eigen rekeningen aan het IBAN en maakt per rekening een bankdagboek. Richt eerst de boekhouding in." />
+                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16" TextWrapping="Wrap"
+                               Text="Lees een bankafschrift (CAMT.053) in. Verenigd herkent de eigen rekeningen aan het IBAN en maakt per rekening een bankdagboek (betaal- en spaarrekening). Richt eerst de boekhouding van die administratie in." />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Label Content="Admi_nistratie" Target="{Binding ElementName=BankVoorKeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                        <ComboBox x:Name="BankVoorKeuze" ItemsSource="{x:Static vm:StartwizardViewModel.BoekhoudingKeuzes}" SelectedItem="{Binding BankVoor}"
+                                  Width="160" AutomationProperties.AutomationId="StartwizardBankVoor" />
+                    </StackPanel>
                     <Button Content="Bank_afschrift inlezen..." Command="{Binding BankInlezenCommand}" Style="{DynamicResource AccentButtonStyle}"
                             ContentTemplate="{StaticResource Toegangstekst}" HorizontalAlignment="Left" AutomationProperties.AutomationId="StartwizardBank"
-                            IsEnabled="{Binding Status.BoekhoudingVereniging}" />
+                            IsEnabled="{Binding KanBankInlezen}" />
                 </StackPanel>
 
                 <!-- ===== Contributie ===== -->

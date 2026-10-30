@@ -65,5 +65,19 @@ public sealed class ShellIncassoTests
         Assert.NotNull(instellingen.Incasso);
         await instellingen.Incasso.LaadCommand.ExecutionTask!;
         Assert.False(instellingen.HeeftOnopgeslagenWijzigingen);
+        Assert.Equal(2, instellingen.Facturen.Count); // besluit 209: per administratie
+        Assert.Equal(2, instellingen.Emailkoppelingen.Count); // besluit 211
+    }
+
+    [Fact]
+    public async Task Instellingen_tonen_factuur_en_email_per_administratie()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+
+        shell.OpenModuleCommand.Execute(ModuleVerzoek.Instellingen);
+
+        var instellingen = Assert.IsType<InstellingenViewModel>(shell.GeselecteerdTabblad);
+        Assert.Equal([AdministratieSoort.Vereniging, AdministratieSoort.Stichting], instellingen.Facturen.Select(f => f.Administratie));
+        Assert.Equal([AdministratieSoort.Vereniging, AdministratieSoort.Stichting], instellingen.Emailkoppelingen.Select(e => e.Administratie));
     }
 }

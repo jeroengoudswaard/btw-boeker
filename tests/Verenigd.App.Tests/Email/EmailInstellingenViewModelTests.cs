@@ -1,5 +1,6 @@
 using Verenigd.App.ViewModels.Email;
 using Verenigd.Application.Email;
+using Verenigd.Domain.Administraties;
 
 namespace Verenigd.App.Tests.Email;
 
@@ -13,10 +14,10 @@ public sealed class EmailInstellingenViewModelTests : IDisposable
 
     public void Dispose() => File.Delete(_clientbestand);
 
-    private async Task<EmailInstellingenViewModel> MaakAsync()
+    private async Task<EmailInstellingenViewModel> MaakAsync(AdministratieSoort administratie = AdministratieSoort.Vereniging)
     {
         var sessie = new FakeSessie("test.vdb", new InMemoryAdministratieRepository(), new InMemoryLedenOpslag()) { Email = _opslag };
-        var vm = new EmailInstellingenViewModel(new EmailDienst(sessie, new NepVerzender(), TimeProvider.System), _koppeling, _dialogen);
+        var vm = new EmailInstellingenViewModel(new EmailDienst(sessie, new NepVerzender(), TimeProvider.System), _koppeling, _dialogen, administratie, administratie.ToString());
         await vm.LaadCommand.ExecuteAsync(null);
         return vm;
     }
@@ -86,5 +87,27 @@ public sealed class EmailInstellingenViewModelTests : IDisposable
         Assert.Single(_dialogen.Bevestigingsvragen);
         Assert.False(vm.IsGekoppeld);
         Assert.Null(_opslag.Instellingen.Vernieuwingssleutel);
+    }
+
+    [Fact]
+    public async Task De_stichting_koppelt_een_eigen_gmail_account()
+    {
+        _opslag.Koppel(); // de Vereniging is al gekoppeld
+        var vm = await MaakAsync(AdministratieSoort.Stichting);
+        Assert.False(vm.IsGekoppeld);
+        Assert.Equal("E-mail (Stichting)", vm.Titel);
+
+        vm.Afzendernaam = "Penningmeester Stichting";
+        vm.Afzenderadres = "stichting@example.org";
+        await vm.BewaarAsync();
+        await File.WriteAllTextAsync(_clientbestand, """{"installed":{"client_id":"456.apps.googleusercontent.com","client_secret":"ander"}}""");
+        _dialogen.Clientbestand = _clientbestand;
+        await vm.LeesClientbestandCommand.ExecuteAsync(null);
+        await vm.KoppelCommand.ExecuteAsync(null);
+
+        Assert.True(vm.IsGekoppeld);
+        Assert.Equal("stichting@example.org", _opslag.Stichting.Afzenderadres);
+        Assert.Equal("456.apps.googleusercontent.com", _opslag.Stichting.ClientId);
+        Assert.Equal("penningmeester@example.org", _opslag.Instellingen.Afzenderadres); // de Vereniging blijft ongewijzigd
     }
 }

@@ -23,8 +23,8 @@
                         Command="{Binding DataContext.OpenModuleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{x:Static root:ModuleVerzoek.Instellingen}" />
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="⚠ E-mail is nog niet gekoppeld." FontWeight="SemiBold" />
-                    <Run Text="Koppel eenmalig met Gmail bij Instellingen › E-mail; daarna kunt u hier versturen. Opstellen en sjablonen aanpassen kan nu al." />
+                    <Run Text="{Binding GekozenAfzender.Naam, Mode=OneWay, StringFormat='⚠ E-mail van {0} is nog niet gekoppeld.'}" FontWeight="SemiBold" />
+                    <Run Text="Koppel eenmalig het Gmail-account van deze afzender bij Instellingen › E-mail; daarna kunt u hier versturen. Opstellen en sjablonen aanpassen kan nu al." />
                 </TextBlock>
             </DockPanel>
         </tg:Groepskader>
@@ -131,12 +131,17 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Label Content="_Sjabloon" Target="{Binding ElementName=Sjabloonkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
-                            <ComboBox x:Name="Sjabloonkeuze" Grid.Column="1" ItemsSource="{Binding Sjablonen}" SelectedItem="{Binding GekozenSjabloon}"
+                            <Label Content="V_an" Target="{Binding ElementName=Afzenderkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <ComboBox x:Name="Afzenderkeuze" Grid.Column="1" ItemsSource="{Binding Afzenders}" SelectedItem="{Binding GekozenAfzender}"
+                                      DisplayMemberPath="Naam" HorizontalAlignment="Left" MinWidth="220" Margin="0,0,0,8"
+                                      ToolTip="Elke administratie verstuurt met haar eigen Gmail-account" AutomationProperties.AutomationId="EmailAfzender" />
+                            <Label Grid.Row="1" Content="_Sjabloon" Target="{Binding ElementName=Sjabloonkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <ComboBox x:Name="Sjabloonkeuze" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Sjablonen}" SelectedItem="{Binding GekozenSjabloon}"
                                       DisplayMemberPath="Naam" Margin="0,0,0,8" AutomationProperties.AutomationId="EmailSjabloon" />
-                            <Label Grid.Row="1" Content="O_nderwerp" Target="{Binding ElementName=Onderwerpveld}" VerticalAlignment="Center" Padding="0,0,12,0" />
-                            <TextBox x:Name="Onderwerpveld" Grid.Row="1" Grid.Column="1" MaxLength="200" Margin="0,0,0,8"
+                            <Label Grid.Row="2" Content="O_nderwerp" Target="{Binding ElementName=Onderwerpveld}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <TextBox x:Name="Onderwerpveld" Grid.Row="2" Grid.Column="1" MaxLength="200" Margin="0,0,0,8"
                                      Text="{Binding Onderwerp, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="EmailOnderwerp" />
                         </Grid>
                         <Label DockPanel.Dock="Top" Content="_Tekst (invulvelden tussen { }, zie Sjablonen)" Target="{Binding ElementName=Tekstveld}" Padding="0,0,0,4" />
@@ -181,6 +186,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Tijdstip" Binding="{Binding Tijdstip}" Width="Auto" />
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                            <DataGridTextColumn Header="Van" Binding="{Binding Van}" Width="*" />
                             <DataGridTextColumn Header="Aan" Binding="{Binding Bericht.Naam}" Width="*" />
                             <DataGridTextColumn Header="Adres" Binding="{Binding Bericht.Adres}" Width="*" />
                             <DataGridTextColumn Header="Onderwerp" Binding="{Binding Bericht.Onderwerp}" Width="2*" />

@@ -69,4 +69,20 @@ public sealed class FactuurInstellingenViewModelTests : IDisposable
         Assert.NotNull(vm.Fout);
         Assert.Equal("Geen logo", vm.Logotekst);
     }
+
+    [Fact]
+    public async Task De_stichting_heeft_eigen_factuurgegevens()
+    {
+        var stichting = new FactuurInstellingenViewModel(new FactuurDienst(_sessie, TimeProvider.System), _dialogen, AdministratieSoort.Stichting, "Stichting De Hut");
+        await stichting.LaadAsync();
+        Assert.Equal("Facturen (Stichting De Hut)", stichting.Titel);
+
+        stichting.Naam = "Stichting De Hut";
+        stichting.Iban = "NL91ABNA0417164300";
+        await stichting.BewaarAsync();
+
+        var dienst = new FactuurDienst(_sessie, TimeProvider.System);
+        Assert.Equal("Stichting De Hut", (await dienst.LaadAsync(AdministratieSoort.Stichting)).Factuurinstellingen!.Naam);
+        Assert.Null((await dienst.LaadAsync(AdministratieSoort.Vereniging)).Factuurinstellingen);
+    }
 }

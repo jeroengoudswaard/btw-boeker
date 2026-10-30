@@ -129,6 +129,11 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Administratie")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1);
+
                     b.Property<string>("Adres")
                         .IsRequired()
                         .HasMaxLength(320)

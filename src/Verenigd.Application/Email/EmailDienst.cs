@@ -1,9 +1,15 @@
 using Verenigd.Application.Database;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 
 namespace Verenigd.Application.Email;
 
-public sealed record EmailStand(IReadOnlyList<Emailsjabloon> Sjablonen, IReadOnlyList<VerzondenBericht> Logboek, Emailinstellingen Instellingen);
+public sealed record EmailStand(IReadOnlyList<Emailsjabloon> Sjablonen, IReadOnlyList<VerzondenBericht> Logboek, IReadOnlyList<Emailinstellingen> Koppelingen)
+{
+    /// <summary>Besluit 211: de koppeling van een administratie; een nieuwe, lege als die er nog niet is.</summary>
+    public Emailinstellingen Instellingen(AdministratieSoort administratie) =>
+        Koppelingen.FirstOrDefault(k => k.Administratie == administratie) ?? new Emailinstellingen(administratie);
+}
 
 /// <summary>Sjablonen, logboek en instellingen van e-mail, in de versleutelde database.</summary>
 public interface IEmailOpslag
@@ -57,21 +63,22 @@ public sealed class EmailDienst(IDatabaseSessie sessie, IEmailVerzender verzende
         return await sessie.Email.LaadAsync(annulering).ConfigureAwait(false);
     }
 
-    public int VerzondenVandaag(EmailStand stand)
+    /// <summary>De daglimiet geldt per Gmail-account, dus per administratie (besluit 211).</summary>
+    public int VerzondenVandaag(EmailStand stand, AdministratieSoort administratie)
     {
         ArgumentNullException.ThrowIfNull(stand);
         var vandaag = NuUtc.Date;
-        return stand.Logboek.Count(b => b.Status == Verzendstatus.Verzonden && b.TijdstipUtc.Date == vandaag);
+        return stand.Logboek.Count(b => b.Administratie == administratie && b.Status == Verzendstatus.Verzonden && b.TijdstipUtc.Date == vandaag);
     }
 
     public async Task<Verzendresultaat> VerstuurAsync(
-        IReadOnlyList<Emailontvanger> ontvangers, string onderwerp, string tekst, string sjabloonnaam, IProgress<int>? voortgang = null,
+        AdministratieSoort administratie, IReadOnlyList<Emailontvanger> ontvangers, string onderwerp, string tekst, string sjabloonnaam, IProgress<int>? voortgang = null,
         CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(ontvangers);
         var stand = await LaadAsync(annulering).ConfigureAwait(false);
-        var instellingen = Gekoppeld(stand);
-        var ruimte = Math.Max(0, Daglimiet - VerzondenVandaag(stand));
+        var instellingen = Gekoppeld(stand, administratie);
+        var ruimte = Math.Max(0, Daglimiet - VerzondenVandaag(stand, administratie));
         var verzonden = 0;
         var mislukt = new List<Mislukking>();
         for (var i = 0; i < ontvangers.Count && i < ruimte; i++)
@@ -82,12 +89,12 @@ public sealed class EmailDienst(IDatabaseSessie sessie, IEmailVerzender verzende
             try
             {
                 await verzender.VerstuurAsync(instellingen, bericht, annulering).ConfigureAwait(false);
-                await sessie.Email.LogAsync(VerzondenBericht.Gelukt(ontvanger.Naam, ontvanger.Adres, bericht.Onderwerp, sjabloonnaam, NuUtc), annulering).ConfigureAwait(false);
+                await sessie.Email.LogAsync(VerzondenBericht.Gelukt(ontvanger.Naam, ontvanger.Adres, bericht.Onderwerp, sjabloonnaam, NuUtc, administratie), annulering).ConfigureAwait(false);
                 verzonden++;
             }
             catch (EmailVerzendException ex)
             {
-                await sessie.Email.LogAsync(VerzondenBericht.Mislukt(ontvanger.Naam, ontvanger.Adres, bericht.Onderwerp, sjabloonnaam, ex.Message, NuUtc), annulering).ConfigureAwait(false);
+                await sessie.Email.LogAsync(VerzondenBericht.Mislukt(ontvanger.Naam, ontvanger.Adres, bericht.Onderwerp, sjabloonnaam, ex.Message, NuUtc, administratie), annulering).ConfigureAwait(false);
                 mislukt.Add(new Mislukking(ontvanger, ex.Message));
             }
 
@@ -98,10 +105,10 @@ public sealed class EmailDienst(IDatabaseSessie sessie, IEmailVerzender verzende
     }
 
     /// <summary>Het bericht zoals <paramref name="voorbeeld"/> het krijgt, naar het eigen adres; niet in het logboek.</summary>
-    public async Task ProefAsync(Emailontvanger voorbeeld, string onderwerp, string tekst, CancellationToken annulering = default)
+    public async Task ProefAsync(AdministratieSoort administratie, Emailontvanger voorbeeld, string onderwerp, string tekst, CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(voorbeeld);
-        var instellingen = Gekoppeld(await LaadAsync(annulering).ConfigureAwait(false));
+        var instellingen = Gekoppeld(await LaadAsync(annulering).ConfigureAwait(false), administratie);
         var bericht = Maak(voorbeeld, onderwerp, tekst);
         await verzender.VerstuurAsync(instellingen,
             bericht with { AanNaam = instellingen.Afzendernaam ?? instellingen.Afzenderadres!, AanAdres = instellingen.Afzenderadres!, Onderwerp = "[Proef] " + bericht.Onderwerp },
@@ -131,11 +138,11 @@ public sealed class EmailDienst(IDatabaseSessie sessie, IEmailVerzender verzende
         sessie.Email.BewaarInstellingenAsync(instellingen, annulering);
 
     /// <summary>De eenmalige toestemming in de browser (besluit 192); bewaart de vernieuwingssleutel versleuteld.</summary>
-    public async Task KoppelAsync(IGoogleKoppeling koppeling, CancellationToken annulering = default)
+    public async Task KoppelAsync(AdministratieSoort administratie, IGoogleKoppeling koppeling, CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(koppeling);
         var stand = await LaadAsync(annulering).ConfigureAwait(false);
-        var instellingen = stand.Instellingen;
+        var instellingen = stand.Instellingen(administratie);
         if (!instellingen.HeeftClient)
         {
             throw new InvalidOperationException("Lees eerst het clientbestand van Google Cloud in.");
@@ -146,10 +153,10 @@ public sealed class EmailDienst(IDatabaseSessie sessie, IEmailVerzender verzende
         await sessie.Email.BewaarInstellingenAsync(instellingen, annulering).ConfigureAwait(false);
     }
 
-    private static Emailinstellingen Gekoppeld(EmailStand stand) =>
-        stand.Instellingen is { IsGekoppeld: true, Afzenderadres: not null } instellingen
+    private static Emailinstellingen Gekoppeld(EmailStand stand, AdministratieSoort administratie) =>
+        stand.Instellingen(administratie) is { IsGekoppeld: true, Afzenderadres: not null } instellingen
             ? instellingen
-            : throw new InvalidOperationException("E-mail is nog niet gekoppeld: ga naar Instellingen › E-mail.");
+            : throw new InvalidOperationException($"E-mail van de {administratie} is nog niet gekoppeld: ga naar Instellingen › E-mail.");
 }
 
 /// <summary>De ingebouwde sjablonen (besluit 191), aan te passen door de gebruiker.</summary>

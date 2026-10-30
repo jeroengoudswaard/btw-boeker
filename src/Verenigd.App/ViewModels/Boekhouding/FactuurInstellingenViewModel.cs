@@ -9,12 +9,11 @@ using Verenigd.Domain.Financien.Facturen;
 namespace Verenigd.App.ViewModels.Boekhouding;
 
 /// <summary>
-/// Instellingen › Facturen: afzender, betaaltermijn, voettekst en logo van de Vereniging op de verkoopfactuur
-/// (besluiten 107 en 112). Het logo staat in de versleutelde database.
+/// Instellingen › Facturen: afzender, betaaltermijn, voettekst en logo van één administratie op de verkoopfactuur
+/// (besluiten 112 en 209). Het logo staat in de versleutelde database.
 /// </summary>
 public sealed partial class FactuurInstellingenViewModel : ObservableObject
 {
-    private const AdministratieSoort Administratie = AdministratieSoort.Vereniging;
     private readonly FactuurDienst _dienst;
     private readonly IDialoogService _dialogen;
     private string _origineel = string.Empty;
@@ -23,15 +22,23 @@ public sealed partial class FactuurInstellingenViewModel : ObservableObject
     /// <summary><c>null</c>: ongewijzigd; leeg: wissen; anders het nieuwe logo.</summary>
     private byte[]? _nieuwLogo;
 
-    public FactuurInstellingenViewModel(FactuurDienst dienst, IDialoogService dialogen)
+    public FactuurInstellingenViewModel(
+        FactuurDienst dienst, IDialoogService dialogen, AdministratieSoort administratie = AdministratieSoort.Vereniging, string? naam = null)
     {
         _dienst = dienst;
         _dialogen = dialogen;
+        Administratie = administratie;
+        Titel = $"Facturen ({naam ?? administratie.ToString()})";
         LaadCommand = new AsyncRelayCommand(LaadAsync);
         _origineel = Momentopname();
     }
 
     public IAsyncRelayCommand LaadCommand { get; }
+
+    /// <summary>Besluit 209: elke administratie heeft eigen gegevens op de factuur.</summary>
+    public AdministratieSoort Administratie { get; }
+
+    public string Titel { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]

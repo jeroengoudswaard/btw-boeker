@@ -1,3 +1,4 @@
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 
 namespace Verenigd.Domain.Tests.Communicatie;
@@ -69,4 +70,17 @@ public sealed class EmailTests
     [InlineData("anna example.org", false)]
     [InlineData("", false)]
     public void Emailadres_herkent_een_geldig_adres(string adres, bool geldig) => Assert.Equal(geldig, Emailadres.IsGeldig(adres));
+
+    [Fact]
+    public void Elke_administratie_heeft_eigen_instellingen_en_het_logboek_onthoudt_de_afzender()
+    {
+        Assert.Equal(AdministratieSoort.Vereniging, new Emailinstellingen().Administratie);
+        var stichting = new Emailinstellingen(AdministratieSoort.Stichting);
+        Assert.Equal(AdministratieSoort.Stichting, stichting.Administratie);
+        Assert.NotEqual(new Emailinstellingen().Id, stichting.Id);
+
+        Assert.Equal(AdministratieSoort.Vereniging, VerzondenBericht.Gelukt("Anna", "anna@example.org", "Kamp", "Vrij", Nu).Administratie);
+        Assert.Equal(AdministratieSoort.Stichting,
+            VerzondenBericht.Mislukt("Kerk", "kerk@example.org", "Factuur", "Factuur", "Fout", Nu, AdministratieSoort.Stichting).Administratie);
+    }
 }

@@ -15,7 +15,7 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 
     public InstellingenViewModel(
         IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null,
-        Boekhouding.FactuurInstellingenViewModel? facturen = null, EmailInstellingenViewModel? email = null)
+        IReadOnlyList<Boekhouding.FactuurInstellingenViewModel>? facturen = null, IReadOnlyList<EmailInstellingenViewModel>? email = null)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
@@ -25,16 +25,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             incasso.PropertyChanged += RegelGewijzigd;
         }
 
-        Facturen = facturen;
-        if (facturen is not null)
+        Facturen = facturen ?? [];
+        Emailkoppelingen = email ?? [];
+        foreach (var blok in Blokken)
         {
-            facturen.PropertyChanged += RegelGewijzigd;
-        }
-
-        Email = email;
-        if (email is not null)
-        {
-            email.PropertyChanged += RegelGewijzigd;
+            blok.PropertyChanged += RegelGewijzigd;
         }
 
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
@@ -50,24 +45,26 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
     /// <summary>Incassogegevens van de Vereniging (fase 3).</summary>
     public IncassoInstellingenViewModel? Incasso { get; }
 
-    /// <summary>Gegevens op de verkoopfactuur van de Vereniging (stap 4c-2).</summary>
-    public Boekhouding.FactuurInstellingenViewModel? Facturen { get; }
+    /// <summary>Gegevens op de verkoopfactuur, per administratie (besluit 209).</summary>
+    public IReadOnlyList<Boekhouding.FactuurInstellingenViewModel> Facturen { get; }
 
-    /// <summary>Afzender en koppeling met Gmail (fase 6).</summary>
-    public EmailInstellingenViewModel? Email { get; }
+    /// <summary>Afzender en koppeling met Gmail, per administratie (besluit 211).</summary>
+    public IReadOnlyList<EmailInstellingenViewModel> Emailkoppelingen { get; }
+
+    private IEnumerable<ObservableObject> Blokken => Facturen.Cast<ObservableObject>().Concat(Emailkoppelingen);
 
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
     public IAsyncRelayCommand OpslaanCommand { get; }
 
-    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen?.IsGewijzigd == true
-        || Email?.IsGewijzigd == true;
+    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen.Any(f => f.IsGewijzigd)
+        || Emailkoppelingen.Any(e => e.IsGewijzigd);
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null)
-        && (Facturen is not { IsGewijzigd: true } || Facturen.Fout is null)
-        && (Email is not { IsGewijzigd: true } || Email.Fout is null);
+        && Facturen.All(f => !f.IsGewijzigd || f.Fout is null)
+        && Emailkoppelingen.All(e => !e.IsGewijzigd || e.Fout is null);
 
     public override async Task<bool> BewaarAsync()
     {
@@ -94,11 +91,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             }
         }
 
-        if (Facturen is { IsGewijzigd: true })
+        foreach (var facturen in Facturen.Where(f => f.IsGewijzigd))
         {
             try
             {
-                await Facturen.BewaarAsync();
+                await facturen.BewaarAsync();
             }
             catch (ArgumentException ex)
             {
@@ -107,11 +104,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             }
         }
 
-        if (Email is { IsGewijzigd: true })
+        foreach (var email in Emailkoppelingen.Where(e => e.IsGewijzigd))
         {
             try
             {
-                await Email.BewaarAsync();
+                await email.BewaarAsync();
             }
             catch (ArgumentException ex)
             {
@@ -136,14 +133,9 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             Incasso.PropertyChanged -= RegelGewijzigd;
         }
 
-        if (Facturen is not null)
+        foreach (var blok in Blokken)
         {
-            Facturen.PropertyChanged -= RegelGewijzigd;
-        }
-
-        if (Email is not null)
-        {
-            Email.PropertyChanged -= RegelGewijzigd;
+            blok.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();

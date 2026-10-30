@@ -297,8 +297,11 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             nieuw.Count == 1 ? "Welkomstmail voor 1 nieuw lid" : $"Welkomstmail voor {nieuw.Count} nieuwe leden"));
     }
 
-    /// <summary>De naam in {vereniging} van een e-mail: de naam van de administratie Vereniging.</summary>
-    private string Verenigingsnaam => Administraties.FirstOrDefault(a => a.Soort == AdministratieSoort.Vereniging)?.Naam ?? "de vereniging";
+    /// <summary>De naam in {vereniging} van een e-mail: de naam van de administratie die verstuurt.</summary>
+    private string Administratienaam(AdministratieSoort soort) =>
+        Administraties.FirstOrDefault(a => a.Soort == soort)?.Naam ?? (soort == AdministratieSoort.Stichting ? "de stichting" : "de vereniging");
+
+    private string Verenigingsnaam => Administratienaam(AdministratieSoort.Vereniging);
 
     /// <summary>Opent E-mail › Opstellen met een bericht dat een andere pagina heeft voorbereid.</summary>
     private async Task OpenEmailAsync(EmailVoorstel voorstel)
@@ -533,8 +536,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             _ => boekhouding.LeegBeginnenCommand.ExecuteAsync(null),
         });
 
-    Task IStartwizardRegie.ImporteerBankafschriftAsync() =>
-        InBoekhoudingAsync(AdministratieSoort.Vereniging, boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
+    Task IStartwizardRegie.ImporteerBankafschriftAsync(AdministratieSoort administratie) =>
+        InBoekhoudingAsync(administratie, boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
 
     void IStartwizardRegie.OpenTarieven()
     {
@@ -636,12 +639,13 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         {
             ModuleSoort.Instellingen => new InstellingenViewModel(
                 _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
-                new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen),
-                new EmailInstellingenViewModel(new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen)),
+                [.. Administraties.Select(a => new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen, a.Soort, a.Naam))],
+                [.. Administraties.Select(a => new EmailInstellingenViewModel(
+                    new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen, a.Soort, a.Naam))]),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
-            ModuleSoort.Email => new EmailViewModel(_sessie!, _dialogen, _tijd, _boekhouding, () => Verenigingsnaam),
+            ModuleSoort.Email => new EmailViewModel(_sessie!, _dialogen, _tijd, _boekhouding, Administratienaam),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         tab.EmailAanbieden = OpenEmailAsync;
@@ -660,8 +664,16 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 break;
             case InstellingenViewModel instellingen:
                 instellingen.Incasso?.LaadCommand.Execute(null);
-                instellingen.Facturen?.LaadCommand.Execute(null);
-                instellingen.Email?.LaadCommand.Execute(null);
+                foreach (var facturen in instellingen.Facturen)
+                {
+                    facturen.LaadCommand.Execute(null);
+                }
+
+                foreach (var email in instellingen.Emailkoppelingen)
+                {
+                    email.LaadCommand.Execute(null);
+                }
+
                 break;
             case EmailViewModel email:
                 email.VernieuwCommand.Execute(null);

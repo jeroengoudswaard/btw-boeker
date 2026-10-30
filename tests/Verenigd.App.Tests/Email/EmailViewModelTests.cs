@@ -1,6 +1,7 @@
 using Verenigd.App.Tests.Leden;
 using Verenigd.App.ViewModels.Email;
 using Verenigd.Application.Email;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 using Verenigd.Domain.Leden;
 
@@ -27,7 +28,7 @@ public sealed class EmailViewModelTests
         _beheer.Voeg("test.vdb", "geheim");
         var sessie = await _beheer.OpenAsync("test.vdb", "geheim");
         var pagina = new EmailViewModel(sessie, _dialogen, new VasteTijd(new DateTimeOffset(2026, 10, 27, 10, 0, 0, TimeSpan.Zero)),
-            FakeBoekhouding.Hulpmiddelen(_verzender), () => "Scouting Ergens");
+            FakeBoekhouding.Hulpmiddelen(_verzender), a => a == AdministratieSoort.Stichting ? "Stichting De Hut" : "Scouting Ergens");
         await pagina.VernieuwCommand.ExecuteAsync(null);
         return pagina;
     }
@@ -186,5 +187,39 @@ public sealed class EmailViewModelTests
 
         Assert.NotNull(pagina.Bewerking.Fout);
         Assert.False(pagina.KanOpslaan);
+    }
+
+    [Fact]
+    public async Task De_afzender_bepaalt_de_koppeling_de_daglimiet_en_het_logboek()
+    {
+        var pagina = await MaakAsync();
+        Assert.Equal(AdministratieSoort.Vereniging, pagina.GekozenAfzender.Administratie);
+        pagina.Groepen.Single(g => g.Naam == "Scouts").IsGekozen = true;
+        pagina.Onderwerp = "Groet van {vereniging}";
+        pagina.Tekst = "Tekst";
+
+        pagina.GekozenAfzender = pagina.Afzenders.Single(a => a.Administratie == AdministratieSoort.Stichting);
+        Assert.False(pagina.IsGekoppeld); // de Stichting heeft nog geen eigen Gmail-koppeling
+        Assert.False(pagina.VerstuurCommand.CanExecute(null));
+        Assert.Equal("Groet van Stichting De Hut", pagina.VoorbeeldOnderwerp);
+
+        _beheer.Email.Koppel(AdministratieSoort.Stichting);
+        await pagina.VernieuwCommand.ExecuteAsync(null);
+        await pagina.VerstuurCommand.ExecuteAsync(null);
+
+        Assert.Equal("stichting@example.org", Assert.Single(_verzender.Afzenders));
+        Assert.Equal(AdministratieSoort.Stichting, Assert.Single(pagina.Logboek).Bericht.Administratie);
+        Assert.Equal("Stichting De Hut", pagina.Logboek[0].Van);
+    }
+
+    [Fact]
+    public async Task Een_voorbereid_bericht_kiest_de_afzender_van_de_pagina()
+    {
+        var pagina = await MaakAsync();
+        var ontvanger = new Emailontvanger("Bakkerij", "info@example.org", new Dictionary<string, string>());
+
+        pagina.BereidVoor(new EmailVoorstel(Emailsoort.Factuur, [ontvanger], "Factuur S2026-001", AdministratieSoort.Stichting));
+
+        Assert.Equal(AdministratieSoort.Stichting, pagina.GekozenAfzender.Administratie);
     }
 }

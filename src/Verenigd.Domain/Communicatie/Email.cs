@@ -1,4 +1,5 @@
 using System.Net.Mail;
+using Verenigd.Domain.Administraties;
 
 namespace Verenigd.Domain.Communicatie;
 
@@ -118,15 +119,22 @@ public sealed class VerzondenBericht
     /// <summary>De reden van een mislukte verzending, zonder persoonsgegevens.</summary>
     public string? Fout { get; private set; }
 
-    public static VerzondenBericht Gelukt(string naam, string adres, string onderwerp, string sjabloon, DateTime nuUtc) =>
-        Maak(naam, adres, onderwerp, sjabloon, Verzendstatus.Verzonden, null, nuUtc);
+    /// <summary>De administratie (en dus het Gmail-account) waarvan het bericht kwam (besluit 211).</summary>
+    public AdministratieSoort Administratie { get; private set; } = AdministratieSoort.Vereniging;
 
-    public static VerzondenBericht Mislukt(string naam, string adres, string onderwerp, string sjabloon, string fout, DateTime nuUtc) =>
-        Maak(naam, adres, onderwerp, sjabloon, Verzendstatus.Mislukt, fout, nuUtc);
+    public static VerzondenBericht Gelukt(
+        string naam, string adres, string onderwerp, string sjabloon, DateTime nuUtc, AdministratieSoort administratie = AdministratieSoort.Vereniging) =>
+        Maak(naam, adres, onderwerp, sjabloon, Verzendstatus.Verzonden, null, nuUtc, administratie);
 
-    private static VerzondenBericht Maak(string naam, string adres, string onderwerp, string sjabloon, Verzendstatus status, string? fout, DateTime nuUtc) =>
+    public static VerzondenBericht Mislukt(
+        string naam, string adres, string onderwerp, string sjabloon, string fout, DateTime nuUtc, AdministratieSoort administratie = AdministratieSoort.Vereniging) =>
+        Maak(naam, adres, onderwerp, sjabloon, Verzendstatus.Mislukt, fout, nuUtc, administratie);
+
+    private static VerzondenBericht Maak(
+        string naam, string adres, string onderwerp, string sjabloon, Verzendstatus status, string? fout, DateTime nuUtc, AdministratieSoort administratie) =>
         new()
         {
+            Administratie = administratie,
             Naam = naam ?? string.Empty,
             Adres = adres ?? string.Empty,
             Onderwerp = onderwerp ?? string.Empty,
@@ -143,9 +151,17 @@ public sealed class VerzondenBericht
 /// </summary>
 public sealed class Emailinstellingen
 {
-    public const int VasteId = 1;
+    public Emailinstellingen()
+        : this(AdministratieSoort.Vereniging)
+    {
+    }
 
-    public int Id { get; private set; } = VasteId;
+    /// <summary>Besluit 211: elke administratie heeft een eigen Gmail-account; de sleutel is de administratie zelf.</summary>
+    public Emailinstellingen(AdministratieSoort administratie) => Id = (int)administratie;
+
+    public int Id { get; private set; }
+
+    public AdministratieSoort Administratie => (AdministratieSoort)Id;
 
     public string? Afzendernaam { get; private set; }
 

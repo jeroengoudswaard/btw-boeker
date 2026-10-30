@@ -272,7 +272,7 @@ public sealed partial class BoekhoudingViewModel
         }
 
         var aanleiding = soort == Domain.Communicatie.Emailsoort.Herinnering ? $"Herinnering factuur {regel.Nummer}" : $"Factuur {regel.Nummer}";
-        return BiedEmailAanAsync(new Email.EmailVoorstel(soort, [ontvanger], $"{aanleiding} aan {relatie.Naam}"));
+        return BiedEmailAanAsync(new Email.EmailVoorstel(soort, [ontvanger], $"{aanleiding} aan {relatie.Naam}", Soort));
     }
 
     private bool KanConceptVerwijderen() => !IsBezig && GeselecteerdeFactuur?.IsConcept == true;

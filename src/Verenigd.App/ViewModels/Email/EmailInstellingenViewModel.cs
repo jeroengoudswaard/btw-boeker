@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Verenigd.App.Diensten;
 using Verenigd.Application.Email;
+using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Communicatie;
 
 namespace Verenigd.App.ViewModels.Email;
@@ -18,17 +19,27 @@ public sealed partial class EmailInstellingenViewModel : ObservableObject
     private readonly EmailDienst _dienst;
     private readonly IGoogleKoppeling _koppeling;
     private readonly IDialoogService _dialogen;
-    private Emailinstellingen _instellingen = new();
+    private Emailinstellingen _instellingen;
 
-    public EmailInstellingenViewModel(EmailDienst dienst, IGoogleKoppeling koppeling, IDialoogService dialogen)
+    public EmailInstellingenViewModel(
+        EmailDienst dienst, IGoogleKoppeling koppeling, IDialoogService dialogen, AdministratieSoort administratie = AdministratieSoort.Vereniging,
+        string? naam = null)
     {
         _dienst = dienst;
         _koppeling = koppeling;
         _dialogen = dialogen;
+        Administratie = administratie;
+        Titel = $"E-mail ({naam ?? administratie.ToString()})";
+        _instellingen = new Emailinstellingen(administratie);
         LaadCommand = new AsyncRelayCommand(LaadAsync);
     }
 
     public IAsyncRelayCommand LaadCommand { get; }
+
+    /// <summary>Besluit 211: elke administratie heeft een eigen Gmail-account.</summary>
+    public AdministratieSoort Administratie { get; }
+
+    public string Titel { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
@@ -67,7 +78,7 @@ public sealed partial class EmailInstellingenViewModel : ObservableObject
 
     public async Task LaadAsync()
     {
-        _instellingen = (await _dienst.LaadAsync()).Instellingen;
+        _instellingen = (await _dienst.LaadAsync()).Instellingen(Administratie);
         Afzendernaam = _instellingen.Afzendernaam ?? string.Empty;
         Afzenderadres = _instellingen.Afzenderadres ?? string.Empty;
         Ververs();
@@ -124,7 +135,7 @@ public sealed partial class EmailInstellingenViewModel : ObservableObject
         using var wachten = new CancellationTokenSource(Wachttijd);
         try
         {
-            await _dienst.KoppelAsync(_koppeling, wachten.Token);
+            await _dienst.KoppelAsync(Administratie, _koppeling, wachten.Token);
         }
         catch (OperationCanceledException)
         {
