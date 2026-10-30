@@ -44,10 +44,25 @@ public sealed class Sol3ExportuitlegTests
     }
 
     [Fact]
-    public void Het_formaat_noemt_puntkomma_tekenset_en_datum()
+    public void Het_formaat_noemt_exportkeuze_tekenset_en_datum()
     {
-        Assert.Contains("puntkomma", Sol3Exportuitleg.Formaat, StringComparison.Ordinal);
+        Assert.Contains("Alleen details", Sol3Exportuitleg.Formaat, StringComparison.Ordinal);
         Assert.Contains("Windows-1252", Sol3Exportuitleg.Formaat, StringComparison.Ordinal);
         Assert.Contains("dag-maand-jaar", Sol3Exportuitleg.Formaat, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void De_klikroute_volgt_de_stappen_van_de_gebruiker_en_elke_export_heeft_een_eigen_rapportnaam()
+    {
+        Assert.Equal(8, Sol3Exportuitleg.Klikroute.Count);
+        Assert.StartsWith("1. Log in op SOL3", Sol3Exportuitleg.Klikroute[0], StringComparison.Ordinal);
+        Assert.Contains("Meer", Sol3Exportuitleg.Klikroute[1], StringComparison.Ordinal);
+        Assert.Contains("Voorbeeld automatisch bijwerken", Sol3Exportuitleg.Klikroute[3], StringComparison.Ordinal);
+        Assert.Contains("Exporteren", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);
+        Assert.Contains("Alleen details", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);
+        Assert.Contains("CSV, door komma's gescheiden", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);
+        Assert.Equal(
+            ["invoer voor Verenigd, output #1", "invoer voor Verenigd, output #2", "invoer voor Verenigd, output #3", "invoer voor Verenigd, output #4"],
+            Sol3Exportuitleg.Alle.Select(e => e.Rapportnaam));
     }
 }

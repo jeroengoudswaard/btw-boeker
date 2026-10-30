@@ -11,6 +11,9 @@ public sealed record Sol3Exportbeschrijving(Sol3Export Export, string Titel, str
     /// <summary>Voor <i>Kolomnamen kopiëren</i>: één naam per regel, in de volgorde van SOL3.</summary>
     public string Kopieertekst => string.Join(Environment.NewLine, Kolommen.Select(k => k.Naam));
 
+    /// <summary>De naam waaronder het rapport in SOL3 wordt opgeslagen (klikroute van de gebruiker, besluit 187).</summary>
+    public string Rapportnaam => $"invoer voor Verenigd, output #{(int)Export}";
+
     public string Aantaltekst => $"{Kolommen.Count} kolommen, waarvan {Kolommen.Count(k => k.IsVerplicht)} verplicht";
 }
 
@@ -21,9 +24,22 @@ public sealed record Sol3Exportbeschrijving(Sol3Export Export, string Titel, str
 public static class Sol3Exportuitleg
 {
     public const string Formaat =
-        "Een CSV-bestand met een puntkomma tussen de velden, zoals SOL3 het levert (tekenset Windows-1252 of UTF-8). " +
+        "Een CSV-bestand zoals SOL3 het exporteert met \"Alleen details\" (tekenset Windows-1252 of UTF-8). " +
         "Datums als dag-maand-jaar, bijvoorbeeld 19-09-2025. De volgorde van de kolommen maakt niet uit: Verenigd zoekt ze op naam. " +
         "Elke export bevat het lidnummer.";
+
+    /// <summary>Hoe u in SOL3 een export maakt, zoals aangeleverd door de gebruiker (besluit 187); gelijk voor alle vier.</summary>
+    public static IReadOnlyList<string> Klikroute { get; } =
+    [
+        "1. Log in op SOL3.",
+        "2. Kies rechtsboven Meer › Rapporten.",
+        "3. Kies Nieuw rapport en begin met een standaardrapport, bijvoorbeeld \"Import voor de Grote Clubactie\".",
+        "4. Kies Bewerken en zet \"Voorbeeld automatisch bijwerken\" aan.",
+        "5. Verwijder alle kolommen die u niet nodig hebt en kies de kolommen van de export (zie hieronder).",
+        "6. Kies Uitvoeren.",
+        "7. Kies in het driehoekje naast Bewerken eerst Opslaan, met de rapportnaam van de export (zie hieronder).",
+        "8. Kies daarna in hetzelfde driehoekje Exporteren, met \"Alleen details\" en de indeling \"CSV, door komma's gescheiden\".",
+    ];
 
     public static IReadOnlyList<Sol3Exportbeschrijving> Alle { get; } =
     [

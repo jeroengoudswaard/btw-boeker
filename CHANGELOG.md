@@ -10,7 +10,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Uitleg over de vier SOL3-exports** (besluiten 185–187), in de stap *Leden* van de startwizard en in stap 1 van de SOL3-importwizard (uitklapbaar onder *Welke exports en kolommen?*):
   - per export het doel en alle kolommen in de volgorde van SOL3, met *(optioneel)* bij kolommen die Verenigd niet gebruikt;
   - een knop *Kolomnamen kopiëren* per export (één naam per regel);
-  - het formaat: CSV met puntkomma's, Windows-1252 of UTF-8, datums als dag-maand-jaar, kolomvolgorde vrij.
+  - de klikroute in SOL3 (Meer › Rapporten › Nieuw rapport … Opslaan als "invoer voor Verenigd, output #1–4" en Exporteren met "Alleen details", CSV), zoals aangeleverd door de gebruiker;
+  - het formaat: Windows-1252 of UTF-8, datums als dag-maand-jaar, kolomvolgorde vrij.
 - Welke kolommen verplicht zijn, komt uit dezelfde bron als de import; een test bewaakt dat de uitleg en de import gelijk blijven.
 - 812 geautomatiseerde tests (was 805).
 

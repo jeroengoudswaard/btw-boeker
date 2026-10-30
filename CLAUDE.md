@@ -312,7 +312,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
   - **Uitleg SOL3-exports: gereed**, v0.7.1 (2026-10-30). Besluiten 185–188. `Sol3Exportuitleg` (Application, verplicht uit `ExportHerkenning`) en het gedeelde onderdeel `Sol3Uitleg` in de stap Leden van de startwizard en (uitklapbaar) in stap 1 van de SOL3-importwizard.
     - Tests: 812 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 307, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 812/812, de UI-test van de importwizard controleert nu ook de uitleg) en een visuele controle.
-    - Open: de klikroute in SOL3 (besluit 187) volgt van de gebruiker.
+    - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
+    - Open vraag: de import leest nu alleen puntkomma-CSV; voorgelegd of het scheidingsteken automatisch herkend moet worden.
 
 ## Privacy
 

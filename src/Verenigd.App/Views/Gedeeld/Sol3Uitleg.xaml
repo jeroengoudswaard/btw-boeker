@@ -4,6 +4,14 @@
              xmlns:imp="clr-namespace:Verenigd.Application.Import;assembly=Verenigd.Application">
     <!-- Uitleg over de vier SOL3-exports (besluiten 185 en 186); gedeeld door de startwizard en de SOL3-importwizard. -->
     <StackPanel>
+        <TextBlock Text="Zo maakt u een export in SOL3" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <ItemsControl ItemsSource="{x:Static imp:Sol3Exportuitleg.Klikroute}" Focusable="False" Margin="0,0,0,8" AutomationProperties.Name="Klikroute in SOL3">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
         <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" Text="{x:Static imp:Sol3Exportuitleg.Formaat}" />
         <ItemsControl ItemsSource="{x:Static imp:Sol3Exportuitleg.Alle}" Focusable="False" AutomationProperties.Name="SOL3-exports">
             <ItemsControl.ItemTemplate>
@@ -16,6 +24,9 @@
                             <StackPanel Margin="0,0,12,0">
                                 <TextBlock Text="{Binding Titel}" FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding Doel}" Style="{StaticResource Toelichting}" />
+                                <TextBlock Style="{StaticResource Toelichting}">
+                                    <Run Text="Rapportnaam in SOL3: " /><Run Text="{Binding Rapportnaam, Mode=OneWay}" FontWeight="SemiBold" />
+                                </TextBlock>
                                 <TextBlock Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,4,0,4" />
                                 <ItemsControl ItemsSource="{Binding Kolommen}" Focusable="False">
                                     <ItemsControl.ItemsPanel>
