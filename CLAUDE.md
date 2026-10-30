@@ -220,6 +220,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 182 | Herinrichting: wisselen van administratie | Dezelfde pagina blijft staan voor de andere administratie; bestaat die daar niet (Contributie bij de Stichting), dan naar Start |
 | 183 | Herinrichting: startkaarten | Alle 8: inrichting afmaken, banktransacties te verwerken, conceptposten, bonnen in het postvak, incassorun van deze maand, openstaande storneringen, vervallen facturen, zonder bon; alleen zichtbaar als er iets te doen is |
 | 184 | Volgorde v0.8.0 | Eerst de Windows-run en de merge van v0.6.0–v0.7.0, daarna bouwen |
+| 185 | Uitleg SOL3-exports: plaats | Een gedeeld onderdeel in de stap Leden van de startwizard én in stap 1 van de SOL3-importwizard: per export het doel, de kolommen en een knop *Kolomnamen kopiëren* |
+| 186 | Uitleg SOL3-exports: kolommen | Alle kolommen per export, met *verplicht* (de import heeft hem nodig; leeg mag) of *optioneel* (SOL3 levert hem, Verenigd negeert hem); één bron in de importcode, bewaakt met een test |
+| 187 | Uitleg SOL3-exports: klikroute | De gebruiker levert de klikroute in SOL3 (menu, knoppen, formaat); tot dan geen klikroute in de uitleg |
+| 188 | Uitleg SOL3-exports: planning | Nu, als v0.7.1, mee in de pull request van v0.6.0–v0.7.0 |
+| 189 | Pull request v0.6.0–v0.7.1 | Direct openen (de Windows-run van v0.7.0 is groen); v0.7.1 komt er als extra commit bij |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -303,7 +308,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
     - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests).
     - **Windows-test (2026-10-30, Windows 11, commit `b14bb81`): 805/805 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 300, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Nog door de gebruiker te doen: visuele controle van de wizard, de kleurrondjes in Instellingen, het subtabblad Meerjarenplan en de liggende afdruk.
-  - Pull request: één PR voor v0.6.0 en v0.7.0 na de Windows-run (besluit 176). Nog niet geopend (keuze van de gebruiker, 2026-10-30).
+  - Pull request: één PR voor v0.6.0 t/m v0.7.1 (besluiten 176 en 189), geopend 2026-10-30.
   - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
   - **Taak voor later (gebruiker, 2026-10-30):** de startwizard moet meer uitleg geven over de vier SOL3-exports (besluit 20): per export welke kolomkoppen nodig zijn en in welk formaat de export moet worden gedownload. Bron voor de kolomkoppen: `tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`. Eerst een ontwerp ter goedkeuring.
 
