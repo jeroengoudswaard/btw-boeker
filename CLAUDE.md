@@ -233,6 +233,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 195 | E-mail: logboek | Bewaren aan wie, wanneer, onderwerp en sjabloon; niet de tekst zelf |
 | 196 | Volgorde fase 6 | Eerst v0.8.0 (herinrichting), daarna fase 6 in de nieuwe navigatie; het uitgewerkte ontwerp van fase 6 (sjablonen, moment van de welkomstmail, Google Cloud-stappen) volgt dan ter goedkeuring |
 | 197 | XAF (auditfile financieel) | Export van de volledige financiële administratie als XAF (XML, standaard van de Belastingdienst), zodat een groep kan overstappen naar een ander pakket; import van XAF als gespreksonderwerp. Beide nog niet ingepland; eerst een ontwerp als het zover is |
+| 198 | Opbouw eigen administratie | De Vereniging bouwt 2025 opnieuw op in een lege, verbeterde administratie (posten en bankafschriften vanaf 1-1-2025). Rekeningschema uit het standaardschema of een sjabloonbestand; beginsaldi per 1-1-2025 handmatig in de wizardstap *Beginsaldi*. Daarvoor een keuze *Beginjaar* (standaard het huidige jaar) in de standaardinrichting en bij een sjabloonbestand. De Excel-overname (besluit 62) wordt voor de eigen administratie niet meer gebruikt |
+| 199 | Historisch boekjaar | Blijft in de app voor andere groepen (besluiten 122–126); niet gebruikt voor de eigen administratie |
+| 200 | Incasso's oude systeem 2025–2026 | Zoals besluit 103: via een boekingsregel direct op contributie, zonder debiteuren, ook voor 2025 |
+| 201 | 2024 | Geen historie of vergelijking met 2024 in de applicatie |
+| 202 | Planning beginjaar | De keuze *Beginjaar* gaat mee in v0.8.0 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
