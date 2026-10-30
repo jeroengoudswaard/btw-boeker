@@ -238,6 +238,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 200 | Incasso's oude systeem 2025–2026 | Zoals besluit 103: via een boekingsregel direct op contributie, zonder debiteuren, ook voor 2025 |
 | 201 | 2024 | Geen historie of vergelijking met 2024 in de applicatie |
 | 202 | Planning beginjaar | De keuze *Beginjaar* gaat mee in v0.8.0 |
+| 203 | E-mail: ontvangers leden | Per bericht te kiezen (standaard, alleen voogden, alleen leden zelf, voogden én leden); standaard: voogden bij leden met een actieve jeugdlidfunctie, het lid zelf bij de anderen |
+| 204 | E-mail: berichten per betaler | Vooraankondiging en stornering gaan naar de voogden en leden die onder die betaler vallen, ontdubbeld op e-mailadres; geen eigen adres bij de betaler |
+| 205 | E-mail: welkomstmail | Na een SOL3-import met nieuwe leden biedt de app aan een welkomstmail op te stellen voor die leden |
+| 206 | E-mail: vooraankondiging | Direct na *Definitief maken* van een incassorun aanbieden, per betaler met bedrag, uitvoerdatum en mandaatkenmerk |
+| 207 | E-mail: facturen | Na *Definitief maken* van een factuur aanbieden om te mailen met de PDF als bijlage; bij een vervallen factuur een knop *Herinnering sturen* |
+| 208 | Opdeling fase 6 | Alles in één versie (v0.9.0): koppeling, sjablonen, opstellen, verzonden en de berichten vanuit de modules |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -338,7 +344,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
     - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
 
-- **Fase 6 (E-mail via Gmail): in ontwerp.** Besluiten 191–196 vastgesteld (2026-10-30); uitgewerkt ontwerp na v0.8.0.
+- **Fase 6 (E-mail via Gmail): in aanbouw**, v0.9.0. Besluiten 191–196 en 203–208 vastgesteld (2026-10-30); uitgewerkt ontwerp goedgekeurd (navigatie E-mail › Opstellen/Verzonden/Sjablonen, Instellingen › E-mail, Gmail-API met alleen versturen, MimeKit, standaardsjablonen, daglimiet, logboek zonder tekst).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
