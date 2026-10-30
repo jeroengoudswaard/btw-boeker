@@ -211,6 +211,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 173 | Startwizard: voortgang | *Later verder* bewaart de stap in de database (hoort bij de administratie, ook na een back-up) |
 | 174 | Startwizard: venster | Een eigen venster vóór het hoofdvenster, zodat het na de herinrichting (besluit 168) blijft werken |
 | 175 | Startwizard: stap al klaar | Tonen met "Al ingericht" en de knoppen om het toch opnieuw te doen; niet automatisch overslaan |
+| 176 | Pull request v0.6.0–v0.7.0 | Eén pull request voor het meerjarenplan en de startwizard, na een geslaagde Windows-run |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -293,7 +294,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Startwizard: gereed**, v0.7.0 (2026-10-30). Eigen venster *Verenigd instellen* met acht stappen, automatisch bij de eerste start en via *Bestand › Startwizard…*; voortgang in tabel `Startwizard` (migratie *Startwizard*); ✓ per stap uit `Inrichtingsstatus`.
     - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
     - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 805/805, inclusief de nieuwe UI-test `Eerste_start_opent_de_startwizard…`) en een visuele controle van de wizard en van de kleurrondjes in Instellingen.
-  - Volgende stap: ontwerp van de herinrichting van de UI (besluit 168) ter goedkeuring.
+  - Pull request: één PR voor v0.6.0 en v0.7.0 na de Windows-run (besluit 176).
+  - Volgende stap: ontwerp van de herinrichting van de UI (besluit 168) ter goedkeuring; voorgelegd 2026-10-30.
 
 ## Privacy
 
