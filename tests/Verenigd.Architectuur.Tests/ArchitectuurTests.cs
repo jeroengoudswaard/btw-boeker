@@ -255,6 +255,7 @@ public class ArchitectuurTests
     [InlineData("ContributieView.xaml", "Runs")]
     [InlineData("ContributieView.xaml", "Vorderingen")]
     [InlineData("LedenView.xaml", "Leden")]
+    [InlineData("EmailView.xaml", "Logboek")]
     public void Hoofdlijst_heeft_een_leeg_scherm(string view, string lijst)
     {
         var tekst = File.ReadAllText(XamlBestanden().Single(b => Path.GetFileName(b) == view));

@@ -344,7 +344,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
     - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
 
-- **Fase 6 (E-mail via Gmail): in aanbouw**, v0.9.0. Besluiten 191–196 en 203–208 vastgesteld (2026-10-30); uitgewerkt ontwerp goedgekeurd (navigatie E-mail › Opstellen/Verzonden/Sjablonen, Instellingen › E-mail, Gmail-API met alleen versturen, MimeKit, standaardsjablonen, daglimiet, logboek zonder tekst).
+- **Fase 6 (E-mail via Gmail): gereed**, v0.9.0 (2026-10-30). Besluiten 191–196 en 203–208; uitgewerkt ontwerp goedgekeurd (navigatie E-mail › Opstellen/Verzonden/Sjablonen, Instellingen › E-mail, Gmail-API met alleen versturen, MimeKit, standaardsjablonen, daglimiet, logboek zonder tekst). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/GOOGLE-CLOUD.md.
+  - Uitwerkingen: andere pagina's bieden een bericht aan via `TabbladViewModel.EmailAanbieden` (`EmailVoorstel`); de welkomstmail, vooraankondiging en factuurmail worden na een vraag aangeboden, de stornering en de herinnering via een knop. Extra knop *Mailen…* bij een definitieve factuur (ook later nog te mailen). Bij Instellingen › E-mail gaat de afzender mee met Opslaan; inlezen, koppelen en ontkoppelen worden direct bewaard. Koppelen wacht hooguit 5 minuten op de browser.
+  - Tests: 889 in totaal. In de Linux-cloudsessie groen: Domain 241, Application 329, Infrastructure 69, Architectuur 27; ViewModel-tests 205/207 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 889/889, met de nieuwe UI-test `Email_toont_onderdelen_koppelmelding_en_standaardsjablonen`), 2 runs, en een echte koppeling met Gmail (handleiding volgen, proef naar mezelf, één bericht aan een testgroep).
+  - Pull request: v0.8.0 en v0.9.0 staan op dezelfde branch; één PR na een geslaagde Windows-run (de v0.8.0-run, verwacht 842/842, is daarmee vervangen door de run van v0.9.0).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

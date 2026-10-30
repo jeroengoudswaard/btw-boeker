@@ -273,8 +273,11 @@
                             <Label Content="Kosten_rekening" Target="{Binding ElementName=Oninbaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
                             <ComboBox x:Name="Oninbaarkeuze" ItemsSource="{Binding Kostenrekeningen}" SelectedItem="{Binding Oninbaarrekening}" Width="240"
                                       IsTextSearchEnabled="True" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button Content="Afboeken als _oninbaar..." Command="{Binding OninbaarCommand}" VerticalAlignment="Center"
+                            <Button Content="Afboeken als _oninbaar..." Command="{Binding OninbaarCommand}" VerticalAlignment="Center" Margin="0,0,24,0"
                                     AutomationProperties.AutomationId="Oninbaar" />
+                            <Button Content="Bericht _mailen..." Command="{Binding MailStorneringCommand}" VerticalAlignment="Center"
+                                    ToolTip="Een e-mail over de stornering aan de voogden en leden onder deze betaler (E-mail › Opstellen)"
+                                    AutomationProperties.AutomationId="StorneringMailen" />
                         </WrapPanel>
                     </Border>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"

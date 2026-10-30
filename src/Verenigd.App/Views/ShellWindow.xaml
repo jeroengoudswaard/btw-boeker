@@ -10,6 +10,8 @@
         xmlns:leden="clr-namespace:Verenigd.App.Views.Leden"
         xmlns:contributievm="clr-namespace:Verenigd.App.ViewModels.Contributie"
         xmlns:contributie="clr-namespace:Verenigd.App.Views.Contributie"
+        xmlns:emailvm="clr-namespace:Verenigd.App.ViewModels.Email"
+        xmlns:email="clr-namespace:Verenigd.App.Views.Email"
         xmlns:boekhoudingvm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
         xmlns:boekhouding="clr-namespace:Verenigd.App.Views.Boekhouding"
         xmlns:inst="clr-namespace:Verenigd.Application.Instellingen;assembly=Verenigd.Application"
@@ -38,6 +40,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type boekhoudingvm:BoekhoudingViewModel}">
             <boekhouding:BoekhoudingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type emailvm:EmailViewModel}">
+            <email:EmailView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">

@@ -44,7 +44,7 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
         builder.Services.AddSingleton<IThemaService, WpfThemaService>();
         var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(), new Infrastructure.Pdf.FactuurPdfMaker(),
-            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer());
+            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer(), Verzender: new Infrastructure.Email.GmailVerzender(), Koppeling: new Infrastructure.Email.GoogleKoppeling());
         WoordenResources.Koppel(Resources, hulpmiddelen.Woorden);
         builder.Services.AddSingleton(hulpmiddelen);
         builder.Services.AddSingleton<ShellViewModel>();

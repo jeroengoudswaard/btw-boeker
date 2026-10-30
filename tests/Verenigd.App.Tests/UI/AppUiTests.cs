@@ -220,6 +220,37 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
+    public async Task Email_toont_onderdelen_koppelmelding_en_standaardsjablonen()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        VoerWachtwoordIn(venster);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Sneltoets(venster, VirtualKeyShort.KEY_6); // E-mail
+        Zoek(venster, "EmailTabblad");
+        Zoek(venster, "EmailNietGekoppeld"); // nog geen koppeling met Gmail
+        Assert.False(Zoek(venster, "EmailVersturen").IsEnabled);
+        foreach (var onderdeel in new[] { "Opstellen", "Verzonden", "Sjablonen" })
+        {
+            Zoek(venster, $"Nav_Email.{onderdeel}");
+        }
+
+        Bewaar(venster, "15-email");
+        Kies(venster, "Nav_Email.Sjablonen");
+        var sjablonen = Zoek(venster, "EmailSjablonen").AsListBox();
+        Assert.True(Retry.WhileFalse(() => sjablonen.Items.Length >= 6, Wachttijd).Result);
+        sjablonen.Items[0].Select();
+        Zoek(venster, "Invulvelden");
+
+        Sluit(venster);
+    }
+
+    [Fact(Timeout = Timeout)]
     public async Task Boekhouding_leeg_beginnen_toont_subtabbladen_en_nieuwe_post()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");

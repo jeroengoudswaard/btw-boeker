@@ -195,4 +195,55 @@ public sealed class FacturenViewModelTests : IDisposable
         vm.Factuurfilter = Factuurfilter.Alle;
         Assert.All(vm.Facturen, f => Assert.Equal("Betaald", f.Status));
     }
+
+    [Fact]
+    public async Task Na_definitief_maken_wordt_mailen_met_de_pdf_aangeboden()
+    {
+        await Dienst.BewaarRelatieAsync(new RelatieInvoer(null,
+            new RelatieGegevens("Stichting De Kerk", "Jan", "Kerkstraat 1", "1234 AB", "Dorp", "kerk@example.org", null, null, true, false, null), true));
+        var vm = await _omgeving.OpenIngerichtAsync();
+        var voorstellen = new List<ViewModels.Email.EmailVoorstel>();
+        vm.EmailAanbieden = v =>
+        {
+            voorstellen.Add(v);
+            return Task.CompletedTask;
+        };
+        vm.NieuweFactuurCommand.Execute(null);
+        VulFactuur(vm);
+
+        await vm.MaakFactuurDefinitiefCommand.ExecuteAsync(null);
+
+        Assert.Contains("V2026-001", _omgeving.Dialogen.Bevestigingsvragen[^1], StringComparison.Ordinal);
+        var voorstel = Assert.Single(voorstellen);
+        Assert.Equal(Domain.Communicatie.Emailsoort.Factuur, voorstel.Soort);
+        var ontvanger = Assert.Single(voorstel.Ontvangers);
+        Assert.Equal("kerk@example.org", ontvanger.Adres);
+        Assert.Equal("Jan", ontvanger.Velden["aanhef"]);
+        Assert.Equal("Factuur V2026-001.pdf", Assert.Single(ontvanger.Bijlagen).Bestandsnaam);
+
+        vm.Factuurfilter = Factuurfilter.Alle;
+        vm.GeselecteerdeFactuur = vm.Facturen.Single();
+        Assert.True(vm.FactuurMailenCommand.CanExecute(null));
+        Assert.False(vm.HerinneringSturenCommand.CanExecute(null)); // nog niet vervallen
+    }
+
+    [Fact]
+    public async Task Relatie_zonder_e_mailadres_geeft_een_melding_in_plaats_van_een_bericht()
+    {
+        await RelatieAsync();
+        var vm = await _omgeving.OpenIngerichtAsync();
+        var voorstellen = new List<ViewModels.Email.EmailVoorstel>();
+        vm.EmailAanbieden = v =>
+        {
+            voorstellen.Add(v);
+            return Task.CompletedTask;
+        };
+        vm.NieuweFactuurCommand.Execute(null);
+        VulFactuur(vm);
+
+        await vm.MaakFactuurDefinitiefCommand.ExecuteAsync(null);
+
+        Assert.Empty(voorstellen);
+        Assert.Contains("e-mailadres", vm.Foutmelding, StringComparison.Ordinal);
+    }
 }

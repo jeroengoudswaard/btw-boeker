@@ -320,6 +320,13 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
 
         await LaadAsync(Betaler?.Id);
         WijzigingenGewijzigd();
+        if (wizard.Resultaat is { } definitief && _stand is not null && EmailAanbieden is not null
+            && _dialogen.Bevestig("Vooraankondiging", "De incassorun is definitief. Wilt u nu de vooraankondiging per e-mail opstellen, met per betaler het bedrag, de uitvoerdatum en het mandaatkenmerk?"))
+        {
+            await BiedEmailAanAsync(new ViewModels.Email.EmailVoorstel(Domain.Communicatie.Emailsoort.Vooraankondiging,
+                Application.Email.Berichten.Vooraankondiging(definitief, _stand, Vandaag, Administratie?.Naam ?? string.Empty),
+                $"Vooraankondiging incassorun {definitief.Maand}"));
+        }
     }
 
     [RelayCommand]

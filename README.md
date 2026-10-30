@@ -85,6 +85,8 @@ Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`,
 | QRCoder (MIT) | Betaal-QR-code (EPC-QR, "girocode") op de factuur |
 | PdfPig 0.1.16 (Apache-2.0) | Tekst uit PDF-bonnen lezen (datum en bedrag) voor het postvak bonnen |
 | System.Security.Cryptography.Pkcs | Vastgezet op een gepatchte versie; PDFsharp 6.2.4 trekt anders een kwetsbare versie mee |
+| Google.Apis.Gmail.v1, Google.Apis.Auth (Apache-2.0) | E-mail versturen via de Gmail-API met OAuth (alleen versturen); zie `docs/GOOGLE-CLOUD.md` |
+| MimeKit (MIT) | Opbouw van de e-mail (tekst en PDF-bijlage) |
 | Serilog (+ Extensions.Hosting, Sinks.File) | Logging naar bestand |
 | xUnit, FlaUI.UIA3 | Unit- en UI-tests |
 

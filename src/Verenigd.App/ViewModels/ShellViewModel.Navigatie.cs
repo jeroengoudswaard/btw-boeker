@@ -160,7 +160,12 @@ public sealed partial class ShellViewModel
             }
 
             items.Add(Module(ModuleSoort.Begroting, "Begroting", Zonder_(_boekhouding.Woorden[stichting ? "Tab.Meerjarenplan" : "Tab.Begroting"])));
-            items.Add(Module(ModuleSoort.Email, "Email", "E-mail"));
+            items.Add(Module(ModuleSoort.Email, "Email", "E-mail", heeftOnderdelen: true, uitgeklapt: open == ModuleSoort.Email));
+            if (open == ModuleSoort.Email)
+            {
+                items.AddRange(Emailonderdelen());
+            }
+
             items.Add(Module(ModuleSoort.Instellingen, "Instellingen", "Instellingen"));
         }
 
@@ -268,6 +273,17 @@ public sealed partial class ShellViewModel
             (ContributieSubtab.Openstaand, "Openstaand"),
         ];
         return onderdelen.Select(o => new NavigatieItem($"Contributie.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Contributie, (int)o.Subtab));
+    }
+
+    private static IEnumerable<NavigatieItem> Emailonderdelen()
+    {
+        (Email.EmailSubtab Subtab, string Titel)[] onderdelen =
+        [
+            (Email.EmailSubtab.Opstellen, "Opstellen"),
+            (Email.EmailSubtab.Verzonden, "Verzonden"),
+            (Email.EmailSubtab.Sjablonen, "Sjablonen"),
+        ];
+        return onderdelen.Select(o => new NavigatieItem($"Email.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Email, (int)o.Subtab));
     }
 
     private static NavigatieItem Module(ModuleSoort soort, string sleutel, string titel, bool heeftOnderdelen = false, bool uitgeklapt = false) =>

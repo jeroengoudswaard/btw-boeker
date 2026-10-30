@@ -50,6 +50,11 @@ public abstract class TabbladViewModel : ObservableObject
 
     public virtual bool HeeftOnopgeslagenWijzigingen => false;
 
+    /// <summary>Opent E-mail › Opstellen met een voorbereid bericht (besluiten 205–207); de Shell vult dit in.</summary>
+    public Func<Email.EmailVoorstel, Task>? EmailAanbieden { get; set; }
+
+    protected Task BiedEmailAanAsync(Email.EmailVoorstel voorstel) => EmailAanbieden?.Invoke(voorstel) ?? Task.CompletedTask;
+
     public virtual bool KanOpslaan => false;
 
     /// <returns><c>true</c> als alles is opgeslagen.</returns>

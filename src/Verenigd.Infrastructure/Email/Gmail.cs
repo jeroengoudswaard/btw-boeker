@@ -99,7 +99,16 @@ public sealed class GoogleKoppeling : IGoogleKoppeling
             DataStore = new NullDataStore(),
             Prompt = "consent",
         });
-        var credential = await new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync("verenigd", annulering).ConfigureAwait(false);
+        UserCredential credential;
+        try
+        {
+            credential = await new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync("verenigd", annulering).ConfigureAwait(false);
+        }
+        catch (TokenResponseException ex)
+        {
+            throw new EmailVerzendException("Google gaf geen toestemming. Controleer het clientbestand en of u het juiste account koos, en probeer het opnieuw.", ex);
+        }
+
         return credential.Token.RefreshToken
             ?? throw new InvalidOperationException("Google gaf geen vernieuwingssleutel. Trek de toegang in bij myaccount.google.com en koppel opnieuw.");
     }

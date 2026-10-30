@@ -127,6 +127,21 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
+    public async Task Email_heeft_de_onderdelen_opstellen_verzonden_en_sjablonen_en_blijft_bij_wisselen_staan()
+    {
+        var shell = await OpenAsync();
+        shell.GeselecteerdeNavigatie = Item(shell, "Email");
+        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Email.Verzonden");
+
+        shell.GeselecteerdeNavigatie = Item(shell, "Email.Sjablonen");
+        var email = Assert.IsType<ViewModels.Email.EmailViewModel>(shell.GeselecteerdTabblad);
+        Assert.Equal(ViewModels.Email.EmailSubtab.Sjablonen, email.Subtab);
+
+        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
+        Assert.Same(email, shell.GeselecteerdTabblad); // E-mail hoort niet bij één administratie
+    }
+
+    [Fact]
     public async Task Wisselen_vanaf_een_pagina_die_de_andere_administratie_niet_heeft_gaat_naar_start()
     {
         var shell = await OpenAsync();

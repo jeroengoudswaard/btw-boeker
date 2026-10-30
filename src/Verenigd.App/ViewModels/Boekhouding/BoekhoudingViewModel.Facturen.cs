@@ -221,6 +221,8 @@ public sealed partial class BoekhoudingViewModel
             return;
         }
 
+        Guid? definitief = null;
+        string? factuurnummer = null;
         await VoerUitAsync(async () =>
         {
             var id = editor.IsGewijzigd ? await Factuurdienst.BewaarConceptAsync(Soort, editor.Invoer) : editor.Id!.Value;
@@ -230,7 +232,47 @@ public sealed partial class BoekhoudingViewModel
             Factuurfilter = editor.IsCreditfactuur ? Factuurfilter.Alle : Factuurfilter.Open;
             await LaadAsync(Editor?.Id);
             PasFactuurfilterToe(id);
+            (definitief, factuurnummer) = (id, nummer);
         }, null);
+
+        // Besluit 207: na Definitief maken aanbieden om de factuur met de PDF te mailen.
+        if (definitief is { } factuurId && !editor.IsCreditfactuur && EmailAanbieden is not null
+            && _alleFacturen.FirstOrDefault(f => f.Id == factuurId) is { } regel
+            && _dialogen.Bevestig("Factuur mailen", $"Wilt u factuur {factuurnummer} per e-mail versturen, met de PDF als bijlage?"))
+        {
+            await MailFactuurAsync(regel, Domain.Communicatie.Emailsoort.Factuur);
+        }
+    }
+
+    private bool KanFactuurMailen() => !IsBezig && GeselecteerdeFactuur is { IsConcept: false, Factuur.IsCreditfactuur: false };
+
+    /// <summary>De gekozen factuur (opnieuw) mailen met de PDF als bijlage.</summary>
+    [RelayCommand(CanExecute = nameof(KanFactuurMailen))]
+    private Task FactuurMailenAsync() => MailFactuurAsync(GeselecteerdeFactuur!, Domain.Communicatie.Emailsoort.Factuur);
+
+    private bool KanHerinneren() => !IsBezig && GeselecteerdeFactuur is { IsVervallen: true, Stand.IsOpen: true };
+
+    /// <summary>Besluit 207: een herinnering bij een vervallen factuur, ook met de PDF.</summary>
+    [RelayCommand(CanExecute = nameof(KanHerinneren))]
+    private Task HerinneringSturenAsync() => MailFactuurAsync(GeselecteerdeFactuur!, Domain.Communicatie.Emailsoort.Herinnering);
+
+    private Task MailFactuurAsync(FactuurRegel regel, Domain.Communicatie.Emailsoort soort)
+    {
+        if (regel.Stand.Relatie is not { } relatie)
+        {
+            Foutmelding = "Deze factuur heeft geen relatie.";
+            return Task.CompletedTask;
+        }
+
+        var pdf = _hulpmiddelen.Pdf.Maak(regel.Factuur, _stand?.Factuurinstellingen ?? new Factuurinstellingen(Soort));
+        if (Application.Email.Berichten.Factuur(regel.Factuur, relatie, Administratie?.Naam ?? string.Empty, pdf) is not { } ontvanger)
+        {
+            Foutmelding = $"Bij {relatie.Naam} staat geen geldig e-mailadres. Vul het in bij Relaties.";
+            return Task.CompletedTask;
+        }
+
+        var aanleiding = soort == Domain.Communicatie.Emailsoort.Herinnering ? $"Herinnering factuur {regel.Nummer}" : $"Factuur {regel.Nummer}";
+        return BiedEmailAanAsync(new Email.EmailVoorstel(soort, [ontvanger], $"{aanleiding} aan {relatie.Naam}"));
     }
 
     private bool KanConceptVerwijderen() => !IsBezig && GeselecteerdeFactuur?.IsConcept == true;
@@ -299,5 +341,7 @@ public sealed partial class BoekhoudingViewModel
         VerwijderFactuurconceptCommand.NotifyCanExecuteChanged();
         FactuurPdfCommand.NotifyCanExecuteChanged();
         CreditfactuurCommand.NotifyCanExecuteChanged();
+        FactuurMailenCommand.NotifyCanExecuteChanged();
+        HerinneringSturenCommand.NotifyCanExecuteChanged();
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.App.ViewModels.Contributie;
+using Verenigd.App.ViewModels.Email;
 using Verenigd.App.ViewModels.Inrichting;
 using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
@@ -247,6 +248,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             return;
         }
 
+        var bekend = (await _sessie.Leden.HaalAlleAsync()).Select(p => p.Id).ToHashSet();
         var wizard = new ImportWizardViewModel(new Sol3ImportDienst(_sessie, _tijd), _dialogen);
         if (!_dialogen.ToonImportWizard(wizard))
         {
@@ -274,6 +276,49 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             {
                 await laden;
             }
+        }
+
+        await BiedWelkomstmailAanAsync(bekend);
+    }
+
+    /// <summary>Besluit 205: na een import met nieuwe leden een welkomstmail aanbieden.</summary>
+    private async Task BiedWelkomstmailAanAsync(HashSet<Guid> bekend)
+    {
+        var nieuw = (await _sessie!.Leden.HaalAlleAsync()).Where(p => !bekend.Contains(p.Id) && !p.IsUitgeschreven).ToList();
+        var vraag = nieuw.Count == 1 ? "Er is 1 nieuw lid." : $"Er zijn {nieuw.Count} nieuwe leden.";
+        if (nieuw.Count == 0 || !_dialogen.Bevestig("Welkomstmail", $"{vraag} Wilt u een welkomstmail opstellen?"))
+        {
+            return;
+        }
+
+        var vandaag = DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
+        await OpenEmailAsync(new EmailVoorstel(Domain.Communicatie.Emailsoort.Welkom,
+            Application.Email.Ontvangers.VoorLeden(nieuw, Application.Email.Ontvangerkeuze.Standaard, vandaag, Verenigingsnaam),
+            nieuw.Count == 1 ? "Welkomstmail voor 1 nieuw lid" : $"Welkomstmail voor {nieuw.Count} nieuwe leden"));
+    }
+
+    /// <summary>De naam in {vereniging} van een e-mail: de naam van de administratie Vereniging.</summary>
+    private string Verenigingsnaam => Administraties.FirstOrDefault(a => a.Soort == AdministratieSoort.Vereniging)?.Naam ?? "de vereniging";
+
+    /// <summary>Opent E-mail › Opstellen met een bericht dat een andere pagina heeft voorbereid.</summary>
+    private async Task OpenEmailAsync(EmailVoorstel voorstel)
+    {
+        var verzoek = new ModuleVerzoek(ModuleSoort.Email, null);
+        if (!KanModuleOpenen(verzoek))
+        {
+            return;
+        }
+
+        OpenModule(verzoek);
+        if (GeselecteerdTabblad is EmailViewModel email)
+        {
+            if (email.VernieuwCommand.ExecutionTask is { } laden)
+            {
+                await laden;
+            }
+
+            email.BereidVoor(voorstel);
+            BouwNavigatie();
         }
     }
 
@@ -591,12 +636,15 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         {
             ModuleSoort.Instellingen => new InstellingenViewModel(
                 _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
-                new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen)),
+                new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen),
+                new EmailInstellingenViewModel(new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen)),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
+            ModuleSoort.Email => new EmailViewModel(_sessie!, _dialogen, _tijd, _boekhouding, () => Verenigingsnaam),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
+        tab.EmailAanbieden = OpenEmailAsync;
         Tabbladen.Add(tab);
         GeselecteerdTabblad = tab;
         switch (tab)
@@ -613,6 +661,10 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             case InstellingenViewModel instellingen:
                 instellingen.Incasso?.LaadCommand.Execute(null);
                 instellingen.Facturen?.LaadCommand.Execute(null);
+                instellingen.Email?.LaadCommand.Execute(null);
+                break;
+            case EmailViewModel email:
+                email.VernieuwCommand.Execute(null);
                 break;
         }
     }

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Verenigd.App.ViewModels.Contributie;
+using Verenigd.App.ViewModels.Email;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -14,7 +15,7 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 
     public InstellingenViewModel(
         IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null,
-        Boekhouding.FactuurInstellingenViewModel? facturen = null)
+        Boekhouding.FactuurInstellingenViewModel? facturen = null, EmailInstellingenViewModel? email = null)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
@@ -28,6 +29,12 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
         if (facturen is not null)
         {
             facturen.PropertyChanged += RegelGewijzigd;
+        }
+
+        Email = email;
+        if (email is not null)
+        {
+            email.PropertyChanged += RegelGewijzigd;
         }
 
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
@@ -46,16 +53,21 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
     /// <summary>Gegevens op de verkoopfactuur van de Vereniging (stap 4c-2).</summary>
     public Boekhouding.FactuurInstellingenViewModel? Facturen { get; }
 
+    /// <summary>Afzender en koppeling met Gmail (fase 6).</summary>
+    public EmailInstellingenViewModel? Email { get; }
+
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
     public IAsyncRelayCommand OpslaanCommand { get; }
 
-    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen?.IsGewijzigd == true;
+    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen?.IsGewijzigd == true
+        || Email?.IsGewijzigd == true;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null)
-        && (Facturen is not { IsGewijzigd: true } || Facturen.Fout is null);
+        && (Facturen is not { IsGewijzigd: true } || Facturen.Fout is null)
+        && (Email is not { IsGewijzigd: true } || Email.Fout is null);
 
     public override async Task<bool> BewaarAsync()
     {
@@ -95,6 +107,19 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             }
         }
 
+        if (Email is { IsGewijzigd: true })
+        {
+            try
+            {
+                await Email.BewaarAsync();
+            }
+            catch (ArgumentException ex)
+            {
+                Foutmelding = ex.Message;
+                return false;
+            }
+        }
+
         Foutmelding = null;
         return true;
     }
@@ -114,6 +139,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
         if (Facturen is not null)
         {
             Facturen.PropertyChanged -= RegelGewijzigd;
+        }
+
+        if (Email is not null)
+        {
+            Email.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();

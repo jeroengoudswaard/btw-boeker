@@ -107,6 +107,52 @@
                     <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
                                Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
                 </tg:Groepspaneel>
+                <!-- ===== E-mail (fase 6, besluiten 192 en 193) ===== -->
+                <tg:Groepspaneel DataContext="{Binding Email}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" Margin="0,24,0,0"
+                            AutomationProperties.Name="E-mail" AutomationProperties.AutomationId="InstellingenEmail">
+                    <TextBlock Text="E-mail" Style="{StaticResource Sectietitel}" />
+                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16" TextWrapping="Wrap"
+                               Text="Verenigd verstuurt e-mail via de Gmail-API, met alleen toestemming om te versturen (geen wachtwoord in de app). Maak eenmalig een eigen Google Cloud-project; de stappen staan in docs/GOOGLE-CLOUD.md. Adres en sleutels staan versleuteld in de database." />
+                    <Border Style="{StaticResource Kaart}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Content="_Uw naam (afzender)" Target="{Binding ElementName=AfzendernaamVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="AfzendernaamVeld" Grid.Column="1" Margin="0,0,0,8" MaxLength="100" Text="{Binding Afzendernaam, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Bijvoorbeeld: Penningmeester Scouting" AutomationProperties.AutomationId="Afzendernaam" />
+                            <Label Grid.Row="1" Content="_Het Gmail-adres" Target="{Binding ElementName=AfzenderadresVeld}" VerticalAlignment="Center" />
+                            <TextBox x:Name="AfzenderadresVeld" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8" MaxLength="254" Text="{Binding Afzenderadres, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Het gmail.com-adres waarmee u bij Google toestemming geeft" AutomationProperties.AutomationId="Afzenderadres" />
+                            <TextBlock Grid.Row="2" Text="Clientbestand" VerticalAlignment="Center" Margin="5,0,0,8" />
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="{Binding Clienttekst}" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="300"
+                                           AutomationProperties.AutomationId="Clientbestand" />
+                                <Button Content="_Clientbestand inlezen..." Command="{Binding LeesClientbestandCommand}"
+                                        ToolTip="Het JSON-bestand van een OAuth-client van het type Desktop-app" AutomationProperties.AutomationId="ClientbestandInlezen" />
+                            </StackPanel>
+                            <TextBlock Grid.Row="3" Text="Koppeling" VerticalAlignment="Top" Margin="5,6,0,0" />
+                            <StackPanel Grid.Row="3" Grid.Column="1">
+                                <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,6,0,8" AutomationProperties.AutomationId="EmailStatus"
+                                           AutomationProperties.LiveSetting="Polite" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Koppelen met Google..." Command="{Binding KoppelCommand}" Margin="0,0,8,0"
+                                            ToolTip="Opent de browser; geef daar toestemming om e-mail te versturen" AutomationProperties.AutomationId="EmailKoppelen" />
+                                    <Button Content="Ontkoppelen..." Command="{Binding OntkoppelCommand}" AutomationProperties.AutomationId="EmailOntkoppelen" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
+                               Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                </tg:Groepspaneel>
                 <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}"
                            Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
             </StackPanel>

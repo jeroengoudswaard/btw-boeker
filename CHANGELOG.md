@@ -4,6 +4,28 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.9.0] - 2026-10-30: E-mail via Gmail
+
+### Toegevoegd
+- **Pagina E-mail** (fase 6, besluiten 191–196 en 203–208) met de onderdelen *Opstellen*, *Verzonden* en *Sjablonen* in de navigatiebalk (Ctrl+6).
+  - **Opstellen:** kies groepen (speltakken, bestuur, overig) en de ontvangers per bericht: standaard, alleen voogden, alleen leden zelf, of voogden én leden. Standaard krijgen de voogden de e-mail bij leden met een actieve jeugdlidfunctie, en anders het lid zelf. Adressen worden ontdubbeld; wie onder één adres valt, staat samen in `{voornaam}` ("Anna en Bo"). Leden zonder geldig adres worden gemeld.
+  - Kies een sjabloon of schrijf een eigen tekst. Het voorbeeld toont de e-mail zoals de gekozen ontvanger hem krijgt; een onbekend invulveld geeft een waarschuwing. Met *Proef naar mezelf* gaat het voorbeeld naar uw eigen adres.
+  - *Versturen* vraagt eerst om bevestiging en stuurt elke ontvanger een eigen, persoonlijk ingevulde e-mail (geen BCC). Wat niet verstuurd kon worden, staat met de reden onder het bericht. Bij de daglimiet van 500 berichten stopt Verenigd en meldt hoeveel berichten niet verstuurd zijn.
+  - **Verzonden:** per bericht aan wie, wanneer, het onderwerp, het sjabloon en de status; de tekst zelf wordt niet bewaard.
+  - **Sjablonen:** zes standaardsjablonen (Mededeling speltak, Welkomstmail, Vooraankondiging incasso, Bericht bij stornering, Factuur, Herinnering factuur). Ze zijn aan te passen maar niet te verwijderen. U kunt eigen sjablonen toevoegen; per soort staat ernaast welke invulvelden er zijn, met uitleg.
+- **Berichten vanuit de modules:**
+  - **Welkomstmail** na een SOL3-import met nieuwe leden, alleen voor die leden (besluit 205).
+  - **Vooraankondiging** direct na *Definitief maken* van een incassorun, per betaler met bedrag, uitvoerdatum en mandaatkenmerk (besluit 206).
+  - **Bericht mailen** bij een stornering in Contributie › Openstaand, aan de voogden en leden onder die betaler (besluit 204).
+  - **Factuur mailen** na *Definitief maken*, met de PDF als bijlage, plus de knoppen *Mailen…* en *Herinnering sturen…* (bij een vervallen factuur) in Boekhouding › Facturen (besluit 207).
+- **Instellingen › E-mail:** uw naam en Gmail-adres als afzender, *Clientbestand inlezen…*, *Koppelen met Google…* en *Ontkoppelen…*. Verenigd vraagt alleen toestemming om te versturen, met de Gmail-API en OAuth; er staat geen wachtwoord in de app. Adres en sleutels staan versleuteld in de database, niet in Git.
+- Handleiding `docs/GOOGLE-CLOUD.md` voor het eenmalige Google Cloud-project: Gmail-API, toestemmingsscherm *In productie* en een OAuth-client voor een desktop-app.
+- Nieuwe pakketten: Google.Apis.Gmail.v1 en Google.Apis.Auth (Apache-2.0), MimeKit (MIT).
+- 889 geautomatiseerde tests (was 842).
+
+### Opgelost
+- UI-tests typen het wachtwoord alleen als de app de toetsenbordfocus heeft, anders stoppen ze. De navigatiebalk wordt bij uitklappen bijgewerkt in plaats van opnieuw opgebouwd, zodat de gekozen regel en de focus blijven (na de Windows-run van v0.8.0).
+
 ## [0.8.0] - 2026-10-30: Herinrichting van de app
 
 ### Gewijzigd
@@ -19,7 +41,7 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Lege schermen**: een lege lijst (journaal, bank, postvak, boekingsregels, facturen, relaties, leden, betalers, incassoruns, openstaand) toont uitleg en één knop.
 - **Beginjaar kiezen** bij het inrichten met het standaardschema of een sjabloonbestand (besluit 198): ook een eerder jaar, met beginsaldi per 1 januari van dat jaar.
 - Architectuurtests: hooguit één hoofdactie per pagina; elke hoofdlijst heeft een leeg scherm.
-- 843 geautomatiseerde tests (was 816).
+- 842 geautomatiseerde tests (was 816).
 
 ## [0.7.1] - 2026-10-30: Uitleg over de SOL3-exports
 

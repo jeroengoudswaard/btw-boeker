@@ -658,7 +658,11 @@
                                 </Button>
                                 <Button Content="Cred_itfactuur..." Command="{Binding CreditfactuurCommand}" Margin="0,0,8,0"
                                         ToolTip="Een definitieve factuur corrigeren of intrekken" AutomationProperties.AutomationId="Creditfactuur" />
-                                <Button Content="Concept _verwijderen" Command="{Binding VerwijderFactuurconceptCommand}" AutomationProperties.AutomationId="FactuurconceptVerwijderen" />
+                                <Button Content="Concept _verwijderen" Command="{Binding VerwijderFactuurconceptCommand}" Margin="0,0,8,0" AutomationProperties.AutomationId="FactuurconceptVerwijderen" />
+                                <Button Content="Mai_len..." Command="{Binding FactuurMailenCommand}" Margin="0,0,8,0"
+                                        ToolTip="De factuur per e-mail versturen met de PDF als bijlage (E-mail › Opstellen)" AutomationProperties.AutomationId="FactuurMailen" />
+                                <Button Content="_Herinnering sturen..." Command="{Binding HerinneringSturenCommand}"
+                                        ToolTip="Een herinnering bij een vervallen factuur, met de PDF als bijlage" AutomationProperties.AutomationId="HerinneringSturen" />
                             </WrapPanel>
                             <g:LeegScherm DockPanel.Dock="Top" Lijst="Facturen" Titel="Nog geen facturen" Tekst="Maak een verkoopfactuur, bijvoorbeeld voor verhuur." Knoptekst="Nieuwe factuur" Opdracht="{Binding NieuweFactuurCommand}"
                                            Visibility="{Binding Facturen.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
