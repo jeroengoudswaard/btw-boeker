@@ -15,7 +15,7 @@ Claude treedt op als **Senior AI Enterprise Architect** die werkt als een profes
 
 ### 2. UI/UX-ontwerpstandaarden
 - De UI gaat naadloos op in het Windows-ecosysteem: WPF met het Fluent-thema van .NET.
-- Native Windows-gedrag heeft voorrang: standaard menubalk (Bestand, Bewerken, Beeld, Help), vertrouwde sneltoetsen (Ctrl+S, Ctrl+Z, Ctrl+F, F5…), Segoe UI, standaard paddings en margins, ondersteuning voor Light/Dark mode en toegankelijkheid (toetsenbordnavigatie, AutomationProperties).
+- Native Windows-gedrag heeft voorrang: standaard menubalk (Bestand, Bewerken, Beeld, Help; sinds besluit 179 in Eenvoudig verborgen en met Alt op te roepen), vertrouwde sneltoetsen (Ctrl+S, Ctrl+Z, Ctrl+F, F5…), Segoe UI, standaard paddings en margins, ondersteuning voor Light/Dark mode en toegankelijkheid (toetsenbordnavigatie, AutomationProperties).
 
 ### 3. Enterprise quality gates
 Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun feedback of goedkeuring beknopt in de output:
@@ -203,6 +203,35 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 165 | Afdruk meerjarenplan | Liggend A4, alle 10 jaren op één pagina, met kleinere letters voor de bedragen |
 | 166 | Invulhulp meerjarenplan | Per rij een knop *Naar de volgende jaren kopiëren*: het bedrag van het gekozen jaar gaat naar alle latere jaren; daarna blijft elk bedrag aan te passen |
 | 167 | Startjaar meerjarenplan | Vrij te kiezen, standaard het volgende jaar; een nieuw plan begint los van het vorige |
+| 168 | Herinrichting UI (wijzigt besluit 9) | Volledige herinrichting naar het model van Clipchamp: navigatiebalk links, geen tabbladen, de klassieke menubalk alleen in de Expert-weergave; per scherm één hoofdactie, lege schermen met uitleg en één knop, kaarten op het startscherm, vaste statusteksten (✓/⚠/✕, "wat er gebeurde + wat nu"). Gevolgen voor besluiten 10–12, 17 en 127 worden in het ontwerp voorgelegd |
+| 169 | Startwizard: moment | Automatisch bij de eerste start (geen database); daarna altijd via *Bestand › Startwizard…* |
+| 170 | Startwizard: stappen | Welkom → Database → Vereniging en Stichting → Leden → Boekhouding → Bank → Contributie → Klaar; elke stap over te slaan, *Later verder* bewaart de voortgang; de bestaande wizards en diensten worden hergebruikt |
+| 171 | Volgorde | Eerst 5b afmaken, dan de startwizard, dan de herinrichting van de UI |
+| 172 | Startwizard: bestaande wizards | De startwizard opent de bestaande wizards (SOL3, boekhouding, bank) als eigen venster en gaat daarna verder; geen herbouw |
+| 173 | Startwizard: voortgang | *Later verder* bewaart de stap in de database (hoort bij de administratie, ook na een back-up) |
+| 174 | Startwizard: venster | Een eigen venster vóór het hoofdvenster, zodat het na de herinrichting (besluit 168) blijft werken |
+| 175 | Startwizard: stap al klaar | Tonen met "Al ingericht" en de knoppen om het toch opnieuw te doen; niet automatisch overslaan |
+| 176 | Pull request v0.6.0–v0.7.0 | Eén pull request voor het meerjarenplan en de startwizard, na een geslaagde Windows-run |
+| 177 | Herinrichting: administratie | Eén wisselaar bovenaan voor de hele app, met accentkleur en band; vervangt het tabblad per administratie (besluiten 10, 11 en 17). Herstarten opent de laatste pagina en administratie (vervangt 12) |
+| 178 | Herinrichting: onderdelen Boekhouding | Inklapbare subitems in de navigatiebalk (Journaal, Bank, Postvak …), elk met één klik bereikbaar |
+| 179 | Herinrichting: menubalk | In Expert zichtbaar; in Eenvoudig verborgen, Alt toont hem tijdelijk (zoals Verkenner). Sneltoetsen werken altijd. Eenvoudig/Expert geldt daarmee voor de menubalk app-breed; de eenvoudige woorden blijven alleen in Financiën (aanvulling op 130) |
+| 180 | Herinrichting: aanpak | Alles in één versie (v0.8.0): schil, startpagina met kaarten, één hoofdactie per pagina en lege schermen |
+| 181 | Herinrichting: Contributie | De subtabbladen van Contributie worden ook subitems in de navigatiebalk, zoals Boekhouding |
+| 182 | Herinrichting: wisselen van administratie | Dezelfde pagina blijft staan voor de andere administratie; bestaat die daar niet (Contributie bij de Stichting), dan naar Start |
+| 183 | Herinrichting: startkaarten | Alle 8: inrichting afmaken, banktransacties te verwerken, conceptposten, bonnen in het postvak, incassorun van deze maand, openstaande storneringen, vervallen facturen, zonder bon; alleen zichtbaar als er iets te doen is |
+| 184 | Volgorde v0.8.0 | Eerst de Windows-run en de merge van v0.6.0–v0.7.0, daarna bouwen |
+| 185 | Uitleg SOL3-exports: plaats | Een gedeeld onderdeel in de stap Leden van de startwizard én in stap 1 van de SOL3-importwizard: per export het doel, de kolommen en een knop *Kolomnamen kopiëren* |
+| 186 | Uitleg SOL3-exports: kolommen | Alle kolommen per export, met *verplicht* (de import heeft hem nodig; leeg mag) of *optioneel* (SOL3 levert hem, Verenigd negeert hem); één bron in de importcode, bewaakt met een test |
+| 187 | Uitleg SOL3-exports: klikroute | De gebruiker levert de klikroute in SOL3 (menu, knoppen, formaat); tot dan geen klikroute in de uitleg |
+| 188 | Uitleg SOL3-exports: planning | Nu, als v0.7.1, mee in de pull request van v0.6.0–v0.7.0 |
+| 189 | Pull request v0.6.0–v0.7.1 | Direct openen (de Windows-run van v0.7.0 is groen); v0.7.1 komt er als extra commit bij |
+| 190 | Scheidingsteken SOL3-CSV | De import herkent `;` of `,` aan de kopregel (buiten aanhalingstekens, bij gelijkspel `;`). SOL3 noemt de export "door komma's gescheiden", maar levert puntkomma's (gemeld door de gebruiker) |
+| 191 | E-mail: functies | Facturen en herinneringen, vooraankondiging per incassorun, bericht bij stornering/openstaande post, vrije berichten aan leden en voogden per speltak of groep, en een welkomstmail; de gebruiker kan zelf sjablonen toevoegen en aanpassen |
+| 192 | E-mail: koppeling | Gmail-API met OAuth (alleen toestemming om te versturen, geen wachtwoord in de app); de gebruiker maakt eenmalig een Google Cloud-project, met hulp van Claude. De toegangssleutel staat versleuteld in de database |
+| 193 | E-mail: account | Een bestaand gmail.com-account van de penningmeester (adres niet in Git; ingesteld in de app). Limiet ±500 berichten per dag |
+| 194 | E-mail: groepsberichten | Elke ontvanger krijgt een eigen, persoonlijk ingevulde e-mail; geen BCC |
+| 195 | E-mail: logboek | Bewaren aan wie, wanneer, onderwerp en sjabloon; niet de tekst zelf |
+| 196 | Volgorde fase 6 | Eerst v0.8.0 (herinrichting), daarna fase 6 in de nieuwe navigatie; het uitgewerkte ontwerp van fase 6 (sjablonen, moment van de welkomstmail, Google Cloud-stappen) volgt dan ter goedkeuring |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -278,7 +307,23 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Daarna: Ctrl+5 / *Modules › Begroting* opent Boekhouding op het subtabblad Begroting (besluit 157), en het icoon is opnieuw gemaakt (besluit 158). Tests: 774; in de Linux-cloudsessie groen (ViewModel 163/165, de 2 Windows-padtests).
     - Tests: 773 in totaal. In de Linux-cloudsessie groen: Domain 226, Application 291, Infrastructure 65, Architectuur 14; ViewModel-tests 162/164 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 773/773) en een visuele controle van het subtabblad Begroting, de ALV-afdruk en het icoon.
     - Gemerged als PR #9 (2026-10-29, `e973ee1`), na groene CI (keuze van de gebruiker: mergen zonder extra Windows-run voor icoon en Ctrl+5).
-  - **5b Meerjarenplan Stichting: in ontwerp.** Besluiten 159–167 vastgesteld (2026-10-29); uitgewerkt ontwerp voorgelegd, wacht op akkoord om te bouwen (v0.6.0).
+  - **5b Meerjarenplan Stichting: gereed**, v0.6.0 (2026-10-30). Besluiten 159–167. Subtabblad *Meerjarenplan* (alleen Stichting): raster 10 jaar per resultaatrekening, knop → per rij (vanaf het jaar bij *Kopiëren vanaf*), resultaat per jaar, vaststellen en herzien, liggende afdruk (`RapportTabel.IsLiggend`), Ctrl+5 per administratie. Tabellen `Meerjarenplannen`, `Meerjarenposten`, `Meerjarenbedragen` (migratie *Meerjarenplan*).
+    - Uitwerking: de knop per rij kopieert vanaf het jaar dat in de werkbalk bij *Kopiëren vanaf* staat (één keuze voor alle rijen).
+    - Tests: 791 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 296, Infrastructure 66, Architectuur 14; ViewModel-tests 168/170 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 791/791) en een visuele controle van het subtabblad Meerjarenplan en de liggende afdruk.
+- **Startwizard en herinrichting UI:** besluiten 168–175 vastgesteld (2026-10-30).
+  - **Startwizard: gereed**, v0.7.0 (2026-10-30). Eigen venster *Verenigd instellen* met acht stappen, automatisch bij de eerste start en via *Bestand › Startwizard…*; voortgang in tabel `Startwizard` (migratie *Startwizard*); ✓ per stap uit `Inrichtingsstatus`.
+    - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
+    - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests).
+    - **Windows-test (2026-10-30, Windows 11, commit `b14bb81`): 805/805 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 300, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Nog door de gebruiker te doen: visuele controle van de wizard, de kleurrondjes in Instellingen, het subtabblad Meerjarenplan en de liggende afdruk.
+  - Pull request: één PR voor v0.6.0 t/m v0.7.1 (besluiten 176 en 189), geopend 2026-10-30.
+  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–184, 2026-10-30), inclusief de technische uitwerking (navigatie, hoofdactie per pagina, lege schermen, startkaarten, teststrategie). Bouwen na de merge van v0.6.0–v0.7.0.
+  - **Uitleg SOL3-exports: gereed**, v0.7.1 (2026-10-30). Besluiten 185–188. `Sol3Exportuitleg` (Application, verplicht uit `ExportHerkenning`) en het gedeelde onderdeel `Sol3Uitleg` in de stap Leden van de startwizard en (uitklapbaar) in stap 1 van de SOL3-importwizard.
+    - Tests: 812 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 307, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 812/812, de UI-test van de importwizard controleert nu ook de uitleg) en een visuele controle.
+    - **Windows-test (2026-10-30, Windows 11, commit `bc8cc09`): 813/813 geslaagd**, inclusief alle FlaUI-UI-tests (Domain 232, Application 308, Architectuur 14, Infrastructure 67, App 192); build zonder waarschuwingen, geen achtergebleven testproces. Eén Application-test meer dan de verwachte 812 (vermoedelijk toegevoegd in `bc8cc09` na de telling). Nog door de gebruiker te doen: visuele controle van de uitleg in de startwizard en de importwizard.
+    - Klikroute (besluit 187) aangeleverd en verwerkt, met per export de rapportnaam "invoer voor Verenigd, output #1–4" en exporteren met "Alleen details" en "CSV, door komma's gescheiden".
+    - Na de Windows-run: het scheidingsteken wordt herkend (besluit 190), met 3 nieuwe tests. Tests: 816 in totaal; in de Linux-cloudsessie groen (Application 311). **Nog op Windows te draaien:** de volledige suite (verwacht 816/816).
+
+- **Fase 6 (E-mail via Gmail): in ontwerp.** Besluiten 191–196 vastgesteld (2026-10-30); uitgewerkt ontwerp na v0.8.0.
 
 ## Privacy
 

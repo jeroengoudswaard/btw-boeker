@@ -186,7 +186,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd || BegrotingGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && !IsBezig
@@ -194,7 +194,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
         && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
         && FacturenGeldig
-        && BegrotingGeldig;
+        && BegrotingGeldig
+        && MeerjarenplanGeldig;
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
     public RapportTabel? Afdruktabel => Subtab switch
@@ -202,6 +203,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         BoekhoudingSubtab.Grootboekkaart when KaartTabel is not null => KaartTabel,
         // De begroting voor de ALV (besluit 155), altijd in Expert-termen (besluit 131).
         BoekhoudingSubtab.Begroting when _stand is not null && HeeftBegroting => Rapporten.BegrotingAlv(_stand, Begrotingsjaar, Administratienaam),
+        BoekhoudingSubtab.Meerjarenplan when HeeftMeerjarenplan => MeerjarenAfdruk(),
         _ => Rapport,
     };
 
@@ -229,6 +231,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
 
             await BewaarRegelsAsync();
             await BewaarBegrotingAsync();
+            await BewaarMeerjarenplanAsync();
             var factuur = await BewaarFacturenAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
@@ -329,6 +332,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         LaadFacturen(null);
         LaadBijlagen();
         LaadBegroting(GekozenBegrotingsversie?.Id);
+        LaadMeerjarenplan(GekozenMeerjarenversie?.Id);
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -950,5 +954,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel
         FactuurCommandsVernieuwen();
         BijlageCommandsVernieuwen();
         BegrotingCommandsVernieuwen();
+        MeerjarenCommandsVernieuwen();
     }
 }

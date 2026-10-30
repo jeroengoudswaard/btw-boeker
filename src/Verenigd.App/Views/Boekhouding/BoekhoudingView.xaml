@@ -1090,6 +1090,163 @@
                     </DockPanel>
                 </TabItem>
 
+                <!-- ===== Meerjarenplan, alleen Stichting (fase 5b, besluiten 159–167) ===== -->
+                <TabItem Header="{DynamicResource T.Tab.Meerjarenplan}" ToolTip="{DynamicResource U.Tab.Meerjarenplan}" AutomationProperties.AutomationId="SubtabMeerjarenplan"
+                         Visibility="{Binding HeeftMeerjarenplanTab, Converter={StaticResource BoolNaarZichtbaar}}">
+                    <DockPanel Margin="0,12,0,0">
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <Label Content="_Startjaar" Target="{Binding ElementName=Meerjarenstartjaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Meerjarenstartjaarkeuze" ItemsSource="{Binding MeerjarenStartjaren}" SelectedItem="{Binding MeerjarenStartjaar}" Width="90"
+                                      Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="MeerjarenStartjaar" />
+                            <Label Content="_Versie" Target="{Binding ElementName=Meerjarenversiekeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Meerjarenversiekeuze" ItemsSource="{Binding Meerjarenversies}" SelectedItem="{Binding GekozenMeerjarenversie}"
+                                      DisplayMemberPath="Tekst" MinWidth="300" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="Meerjarenversie" />
+                            <Button Content="{DynamicResource T.Knop.MeerjarenplanMaken}" Command="{Binding MeerjarenplanMakenCommand}" VerticalAlignment="Center"
+                                    Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="MeerjarenplanMaken"
+                                    Visibility="{Binding HeeftMeerjarenplan, Converter={StaticResource OnwaarNaarZichtbaar}}" />
+                        </WrapPanel>
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8" Visibility="{Binding IsMeerjarenplanBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}">
+                            <Label Content="Kopiëren v_anaf" Target="{Binding ElementName=Kopieervanafkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <ComboBox x:Name="Kopieervanafkeuze" ItemsSource="{Binding MeerjarenJaren}" SelectedItem="{Binding KopieerVanafJaar}" Width="90" Margin="0,0,24,0"
+                                      VerticalAlignment="Center" ToolTip="Het jaar waarvan de knop → in een rij het bedrag naar alle latere jaren kopieert"
+                                      AutomationProperties.AutomationId="KopieerVanafJaar" />
+                            <Label Content="Vastgesteld _op" Target="{Binding ElementName=Meerjarenvaststellingsdatum}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                            <DatePicker x:Name="Meerjarenvaststellingsdatum" SelectedDate="{Binding MeerjarenVaststellenOp}" Width="130" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding MeerjarenVaststellenOmschrijving, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="0,0,8,0" VerticalAlignment="Center"
+                                     ToolTip="Bijvoorbeeld: Vastgesteld bestuur 12-12-2026" AutomationProperties.Name="Omschrijving bij vaststellen" />
+                            <Button Content="{DynamicResource T.Knop.Vaststellen}" Command="{Binding MeerjarenplanVaststellenCommand}" VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="MeerjarenplanVaststellen" />
+                        </WrapPanel>
+                        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <Button Content="{DynamicResource T.Knop.Herzien}" Command="{Binding MeerjarenplanHerzienCommand}" VerticalAlignment="Center"
+                                    ToolTip="Een nieuwe conceptversie van het vastgestelde plan; de vastgestelde versie blijft bewaard" AutomationProperties.AutomationId="MeerjarenplanHerzien" />
+                        </WrapPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Meerjarentotalen}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                   Text="Bedragen per jaar in de prijzen van dat jaar. Ctrl+S slaat op; Ctrl+P drukt het plan liggend af." />
+                        <TextBlock Style="{StaticResource Toelichting}" DockPanel.Dock="Top"
+                                   Text="Er is nog geen meerjarenplan met dit startjaar. Richt eerst het rekeningschema van de Stichting in als dat nog niet is gebeurd."
+                                   Visibility="{Binding HeeftMeerjarenplan, Converter={StaticResource OnwaarNaarZichtbaar}}" />
+                        <DataGrid ItemsSource="{Binding Meerjarenrijen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                                  HeadersVisibility="Column" FrozenColumnCount="2" IsReadOnly="{Binding IsMeerjarenplanBewerkbaar, Converter={StaticResource Niet}}"
+                                  AutomationProperties.Name="Meerjarenplan per rekening" AutomationProperties.AutomationId="Meerjarenrijen"
+                                  Visibility="{Binding HeeftMeerjarenplan, Converter={StaticResource BoolNaarZichtbaar}}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{DynamicResource T.Kant}" Binding="{Binding Kanttekst}" IsReadOnly="True" Width="Auto" />
+                                <DataGridTextColumn Header="{DynamicResource T.Rekening}" Binding="{Binding Rekeningtekst}" IsReadOnly="True" Width="220" />
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[0], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[0].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[0].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[1], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[1].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[1].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[2], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[2].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[2].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[3], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[3].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[3].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[4], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[4].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[4].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[5], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[5].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[5].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[6], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[6].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[6].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[7], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[7].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[7].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[8], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[8].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[8].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="{Binding Data.Meerjarenkoppen[9], Source={StaticResource Kaartproxy}}" Width="92">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Cellen[9].Tekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" ToolTip="{Binding Fout}"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Cellen[9].Jaar, StringFormat=Bedrag {0}}" AutomationProperties.HelpText="{Binding Rekeningtekst}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Kopiëren" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <Button Content="→" Padding="8,0" Command="{Binding DataContext.NaarVolgendeJarenKopierenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" ToolTip="Naar de volgende jaren kopiëren: het bedrag van het jaar bij 'Kopiëren vanaf' gaat naar alle latere jaren"
+                                                    AutomationProperties.Name="{Binding Rekeningtekst, StringFormat=Naar de volgende jaren kopiëren {0}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Toelichting" Width="200">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:MeerjarenRij}">
+                                            <TextBox Text="{Binding Toelichting, UpdateSourceTrigger=PropertyChanged}" MaxLength="200"
+                                                     IsReadOnly="{Binding DataContext.IsMeerjarenplanBewerkbaar, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource Niet}}"
+                                                     AutomationProperties.Name="{Binding Rekeningtekst, StringFormat=Toelichting {0}}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </TabItem>
+
                 <!-- ===== Boekjaren ===== -->
                 <TabItem Header="{DynamicResource T.Tab.Boekjaren}" AutomationProperties.AutomationId="SubtabBoekjaren">
                     <DockPanel Margin="0,12,0,0">

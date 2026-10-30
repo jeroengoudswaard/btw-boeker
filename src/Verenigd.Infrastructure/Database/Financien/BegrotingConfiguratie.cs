@@ -21,6 +21,38 @@ internal static class BegrotingConfiguratie
             b.Ignore(x => x.IsVastgesteld);
         });
 
+        modelBuilder.Entity<Meerjarenplan>(b =>
+        {
+            b.ToTable("Meerjarenplannen");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Omschrijving).IsRequired().HasMaxLength(Begroting.MaximaleOmschrijvingLengte);
+            b.HasIndex(x => new { x.Administratie, x.Startjaar, x.Versie }).IsUnique();
+            b.HasMany(x => x.Posten).WithOne().HasForeignKey("PlanId").IsRequired().OnDelete(DeleteBehavior.Cascade);
+            b.Navigation(x => x.Posten).UsePropertyAccessMode(PropertyAccessMode.Field);
+            b.Ignore(x => x.IsVastgesteld);
+            b.Ignore(x => x.Eindjaar);
+            b.Ignore(x => x.Jaren);
+        });
+
+        modelBuilder.Entity<Meerjarenpost>(b =>
+        {
+            b.ToTable("Meerjarenposten");
+            b.HasKey(x => x.Id);
+            b.HasOne(x => x.Rekening).WithMany().HasForeignKey("RekeningId").IsRequired().OnDelete(DeleteBehavior.Restrict);
+            b.Property(x => x.Toelichting).HasMaxLength(Meerjarenpost.MaximaleToelichtingLengte);
+            b.HasIndex("PlanId", "RekeningId").IsUnique();
+            b.HasMany(x => x.Bedragen).WithOne().HasForeignKey("PostId").IsRequired().OnDelete(DeleteBehavior.Cascade);
+            b.Navigation(x => x.Bedragen).UsePropertyAccessMode(PropertyAccessMode.Field);
+        });
+
+        modelBuilder.Entity<Meerjarenbedrag>(b =>
+        {
+            b.ToTable("Meerjarenbedragen");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Bedrag).HasConversion(v => v.Centen, c => new Bedrag(c));
+            b.HasIndex("PostId", nameof(Meerjarenbedrag.Jaar)).IsUnique();
+        });
+
         modelBuilder.Entity<Begrotingsregel>(b =>
         {
             b.ToTable("Begrotingsregels");

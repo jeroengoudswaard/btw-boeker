@@ -3,11 +3,12 @@ using System.Text;
 namespace Verenigd.Application.Import;
 
 /// <summary>
-/// Leest SOL3-CSV's: <c>;</c>-gescheiden, velden (meestal) tussen aanhalingstekens, Windows-1252 of UTF-8 met BOM.
+/// Leest SOL3-CSV's: velden (meestal) tussen aanhalingstekens, Windows-1252 of UTF-8 met BOM. Het scheidingsteken
+/// (<c>;</c> of <c>,</c>) wordt herkend aan de kopregel (besluit 190): SOL3 noemt de export "door komma's gescheiden",
+/// maar levert puntkomma's.
 /// </summary>
 public static class Sol3CsvLezer
 {
-    private const char Scheidingsteken = ';';
     private static readonly Encoding Windows1252 = MaakWindows1252();
 
     public static CsvTabel Lees(Stream inhoud)
@@ -21,7 +22,7 @@ public static class Sol3CsvLezer
             ? Encoding.UTF8.GetString(bytes, preambule.Length, bytes.Length - preambule.Length)
             : Windows1252.GetString(bytes);
 
-        var records = Splits(tekst).Where(r => !(r.Velden.Count == 1 && string.IsNullOrWhiteSpace(r.Velden[0]))).ToList();
+        var records = Splits(tekst, Scheidingsteken(tekst)).Where(r => !(r.Velden.Count == 1 && string.IsNullOrWhiteSpace(r.Velden[0]))).ToList();
         if (records.Count == 0)
         {
             throw new Sol3ImportException("Het bestand is leeg.");
@@ -40,7 +41,35 @@ public static class Sol3CsvLezer
         return new CsvTabel(kolommen, records.Skip(1).Select(r => (r.Regelnummer, r.Velden.ToArray())));
     }
 
-    private static IEnumerable<(int Regelnummer, List<string> Velden)> Splits(string tekst)
+    /// <summary>Het teken dat in de kopregel (buiten aanhalingstekens) het vaakst voorkomt; bij gelijkspel de puntkomma.</summary>
+    internal static char Scheidingsteken(string tekst)
+    {
+        int puntkomma = 0, komma = 0;
+        var tussenAanhalingstekens = false;
+        foreach (var teken in tekst)
+        {
+            if (teken == '"')
+            {
+                tussenAanhalingstekens = !tussenAanhalingstekens;
+            }
+            else if (!tussenAanhalingstekens && teken == '\n')
+            {
+                break;
+            }
+            else if (!tussenAanhalingstekens && teken == ';')
+            {
+                puntkomma++;
+            }
+            else if (!tussenAanhalingstekens && teken == ',')
+            {
+                komma++;
+            }
+        }
+
+        return komma > puntkomma ? ',' : ';';
+    }
+
+    private static IEnumerable<(int Regelnummer, List<string> Velden)> Splits(string tekst, char scheidingsteken)
     {
         var velden = new List<string>();
         var veld = new StringBuilder();
@@ -80,10 +109,6 @@ public static class Sol3CsvLezer
                 case '"':
                     tussenAanhalingstekens = true;
                     break;
-                case Scheidingsteken:
-                    velden.Add(veld.ToString());
-                    veld.Clear();
-                    break;
                 case '\r':
                     break;
                 case '\n':
@@ -93,6 +118,10 @@ public static class Sol3CsvLezer
                     velden = [];
                     regel++;
                     startregel = regel;
+                    break;
+                case var _ when teken == scheidingsteken:
+                    velden.Add(veld.ToString());
+                    veld.Clear();
                     break;
                 default:
                     veld.Append(teken);

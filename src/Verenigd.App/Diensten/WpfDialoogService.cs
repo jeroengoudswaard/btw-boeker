@@ -18,7 +18,9 @@ internal sealed class WpfDialoogService : IDialoogService
     private const string BackupFilter = "Verenigd-back-up (*.vbak)|*.vbak";
     private const string CsvFilter = "CSV-bestand (*.csv)|*.csv|Alle bestanden (*.*)|*.*";
 
-    private static Window? Eigenaar => System.Windows.Application.Current.MainWindow;
+    /// <summary>Het actieve venster (bijvoorbeeld de startwizard), anders het hoofdvenster.</summary>
+    private static Window? Eigenaar =>
+        System.Windows.Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive) ?? System.Windows.Application.Current.MainWindow;
 
     public string? KiesNieuwDatabasebestand(string titel)
     {
@@ -147,6 +149,8 @@ internal sealed class WpfDialoogService : IDialoogService
     public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
 
     public bool ToonHistorieImport(HistorieImportViewModel wizard) => ToonModaal(new HistorieImportVenster(wizard));
+
+    public void ToonStartwizard(ViewModels.Inrichting.StartwizardViewModel wizard) => ToonModaal(new Views.Inrichting.StartwizardVenster(wizard));
 
     public IReadOnlyList<string> KiesBijlagen()
     {

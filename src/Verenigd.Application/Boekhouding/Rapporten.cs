@@ -115,6 +115,32 @@ public static class Rapporten
         ], rijen);
     }
 
+    /// <summary>Het meerjarenplan (besluiten 162 en 165): een kolom per jaar, liggend afgedrukt, in Expert-termen.</summary>
+    public static RapportTabel Meerjarenplan(Begrotingen.Meerjarenoverzicht overzicht, string administratie)
+    {
+        ArgumentNullException.ThrowIfNull(overzicht);
+        var jaren = overzicht.Jaren;
+        var leeg = Enumerable.Repeat<object?>(null, jaren.Count).ToArray();
+        var rijen = new List<RapportRij>();
+        foreach (var (kop, regels, totaal) in new[]
+        {
+            ("Baten", overzicht.Baten, (Func<int, Bedrag>)overzicht.TotaalBaten),
+            ("Lasten", overzicht.Lasten, (Func<int, Bedrag>)overzicht.TotaalLasten),
+        })
+        {
+            rijen.Add(new RapportRij([kop, .. leeg], true, false));
+            rijen.AddRange(regels.Where(r => r.Bedragen.Any(b => b != Bedrag.Nul))
+                .Select(r => new RapportRij([r.Rekening.ToString(), .. r.Bedragen.Select(b => b == Bedrag.Nul ? null : (object?)b)], false, false)));
+            rijen.Add(new RapportRij([$"Totaal {kop.ToLowerInvariant()}", .. Enumerable.Range(0, jaren.Count).Select(i => (object?)totaal(i))], false, true));
+        }
+
+        rijen.Add(new RapportRij(["Resultaat (baten min lasten)", .. Enumerable.Range(0, jaren.Count).Select(i => (object?)new Bedrag(overzicht.Resultaat(i)))], false, true));
+        return new RapportTabel($"Meerjarenplan {Jaar(overzicht.Plan.Startjaar)}–{Jaar(overzicht.Plan.Eindjaar)}",
+            $"{administratie} · {overzicht.Plan.Omschrijving}",
+            [new("Rekening", false), .. jaren.Select(j => new RapportKolom(Jaar(j), true))], rijen)
+        { IsLiggend = true };
+    }
+
     public static RapportTabel Kaart(Grootboekkaart kaart, string administratie)
     {
         ArgumentNullException.ThrowIfNull(kaart);

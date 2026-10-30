@@ -190,6 +190,7 @@ public sealed class IncassoDienstTests : IAsyncDisposable
         public ILedenImportOpslag LedenImport => throw new NotSupportedException();
         public IContributieRepository Contributie { get; } = new FakeRepository(data);
         public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding => throw new NotSupportedException();
+        public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

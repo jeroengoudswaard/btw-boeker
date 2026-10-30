@@ -47,6 +47,9 @@ public interface IDatabaseSessie : IAsyncDisposable
 
     IBoekhoudingRepository Boekhouding { get; }
 
+    /// <summary>De voortgang van de startwizard (besluit 173).</summary>
+    Inrichting.IStartwizardOpslag Startwizard { get; }
+
     /// <summary>Schrijft een consistente, versleutelde back-up (database + sleutelbestand) naar één bestand.</summary>
     Task MaakBackupAsync(string doelPad, CancellationToken annulering = default);
 }

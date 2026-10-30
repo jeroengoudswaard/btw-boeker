@@ -319,4 +319,24 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Application** (`Application/Begrotingen`): `Begrotingsrekenaar` (geldende versie = laatste vastgestelde, anders het concept; overnemen met percentage, afgerond op tientallen; overzicht per rubriek met naar rato per dag) en `BegrotingDienst`. `Grootboek.Resultaat` geeft het saldo van een resultaatrekening zonder afsluitpost. Rapporten: `Rapporten.Begroting` en `Rapporten.BegrotingAlv`.
 - **Opslag:** tabellen `Begrotingen` (uniek per administratie, jaar en versie) en `Begrotingsregels` (uniek per begroting en rekening), migratie *Begroting*.
 - **App:** partial `BoekhoudingViewModel.Begroting`, `BegrotingRij` en `BegrotingVersie`; Ctrl+S via `BewaarAsync`, Ctrl+P via `Afdruktabel` (op het subtabblad Begroting de ALV-afdruk).
-- **Bewaking:** de architectuurtest `Begroting_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank`.
+- **Bewaking:** de architectuurtest `Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank` (sinds v0.6.0 ook voor het meerjarenplan).
+
+## Meerjarenplan Stichting (v0.6.0, fase 5b, besluiten 159–167)
+
+- **Domein** (`Domain/Financien/Begrotingen/Meerjarenplan.cs`): `Meerjarenplan` (administratie, startjaar, 10 jaren, versie, status *Concept*/*Vastgesteld*) met `Meerjarenpost` (rekening, toelichting) en `Meerjarenbedrag` (jaar, bedrag). `ZetBedrag` weigert een jaar buiten het plan, een balansrekening, een negatief bedrag en een vastgesteld plan; `KopieerNaarVolgendeJaren` zet het bedrag van een jaar in alle latere jaren; `Herzie()` maakt een nieuwe conceptversie als kopie. Een lege post verdwijnt.
+- **Application** (`Application/Begrotingen`): `Meerjarenrekenaar` (geldende versie per startjaar; overzicht met baten, lasten en resultaat per jaar, zonder indexatie of geldprognose) en `MeerjarenplanDienst`. `Rapporten.Meerjarenplan` geeft een `RapportTabel` met `IsLiggend`; `WpfAfdrukDienst` drukt die liggend af met kleinere letters (besluit 165).
+- **Opslag:** tabellen `Meerjarenplannen` (uniek per administratie, startjaar en versie), `Meerjarenposten` (uniek per plan en rekening) en `Meerjarenbedragen` (uniek per post en jaar), migratie *Meerjarenplan*.
+- **App:** partial `BoekhoudingViewModel.Meerjarenplan`, `MeerjarenRij`, `JaarCel` en `MeerjarenVersie`. Het subtabblad is alleen zichtbaar bij de Stichting (`HeeftMeerjarenplanTab`); de jaarkolommen krijgen hun kop via `Bindingsproxy`. De knop → per rij kopieert vanaf het jaar bij *Kopiëren vanaf* (besluit 166). Ctrl+5 opent bij de Stichting het meerjarenplan, bij de Vereniging de begroting (besluit 163).
+
+## Startwizard (v0.7.0, besluiten 169–175)
+
+- **Application** (`Application/Inrichting/Startwizard.cs`): `Startstap` (de acht stappen), `Startwizardvoortgang` (laatste stap en afgerond) met `IStartwizardOpslag` op `IDatabaseSessie.Startwizard`, en `Inrichtingsstatus`: het ✓ per stap, afgeleid uit administratienamen, leden, boekhouding (rekeningen of dagboeken), bankdagboek met IBAN, incassogegevens en tarieven van het jaar.
+- **Opslag:** tabel `Startwizard` (één rij), migratie *Startwizard*.
+- **App:** `StartwizardViewModel` is de regisseur; het hoofdvenster implementeert `IStartwizardRegie` en voert de bestaande opdrachten uit (nieuwe database, SOL3-import, de vier inrichtingsroutes van Boekhouding, bankimport, Contributie › Tarieven via `ContributieSubtab`). Naam en kleur (`AdministratieKaart`) en incasso (`IncassoKaart`) zijn gedeelde UserControls in `Views/Gedeeld`. `StartwizardVenster` is een eigen modaal venster; ✕ werkt als *Later verder*.
+- **Eerste start:** `GebruikersInstellingen.StartwizardGetoond` zorgt dat de wizard maar één keer vanzelf opent.
+
+## Uitleg SOL3-exports (v0.7.1, besluiten 185–187)
+
+- `Application/Import/Sol3Exportuitleg.cs`: per export de titel, het doel en de kolommen in de volgorde van SOL3. *Verplicht* komt uit `ExportHerkenning.VerplichteKolommen`; de overige kolommen zijn wat SOL3 daarnaast levert. `Sol3ExportuitlegTests` vergelijkt dit met de kopregels in `Sol3Voorbeeld`.
+- `Views/Gedeeld/Sol3Uitleg.xaml`: gedeeld door de startwizard en de importwizard; *Kolomnamen kopiëren* vult alleen het klembord (code-behind, geen logica).
+- `Sol3CsvLezer.Scheidingsteken` kiest `;` of `,`: het teken dat buiten aanhalingstekens het vaakst in de kopregel staat (bij gelijkspel `;`), besluit 190.

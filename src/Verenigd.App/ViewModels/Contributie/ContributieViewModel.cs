@@ -50,6 +50,10 @@ public sealed partial class ContributieViewModel : TabbladViewModel
 
     public ObservableCollection<LidCategorieRegel> Leden { get; } = [];
 
+    /// <summary>Het zichtbare subtabblad; de startwizard opent hiermee de tarieven.</summary>
+    [ObservableProperty]
+    public partial ContributieSubtab Subtab { get; set; }
+
     public ObservableCollection<TariefRegel> Tarieven { get; } = [];
 
     public ObservableCollection<BetalerRegel> Betalers { get; } = [];

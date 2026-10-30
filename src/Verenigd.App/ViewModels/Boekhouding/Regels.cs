@@ -32,6 +32,7 @@ public enum BoekhoudingSubtab
     Grootboekkaart,
     Rapporten,
     Begroting,
+    Meerjarenplan,
     Boekjaren,
 }
 

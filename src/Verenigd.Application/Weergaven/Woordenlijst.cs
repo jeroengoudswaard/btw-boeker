@@ -72,6 +72,8 @@ public static class Woordenlijst
         new("Label.Dagboek", "Dag_boek", "Soort boekin_g"),
         new("Label.Rekening", "Re_kening", "Pot_je"),
         new("Tab.Begroting", "B_egroting", "B_egroting"),
+        new("Tab.Meerjarenplan", "_Meerjarenplan", "_Meerjarenplan", "Wat de Stichting de komende 10 jaar verwacht te ontvangen en uit te geven, per potje en per jaar."),
+        new("Knop.MeerjarenplanMaken", "Plan _maken", "Plan _maken"),
         new("Knop.BegrotingMaken", "Begroting _maken", "Begroting _maken"),
         new("Knop.Overnemen", "_Overnemen", "_Overnemen"),
         new("Knop.Vaststellen", "Vast_stellen...", "Vast_stellen..."),

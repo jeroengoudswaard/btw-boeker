@@ -6,6 +6,7 @@ using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Database;
 using Verenigd.Application.Import;
 using Verenigd.Application.Incasso;
+using Verenigd.Application.Inrichting;
 using Verenigd.Application.Leden;
 using Verenigd.Infrastructure.Database.Leden;
 
@@ -24,6 +25,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         LedenImport = new LedenImportOpslag(MaakContext);
         Contributie = new ContributieRepository(MaakContext);
         Boekhouding = new BoekhoudingRepository(MaakContext);
+        Startwizard = new StartwizardOpslag(MaakContext);
     }
 
     public string Pad { get; }
@@ -37,6 +39,8 @@ internal sealed class DatabaseSessie : IDatabaseSessie
     public IContributieRepository Contributie { get; }
 
     public IBoekhoudingRepository Boekhouding { get; }
+
+    public IStartwizardOpslag Startwizard { get; }
 
     public async Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
     {

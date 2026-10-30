@@ -99,4 +99,7 @@ public interface IDialoogService
 
     /// <summary>Toont het voorbeeldvenster van een bijlage (besluit 86).</summary>
     void ToonBijlage(BijlageVoorbeeldViewModel voorbeeld);
+
+    /// <summary>De startwizard (besluit 169); sluit via <i>Later verder</i>, <i>Voltooien</i> of ✕.</summary>
+    void ToonStartwizard(ViewModels.Inrichting.StartwizardViewModel wizard);
 }

@@ -298,6 +298,95 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Begrotingsregels", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenbedrag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Bedrag")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Jaar")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId", "Jaar")
+                        .IsUnique();
+
+                    b.ToTable("Meerjarenbedragen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenplan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AangemaaktUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AantalJaren")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Omschrijving")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Startjaar")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly?>("VastgesteldOp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Versie")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Administratie", "Startjaar", "Versie")
+                        .IsUnique();
+
+                    b.ToTable("Meerjarenplannen", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenpost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RekeningId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Toelichting")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RekeningId");
+
+                    b.HasIndex("PlanId", "RekeningId")
+                        .IsUnique();
+
+                    b.ToTable("Meerjarenposten", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Betaler", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1447,6 +1536,23 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Voogden", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Infrastructure.Database.StartwizardRij", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsAfgerond")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Stap")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Startwizard", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankafschrift", b =>
                 {
                     b.HasOne("Verenigd.Domain.Financien.Boekhouding.Dagboek", "Dagboek")
@@ -1490,6 +1596,32 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.HasOne("Verenigd.Domain.Financien.Begrotingen.Begroting", null)
                         .WithMany("Regels")
                         .HasForeignKey("BegrotingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Grootboekrekening", "Rekening")
+                        .WithMany()
+                        .HasForeignKey("RekeningId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rekening");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenbedrag", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Begrotingen.Meerjarenpost", null)
+                        .WithMany("Bedragen")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenpost", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Begrotingen.Meerjarenplan", null)
+                        .WithMany("Posten")
+                        .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1727,6 +1859,16 @@ namespace Verenigd.Infrastructure.Database.Migraties
             modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Begroting", b =>
                 {
                     b.Navigation("Regels");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenplan", b =>
+                {
+                    b.Navigation("Posten");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenpost", b =>
+                {
+                    b.Navigation("Bedragen");
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>

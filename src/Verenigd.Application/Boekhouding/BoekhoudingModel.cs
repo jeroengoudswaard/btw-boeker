@@ -53,6 +53,9 @@ public sealed record BoekhoudingStand(
     /// <summary>Alle versies van alle begrotingen (besluit 149); nooit onderdeel van het grootboek.</summary>
     public IReadOnlyList<Begroting> Begrotingen { get; init; } = [];
 
+    /// <summary>Alle versies van alle meerjarenplannen (besluiten 159–164); nooit onderdeel van het grootboek.</summary>
+    public IReadOnlyList<Meerjarenplan> Meerjarenplannen { get; init; } = [];
+
     public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
 
     public bool HeeftBijlage(Guid postId) => Bijlagen.Any(b => b.PostId == postId);
@@ -160,7 +163,11 @@ public sealed record Grootboekkaart(Grootboekrekening Rekening, DateOnly Van, Da
 }
 
 /// <summary>Een rapport als tabel, voor afdrukken en export (besluit 67). Cellen zijn tekst of <see cref="Bedrag"/>.</summary>
-public sealed record RapportTabel(string Titel, string? Subtitel, IReadOnlyList<RapportKolom> Kolommen, IReadOnlyList<RapportRij> Rijen);
+public sealed record RapportTabel(string Titel, string? Subtitel, IReadOnlyList<RapportKolom> Kolommen, IReadOnlyList<RapportRij> Rijen)
+{
+    /// <summary>Liggend afdrukken met kleinere letters, voor brede tabellen zoals het meerjarenplan (besluit 165).</summary>
+    public bool IsLiggend { get; init; }
+}
 
 public sealed record RapportKolom(string Naam, bool IsBedrag);
 

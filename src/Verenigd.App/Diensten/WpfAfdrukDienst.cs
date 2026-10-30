@@ -14,6 +14,12 @@ internal sealed class WpfAfdrukDienst : IAfdrukDienst
     {
         ArgumentNullException.ThrowIfNull(tabel);
         var dialoog = new PrintDialog();
+        if (tabel.IsLiggend)
+        {
+            // Besluit 165: brede tabellen (meerjarenplan) liggend; de gebruiker kan dat in het afdrukvenster nog wijzigen.
+            dialoog.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+        }
+
         if (dialoog.ShowDialog() != true)
         {
             return false;
@@ -32,8 +38,8 @@ internal sealed class WpfAfdrukDienst : IAfdrukDienst
         var document = new FlowDocument
         {
             FontFamily = new FontFamily("Segoe UI"),
-            FontSize = 11,
-            PagePadding = new Thickness(48),
+            FontSize = tabel.IsLiggend ? 8.5 : 11,
+            PagePadding = new Thickness(tabel.IsLiggend ? 32 : 48),
         };
         document.Blocks.Add(new Paragraph(new Run(tabel.Titel)) { FontSize = 18, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
         if (tabel.Subtitel is { } subtitel)

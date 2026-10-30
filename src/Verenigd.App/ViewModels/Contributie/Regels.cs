@@ -6,6 +6,16 @@ using Verenigd.Domain.Leden;
 
 namespace Verenigd.App.ViewModels.Contributie;
 
+/// <summary>Subtabbladen van het tabblad Contributie, in de volgorde van het scherm.</summary>
+public enum ContributieSubtab
+{
+    Leden,
+    Betalers,
+    Tarieven,
+    Runs,
+    Openstaand,
+}
+
 internal static class Weergave
 {
     public static readonly CultureInfo Nederlands = CultureInfo.GetCultureInfo("nl-NL");

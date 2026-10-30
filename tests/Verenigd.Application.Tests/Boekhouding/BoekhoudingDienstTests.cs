@@ -302,6 +302,7 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         public ILedenImportOpslag LedenImport => throw new NotSupportedException();
         public IContributieRepository Contributie => throw new NotSupportedException();
         public IBoekhoudingRepository Boekhouding { get; } = data;
+        public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

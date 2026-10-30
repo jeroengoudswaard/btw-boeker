@@ -26,7 +26,7 @@
                        AutomationProperties.LiveSetting="Assertive" />
         </DockPanel>
 
-        <TabControl AutomationProperties.AutomationId="ContributieSubtabbladen">
+        <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="ContributieSubtabbladen">
             <!-- ===== Leden & categorie ===== -->
             <TabItem Header="_Leden &amp; categorie" AutomationProperties.AutomationId="SubtabLeden">
                 <DockPanel Margin="0,12,0,0">

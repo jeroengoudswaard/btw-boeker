@@ -4,6 +4,51 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.7.1] - 2026-10-30: Uitleg over de SOL3-exports
+
+### Toegevoegd
+- **Uitleg over de vier SOL3-exports** (besluiten 185–187), in de stap *Leden* van de startwizard en in stap 1 van de SOL3-importwizard (uitklapbaar onder *Welke exports en kolommen?*):
+  - per export het doel en alle kolommen in de volgorde van SOL3, met *(optioneel)* bij kolommen die Verenigd niet gebruikt;
+  - een knop *Kolomnamen kopiëren* per export (één naam per regel);
+  - de klikroute in SOL3 (Meer › Rapporten › Nieuw rapport … Opslaan als "invoer voor Verenigd, output #1–4" en Exporteren met "Alleen details", CSV), zoals aangeleverd door de gebruiker;
+  - het formaat: Windows-1252 of UTF-8, datums als dag-maand-jaar, kolomvolgorde vrij.
+- **SOL3-import leest komma's én puntkomma's** (besluit 190): het scheidingsteken wordt herkend aan de kopregel. SOL3 noemt de export "door komma's gescheiden", maar levert puntkomma's; een komma binnen aanhalingstekens blijft gewoon in het veld.
+- Welke kolommen verplicht zijn, komt uit dezelfde bron als de import; een test bewaakt dat de uitleg en de import gelijk blijven.
+- 816 geautomatiseerde tests (was 805).
+
+## [0.7.0] - 2026-10-30: Startwizard
+
+### Toegevoegd
+- **Startwizard *Verenigd instellen*** (besluiten 169–175): Welkom → Database → Vereniging → Leden → Boekhouding → Bank → Contributie → Klaar.
+  - Opent automatisch bij de allereerste start (één keer) en daarna altijd via *Bestand › Startwizard…*.
+  - Elke stap is over te slaan. *Later verder* (ook ✕) onthoudt de stap in de database; bij het openen van die database biedt Verenigd aan om daar verder te gaan.
+  - Gebruikt de bestaande wizards: nieuwe database met herstelsleutel, SOL3-import, Excel-overname, standaardschema, sjabloonbestand, leeg beginnen en bankimport.
+  - Naam en kleur van de administraties en de incassogegevens vult u in de wizard zelf in; *Volgende* slaat ze op. *Tarieven invullen…* opent Contributie › Tarieven.
+  - Een stappenbalk met ✓ (klaar), ● (huidige stap) en ○ (nog te doen). Het ✓ volgt uit de gegevens zelf, dus ook bij een bestaande database ziet u wat al is ingericht ("Al ingericht").
+  - De stap *Klaar* toont per onderdeel ✓ of ⚠, met waar u het later kunt doen.
+- 805 geautomatiseerde tests (was 791).
+
+### Gewijzigd
+- Naam en kleur van een administratie en de incassogegevens staan in gedeelde onderdelen, gebruikt door Instellingen en de startwizard.
+- Dialogen openen boven het actieve venster (bijvoorbeeld de startwizard) in plaats van altijd boven het hoofdvenster.
+
+### Opgelost
+- De kleurrondjes bij *Extra › Instellingen › Administraties* deden niets: de knop zocht de opdracht bij het verkeerde onderdeel.
+
+## [0.6.0] - 2026-10-30: Meerjarenplan Stichting (fase 5b)
+
+### Toegevoegd
+- **Subtabblad *Meerjarenplan* in Boekhouding van de Stichting** (besluiten 159–167):
+  - Een raster met per resultaatrekening van de Stichting een bedrag per jaar, over 10 jaar, met een toelichting per rij. Bedragen in de prijzen van het jaar zelf (geen indexatie).
+  - Het startjaar is vrij te kiezen, standaard het volgende jaar; een nieuw plan begint leeg.
+  - Per rij een knop → *Naar de volgende jaren kopiëren*: het bedrag van het jaar bij *Kopiëren vanaf* gaat naar alle latere jaren; daarna blijft elk bedrag aan te passen.
+  - Onderaan het resultaat (baten min lasten) per jaar.
+  - Status *Concept* → *Vastgesteld* (alleen-lezen); *Herzien* maakt een nieuwe conceptversie, de vastgestelde versie blijft bewaard.
+  - Ctrl+S slaat op; Ctrl+P drukt het plan liggend af op A4, met alle 10 jaren op één pagina.
+- **Ctrl+5 / *Modules › Begroting*** opent bij de Stichting het meerjarenplan en bij de Vereniging de begroting (besluit 163).
+- Architectuurtest: ook het meerjarenplan telt nooit mee in grootboek, jaarafsluiting of bank.
+- 791 geautomatiseerde tests (was 774).
+
 ### Gewijzigd
 - App-icoon zonder lege rand: de tegel vult nu het hele vierkant, zodat het icoon in de taakbalk even groot is als andere apps (besluit 158).
 
