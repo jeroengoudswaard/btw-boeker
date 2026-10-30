@@ -58,6 +58,7 @@ public sealed class Sol3ExportuitlegTests
         Assert.StartsWith("1. Log in op SOL3", Sol3Exportuitleg.Klikroute[0], StringComparison.Ordinal);
         Assert.Contains("Meer", Sol3Exportuitleg.Klikroute[1], StringComparison.Ordinal);
         Assert.Contains("Voorbeeld automatisch bijwerken", Sol3Exportuitleg.Klikroute[3], StringComparison.Ordinal);
+        Assert.Contains("De volgorde van de kolommen doet er niet toe", Sol3Exportuitleg.Klikroute[4], StringComparison.Ordinal);
         Assert.Contains("Exporteren", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);
         Assert.Contains("Alleen details", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);
         Assert.Contains("CSV, door komma's gescheiden", Sol3Exportuitleg.Klikroute[^1], StringComparison.Ordinal);

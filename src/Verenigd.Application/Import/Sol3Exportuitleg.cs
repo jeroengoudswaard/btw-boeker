@@ -28,14 +28,14 @@ public static class Sol3Exportuitleg
         "Datums als dag-maand-jaar, bijvoorbeeld 19-09-2025. De volgorde van de kolommen maakt niet uit: Verenigd zoekt ze op naam. " +
         "Elke export bevat het lidnummer.";
 
-    /// <summary>Hoe u in SOL3 een export maakt, zoals aangeleverd door de gebruiker (besluit 187); gelijk voor alle vier.</summary>
+    /// <summary>Hoe u in SOL3 een export maakt, zoals aangeleverd door de gebruiker (besluit 187); gelijk voor alle vier, alleen de kolommen verschillen.</summary>
     public static IReadOnlyList<string> Klikroute { get; } =
     [
         "1. Log in op SOL3.",
         "2. Kies rechtsboven Meer › Rapporten.",
         "3. Kies Nieuw rapport en begin met een standaardrapport, bijvoorbeeld \"Import voor de Grote Clubactie\".",
         "4. Kies Bewerken en zet \"Voorbeeld automatisch bijwerken\" aan.",
-        "5. Verwijder alle kolommen die u niet nodig hebt en kies de kolommen van de export (zie hieronder).",
+        "5. Verwijder alle kolommen die u niet nodig hebt en kies de kolommen van de export (zie hieronder; elke export heeft eigen kolommen). De volgorde van de kolommen doet er niet toe.",
         "6. Kies Uitvoeren.",
         "7. Kies in het driehoekje naast Bewerken eerst Opslaan, met de rapportnaam van de export (zie hieronder).",
         "8. Kies daarna in hetzelfde driehoekje Exporteren, met \"Alleen details\" en de indeling \"CSV, door komma's gescheiden\".",
