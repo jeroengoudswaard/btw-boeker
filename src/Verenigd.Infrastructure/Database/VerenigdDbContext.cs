@@ -41,6 +41,9 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Financien.Begrotingen.Meerjarenplan> Meerjarenplannen => Set<Domain.Financien.Begrotingen.Meerjarenplan>();
     public DbSet<Domain.Financien.Bijlagen.BijlageInhoud> BijlageInhoud => Set<Domain.Financien.Bijlagen.BijlageInhoud>();
     internal DbSet<StartwizardRij> Startwizard => Set<StartwizardRij>();
+    public DbSet<Domain.Communicatie.Emailsjabloon> Emailsjablonen => Set<Domain.Communicatie.Emailsjabloon>();
+    public DbSet<Domain.Communicatie.VerzondenBericht> VerzondenBerichten => Set<Domain.Communicatie.VerzondenBericht>();
+    public DbSet<Domain.Communicatie.Emailinstellingen> Emailinstellingen => Set<Domain.Communicatie.Emailinstellingen>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -86,6 +89,37 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
             b.HasKey(r => r.Id);
             b.Property(r => r.Id).ValueGeneratedNever();
             b.Property(r => r.Stap).HasConversion<string>().HasMaxLength(20);
+        });
+        modelBuilder.Entity<Domain.Communicatie.Emailsjabloon>(b =>
+        {
+            b.ToTable("Emailsjablonen");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.Naam).IsRequired().HasMaxLength(Domain.Communicatie.Emailsjabloon.MaximaleNaamLengte);
+            b.Property(s => s.Onderwerp).IsRequired().HasMaxLength(Domain.Communicatie.Emailsjabloon.MaximaleOnderwerpLengte);
+            b.Property(s => s.Tekst).IsRequired();
+        });
+        modelBuilder.Entity<Domain.Communicatie.VerzondenBericht>(b =>
+        {
+            b.ToTable("VerzondenBerichten");
+            b.HasKey(v => v.Id);
+            b.Property(v => v.Naam).IsRequired().HasMaxLength(200);
+            b.Property(v => v.Adres).IsRequired().HasMaxLength(320);
+            b.Property(v => v.Onderwerp).IsRequired().HasMaxLength(300);
+            b.Property(v => v.Sjabloon).IsRequired().HasMaxLength(100);
+            b.Property(v => v.Fout).HasMaxLength(300);
+            b.HasIndex(v => v.TijdstipUtc);
+        });
+        modelBuilder.Entity<Domain.Communicatie.Emailinstellingen>(b =>
+        {
+            b.ToTable("Emailinstellingen");
+            b.HasKey(i => i.Id);
+            b.Property(i => i.Id).ValueGeneratedNever();
+            b.Property(i => i.Afzendernaam).HasMaxLength(200);
+            b.Property(i => i.Afzenderadres).HasMaxLength(320);
+            b.Property(i => i.ClientId).HasMaxLength(300);
+            b.Property(i => i.ClientGeheim).HasMaxLength(300);
+            b.Ignore(i => i.HeeftClient);
+            b.Ignore(i => i.IsGekoppeld);
         });
     }
 }

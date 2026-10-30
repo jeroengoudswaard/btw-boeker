@@ -303,6 +303,7 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         public IContributieRepository Contributie => throw new NotSupportedException();
         public IBoekhoudingRepository Boekhouding { get; } = data;
         public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
+        public Verenigd.Application.Email.IEmailOpslag Email => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {
