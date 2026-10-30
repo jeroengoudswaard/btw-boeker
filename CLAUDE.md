@@ -15,7 +15,7 @@ Claude treedt op als **Senior AI Enterprise Architect** die werkt als een profes
 
 ### 2. UI/UX-ontwerpstandaarden
 - De UI gaat naadloos op in het Windows-ecosysteem: WPF met het Fluent-thema van .NET.
-- Native Windows-gedrag heeft voorrang: standaard menubalk (Bestand, Bewerken, Beeld, Help), vertrouwde sneltoetsen (Ctrl+S, Ctrl+Z, Ctrl+F, F5…), Segoe UI, standaard paddings en margins, ondersteuning voor Light/Dark mode en toegankelijkheid (toetsenbordnavigatie, AutomationProperties).
+- Native Windows-gedrag heeft voorrang: standaard menubalk (Bestand, Bewerken, Beeld, Help; sinds besluit 179 in Eenvoudig verborgen en met Alt op te roepen), vertrouwde sneltoetsen (Ctrl+S, Ctrl+Z, Ctrl+F, F5…), Segoe UI, standaard paddings en margins, ondersteuning voor Light/Dark mode en toegankelijkheid (toetsenbordnavigatie, AutomationProperties).
 
 ### 3. Enterprise quality gates
 Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun feedback of goedkeuring beknopt in de output:
@@ -212,6 +212,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 174 | Startwizard: venster | Een eigen venster vóór het hoofdvenster, zodat het na de herinrichting (besluit 168) blijft werken |
 | 175 | Startwizard: stap al klaar | Tonen met "Al ingericht" en de knoppen om het toch opnieuw te doen; niet automatisch overslaan |
 | 176 | Pull request v0.6.0–v0.7.0 | Eén pull request voor het meerjarenplan en de startwizard, na een geslaagde Windows-run |
+| 177 | Herinrichting: administratie | Eén wisselaar bovenaan voor de hele app, met accentkleur en band; vervangt het tabblad per administratie (besluiten 10, 11 en 17). Herstarten opent de laatste pagina en administratie (vervangt 12) |
+| 178 | Herinrichting: onderdelen Boekhouding | Inklapbare subitems in de navigatiebalk (Journaal, Bank, Postvak …), elk met één klik bereikbaar |
+| 179 | Herinrichting: menubalk | In Expert zichtbaar; in Eenvoudig verborgen, Alt toont hem tijdelijk (zoals Verkenner). Sneltoetsen werken altijd. Eenvoudig/Expert geldt daarmee voor de menubalk app-breed; de eenvoudige woorden blijven alleen in Financiën (aanvulling op 130) |
+| 180 | Herinrichting: aanpak | Alles in één versie (v0.8.0): schil, startpagina met kaarten, één hoofdactie per pagina en lege schermen |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -295,7 +299,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Uitwerkingen: "Stichting aan of uit" uit het ontwerp is niet gebouwd (beide administraties bestaan altijd, besluit 4); de tarieven vult u in op Contributie › Tarieven (de wizard onthoudt de stap en opent dat subtabblad); ✕ werkt als *Later verder*; de bankstap kan pas als de boekhouding van de Vereniging is ingericht. Gevonden en opgelost: de kleurrondjes bij Instellingen › Administraties werkten niet.
     - Tests: 805 in totaal. In de Linux-cloudsessie groen: Domain 232, Application 300, Infrastructure 67, Architectuur 14; ViewModel-tests 176/178 (de 2 Windows-padtests). **Nog op Windows te draaien:** de volledige suite (verwacht 805/805, inclusief de nieuwe UI-test `Eerste_start_opent_de_startwizard…`) en een visuele controle van de wizard en van de kleurrondjes in Instellingen.
   - Pull request: één PR voor v0.6.0 en v0.7.0 na de Windows-run (besluit 176).
-  - Volgende stap: ontwerp van de herinrichting van de UI (besluit 168) ter goedkeuring; voorgelegd 2026-10-30.
+  - **Herinrichting UI (v0.8.0): ontwerp goedgekeurd** (besluiten 177–180, 2026-10-30); technische uitwerking voorgelegd.
 
 ## Privacy
 
