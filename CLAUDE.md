@@ -392,7 +392,24 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-31, Windows 11, commit `4615391`): 905/905 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 243, Application 331, Architectuur 28, Infrastructure 70, App 233); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets (`GetAsyncKeyState`), geen achtergebleven testproces. Nog door de gebruiker te doen: de visuele controle hierboven.
   - Gemerged als PR #12 (2026-10-31, `c38d6fa`), samen met v0.8.0 en v0.9.0, na groene CI; keuze van de gebruiker: v0.10.1 is de release op `main`.
 
-- **Visueel ontwerp: in aanbouw**, v0.11.0. Besluiten 216–221 (2026-10-31, keuzes 1A 2A 3B en 1A 2A 3A); uitgewerkte schermen goedgekeurd. Ontwerpcanvas met de drie richtingen en de uitwerking van A: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé).
+- **Visueel ontwerp: gereed**, v0.11.0 (2026-10-31). Besluiten 216–221 (keuzes 1A 2A 3B en 1A 2A 3A); de uitgewerkte schermen zijn goedgekeurd. Ontwerpcanvas: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Wat er is gebouwd:
+    - thema `FluentMica.xaml`;
+    - accentkleur per administratie (`Accentkleuren`);
+    - eigen titelbalk (`WindowChrome`);
+    - kerncijfers op Start (`Kerncijfers`);
+    - tellers in de navigatiebalk (`Navigatietellers`);
+    - Instellingen in tabs.
+  - Uitwerkingen:
+    - De kerncijfers tonen per bankdagboek een kaart (dus betaal- en spaarrekening apart), met het saldo van het laatste afschrift of anders van het grootboek.
+    - De Snap-indeling bij het zweven boven Maximaliseren (Windows 11) werkt niet met een eigen titelbalk. Snap via Win+pijl en via slepen naar de rand werkt wel.
+    - Of de Fluent-accentknoppen de accentkleur van de administratie overnemen, moet op Windows worden gecontroleerd. Doen ze dat niet, dan zijn het alleen de sleutels in `Accentkleuren`.
+  - Tests: 910 in totaal.
+    - In de Linux-cloudsessie groen: Domain 243, Application 333, Infrastructure 70, Architectuur 28.
+    - ViewModel-tests 217/219 (de 2 Windows-padtests).
+    - Nieuw: `KerncijfersTests`, `StartTests`, de UI-test `Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel` en de tabs in de Instellingen-UI-test.
+    - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 910/910).
+    - Daarnaast een visuele controle: licht en donker, de accentkleur bij het wisselen van administratie, slepen, dubbelklikken en Snap met de titelbalk, de kerncijfers en de tellers.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
