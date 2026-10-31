@@ -6,6 +6,9 @@
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Views/Thema/FluentMica.xaml" />
+            </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolNaarZichtbaar" />
             <conv:KleurNaarBrushConverter x:Key="KleurNaarBrush" />
             <conv:NullNaarZichtbaarheidConverter x:Key="NietNullNaarZichtbaar" />
@@ -21,10 +24,11 @@
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
             <!-- Standaardmaten volgens de Windows-richtlijnen (veelvouden van 4/8). -->
-            <Thickness x:Key="PaginaMarge">24,16,24,24</Thickness>
+            <Thickness x:Key="PaginaMarge">40,28,40,28</Thickness>
             <Thickness x:Key="KaartPadding">16</Thickness>
 
             <Style x:Key="Paginatitel" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Koplettertype}" />
                 <Setter Property="FontSize" Value="28" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Margin" Value="0,0,0,16" />
@@ -53,7 +57,7 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Padding" Value="{StaticResource KaartPadding}" />
+                <Setter Property="Padding" Value="18" />
             </Style>
             <Style x:Key="Knoppenbalk" TargetType="StackPanel">
                 <Setter Property="Orientation" Value="Horizontal" />

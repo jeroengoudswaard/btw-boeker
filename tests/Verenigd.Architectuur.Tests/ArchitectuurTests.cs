@@ -316,7 +316,7 @@ public class ArchitectuurTests
     [Fact]
     public void Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
     {
-        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs"];
+        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs", "Kerncijfers.cs"]; // Kerncijfers leest de begroting alleen, voor Start
         var overtredingen = Directory
             .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))

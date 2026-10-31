@@ -21,7 +21,14 @@
         Title="{Binding Venstertitel}"
         Width="1200" Height="760" MinWidth="800" MinHeight="500"
         WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+        FontFamily="{StaticResource Lettertype}"
         AutomationProperties.AutomationId="Hoofdvenster">
+
+    <!-- Besluit 221: eigen titelbalk; slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven van Windows. -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="8" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
 
@@ -79,7 +86,22 @@
         <KeyBinding Gesture="Ctrl+D6" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="6" />
     </Window.InputBindings>
 
-    <DockPanel>
+    <DockPanel x:Name="Wortel">
+        <!-- ===== Titelbalk (besluit 221) ===== -->
+        <DockPanel DockPanel.Dock="Top" Height="36">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource Vensterknop}" Content="&#xE921;" Click="Minimaliseren_Click" ToolTip="Minimaliseren"
+                        AutomationProperties.Name="Minimaliseren" AutomationProperties.AutomationId="VensterMinimaliseren" />
+                <Button x:Name="Maximaliseerknop" Style="{StaticResource Vensterknop}" Content="&#xE922;" Click="Maximaliseren_Click" ToolTip="Maximaliseren"
+                        AutomationProperties.Name="Maximaliseren" AutomationProperties.AutomationId="VensterMaximaliseren" />
+                <Button Style="{StaticResource Sluitknop}" Content="&#xE8BB;" Click="Afsluiten_Click" ToolTip="Sluiten"
+                        AutomationProperties.Name="Sluiten" AutomationProperties.AutomationId="VensterSluiten" />
+            </StackPanel>
+            <Image Source="/Assets/Verenigd.ico" Width="16" Height="16" Margin="14,0,10,0" VerticalAlignment="Center" AutomationProperties.Name="Verenigd" />
+            <TextBlock Text="{Binding Venstertitel}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </DockPanel>
+
         <!-- ===== Menubalk ===== -->
         <!-- Besluit 179: in Expert altijd zichtbaar; in Eenvoudig alleen na Alt (zoals Verkenner). -->
         <Menu x:Name="Menubalk" DockPanel.Dock="Top" AutomationProperties.AutomationId="Menubalk"
@@ -167,7 +189,8 @@
         </Menu>
 
         <!-- ===== Statusbalk ===== -->
-        <StatusBar DockPanel.Dock="Bottom" AutomationProperties.AutomationId="Statusbalk">
+        <StatusBar DockPanel.Dock="Bottom" AutomationProperties.AutomationId="Statusbalk" Background="Transparent"
+                   BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Padding="8,0">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" Margin="0,0,6,0" VerticalAlignment="Center"
@@ -215,19 +238,23 @@
         </StatusBar>
 
         <!-- ===== Navigatiebalk met administratiewisselaar (besluiten 168, 177, 178 en 181) ===== -->
-        <Border DockPanel.Dock="Left" Width="232" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                Background="{DynamicResource LayerFillColorDefaultBrush}">
-            <DockPanel Margin="8,12,8,8">
-                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,12" Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
-                    <Label Content="_Administratie" Target="{Binding ElementName=Administratiewisselaar}" Padding="0,0,0,4" />
+        <Border DockPanel.Dock="Left" Width="248" Background="Transparent">
+            <DockPanel Margin="8,8,8,8">
+                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,14" Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
+                    <Label Content="_Administratie" Target="{Binding ElementName=Administratiewisselaar}" Padding="2,0,0,4" FontSize="12"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     <ComboBox x:Name="Administratiewisselaar" ItemsSource="{Binding Administraties}" SelectedItem="{Binding GekozenAdministratie}"
+                              HorizontalAlignment="Stretch" MinHeight="44"
                               AutomationProperties.AutomationId="Administratiewisselaar" ToolTip="Geldt voor de hele app; de pagina blijft dezelfde">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AdministratieViewModel}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
+                                    <Ellipse Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center"
                                              Fill="{Binding Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                                    <TextBlock Text="{Binding Naam}" />
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Naam}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Soort}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -237,23 +264,28 @@
                          BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          AutomationProperties.Name="Navigatie" AutomationProperties.AutomationId="Navigatiebalk">
                     <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource Navigatieregel}">
                             <Setter Property="AutomationProperties.AutomationId" Value="{Binding Sleutel, StringFormat=Nav_{0}}" />
                             <Setter Property="AutomationProperties.Name" Value="{Binding Titel}" />
-                            <Setter Property="Padding" Value="8,6" />
+                            <Setter Property="AutomationProperties.HelpText" Value="{Binding Teller, StringFormat='{}{0} te doen'}" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:NavigatieItem}">
-                            <StackPanel x:Name="Regel" Orientation="Horizontal">
-                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" Width="20" Margin="0,0,12,0" VerticalAlignment="Center" />
-                                <TextBlock x:Name="Titeltekst" Text="{Binding Titel}" VerticalAlignment="Center" />
-                                <TextBlock x:Name="Pijl" FontFamily="{StaticResource Pictogrammen}" Text="&#xE76C;" FontSize="10" Margin="8,0,0,0"
+                            <DockPanel x:Name="Regel">
+                                <TextBlock x:Name="Pijl" DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Text="&#xE76C;" FontSize="10" Margin="8,0,0,0"
                                            VerticalAlignment="Center" Visibility="Collapsed" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
+                                <Border DockPanel.Dock="Right" Style="{StaticResource Teller}" Margin="8,0,0,0"
+                                        Visibility="{Binding Teller, Converter={StaticResource NietNullNaarZichtbaar}}">
+                                    <TextBlock Text="{Binding Teller}" FontSize="12" FontWeight="SemiBold" TextAlignment="Center"
+                                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                </Border>
+                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" Width="20" Margin="0,0,12,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Titeltekst" Text="{Binding Titel}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </DockPanel>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsSubitem}" Value="True">
-                                    <Setter TargetName="Regel" Property="Margin" Value="32,0,0,0" />
+                                    <Setter TargetName="Regel" Property="Margin" Value="32,-2,0,-2" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HeeftOnderdelen}" Value="True">
                                     <Setter TargetName="Pijl" Property="Visibility" Value="Visible" />
@@ -269,23 +301,27 @@
         </Border>
 
         <!-- ===== Pagina ===== -->
-        <ContentControl Content="{Binding GeselecteerdTabblad}" Focusable="False" AutomationProperties.AutomationId="Pagina">
-            <ContentControl.ContentTemplate>
-                <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
-                    <DockPanel>
-                        <!-- Gekleurde band: altijd zichtbaar in welke administratie u werkt. -->
-                        <Border DockPanel.Dock="Top" Padding="24,8"
-                                Background="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}"
-                                Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
-                            <TextBlock FontWeight="SemiBold" AutomationProperties.AutomationId="AdministratieBand"
-                                       Foreground="{Binding Administratie.Tekstkleur, Converter={StaticResource KleurNaarBrush}}">
-                                <Run Text="{Binding Titel, Mode=OneWay}" />
-                            </TextBlock>
-                        </Border>
-                        <ContentControl Content="{Binding}" Focusable="False" />
-                    </DockPanel>
-                </DataTemplate>
-            </ContentControl.ContentTemplate>
-        </ContentControl>
+        <Border Style="{StaticResource Paginavlak}">
+            <ContentControl Content="{Binding GeselecteerdTabblad}" Focusable="False" AutomationProperties.AutomationId="Pagina">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
+                        <DockPanel>
+                            <!-- Band (besluit 177): een accentstreep en de naam van de pagina met de administratie. -->
+                            <Border DockPanel.Dock="Top" Padding="40,10,40,0" Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
+                                             Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
+                                    <TextBlock FontSize="12" AutomationProperties.AutomationId="AdministratieBand"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{Binding Titel, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            <ContentControl Content="{Binding}" Focusable="False" />
+                        </DockPanel>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </Border>
     </DockPanel>
 </Window>
