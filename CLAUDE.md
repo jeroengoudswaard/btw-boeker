@@ -251,6 +251,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 213 | Begroting Stichting | Geen jaarbegroting; het meerjarenplan volstaat |
 | 214 | Drempel "zonder bon" | Instelbaar per administratie (uitwerking van besluit 97), in v0.10.1 |
 | 215 | Groepsindeling wijzigen | Instellingen › Groepen: per groep het soort (speltak, bestuur, technisch, overig), ook buiten de import (aanvulling op besluit 43), in v0.10.1 |
+| 216 | Visueel ontwerp | Richting A *Fluent Mica* uit het ontwerpvoorstel (2026-10-31): dicht bij Windows 11, lichte navigatie met accentstreepje bij de gekozen regel, witte kaarten op een Mica-achtige achtergrond, accentkleur per administratie |
+| 217 | Kerncijfers op Start | Betaalrekening, spaarrekening, openstaande contributie en resultaat t/m vandaag (met begroot naar rato), per gekozen administratie |
+| 218 | Aanpak visueel ontwerp | Alles in één versie (thema, schil, Start en alle pagina's), na goedkeuring van de uitgewerkte schermen inclusief donkere modus |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -384,7 +387,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - ViewModel-tests 215/217 (de 2 Windows-padtests).
     - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 905/905), plus een visuele controle van Instellingen (blokken per administratie, drempel, Groepen) en E-mail › Opstellen (*Van*).
     - **Windows-test (2026-10-31, Windows 11, commit `4615391`): 905/905 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 243, Application 331, Architectuur 28, Infrastructure 70, App 233); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets (`GetAsyncKeyState`), geen achtergebleven testproces. Nog door de gebruiker te doen: de visuele controle hierboven.
-  - Pull request: één PR voor v0.10.0 en v0.10.1 na een geslaagde Windows-run. PR #12 (v0.8.0–v0.9.0) staat nog open; deze commits staan op dezelfde branch en komen daar dus ook bij, tenzij PR #12 eerst wordt gemerged.
+  - Gemerged als PR #12 (2026-10-31, `c38d6fa`), samen met v0.8.0 en v0.9.0, na groene CI; keuze van de gebruiker: v0.10.1 is de release op `main`.
+
+- **Visueel ontwerp: in ontwerp.** Besluiten 216–218 (2026-10-31, keuzes 1A 2A 3B). Ontwerpcanvas met de drie richtingen en de uitwerking van A: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
