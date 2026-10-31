@@ -254,6 +254,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 216 | Visueel ontwerp | Richting A *Fluent Mica* uit het ontwerpvoorstel (2026-10-31): dicht bij Windows 11, lichte navigatie met accentstreepje bij de gekozen regel, witte kaarten op een Mica-achtige achtergrond, accentkleur per administratie |
 | 217 | Kerncijfers op Start | Betaalrekening, spaarrekening, openstaande contributie en resultaat t/m vandaag (met begroot naar rato), per gekozen administratie |
 | 218 | Aanpak visueel ontwerp | Alles in één versie (thema, schil, Start en alle pagina's), na goedkeuring van de uitgewerkte schermen inclusief donkere modus |
+| 219 | Instellingen | Tabs per onderdeel (Administraties, Incasso, Facturen, E-mail, Groepen), per instelling een rij met uitleg links en invoer rechts, *Opslaan* onderaan |
+| 220 | Tellers in de navigatiebalk | Ja: aantallen bij de onderdelen (bijv. Bank 3, Postvak 2), uit dezelfde berekening als de startkaarten |
+| 221 | Titelbalk | Eigen titelbalk in de Mica-stijl (WindowChrome); slepen, dubbelklikken, Snap en de vensterknoppen blijven werken en worden apart getest |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -389,7 +392,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Windows-test (2026-10-31, Windows 11, commit `4615391`): 905/905 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 243, Application 331, Architectuur 28, Infrastructure 70, App 233); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets (`GetAsyncKeyState`), geen achtergebleven testproces. Nog door de gebruiker te doen: de visuele controle hierboven.
   - Gemerged als PR #12 (2026-10-31, `c38d6fa`), samen met v0.8.0 en v0.9.0, na groene CI; keuze van de gebruiker: v0.10.1 is de release op `main`.
 
-- **Visueel ontwerp: in ontwerp.** Besluiten 216–218 (2026-10-31, keuzes 1A 2A 3B). Ontwerpcanvas met de drie richtingen en de uitwerking van A: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé).
+- **Visueel ontwerp: in aanbouw**, v0.11.0. Besluiten 216–221 (2026-10-31, keuzes 1A 2A 3B en 1A 2A 3A); uitgewerkte schermen goedgekeurd. Ontwerpcanvas met de drie richtingen en de uitwerking van A: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
