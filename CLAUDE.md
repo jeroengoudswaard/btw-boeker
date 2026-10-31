@@ -383,6 +383,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - In de Linux-cloudsessie groen: Domain 243, Application 331, Infrastructure 70, Architectuur 28.
     - ViewModel-tests 215/217 (de 2 Windows-padtests).
     - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 905/905), plus een visuele controle van Instellingen (blokken per administratie, drempel, Groepen) en E-mail › Opstellen (*Van*).
+    - **Windows-test (2026-10-31, Windows 11, commit `4615391`): 905/905 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 243, Application 331, Architectuur 28, Infrastructure 70, App 233); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets (`GetAsyncKeyState`), geen achtergebleven testproces. Nog door de gebruiker te doen: de visuele controle hierboven.
   - Pull request: één PR voor v0.10.0 en v0.10.1 na een geslaagde Windows-run. PR #12 (v0.8.0–v0.9.0) staat nog open; deze commits staan op dezelfde branch en komen daar dus ook bij, tenzij PR #12 eerst wordt gemerged.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
