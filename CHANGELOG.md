@@ -22,7 +22,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
   - de openstaande contributie met het aantal storneringen (alleen de Vereniging);
   - het resultaat van het jaar tot vandaag, naast de begroting naar rato.
 - **Tellers in de navigatiebalk** (besluit 220): bijvoorbeeld *Bank 3* en *Postvak 2*; een ingeklapte module telt de onderdelen op.
-- 910 geautomatiseerde tests (was 905).
+- Architectuurtest: een test met een time-out is altijd asynchroon (xUnit voert een `void`-test met `Timeout` niet uit).
+- 911 geautomatiseerde tests (was 905).
 
 ## [0.10.1] - 2026-10-31: Drempel en groepsindeling
 

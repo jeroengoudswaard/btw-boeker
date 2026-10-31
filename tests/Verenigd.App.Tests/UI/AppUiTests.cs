@@ -141,8 +141,9 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
-    public void Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel()
+    public async Task Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel()
     {
+        await Task.Yield(); // xUnit voert een test met Timeout alleen asynchroon uit
         BewaarInstellingen(new GebruikersInstellingen { StartwizardGetoond = true });
         var venster = Start();
 
