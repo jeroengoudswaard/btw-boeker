@@ -6,6 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Verenigd.App.ViewModels"
+             xmlns:lvm="clr-namespace:Verenigd.App.ViewModels.Leden"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:InstellingenViewModel}">
     <DockPanel>
@@ -31,7 +32,15 @@
                 <ItemsControl ItemsSource="{Binding Regels}" Focusable="False">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:AdministratieInstellingRegel}">
-                            <g:AdministratieKaart Margin="0,0,0,16" />
+                            <StackPanel Margin="0,0,0,16">
+                                <g:AdministratieKaart />
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Label Content="Drempel 'zonder bon' (€)" Target="{Binding ElementName=Drempelveld}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                                    <TextBox x:Name="Drempelveld" Width="100" Text="{Binding Drempeltekst, UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="Uitgaven en ontvangsten van bank of kas vanaf dit bedrag zonder bijlage komen in het filter en op de startpagina"
+                                             AutomationProperties.AutomationId="{Binding Soort, StringFormat=Drempel{0}}" />
+                                </StackPanel>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -164,6 +173,26 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <!-- ===== Groepen (besluit 215) ===== -->
+                <tg:Groepspaneel DataContext="{Binding Groepen}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" Margin="0,24,0,0"
+                                 AutomationProperties.Name="Groepen" AutomationProperties.AutomationId="InstellingenGroepen">
+                    <TextBlock Text="Groepen" Style="{StaticResource Sectietitel}" />
+                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16" TextWrapping="Wrap"
+                               Text="Het soort van elke groep uit SOL3. Speltakken bepalen de voorgestelde contributiecategorie en de speltak in e-mails; technische groepen zijn standaard verborgen." />
+                    <TextBlock Style="{StaticResource Toelichting}" Text="Nog geen groepen: lees eerst de leden in uit SOL3."
+                               Visibility="{Binding Regels.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
+                    <ItemsControl ItemsSource="{Binding Regels}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,0,0,6">
+                                    <ComboBox DockPanel.Dock="Right" Width="160" ItemsSource="{Binding Source={x:Static lvm:GroepenInstellingenViewModel.Soorten}}"
+                                              SelectedItem="{Binding Soort}" AutomationProperties.Name="{Binding Naam, StringFormat='Soort van {0}'}" />
+                                    <TextBlock Text="{Binding Naam}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </tg:Groepspaneel>
                 <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}"
                            Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
             </StackPanel>

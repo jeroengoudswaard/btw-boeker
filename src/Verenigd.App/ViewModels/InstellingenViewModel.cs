@@ -6,6 +6,7 @@ using Verenigd.App.ViewModels.Email;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien;
 
 namespace Verenigd.App.ViewModels;
 
@@ -15,7 +16,8 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 
     public InstellingenViewModel(
         IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null,
-        IReadOnlyList<Boekhouding.FactuurInstellingenViewModel>? facturen = null, IReadOnlyList<EmailInstellingenViewModel>? email = null)
+        IReadOnlyList<Boekhouding.FactuurInstellingenViewModel>? facturen = null, IReadOnlyList<EmailInstellingenViewModel>? email = null,
+        Leden.GroepenInstellingenViewModel? groepen = null)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
@@ -27,6 +29,12 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 
         Facturen = facturen ?? [];
         Emailkoppelingen = email ?? [];
+        Groepen = groepen;
+        if (groepen is not null)
+        {
+            groepen.PropertyChanged += RegelGewijzigd;
+        }
+
         foreach (var blok in Blokken)
         {
             blok.PropertyChanged += RegelGewijzigd;
@@ -51,6 +59,9 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
     /// <summary>Afzender en koppeling met Gmail, per administratie (besluit 211).</summary>
     public IReadOnlyList<EmailInstellingenViewModel> Emailkoppelingen { get; }
 
+    /// <summary>De groepsindeling (besluit 215).</summary>
+    public Leden.GroepenInstellingenViewModel? Groepen { get; }
+
     private IEnumerable<ObservableObject> Blokken => Facturen.Cast<ObservableObject>().Concat(Emailkoppelingen);
 
     [ObservableProperty]
@@ -59,7 +70,7 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
     public IAsyncRelayCommand OpslaanCommand { get; }
 
     public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen.Any(f => f.IsGewijzigd)
-        || Emailkoppelingen.Any(e => e.IsGewijzigd);
+        || Emailkoppelingen.Any(e => e.IsGewijzigd) || Groepen?.IsGewijzigd == true;
 
     public override bool KanOpslaan =>
         HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null)
@@ -117,6 +128,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             }
         }
 
+        if (Groepen is { IsGewijzigd: true })
+        {
+            await Groepen.BewaarAsync();
+        }
+
         Foutmelding = null;
         return true;
     }
@@ -136,6 +152,11 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
         foreach (var blok in Blokken)
         {
             blok.PropertyChanged -= RegelGewijzigd;
+        }
+
+        if (Groepen is not null)
+        {
+            Groepen.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();
@@ -159,6 +180,7 @@ public sealed partial class AdministratieInstellingRegel : ObservableObject
         _bron = bron;
         Naam = bron.Naam;
         KleurHex = bron.Accentkleur.ToString();
+        Drempeltekst = Drempelweergave(bron.Model.ZonderBonDrempel);
     }
 
     /// <summary>Voorgestelde accentkleuren; allemaal goed leesbaar met witte tekst.</summary>
@@ -174,6 +196,13 @@ public sealed partial class AdministratieInstellingRegel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fout), nameof(IsGewijzigd), nameof(Voorbeeldkleur), nameof(Voorbeeldtekstkleur))]
     public partial string KleurHex { get; set; }
+
+    /// <summary>Besluit 214: vanaf welk bedrag het filter <i>Zonder bon</i> een boeking zonder bijlage toont.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Fout), nameof(IsGewijzigd))]
+    public partial string Drempeltekst { get; set; }
+
+    private long? Drempel => Bedrag.TryParse(Drempeltekst, out var bedrag) && bedrag.Centen >= 0 ? bedrag.Centen : null;
 
     public Kleur? Voorbeeldkleur => Kleur.TryParse(KleurHex, out var k) ? k : null;
 
@@ -193,12 +222,18 @@ public sealed partial class AdministratieInstellingRegel : ObservableObject
                 return $"De naam mag maximaal {Administratie.MaximaleNaamLengte} tekens lang zijn.";
             }
 
-            return Voorbeeldkleur is null ? "Gebruik een kleurcode in de vorm #RRGGBB, bijvoorbeeld #2E7D32." : null;
+            if (Voorbeeldkleur is null)
+            {
+                return "Gebruik een kleurcode in de vorm #RRGGBB, bijvoorbeeld #2E7D32.";
+            }
+
+            return Drempel is null ? "Vul bij de drempel voor 'zonder bon' een bedrag in, bijvoorbeeld 10,00." : null;
         }
     }
 
     public bool IsGewijzigd =>
-        !string.Equals(Naam?.Trim(), _bron.Naam, StringComparison.Ordinal) || Voorbeeldkleur != _bron.Accentkleur;
+        !string.Equals(Naam?.Trim(), _bron.Naam, StringComparison.Ordinal) || Voorbeeldkleur != _bron.Accentkleur
+        || Drempel != _bron.Model.ZonderBonDrempel;
 
     [RelayCommand]
     private void KiesKleur(string hex) => KleurHex = hex;
@@ -207,9 +242,14 @@ public sealed partial class AdministratieInstellingRegel : ObservableObject
     {
         _bron.Model.WijzigNaam(Naam);
         _bron.Model.WijzigAccentkleur(Voorbeeldkleur!.Value);
+        _bron.Model.WijzigZonderBonDrempel(Drempel!.Value);
         await repository.BewaarAsync(_bron.Model);
         _bron.Ververs();
         Naam = _bron.Naam;
+        Drempeltekst = Drempelweergave(_bron.Model.ZonderBonDrempel);
         OnPropertyChanged(nameof(IsGewijzigd));
     }
+
+    private static string Drempelweergave(long centen) =>
+        (centen / 100m).ToString("0.00", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"));
 }

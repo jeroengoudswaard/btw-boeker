@@ -313,6 +313,16 @@ internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
     public Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default) =>
         Task.FromResult<IReadOnlyList<Groep>>(Stand.Groepen.ToList());
 
+    public Task BewaarGroepsoortenAsync(IReadOnlyDictionary<string, GroepSoort> soortPerGroep, CancellationToken annulering = default)
+    {
+        foreach (var groep in Stand.Groepen.Where(g => soortPerGroep.ContainsKey(g.Naam)))
+        {
+            groep.WijzigSoort(soortPerGroep[groep.Naam]);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default)
     {
         var persoon = Stand.Personen.SingleOrDefault(p => p.Id == persoonId) ?? throw new KeyNotFoundException();

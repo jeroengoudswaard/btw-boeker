@@ -17,6 +17,12 @@ public sealed class Administratie
     public string Naam { get; private set; }
     public Kleur Accentkleur { get; private set; }
 
+    /// <summary>Besluit 97: € 10.</summary>
+    public const long StandaardZonderBonDrempel = 1000;
+
+    /// <summary>Besluit 214: vanaf dit bedrag (in centen) toont het filter <i>Zonder bon</i> een boeking zonder bijlage.</summary>
+    public long ZonderBonDrempel { get; private set; } = StandaardZonderBonDrempel;
+
     public static Kleur Standaardkleur(AdministratieSoort soort) => soort switch
     {
         AdministratieSoort.Vereniging => new Kleur(0x2E, 0x7D, 0x32),
@@ -27,6 +33,9 @@ public sealed class Administratie
     public void WijzigNaam(string naam) => Naam = ValideerNaam(naam);
 
     public void WijzigAccentkleur(Kleur kleur) => Accentkleur = kleur;
+
+    public void WijzigZonderBonDrempel(long centen) =>
+        ZonderBonDrempel = centen >= 0 ? centen : throw new ArgumentOutOfRangeException(nameof(centen), "De drempel kan niet negatief zijn.");
 
     private static string ValideerNaam(string naam)
     {

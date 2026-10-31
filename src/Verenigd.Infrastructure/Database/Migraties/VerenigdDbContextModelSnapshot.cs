@@ -36,6 +36,11 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.Property<int>("Soort")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("ZonderBonDrempel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1000L);
+
                     b.HasKey("Id");
 
                     b.HasIndex("Soort")

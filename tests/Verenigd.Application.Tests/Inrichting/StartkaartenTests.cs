@@ -68,6 +68,27 @@ public sealed class StartkaartenTests
     }
 
     [Fact]
+    public void Zonder_bon_gebruikt_de_drempel_van_de_administratie()
+    {
+        var data = new BoekhoudingTestdata();
+        var bank = data.Bankdagboek("BNK", "NL91ABNA0417164300");
+        var uitgave = new Journaalpost(AdministratieSoort.Vereniging, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
+        uitgave.Wijzig(bank, uitgave.Datum, "Bouwmarkt",
+            [new RegelInvoer(data.Energie, null, new Bedrag(2500), Bedrag.Nul), new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(2500))]);
+        uitgave.Boek(1, Nu);
+        data.Posten.Add(uitgave);
+        var drempels = new Dictionary<AdministratieSoort, Bedrag> { [AdministratieSoort.Vereniging] = new(5000) };
+
+        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag, drempels);
+        Assert.DoesNotContain(kaarten, k => k.Soort == Startkaartsoort.ZonderBon); // € 25 ligt onder de drempel van € 50
+
+        drempels[AdministratieSoort.Vereniging] = new(2000);
+        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag, drempels),
+            Startkaartsoort.ZonderBon);
+        Assert.Contains("€ 20,00", kaart.Tekst, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Incassorun_van_deze_maand_ontbreekt_alleen_als_de_incasso_is_ingesteld()
     {
         var incasso = new IncassoTestdata(); // ingesteld vanaf januari 2026, geen runs

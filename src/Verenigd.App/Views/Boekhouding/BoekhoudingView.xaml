@@ -115,7 +115,7 @@
                                 <TextBox x:Name="Zoekveld" Width="200" VerticalAlignment="Center" Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
                                          ToolTip="Zoeken op nummer of omschrijving (Ctrl+F)" AutomationProperties.Name="Zoeken op nummer of omschrijving" />
                                 <CheckBox Content="{DynamicResource T.Knop.ZonderBon}" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenZonderBon}"
-                                          Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="Uitgaven en ontvangsten van bank of kas boven € 10 zonder bijlage"
+                                          Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="Uitgaven en ontvangsten van bank of kas boven de drempel (Instellingen) zonder bijlage"
                                           AutomationProperties.Name="Alleen boekingen zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
                             </WrapPanel>
                             <TextBlock DockPanel.Dock="Bottom" Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />

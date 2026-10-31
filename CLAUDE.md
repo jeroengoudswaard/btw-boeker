@@ -365,7 +365,25 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Eenmalige hang: de allereerste poging bleef ±10 minuten hangen in `Verenigd.App.Tests` (testhost zonder app-venster, vrijwel geen CPU) en is afgebroken. Daarna niet meer: een extra App-run (223/223) en de 2 volledige runs liepen met `--blame-hang --blame-hang-timeout 4m` zonder hang. Welke test hing is onbekend. Advies: Windows-runs voortaan met `--blame-hang --blame-hang-timeout 4m`; komt de hang terug, dan met `--blame-hang-dump-type mini` de test vastleggen.
     - Pull request voor v0.8.0 en v0.9.0 geopend: PR #12 (2026-10-30). Nog door de gebruiker te doen: visuele controle van v0.8.0 en een echte koppeling met Gmail.
 
-- **v0.10.0 Stichting volwaardig en v0.10.1 kleine punten: in aanbouw.** Besluiten 209–215 vastgesteld (2026-10-30, keuzes 1B 2B 3A 4A 5B 6B). Eén pull request voor beide na een Windows-run.
+- **v0.10.0 Stichting volwaardig en v0.10.1 drempel en groepen: gereed** (2026-10-31). Besluiten 209–215 (keuzes 1B 2B 3A 4A 5B 6B). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - v0.10.0:
+    - factuurgegevens en Gmail-koppeling per administratie;
+    - afzenderkeuze *Van* in E-mail › Opstellen (daglimiet en logboek per afzender);
+    - factuurmail via de eigen administratie;
+    - bankstap in de startwizard per administratie;
+    - migratie *EmailPerAdministratie*.
+  - v0.10.1:
+    - drempel "zonder bon" per administratie bij Instellingen › Administraties (migratie *ZonderBonDrempel*);
+    - Instellingen › Groepen.
+  - Uitwerkingen:
+    - De drempel staat bij de administratie in Instellingen › Administraties (niet in een apart blok Bijlagen).
+    - De bestaande Gmail-koppeling wordt die van de Vereniging.
+    - Bij een bericht aan leden is `{vereniging}` de naam van de gekozen afzender.
+  - Tests: 905 in totaal.
+    - In de Linux-cloudsessie groen: Domain 243, Application 331, Infrastructure 70, Architectuur 28.
+    - ViewModel-tests 215/217 (de 2 Windows-padtests).
+    - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 905/905), plus een visuele controle van Instellingen (blokken per administratie, drempel, Groepen) en E-mail › Opstellen (*Van*).
+  - Pull request: één PR voor v0.10.0 en v0.10.1 na een geslaagde Windows-run. PR #12 (v0.8.0–v0.9.0) staat nog open; deze commits staan op dezelfde branch en komen daar dus ook bij, tenzij PR #12 eerst wordt gemerged.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

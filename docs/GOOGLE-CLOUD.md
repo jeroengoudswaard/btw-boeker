@@ -1,6 +1,6 @@
 # E-mail koppelen met Gmail
 
-Verenigd verstuurt e-mail via de Gmail-API van een bestaand gmail.com-account (besluiten 192 en 193). De app krijgt alleen toestemming om **te versturen**: hij kan geen e-mail lezen en kent het wachtwoord niet. Daarvoor maakt u eenmalig een eigen project in Google Cloud. Dat is gratis en duurt ongeveer een kwartier.
+Verenigd verstuurt e-mail via de Gmail-API van een bestaand gmail.com-account (besluiten 192 en 193). Elke administratie (Vereniging en Stichting) heeft een eigen account en koppeling (besluit 211): doorloop stap 4 per administratie. Eén Google Cloud-project mag voor beide; voeg dan beide Gmail-adressen toe en koppel elk blok met het eigen account. De app krijgt alleen toestemming om **te versturen**: hij kan geen e-mail lezen en kent het wachtwoord niet. Daarvoor maakt u eenmalig een eigen project in Google Cloud. Dat is gratis en duurt ongeveer een kwartier.
 
 > Het Gmail-adres, het clientbestand en de toegangssleutel komen alleen in de versleutelde database van Verenigd. Zet het clientbestand nooit in Git en verwijder het na het inlezen van uw pc.
 
@@ -29,7 +29,7 @@ Verenigd verstuurt e-mail via de Gmail-API van een bestaand gmail.com-account (b
 
 ## 4. Koppelen in Verenigd
 
-1. Open **Instellingen** en ga naar het onderdeel **E-mail**.
+1. Open **Instellingen** en ga naar het onderdeel **E-mail (Vereniging)** of **E-mail (Stichting)**.
 2. Vul **Uw naam (afzender)** in, bijvoorbeeld *Penningmeester Scouting …*, en **Het Gmail-adres**. Kies **Opslaan**.
 3. Kies **Clientbestand inlezen…** en kies het JSON-bestand uit stap 3.
 4. Kies **Koppelen met Google…**. De browser opent:

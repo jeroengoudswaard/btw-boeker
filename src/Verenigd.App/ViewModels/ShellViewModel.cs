@@ -641,7 +641,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
                 [.. Administraties.Select(a => new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen, a.Soort, a.Naam))],
                 [.. Administraties.Select(a => new EmailInstellingenViewModel(
-                    new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen, a.Soort, a.Naam))]),
+                    new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen, a.Soort, a.Naam))],
+                new GroepenInstellingenViewModel(_sessie.Leden)),
             ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
@@ -673,6 +674,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 {
                     email.LaadCommand.Execute(null);
                 }
+
+                instellingen.Groepen?.LaadCommand.Execute(null);
 
                 break;
             case EmailViewModel email:

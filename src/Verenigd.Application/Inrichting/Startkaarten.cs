@@ -36,7 +36,7 @@ public static class Startkaarten
 
     public static IReadOnlyList<Startkaart> Bepaal(
         Inrichtingsstatus status, Startwizardvoortgang voortgang, BoekhoudingStand vereniging, BoekhoudingStand stichting, IncassoStand contributie,
-        DateOnly vandaag)
+        DateOnly vandaag, IReadOnlyDictionary<AdministratieSoort, Bedrag>? drempels = null)
     {
         ArgumentNullException.ThrowIfNull(status);
         ArgumentNullException.ThrowIfNull(voortgang);
@@ -69,8 +69,9 @@ public static class Startkaarten
 
             VoegToe(kaarten, stand, Startkaartsoort.VervallenFacturen, Factuuroverzicht.Bereken(stand, vandaag).Count(f => f.IsVervallen),
                 n => Enkelvoud(n, "vervallen factuur", "vervallen facturen"), "De betaaltermijn is verstreken.", "Naar de facturen");
-            VoegToe(kaarten, stand, Startkaartsoort.ZonderBon, ZonderBon.Posten(stand, ZonderBon.StandaardDrempel).Count,
-                n => Enkelvoud(n, "boeking", "boekingen") + " zonder bon", "Uitgaven of ontvangsten boven € 10 zonder bijlage.", "Bekijken");
+            var drempel = drempels?.GetValueOrDefault(stand.Administratie) ?? ZonderBon.StandaardDrempel; // besluit 214
+            VoegToe(kaarten, stand, Startkaartsoort.ZonderBon, ZonderBon.Posten(stand, drempel).Count,
+                n => Enkelvoud(n, "boeking", "boekingen") + " zonder bon", $"Uitgaven of ontvangsten boven {drempel} zonder bijlage.", "Bekijken");
         }
 
         return kaarten;
@@ -89,7 +90,9 @@ public static class Startkaarten
         var vereniging = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
         var stichting = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting, annulering).ConfigureAwait(false);
         var contributie = await sessie.Contributie.LaadAsync(annulering).ConfigureAwait(false);
-        return Bepaal(status, voortgang, vereniging, stichting, contributie, vandaag);
+        var drempels = (await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false))
+            .ToDictionary(a => a.Soort, a => new Bedrag(a.ZonderBonDrempel));
+        return Bepaal(status, voortgang, vereniging, stichting, contributie, vandaag, drempels);
     }
 
     private static void VoegIncassorunToe(List<Startkaart> kaarten, IncassoStand contributie, DateOnly vandaag)

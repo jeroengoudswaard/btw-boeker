@@ -25,7 +25,7 @@ public sealed partial class BoekhoudingViewModel
     [NotifyCanExecuteChangedFor(nameof(BonKoppelenCommand), nameof(BonVerwijderenCommand), nameof(BonBekijkenCommand), nameof(BonGegevensOpslaanCommand))]
     public partial BonRegel? GeselecteerdeBon { get; set; }
 
-    /// <summary>Filter in het Journaal: uitgaven van bank of kas boven € 10 zonder bijlage (besluit 138).</summary>
+    /// <summary>Filter in het Journaal: uitgaven en ontvangsten van bank of kas boven de drempel zonder bijlage (besluiten 145 en 214).</summary>
     [ObservableProperty]
     public partial bool AlleenZonderBon { get; set; }
 
@@ -58,7 +58,9 @@ public sealed partial class BoekhoudingViewModel
         OnPropertyChanged(nameof(Postvaktekst));
     }
 
-    private void BerekenZonderBon() => _zonderBon = [.. ZonderBon.Posten(_stand!, ZonderBon.StandaardDrempel).Select(p => p.Id)];
+    /// <summary>Besluit 214: de drempel van de eigen administratie.</summary>
+    private void BerekenZonderBon() =>
+        _zonderBon = [.. ZonderBon.Posten(_stand!, new Domain.Financien.Bedrag(Administratie?.Model.ZonderBonDrempel ?? Domain.Administraties.Administratie.StandaardZonderBonDrempel)).Select(p => p.Id)];
 
     private void LaadPostbijlagen()
     {

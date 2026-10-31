@@ -4,6 +4,27 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.10.1] - 2026-10-31: Drempel en groepsindeling
+
+### Toegevoegd
+- **Drempel "zonder bon" per administratie** (besluit 214) bij Instellingen › Administraties, standaard € 10. Het filter *Zonder bon* in Boekhouding en de startkaart gebruiken de drempel van de eigen administratie.
+- **Instellingen › Groepen** (besluit 215): per groep het soort (speltak, bestuur, technisch, overig), ook na de import te wijzigen.
+
+## [0.10.0] - 2026-10-31: Stichting volwaardig
+
+### Toegevoegd
+- **Boekhouding, bank en facturen voor de Stichting** (besluiten 209 en 210, vervangen 61 en 107).
+  - **Instellingen › Facturen:** per administratie eigen gegevens (naam, adres, KvK, IBAN, termijn, voettekst, logo); de factuur-PDF en de QR-code gebruiken die van de eigen administratie.
+  - **Startwizard › Bank:** kies Vereniging of Stichting. Het klaaroverzicht toont ook de boekhouding en bank van de Stichting (optioneel).
+- **Gmail per administratie** (besluit 211).
+  - **Instellingen › E-mail:** per administratie een eigen afzender, clientbestand en koppeling.
+  - **E-mail › Opstellen:** kies bij *Van* de afzender, standaard de Vereniging. Een factuur van de Stichting gaat via de Stichting.
+  - De daglimiet geldt per afzender; *Verzonden* toont de kolom *Van*.
+
+### Gewijzigd
+- Migraties *EmailPerAdministratie* (logboek) en *ZonderBonDrempel* (administraties). De bestaande koppeling met Gmail blijft die van de Vereniging.
+- 905 geautomatiseerde tests (was 890).
+
 ## [0.9.0] - 2026-10-30: E-mail via Gmail
 
 ### Toegevoegd

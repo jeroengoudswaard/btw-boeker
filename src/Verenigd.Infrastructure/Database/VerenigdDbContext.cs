@@ -54,6 +54,7 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
             b.Property(a => a.Soort).IsRequired();
             b.HasIndex(a => a.Soort).IsUnique();
             b.Property(a => a.Naam).IsRequired().HasMaxLength(Administratie.MaximaleNaamLengte);
+            b.Property(a => a.ZonderBonDrempel).HasDefaultValue(Administratie.StandaardZonderBonDrempel).HasSentinel(-1L);
             b.Property(a => a.Accentkleur)
                 .IsRequired()
                 .HasMaxLength(7)

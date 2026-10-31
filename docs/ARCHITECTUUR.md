@@ -359,3 +359,15 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Infrastructure:** tabellen `Emailsjablonen`, `VerzondenBerichten` en `Emailinstellingen` (migratie *Email*), in de versleutelde database. `GmailVerzender` bouwt het bericht met MimeKit en verstuurt via `users.messages.send` met alleen het bereik `gmail.send`; `GoogleKoppeling` doet de eenmalige toestemming in de browser (`prompt=consent`, niets op schijf). Foutmeldingen van Google worden Nederlandse meldingen zonder adressen of sleutels.
 - **App:** pagina `EmailViewModel` (module E-mail, niet per administratie) met de onderdelen `EmailSubtab` *Opstellen*, *Verzonden* en *Sjablonen* in de navigatiebalk. Andere pagina's bieden een bericht aan via `TabbladViewModel.EmailAanbieden` met een `EmailVoorstel` (soort, ontvangers, aanleiding); de schil opent dan E-mail › Opstellen en roept `BereidVoor` aan. Aanbiedingen: welkomstmail na een SOL3-import met nieuwe leden (schil), vooraankondiging na *Definitief maken* van een run en *Bericht mailen* bij een stornering (Contributie), factuur na *Definitief maken*, *Mailen* en *Herinnering sturen* (Facturen). `EmailInstellingenViewModel` is het onderdeel E-mail van Instellingen. Gmail-verzender en -koppeling komen via `BoekhoudingHulpmiddelen` binnen; zonder verzender (tests) mislukt versturen met een melding.
 - **Privacy:** het Gmail-adres, de client-gegevens en de vernieuwingssleutel staan alleen in de database (niet in Git, niet in logbestanden); het logboek bewaart geen berichttekst. De handleiding voor het Google Cloud-project staat in `docs/GOOGLE-CLOUD.md`.
+
+## Stichting volwaardig, drempel en groepen (v0.10.0–v0.10.1, besluiten 209–215)
+
+- **Per administratie:** `FactuurInstellingenViewModel` en `EmailInstellingenViewModel` krijgen de administratie mee; `InstellingenViewModel` toont lijsten (`Facturen`, `Emailkoppelingen`). Het datamodel van boekhouding, bank en facturen was al per administratie.
+- **Gmail per administratie:**
+  - `Emailinstellingen.Id` is de waarde van `AdministratieSoort` (1 = Vereniging, 2 = Stichting); `EmailStand.Instellingen(administratie)` geeft de koppeling of een nieuwe.
+  - `VerzondenBericht.Administratie` legt de afzender vast.
+  - `EmailDienst.VerstuurAsync`, `ProefAsync`, `KoppelAsync` en `VerzondenVandaag` nemen de administratie mee; de daglimiet geldt per afzender.
+  - `EmailVoorstel.Administratie` kiest de afzender bij een bericht uit een pagina.
+- **Startwizard:** `IStartwizardRegie.ImporteerBankafschriftAsync(administratie)`, `StartwizardViewModel.BankVoor` en `KanBankInlezen`, en `Inrichtingsstatus.BankStichting`.
+- **Drempel "zonder bon":** `Administratie.ZonderBonDrempel` (centen, standaard 1000). `Startkaarten.Bepaal` krijgt de drempels per administratie; `BoekhoudingViewModel` gebruikt de drempel van de eigen administratie.
+- **Groepen:** `ILedenRepository.BewaarGroepsoortenAsync` (op groepsnaam) en `GroepenInstellingenViewModel` (Instellingen › Groepen).

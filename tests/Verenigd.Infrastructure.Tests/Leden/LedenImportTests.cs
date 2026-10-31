@@ -92,6 +92,18 @@ public sealed class LedenImportTests : IAsyncLifetime, IDisposable
     }
 
     [Fact]
+    public async Task Groepsindeling_is_ook_na_de_import_te_wijzigen()
+    {
+        await ImporteerAsync(Exports());
+
+        await _sessie.Leden.BewaarGroepsoortenAsync(new Dictionary<string, GroepSoort> { ["Welpen"] = GroepSoort.Overig }); // besluit 215
+
+        var groepen = await _sessie.Leden.HaalGroepenAsync();
+        Assert.Equal(GroepSoort.Overig, groepen.Single(g => g.Naam == "Welpen").Soort);
+        Assert.Equal(GroepSoort.Technisch, groepen.Single(g => g.Naam == "Vrijwilligers (Migratie)").Soort);
+    }
+
+    [Fact]
     public async Task Zelfde_iban_wordt_een_betaler_gekoppeld_via_lidnummer()
     {
         await ImporteerAsync(Exports());
