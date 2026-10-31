@@ -340,3 +340,34 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - `Application/Import/Sol3Exportuitleg.cs`: per export de titel, het doel en de kolommen in de volgorde van SOL3. *Verplicht* komt uit `ExportHerkenning.VerplichteKolommen`; de overige kolommen zijn wat SOL3 daarnaast levert. `Sol3ExportuitlegTests` vergelijkt dit met de kopregels in `Sol3Voorbeeld`.
 - `Views/Gedeeld/Sol3Uitleg.xaml`: gedeeld door de startwizard en de importwizard; *Kolomnamen kopiëren* vult alleen het klembord (code-behind, geen logica).
 - `Sol3CsvLezer.Scheidingsteken` kiest `;` of `,`: het teken dat buiten aanhalingstekens het vaakst in de kopregel staat (bij gelijkspel `;`), besluit 190.
+
+## Herinrichting (v0.8.0, besluiten 168 en 177–183, 198)
+
+- **Schil:** `ShellViewModel` (partial `ShellViewModel.Navigatie`) houdt de navigatiebalk (`Navigatie`, `NavigatieItem` met een vaste `Sleutel`, zoals `Boekhouding.Bank`), de wisselaar (`GekozenAdministratie`) en de statusregel (`Statussoort`, `Statusteken`). De pagina's blijven `TabbladViewModel`'s (naam uit de tabbladtijd) en worden per module en administratie bewaard in `Tabbladen`; `GeselecteerdTabblad` is de zichtbare pagina.
+- **Onderdelen:** `TabbladViewModel.Onderdeel` is het subtabblad als getal (Boekhouding: `BoekhoudingSubtab`, Contributie: `ContributieSubtab`). De TabControls op de pagina's verbergen hun koppen; de navigatiebalk kiest het onderdeel en volgt een onderdeel dat de pagina zelf kiest (bijvoorbeeld Ctrl+5).
+- **Wisselen** (besluit 182): dezelfde module en hetzelfde onderdeel voor de andere administratie, anders Start. `LaatstePagina` in de gebruikersinstellingen (module, administratie, onderdeel) vervangt `OpenTabbladen`.
+- **Meldingen:** pagina's met `IPaginameldingen` (`Melding`, `Foutmelding`) vullen de statusregel.
+- **Menubalk:** `IsMenubalkZichtbaar` (Expert, of tijdelijk na Alt in Eenvoudig; `ShellWindow.OnPreviewKeyDown`).
+- **Startkaarten:** `Application/Inrichting/Startkaarten.cs` bepaalt de kaarten uit de gegevens; `KaartOpenenCommand` navigeert.
+- **Hoofdactie en lege schermen:** `HoofdactieStijlConverter` maakt *Opslaan* alleen blauw waar `IsOpslaanHoofdactie`; `Views/Gedeeld/LeegScherm` met `Lijst` (de naam van de lijst). Architectuurtests: `Elke_pagina_heeft_hooguit_een_hoofdactie` en `Hoofdlijst_heeft_een_leeg_scherm`.
+- **Beginjaar:** `StandaardinrichtingViewModel.Beginjaar` is te kiezen (tot 5 jaar terug).
+
+## E-mail via Gmail (v0.9.0, fase 6, besluiten 191–196 en 203–208)
+
+- **Domain** (`Domain/Communicatie/Email.cs`): `Emailsjabloon` (soort, naam, onderwerp, tekst; standaardsjablonen zijn aan te passen, niet te verwijderen), `VerzondenBericht` (logboek zonder tekst, besluit 195), `Emailinstellingen` (afzender, client-id en -geheim van het eigen Google Cloud-project, vernieuwingssleutel) en `Emailadres` (controle en ontdubbelsleutel). Communicatie staat los van Leden en Financiën, zodat de scheiding uit besluit 36 blijft gelden.
+- **Application** (`Application/Email`): `Sjablooninvuller` vult `{veld}` per ontvanger in (hoofdletterongevoelig; een onbekend veld blijft staan en de pagina waarschuwt). `Ontvangers.VoorLeden` kiest de adressen (besluit 203: standaard de voogden bij een actieve jeugdlidfunctie, anders het lid; ontdubbeld op adres, met `{voornaam}` als opsomming). `Berichten` maakt de ontvangers voor de vooraankondiging en de stornering (via de betaler, besluit 204) en voor een factuur of herinnering (met de PDF als bijlage, besluit 207). `EmailDienst` verstuurt per ontvanger één bericht (besluit 194), logt elk bericht, stopt bij de daglimiet van 500 en vult ontbrekende standaardsjablonen aan. `IEmailVerzender` en `IGoogleKoppeling` zijn de poorten naar Google.
+- **Infrastructure:** tabellen `Emailsjablonen`, `VerzondenBerichten` en `Emailinstellingen` (migratie *Email*), in de versleutelde database. `GmailVerzender` bouwt het bericht met MimeKit en verstuurt via `users.messages.send` met alleen het bereik `gmail.send`; `GoogleKoppeling` doet de eenmalige toestemming in de browser (`prompt=consent`, niets op schijf). Foutmeldingen van Google worden Nederlandse meldingen zonder adressen of sleutels.
+- **App:** pagina `EmailViewModel` (module E-mail, niet per administratie) met de onderdelen `EmailSubtab` *Opstellen*, *Verzonden* en *Sjablonen* in de navigatiebalk. Andere pagina's bieden een bericht aan via `TabbladViewModel.EmailAanbieden` met een `EmailVoorstel` (soort, ontvangers, aanleiding); de schil opent dan E-mail › Opstellen en roept `BereidVoor` aan. Aanbiedingen: welkomstmail na een SOL3-import met nieuwe leden (schil), vooraankondiging na *Definitief maken* van een run en *Bericht mailen* bij een stornering (Contributie), factuur na *Definitief maken*, *Mailen* en *Herinnering sturen* (Facturen). `EmailInstellingenViewModel` is het onderdeel E-mail van Instellingen. Gmail-verzender en -koppeling komen via `BoekhoudingHulpmiddelen` binnen; zonder verzender (tests) mislukt versturen met een melding.
+- **Privacy:** het Gmail-adres, de client-gegevens en de vernieuwingssleutel staan alleen in de database (niet in Git, niet in logbestanden); het logboek bewaart geen berichttekst. De handleiding voor het Google Cloud-project staat in `docs/GOOGLE-CLOUD.md`.
+
+## Stichting volwaardig, drempel en groepen (v0.10.0–v0.10.1, besluiten 209–215)
+
+- **Per administratie:** `FactuurInstellingenViewModel` en `EmailInstellingenViewModel` krijgen de administratie mee; `InstellingenViewModel` toont lijsten (`Facturen`, `Emailkoppelingen`). Het datamodel van boekhouding, bank en facturen was al per administratie.
+- **Gmail per administratie:**
+  - `Emailinstellingen.Id` is de waarde van `AdministratieSoort` (1 = Vereniging, 2 = Stichting); `EmailStand.Instellingen(administratie)` geeft de koppeling of een nieuwe.
+  - `VerzondenBericht.Administratie` legt de afzender vast.
+  - `EmailDienst.VerstuurAsync`, `ProefAsync`, `KoppelAsync` en `VerzondenVandaag` nemen de administratie mee; de daglimiet geldt per afzender.
+  - `EmailVoorstel.Administratie` kiest de afzender bij een bericht uit een pagina.
+- **Startwizard:** `IStartwizardRegie.ImporteerBankafschriftAsync(administratie)`, `StartwizardViewModel.BankVoor` en `KanBankInlezen`, en `Inrichtingsstatus.BankStichting`.
+- **Drempel "zonder bon":** `Administratie.ZonderBonDrempel` (centen, standaard 1000). `Startkaarten.Bepaal` krijgt de drempels per administratie; `BoekhoudingViewModel` gebruikt de drempel van de eigen administratie.
+- **Groepen:** `ILedenRepository.BewaarGroepsoortenAsync` (op groepsnaam) en `GroepenInstellingenViewModel` (Instellingen › Groepen).

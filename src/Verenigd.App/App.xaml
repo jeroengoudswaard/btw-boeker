@@ -16,6 +16,7 @@
             <conv:NietConverter x:Key="Niet" />
             <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
             <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
+            <conv:HoofdactieStijlConverter x:Key="HoofdactieStijl" />
 
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 

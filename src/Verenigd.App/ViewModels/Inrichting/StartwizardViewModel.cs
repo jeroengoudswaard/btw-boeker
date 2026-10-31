@@ -35,7 +35,7 @@ public interface IStartwizardRegie
 
     Task RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze);
 
-    Task ImporteerBankafschriftAsync();
+    Task ImporteerBankafschriftAsync(AdministratieSoort administratie);
 
     /// <summary>Opent Contributie · Vereniging op het subtabblad Tarieven.</summary>
     void OpenTarieven();
@@ -111,7 +111,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public partial Startstap Huidig { get; private set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHuidigeStapKlaar), nameof(Klaarregels))]
+    [NotifyPropertyChangedFor(nameof(IsHuidigeStapKlaar), nameof(Klaarregels), nameof(KanBankInlezen))]
     [NotifyCanExecuteChangedFor(nameof(VolgendeCommand), nameof(OverslaanCommand), nameof(GaNaarCommand))]
     public partial Inrichtingsstatus Status { get; private set; } = Inrichtingsstatus.Leeg;
 
@@ -127,6 +127,14 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public partial AdministratieSoort BoekhoudingVoor { get; set; } = AdministratieSoort.Vereniging;
 
     public static IReadOnlyList<AdministratieSoort> BoekhoudingKeuzes { get; } = [AdministratieSoort.Vereniging, AdministratieSoort.Stichting];
+
+    /// <summary>Besluit 209: ook de Stichting heeft eigen bankrekeningen.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(KanBankInlezen))]
+    public partial AdministratieSoort BankVoor { get; set; } = AdministratieSoort.Vereniging;
+
+    /// <summary>Een bankafschrift kan pas als de boekhouding van die administratie is ingericht.</summary>
+    public bool KanBankInlezen => BankVoor == AdministratieSoort.Stichting ? Status.BoekhoudingStichting : Status.BoekhoudingVereniging;
 
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
@@ -151,6 +159,8 @@ public sealed partial class StartwizardViewModel : ObservableObject
         new(Status.HeeftLeden, Status.HeeftLeden ? "De leden zijn ingelezen." : "Nog geen leden: kies Bestand › Importeren › SOL3-leden."),
         new(Status.BoekhoudingVereniging, Status.BoekhoudingVereniging ? "De boekhouding van de Vereniging is ingericht." : "De boekhouding van de Vereniging is nog leeg: open Modules › Boekhouding."),
         new(Status.BankVereniging, Status.BankVereniging ? "Een bankrekening van de Vereniging is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
+        .. (Status.BoekhoudingStichting ? [new KlaarRegel(true, "De boekhouding van de Stichting is ingericht.")] : Array.Empty<KlaarRegel>()),
+        .. (Status.BankStichting ? [new KlaarRegel(true, "Een bankrekening van de Stichting is gekoppeld.")] : Array.Empty<KlaarRegel>()),
         new(Status.IncassoIngesteld, Status.IncassoIngesteld ? "De incassogegevens zijn ingevuld." : "Nog geen incassogegevens: kies Extra › Instellingen › Incasso."),
         new(Status.TarievenIngevuld, Status.TarievenIngevuld
             ? string.Create(CultureInfo.CurrentCulture, $"De tarieven van {Jaar} zijn ingevuld.")
@@ -248,7 +258,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(BoekhoudingVoor, keuze));
 
     [RelayCommand]
-    private Task BankInlezenAsync() => VoerUitAsync(_regie.ImporteerBankafschriftAsync);
+    private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(BankVoor));
 
     /// <summary>
     /// De tarieven staan op het subtabblad Tarieven (per boekjaar en categorie); de wizard bewaart de incassogegevens,

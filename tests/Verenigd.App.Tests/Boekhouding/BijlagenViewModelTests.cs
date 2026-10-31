@@ -167,6 +167,22 @@ public sealed class BijlagenViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Filter_zonder_bon_volgt_de_drempel_van_de_administratie()
+    {
+        await KasuitgaveAsync(2500, new DateOnly(2026, 6, 1));
+        await KasuitgaveAsync(900, new DateOnly(2026, 6, 2));
+        await InrichtenAsync();
+        var model = new Administratie(AdministratieSoort.Vereniging, "Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging));
+        model.WijzigZonderBonDrempel(500);
+        var vm = _omgeving.Maak(new AdministratieViewModel(model));
+        await vm.VernieuwCommand.ExecuteAsync(null);
+
+        vm.AlleenZonderBon = true;
+
+        Assert.Equal(2, vm.Posten.Count); // ook € 9,00 ligt boven de drempel van € 5
+    }
+
+    [Fact]
     public async Task Postvak_stelt_een_post_voor_en_koppelt()
     {
         var post = await KasuitgaveAsync(2345, new DateOnly(2026, 6, 10));

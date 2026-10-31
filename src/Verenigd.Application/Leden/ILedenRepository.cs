@@ -9,6 +9,9 @@ public interface ILedenRepository
 
     Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default);
 
+    /// <summary>Besluit 215: het soort per groep (op naam) wijzigen, ook buiten de import.</summary>
+    Task BewaarGroepsoortenAsync(IReadOnlyDictionary<string, GroepSoort> soortPerGroep, CancellationToken annulering = default);
+
     /// <exception cref="KeyNotFoundException">De persoon bestaat niet (meer).</exception>
     Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default);
 }

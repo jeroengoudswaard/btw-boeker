@@ -144,6 +144,51 @@ public sealed class ContributieboekingViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Na_definitief_maken_wordt_de_vooraankondiging_per_betaler_aangeboden()
+    {
+        var vm = await OpenAsync();
+        var voorstellen = new List<ViewModels.Email.EmailVoorstel>();
+        vm.EmailAanbieden = v =>
+        {
+            voorstellen.Add(v);
+            return Task.CompletedTask;
+        };
+
+        await RunViaWizardAsync(vm);
+
+        Assert.Contains("vooraankondiging", _omgeving.Dialogen.Bevestigingsvragen[^1], StringComparison.Ordinal);
+        var voorstel = Assert.Single(voorstellen);
+        Assert.Equal(Domain.Communicatie.Emailsoort.Vooraankondiging, voorstel.Soort);
+        var ontvanger = Assert.Single(voorstel.Ontvangers);
+        Assert.Equal("voogd@example.org", ontvanger.Adres); // Anna is jeugdlid: de voogd
+        Assert.Equal("VER-0001", ontvanger.Velden["mandaatkenmerk"]);
+        Assert.Equal("€ 37,50", ontvanger.Velden["bedrag"]);
+    }
+
+    [Fact]
+    public async Task Bij_een_stornering_kan_een_bericht_worden_opgesteld()
+    {
+        var vm = await OpenAsync();
+        await RunViaWizardAsync(vm);
+        await StorneerAsync(_omgeving.Opslag.Runs.Single());
+        await vm.VernieuwCommand.ExecuteAsync(null);
+        var voorstellen = new List<ViewModels.Email.EmailVoorstel>();
+        vm.EmailAanbieden = v =>
+        {
+            voorstellen.Add(v);
+            return Task.CompletedTask;
+        };
+        Assert.False(vm.MailStorneringCommand.CanExecute(null));
+
+        vm.GeselecteerdeVordering = vm.Vorderingen.Single();
+        await vm.MailStorneringCommand.ExecuteAsync(null);
+
+        var voorstel = Assert.Single(voorstellen);
+        Assert.Equal(Domain.Communicatie.Emailsoort.Stornering, voorstel.Soort);
+        Assert.Equal("Onvoldoende saldo (AM04)", Assert.Single(voorstel.Ontvangers).Velden["reden"]);
+    }
+
+    [Fact]
     public async Task Oninbaar_afboeken_na_bevestiging()
     {
         var vm = await OpenAsync();

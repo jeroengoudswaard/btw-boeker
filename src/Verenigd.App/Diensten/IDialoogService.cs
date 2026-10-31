@@ -82,6 +82,9 @@ public interface IDialoogService
 
     string? KiesSjabloonDoel(string voorgesteldeNaam);
 
+    /// <summary>Het JSON-clientbestand van een OAuth-client (Desktop-app) uit Google Cloud (besluit 192).</summary>
+    string? KiesClientbestand();
+
     /// <returns><c>true</c> als de administratie is ingericht.</returns>
     bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard);
 

@@ -59,7 +59,8 @@ public sealed class InrichtingsstatusTests
         Assert.True(status.IsKlaar(Startstap.Administraties));
         Assert.True(status.IsKlaar(Startstap.Leden));
         Assert.True(status.IsKlaar(Startstap.Boekhouding));
-        Assert.False(status.BoekhoudingStichting); // optioneel: de boekhouding van de Stichting volgt later (besluit 61)
+        Assert.False(status.BoekhoudingStichting); // optioneel (besluit 209)
+        Assert.False(status.BankStichting);
         Assert.True(status.IsKlaar(Startstap.Bank));
         Assert.True(status.IsKlaar(Startstap.Contributie));
         Assert.Null(status.EersteOpenStap());

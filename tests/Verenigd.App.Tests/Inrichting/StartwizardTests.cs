@@ -162,6 +162,31 @@ public sealed class StartwizardTests
     }
 
     [Fact]
+    public async Task Bankstap_kan_ook_voor_de_stichting()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        _dialogen.Startwizard = async w =>
+        {
+            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Boekhouding));
+            w.BoekhoudingVoor = AdministratieSoort.Stichting;
+            await w.BoekhoudingInrichtenCommand.ExecuteAsync(Boekhoudingkeuze.Leeg);
+            Assert.True(w.Status.BoekhoudingStichting);
+
+            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Bank));
+            Assert.False(w.KanBankInlezen); // de Vereniging heeft nog geen boekhouding
+            w.BankVoor = AdministratieSoort.Stichting;
+            Assert.True(w.KanBankInlezen);
+            await w.BankInlezenCommand.ExecuteAsync(null);
+
+            Assert.Contains(w.Klaarregels, r => r.IsKlaar && r.Tekst.Contains("Stichting", StringComparison.Ordinal));
+        };
+
+        await shell.StartwizardCommand.ExecuteAsync(null);
+
+        Assert.Equal(AdministratieSoort.Stichting, Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad).Administratie?.Soort);
+    }
+
+    [Fact]
     public async Task Incassogegevens_worden_bij_volgende_opgeslagen_en_fouten_houden_de_stap_vast()
     {
         var shell = await MaakShellMetOpenDatabase();

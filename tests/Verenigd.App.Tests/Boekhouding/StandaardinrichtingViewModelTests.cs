@@ -80,6 +80,30 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         Assert.Contains("1299", wizard.Samenvatting, StringComparison.Ordinal);
     }
 
+    /// <summary>Besluit 198: een administratie kan ook in een eerder jaar beginnen, met beginsaldi per 1 januari van dat jaar.</summary>
+    [Fact]
+    public async Task Beginjaar_is_te_kiezen_en_bepaalt_boekjaar_en_openingsbalans()
+    {
+        var wizard = Wizard(AdministratieSoort.Stichting);
+
+        Assert.Equal(2026, wizard.Beginjaar);
+        Assert.Contains(2025, wizard.Beginjaren);
+        Assert.Equal(2026, wizard.Beginjaren[^1]); // niet in de toekomst
+        wizard.Beginjaar = 2025;
+        Assert.Equal("Beginsaldi per 01-01-2025", wizard.Beginsaldititel);
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+        wizard.Balansrekeningen[0].Debettekst = "100";
+        wizard.Balansrekeningen[1].Credittekst = "100";
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+
+        Assert.True(wizard.IsKlaar, wizard.Foutmelding);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Stichting);
+        Assert.NotNull(stand.Boekjaar(2025));
+        Assert.Null(stand.Boekjaar(2026));
+        Assert.Contains(stand.Posten, p => p.Datum == new DateOnly(2025, 1, 1));
+        Assert.Contains("boekjaar 2025", wizard.Samenvatting, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Stichting_begint_bij_de_rekeningen_en_een_ongeldig_bedrag_houdt_tegen()
     {

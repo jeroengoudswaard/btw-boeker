@@ -4,6 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Debiteuren;
+using Verenigd.Application.Email;
+using Verenigd.App.ViewModels.Email;
+using Verenigd.Domain.Communicatie;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Boekhouding;
@@ -33,7 +36,7 @@ public sealed partial class ContributieViewModel
     public partial bool AlleenOpenstaand { get; set; } = true;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(HerincassoCommand), nameof(OninbaarCommand))]
+    [NotifyCanExecuteChangedFor(nameof(HerincassoCommand), nameof(OninbaarCommand), nameof(MailStorneringCommand))]
     public partial VorderingRegel? GeselecteerdeVordering { get; set; }
 
     [ObservableProperty]
@@ -167,5 +170,16 @@ public sealed partial class ContributieViewModel
         {
             Foutmelding = ex.Message;
         }
+    }
+
+    private bool KanStorneringMailen() => GeselecteerdeVordering is { Stand.Status: Vorderingstatus.Gestorneerd } && _stand is not null;
+
+    /// <summary>Besluit 204: een bericht over de stornering aan de leden en voogden onder de betaler, via E-mail › Opstellen.</summary>
+    [RelayCommand(CanExecute = nameof(KanStorneringMailen))]
+    private Task MailStorneringAsync()
+    {
+        var regel = GeselecteerdeVordering!;
+        var ontvangers = Berichten.Stornering(regel.Stand, _stand!, Vandaag, Administratie?.Naam ?? string.Empty);
+        return BiedEmailAanAsync(new EmailVoorstel(Emailsoort.Stornering, ontvangers, $"Stornering {regel.Run} van {regel.Betaler}"));
     }
 }

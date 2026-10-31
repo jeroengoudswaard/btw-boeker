@@ -12,6 +12,9 @@
     <PackageReference Include="PDFsharp-MigraDoc" />
     <PackageReference Include="QRCoder" />
     <PackageReference Include="PdfPig" />
+    <PackageReference Include="Google.Apis.Gmail.v1" />
+    <PackageReference Include="Google.Apis.Auth" />
+    <PackageReference Include="MimeKit" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
   </ItemGroup>

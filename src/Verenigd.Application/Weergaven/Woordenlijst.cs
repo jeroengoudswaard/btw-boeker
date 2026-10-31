@@ -79,7 +79,7 @@ public static class Woordenlijst
         new("Knop.Vaststellen", "Vast_stellen...", "Vast_stellen..."),
         new("Knop.Herzien", "_Herzien", "_Herzien"),
         new("Tab.Postvak", "Post_vak bonnen", "Post_vak bonnen", "Zet hier bonnen neer; de app stelt voor bij welke boeking ze horen."),
-        new("Knop.ZonderBon", "_Zonder bon", "_Zonder bon", "Uitgaven en ontvangsten van bank of kas boven € 10 zonder bon."),
+        new("Knop.ZonderBon", "_Zonder bon", "_Zonder bon", "Uitgaven en ontvangsten van bank of kas boven de drempel (Instellingen) zonder bon."),
         new("Knop.BijlageToevoegen", "Bijlag_e toevoegen...", "Bon toevo_egen..."),
         new("Tip.Toewijzen", "Maakt een conceptpost (Enter)", "Maakt een voorlopige boeking (Enter)"),
         new("Tip.Tegenboeken", "Een geboekte post corrigeren met een post met omgekeerde bedragen", "Een definitieve boeking terugdraaien met een correctieboeking"),

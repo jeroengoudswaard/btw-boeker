@@ -85,4 +85,24 @@ public sealed class InstellingenViewModelTests
                 Assert.True(kleur.Contrastverhouding(kleur.LeesbareTekstkleur()) >= 3.0, hex);
             });
     }
+
+    [Fact]
+    public async Task Drempel_zonder_bon_is_per_administratie_in_te_stellen()
+    {
+        var vm = Maak();
+        Assert.Equal("10,00", vm.Regels[1].Drempeltekst);
+
+        vm.Regels[1].Drempeltekst = "geen bedrag";
+        Assert.NotNull(vm.Regels[1].Fout);
+        Assert.False(vm.KanOpslaan);
+
+        vm.Regels[1].Drempeltekst = "25";
+        Assert.True(vm.KanOpslaan);
+        await vm.OpslaanCommand.ExecuteAsync(null);
+
+        Assert.Equal(2500, _administraties[1].Model.ZonderBonDrempel);
+        Assert.Equal(Administratie.StandaardZonderBonDrempel, _administraties[0].Model.ZonderBonDrempel);
+        Assert.Equal("25,00", vm.Regels[1].Drempeltekst);
+        Assert.False(vm.HeeftOnopgeslagenWijzigingen);
+    }
 }

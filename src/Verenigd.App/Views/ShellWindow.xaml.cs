@@ -46,10 +46,32 @@ public partial class ShellWindow : Window
     {
         base.OnActivated(e);
 
-        // Zonder toetsenbordfocus in het venster werken de sneltoetsen (Ctrl+1...6, Ctrl+W) niet.
-        if (!IsKeyboardFocusWithin && !Tabbladen.Focus())
+        // Zonder toetsenbordfocus in het venster werken de sneltoetsen (Ctrl+1...6, Ctrl+Tab) niet.
+        if (!IsKeyboardFocusWithin && !Navigatiebalk.Focus())
         {
             MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+        }
+    }
+
+    /// <summary>Besluit 179: in Eenvoudig toont Alt de menubalk tijdelijk, zodat ook Alt+letter werkt.</summary>
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        if (e.Key == Key.System && e.SystemKey is (Key.LeftAlt or Key.RightAlt) && !_viewModel.IsMenubalkZichtbaar)
+        {
+            _viewModel.ToonMenubalkTijdelijk();
+            UpdateLayout();
+        }
+
+        base.OnPreviewKeyDown(e);
+    }
+
+    /// <summary>Verlaat de gebruiker het menu (Escape, klik elders of een keuze), dan verdwijnt de tijdelijke menubalk weer.</summary>
+    private void Menubalk_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is false)
+        {
+            _viewModel.VerbergTijdelijkeMenubalk();
         }
     }
 

@@ -17,7 +17,7 @@ namespace Verenigd.App.ViewModels.Contributie;
 /// Tabblad Contributie (alleen Vereniging, besluit 16) met vier subtabbladen: leden &amp; categorie, betalers &amp;
 /// machtigingen, tarieven en incassoruns.
 /// </summary>
-public sealed partial class ContributieViewModel : TabbladViewModel
+public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameldingen
 {
     private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
@@ -52,7 +52,18 @@ public sealed partial class ContributieViewModel : TabbladViewModel
 
     /// <summary>Het zichtbare subtabblad; de startwizard opent hiermee de tarieven.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Onderdeel), nameof(IsOpslaanHoofdactie))]
     public partial ContributieSubtab Subtab { get; set; }
+
+    /// <summary>Besluit 168: bij de categorieën en de tarieven is opslaan de hoofdactie (blauwe knop).</summary>
+    public bool IsOpslaanHoofdactie => Subtab is ContributieSubtab.Leden or ContributieSubtab.Tarieven;
+
+    /// <summary>Het onderdeel in de navigatiebalk (besluit 181).</summary>
+    public override int? Onderdeel
+    {
+        get => (int)Subtab;
+        set => Subtab = value is { } i ? (ContributieSubtab)i : ContributieSubtab.Leden;
+    }
 
     public ObservableCollection<TariefRegel> Tarieven { get; } = [];
 
@@ -309,6 +320,13 @@ public sealed partial class ContributieViewModel : TabbladViewModel
 
         await LaadAsync(Betaler?.Id);
         WijzigingenGewijzigd();
+        if (wizard.Resultaat is { } definitief && _stand is not null && EmailAanbieden is not null
+            && _dialogen.Bevestig("Vooraankondiging", "De incassorun is definitief. Wilt u nu de vooraankondiging per e-mail opstellen, met per betaler het bedrag, de uitvoerdatum en het mandaatkenmerk?"))
+        {
+            await BiedEmailAanAsync(new ViewModels.Email.EmailVoorstel(Domain.Communicatie.Emailsoort.Vooraankondiging,
+                Application.Email.Berichten.Vooraankondiging(definitief, _stand, Vandaag, Administratie?.Naam ?? string.Empty),
+                $"Vooraankondiging incassorun {definitief.Maand}"));
+        }
     }
 
     [RelayCommand]

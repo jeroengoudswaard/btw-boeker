@@ -4,7 +4,20 @@ using Verenigd.Application.Modules;
 
 namespace Verenigd.App.ViewModels;
 
-/// <summary>Basis voor elk tabblad. Een tabblad hoort bij hooguit één administratie.</summary>
+/// <summary>
+/// Meldingen van een pagina voor de statusregel (besluit 168): <see cref="Melding"/> krijgt ✓, <see cref="Foutmelding"/> ✕.
+/// </summary>
+public interface IPaginameldingen
+{
+    string? Melding => null;
+
+    string? Foutmelding => null;
+}
+
+/// <summary>
+/// Basis voor elke pagina (sinds v0.8.0 geen tabblad meer, maar een pagina achter de navigatiebalk; de naam is gebleven).
+/// Een pagina hoort bij hooguit één administratie.
+/// </summary>
 public abstract class TabbladViewModel : ObservableObject
 {
     protected TabbladViewModel(ModuleDefinitie module, AdministratieViewModel? administratie)
@@ -28,7 +41,19 @@ public abstract class TabbladViewModel : ObservableObject
 
     public bool KanSluiten => Module.KanSluiten;
 
+    /// <summary>Het gekozen onderdeel (subtabblad) als getal, of <c>null</c> bij een pagina zonder onderdelen.</summary>
+    public virtual int? Onderdeel
+    {
+        get => null;
+        set { }
+    }
+
     public virtual bool HeeftOnopgeslagenWijzigingen => false;
+
+    /// <summary>Opent E-mail › Opstellen met een voorbereid bericht (besluiten 205–207); de Shell vult dit in.</summary>
+    public Func<Email.EmailVoorstel, Task>? EmailAanbieden { get; set; }
+
+    protected Task BiedEmailAanAsync(Email.EmailVoorstel voorstel) => EmailAanbieden?.Invoke(voorstel) ?? Task.CompletedTask;
 
     public virtual bool KanOpslaan => false;
 

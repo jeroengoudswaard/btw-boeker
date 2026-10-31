@@ -80,6 +80,7 @@ internal sealed class ContributieboekingTestomgeving
         public IContributieRepository Contributie { get; } = new IncassoDienstTests.FakeRepository(omgeving.Incasso);
         public IBoekhoudingRepository Boekhouding => omgeving.Boekhouding;
         public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
+        public Verenigd.Application.Email.IEmailOpslag Email => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

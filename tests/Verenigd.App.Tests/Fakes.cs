@@ -82,6 +82,10 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesSjabloonbestand() => Sjabloonbestand;
 
+    public string? Clientbestand { get; set; }
+
+    public string? KiesClientbestand() => Clientbestand;
+
     public string? KiesSjabloonDoel(string voorgesteldeNaam)
     {
         SjabloonVoorstel = voorgesteldeNaam;
@@ -176,6 +180,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     public InMemoryLedenOpslag Leden { get; } = new();
     public InMemoryContributieOpslag Contributie { get; } = new();
     public InMemoryStartwizardOpslag Startwizard { get; } = new();
+    public InMemoryEmailOpslag Email { get; } = new();
     public FakeSessie? LaatsteSessie { get; private set; }
     public List<(string Backup, string Doel)> Teruggezet { get; } = [];
 
@@ -207,7 +212,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
         }
 
         Contributie.Leden = Leden;
-        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie) { Startwizard = Startwizard };
+        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie) { Startwizard = Startwizard, Email = Email };
         return Task.FromResult<IDatabaseSessie>(LaatsteSessie);
     }
 
@@ -242,6 +247,7 @@ internal sealed class FakeSessie(
     public ILedenRepository Leden { get; } = leden;
     public ILedenImportOpslag LedenImport { get; } = leden;
     public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard { get; init; } = new InMemoryStartwizardOpslag();
+    public Verenigd.Application.Email.IEmailOpslag Email { get; init; } = new InMemoryEmailOpslag();
     public List<string> Backups { get; } = [];
     public bool Gesloten { get; private set; }
 
@@ -306,6 +312,16 @@ internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
 
     public Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default) =>
         Task.FromResult<IReadOnlyList<Groep>>(Stand.Groepen.ToList());
+
+    public Task BewaarGroepsoortenAsync(IReadOnlyDictionary<string, GroepSoort> soortPerGroep, CancellationToken annulering = default)
+    {
+        foreach (var groep in Stand.Groepen.Where(g => soortPerGroep.ContainsKey(g.Naam)))
+        {
+            groep.WijzigSoort(soortPerGroep[groep.Naam]);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default)
     {
@@ -565,7 +581,9 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
 /// <summary>Leest een vooraf klaargezet werkblad.</summary>
 internal static class FakeBoekhouding
 {
-    public static BoekhoudingHulpmiddelen Hulpmiddelen() => new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst(), new FakeFactuurPdfMaker());
+    public static BoekhoudingHulpmiddelen Hulpmiddelen(NepVerzender? verzender = null) =>
+        new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst(), new FakeFactuurPdfMaker(),
+            Verzender: verzender ?? new NepVerzender(), Koppeling: new NepKoppeling());
 }
 
 internal sealed class FakeFactuurPdfMaker : Verenigd.Application.Facturen.IFactuurPdfMaker
@@ -632,4 +650,91 @@ internal sealed class FakeThemaService : IThemaService
 internal sealed class VasteTijd(DateTimeOffset nu) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => nu;
+}
+
+internal sealed class InMemoryEmailOpslag : Verenigd.Application.Email.IEmailOpslag
+{
+    private int _volgend = 1;
+
+    public List<Verenigd.Domain.Communicatie.Emailsjabloon> Sjablonen { get; } = [];
+    public List<Verenigd.Domain.Communicatie.VerzondenBericht> Logboek { get; } = [];
+    public Verenigd.Domain.Communicatie.Emailinstellingen Instellingen { get; set; } = new();
+    public Verenigd.Domain.Communicatie.Emailinstellingen Stichting { get; set; } = new(AdministratieSoort.Stichting);
+
+    public Task<Verenigd.Application.Email.EmailStand> LaadAsync(CancellationToken annulering = default) =>
+        Task.FromResult(new Verenigd.Application.Email.EmailStand([.. Sjablonen], [.. Logboek], [Instellingen, Stichting]));
+
+    public Task BewaarSjabloonAsync(Verenigd.Domain.Communicatie.Emailsjabloon sjabloon, CancellationToken annulering = default)
+    {
+        if (sjabloon.Id == 0)
+        {
+            typeof(Verenigd.Domain.Communicatie.Emailsjabloon).GetProperty(nameof(sjabloon.Id))!.SetValue(sjabloon, _volgend++);
+            Sjablonen.Add(sjabloon);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task VerwijderSjabloonAsync(int id, CancellationToken annulering = default)
+    {
+        Sjablonen.RemoveAll(s => s.Id == id && !s.IsStandaard);
+        return Task.CompletedTask;
+    }
+
+    public Task BewaarInstellingenAsync(Verenigd.Domain.Communicatie.Emailinstellingen instellingen, CancellationToken annulering = default)
+    {
+        if (instellingen.Administratie == AdministratieSoort.Stichting)
+        {
+            Stichting = instellingen;
+            return Task.CompletedTask;
+        }
+
+        Instellingen = instellingen;
+        return Task.CompletedTask;
+    }
+
+    public Task LogAsync(Verenigd.Domain.Communicatie.VerzondenBericht bericht, CancellationToken annulering = default)
+    {
+        Logboek.Add(bericht);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Gekoppeld met een verzonnen afzender, zodat versturen kan.</summary>
+    public void Koppel(AdministratieSoort administratie = AdministratieSoort.Vereniging)
+    {
+        var instellingen = administratie == AdministratieSoort.Stichting ? Stichting : Instellingen;
+        instellingen.ZetAfzender("Penningmeester", administratie == AdministratieSoort.Stichting ? "stichting@example.org" : "penningmeester@example.org");
+        instellingen.ZetClient("id.apps.googleusercontent.com", "geheim");
+        instellingen.Koppel("vernieuwd", DateTime.UtcNow);
+    }
+}
+
+internal sealed class NepVerzender : Verenigd.Application.Email.IEmailVerzender
+{
+    public List<Verenigd.Application.Email.Emailbericht> Verstuurd { get; } = [];
+    public List<string?> Afzenders { get; } = [];
+    public string? FoutVoor { get; set; }
+
+    public Task VerstuurAsync(Verenigd.Domain.Communicatie.Emailinstellingen instellingen, Verenigd.Application.Email.Emailbericht bericht, CancellationToken annulering = default)
+    {
+        Afzenders.Add(instellingen.Afzenderadres);
+        if (bericht.AanAdres == FoutVoor)
+        {
+            throw new Verenigd.Application.Email.EmailVerzendException("Adres bestaat niet.");
+        }
+
+        Verstuurd.Add(bericht);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class NepKoppeling : Verenigd.Application.Email.IGoogleKoppeling
+{
+    public int Aantal { get; private set; }
+
+    public Task<string> KoppelAsync(string clientId, string clientGeheim, CancellationToken annulering = default)
+    {
+        Aantal++;
+        return Task.FromResult("vernieuwd");
+    }
 }

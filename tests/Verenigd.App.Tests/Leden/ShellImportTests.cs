@@ -62,9 +62,47 @@ public sealed class ShellImportTests
             return true;
         };
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Overzicht, null));
+        _dialogen.BevestigAntwoord = false; // geen welkomstmail
         await shell.ImporteerSol3Command.ExecuteAsync(null);
 
         Assert.Same(leden, shell.GeselecteerdTabblad);
         Assert.Single(leden.Leden);
+        Assert.Contains("1 nieuw lid", Assert.Single(_dialogen.Bevestigingsvragen), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Import_met_nieuwe_leden_biedt_een_welkomstmail_aan_voor_alleen_die_leden()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        await VulAsync(_beheer.Leden, Lid("100000001", "Anna", "Vries"));
+        _dialogen.ImportWizard = async _ =>
+        {
+            await VulAsync(_beheer.Leden, Lid("100000001", "Anna", "Vries"), Lid("100000002", "Kees", "Jansen", lidtype: Verenigd.Domain.Leden.Lidtype.Kaderlid));
+            return true;
+        };
+
+        await shell.ImporteerSol3Command.ExecuteAsync(null);
+
+        var email = Assert.IsType<ViewModels.Email.EmailViewModel>(shell.GeselecteerdTabblad);
+        Assert.True(email.IsVoorbereid);
+        Assert.Equal("kees@example.org", Assert.Single(email.Ontvangers).Adres);
+        Assert.Equal(Verenigd.Domain.Communicatie.Emailsoort.Welkom, email.GekozenSjabloon?.Soort);
+    }
+
+    [Fact]
+    public async Task Import_zonder_nieuwe_leden_vraagt_niets()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        await VulAsync(_beheer.Leden, Lid("100000001", "Anna", "Vries"));
+        _dialogen.ImportWizard = async _ =>
+        {
+            await VulAsync(_beheer.Leden, Lid("100000001", "Anna", "Vries"));
+            return true;
+        };
+
+        await shell.ImporteerSol3Command.ExecuteAsync(null);
+
+        Assert.Empty(_dialogen.Bevestigingsvragen);
+        Assert.IsType<LedenViewModel>(shell.GeselecteerdTabblad);
     }
 }

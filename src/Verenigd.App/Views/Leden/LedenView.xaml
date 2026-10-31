@@ -1,6 +1,7 @@
 <UserControl x:Class="Verenigd.App.Views.Leden.LedenView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:g="clr-namespace:Verenigd.App.Views.Gedeeld"
         xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -70,6 +71,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- ===== Ledenlijst ===== -->
+                <g:LeegScherm VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="1" Lijst="Leden" Titel="Nog geen leden" Tekst="Lees de vier exports uit SOL3 in; per export staat in de importwizard welke kolommen nodig zijn." Knoptekst="Importeren uit SOL3..." Opdracht="{Binding DataContext.ImporteerSol3Command, RelativeSource={RelativeSource AncestorType=Window}}"
+                               Visibility="{Binding Leden.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                 <DataGrid ItemsSource="{Binding Leden}" SelectedItem="{Binding GeselecteerdLid}"
                           AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow"
                           HeadersVisibility="Column" GridLinesVisibility="None" CanUserAddRows="False"

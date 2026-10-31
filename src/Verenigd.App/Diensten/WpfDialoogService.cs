@@ -135,6 +135,12 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
+    public string? KiesClientbestand()
+    {
+        var dialoog = new OpenFileDialog { Title = "Clientbestand van Google Cloud kiezen", Filter = "Clientbestand (*.json)|*.json", CheckFileExists = true };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
     public string? KiesSjabloonDoel(string voorgesteldeNaam)
     {
         var dialoog = new SaveFileDialog

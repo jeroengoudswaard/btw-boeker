@@ -36,7 +36,7 @@ public sealed partial class BoekhoudingViewModel
     public partial IReadOnlyList<MeerjarenVersie> Meerjarenversies { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HeeftMeerjarenplan), nameof(IsMeerjarenplanBewerkbaar), nameof(MeerjarenJaren))]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerjarenplan), nameof(IsMeerjarenplanBewerkbaar), nameof(MeerjarenJaren), nameof(IsOpslaanHoofdactie))]
     public partial MeerjarenVersie? GekozenMeerjarenversie { get; set; }
 
     /// <summary>De jaren als kolomkoppen.</summary>

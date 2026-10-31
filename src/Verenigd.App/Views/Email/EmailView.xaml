@@ -1,0 +1,275 @@
+<UserControl x:Class="Verenigd.App.Views.Email.EmailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:g="clr-namespace:Verenigd.App.Views.Gedeeld"
+             xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:root="clr-namespace:Verenigd.App.ViewModels"
+             xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Email"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:EmailViewModel}"
+             AutomationProperties.AutomationId="EmailTabblad">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding VernieuwCommand}" />
+    </UserControl.InputBindings>
+
+    <DockPanel Margin="{StaticResource PaginaMarge}">
+        <!-- Koppeling ontbreekt: uitleg en één knop naar Instellingen (besluit 168) -->
+        <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" Margin="0,0,0,12" AutomationProperties.Name="E-mail niet gekoppeld"
+                Visibility="{Binding IsGekoppeld, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="EmailNietGekoppeld">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Naar _Instellingen" VerticalAlignment="Center"
+                        Command="{Binding DataContext.OpenModuleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="{x:Static root:ModuleVerzoek.Instellingen}" />
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="{Binding GekozenAfzender.Naam, Mode=OneWay, StringFormat='⚠ E-mail van {0} is nog niet gekoppeld.'}" FontWeight="SemiBold" />
+                    <Run Text="Koppel eenmalig het Gmail-account van deze afzender bij Instellingen › E-mail; daarna kunt u hier versturen. Opstellen en sjablonen aanpassen kan nu al." />
+                </TextBlock>
+            </DockPanel>
+        </tg:Groepskader>
+
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0,8,0,0"
+                   Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Assertive"
+                   AutomationProperties.AutomationId="EmailFout" />
+
+        <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="EmailSubtabbladen">
+            <!-- De navigatiebalk kiest het onderdeel (besluit 178); de tabkoppen zijn verborgen. -->
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <!-- ===== Opstellen ===== -->
+            <TabItem Header="Opstellen" AutomationProperties.AutomationId="SubtabOpstellen">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" MinWidth="260" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="3*" MinWidth="360" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Ontvangers -->
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Aan" Style="{StaticResource Sectietitel}" />
+                        <tg:Groepspaneel DockPanel.Dock="Top" Visibility="{Binding IsVoorbereid, Converter={StaticResource BoolNaarZichtbaar}}" Margin="0,0,0,12"
+                                         AutomationProperties.Name="Voorbereid bericht" AutomationProperties.AutomationId="EmailVoorbereid">
+                            <TextBlock Text="{Binding Aanleiding}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,8" />
+                            <Button Content="_Eigen bericht aan groepen" Command="{Binding WisVoorstelCommand}" HorizontalAlignment="Left"
+                                    ToolTip="Terug naar een bericht aan zelfgekozen groepen" />
+                        </tg:Groepspaneel>
+                        <tg:Groepspaneel DockPanel.Dock="Top" Visibility="{Binding IsVoorbereid, Converter={StaticResource OnwaarNaarZichtbaar}}" Margin="0,0,0,12"
+                                         AutomationProperties.Name="Groepen" AutomationProperties.AutomationId="EmailGroepen">
+                            <ItemsControl ItemsSource="{Binding Groepen}" Focusable="False" Margin="0,0,0,8">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:GroepKeuze}">
+                                        <CheckBox IsChecked="{Binding IsGekozen}" Margin="0,0,16,4" AutomationProperties.Name="{Binding Naam}">
+                                            <TextBlock Text="{Binding Tekst}" />
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Label Content="_Ontvangers" Target="{Binding ElementName=Ontvangerkeuze}" Padding="0,0,0,4" />
+                            <ComboBox x:Name="Ontvangerkeuze" ItemsSource="{Binding Source={x:Static vm:EmailViewModel.Ontvangerkeuzes}}"
+                                      SelectedItem="{Binding GekozenOntvangerkeuze}" DisplayMemberPath="Tekst" HorizontalAlignment="Stretch"
+                                      AutomationProperties.AutomationId="Ontvangerkeuze" />
+                        </tg:Groepspaneel>
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding Aantaltekst}" Style="{StaticResource Toelichting}" Margin="0,0,0,4"
+                                   AutomationProperties.AutomationId="EmailAantal" />
+                        <TextBlock DockPanel.Dock="Bottom" Text="{Binding ZonderAdres, StringFormat='⚠ {0}'}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   Visibility="{Binding ZonderAdres, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                        <ListBox ItemsSource="{Binding Ontvangers}" SelectedItem="{Binding GekozenOntvanger}" AutomationProperties.Name="Ontvangers"
+                                 AutomationProperties.AutomationId="EmailOntvangers" ToolTip="Kies een ontvanger om het voorbeeld te zien">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Naam}" />
+                                        <TextBlock Text="{Binding Adres}" Style="{StaticResource Toelichting}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+
+                    <!-- Bericht en voorbeeld -->
+                    <DockPanel Grid.Column="2">
+                        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                            <Button DockPanel.Dock="Right" Command="{Binding VerstuurCommand}" MinWidth="120" Style="{DynamicResource AccentButtonStyle}"
+                                    ContentTemplate="{StaticResource Toegangstekst}" Content="_Versturen"
+                                    ToolTip="Elke ontvanger krijgt een eigen, ingevulde e-mail" AutomationProperties.AutomationId="EmailVersturen" />
+                            <Button DockPanel.Dock="Right" Content="_Proef naar mezelf" Command="{Binding ProefCommand}" Margin="0,0,8,0"
+                                    ToolTip="Het voorbeeld van de gekozen ontvanger naar uw eigen adres" AutomationProperties.AutomationId="EmailProef" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Voortgang}" Visibility="{Binding Voortgang, Converter={StaticResource NietNullNaarZichtbaar}}"
+                                           AutomationProperties.LiveSetting="Polite" />
+                                <TextBlock Text="{Binding Daglimiettekst}" Style="{StaticResource Toelichting}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <tg:Groepspaneel DockPanel.Dock="Bottom" Margin="0,12,0,0" AutomationProperties.Name="Niet verstuurd" AutomationProperties.AutomationId="EmailMislukt"
+                                         Visibility="{Binding HeeftMislukt, Converter={StaticResource BoolNaarZichtbaar}}">
+                            <TextBlock Text="✕ Niet verstuurd" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <DataGrid ItemsSource="{Binding Mislukt}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" MaxHeight="160"
+                                      AutomationProperties.Name="Niet verstuurde e-mails">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Aan" Binding="{Binding Ontvanger.Naam}" Width="*" />
+                                    <DataGridTextColumn Header="Adres" Binding="{Binding Ontvanger.Adres}" Width="*" />
+                                    <DataGridTextColumn Header="Reden" Binding="{Binding Fout}" Width="2*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </tg:Groepspaneel>
+                        <Grid DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Content="V_an" Target="{Binding ElementName=Afzenderkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <ComboBox x:Name="Afzenderkeuze" Grid.Column="1" ItemsSource="{Binding Afzenders}" SelectedItem="{Binding GekozenAfzender}"
+                                      DisplayMemberPath="Naam" HorizontalAlignment="Left" MinWidth="220" Margin="0,0,0,8"
+                                      ToolTip="Elke administratie verstuurt met haar eigen Gmail-account" AutomationProperties.AutomationId="EmailAfzender" />
+                            <Label Grid.Row="1" Content="_Sjabloon" Target="{Binding ElementName=Sjabloonkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <ComboBox x:Name="Sjabloonkeuze" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Sjablonen}" SelectedItem="{Binding GekozenSjabloon}"
+                                      DisplayMemberPath="Naam" Margin="0,0,0,8" AutomationProperties.AutomationId="EmailSjabloon" />
+                            <Label Grid.Row="2" Content="O_nderwerp" Target="{Binding ElementName=Onderwerpveld}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <TextBox x:Name="Onderwerpveld" Grid.Row="2" Grid.Column="1" MaxLength="200" Margin="0,0,0,8"
+                                     Text="{Binding Onderwerp, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="EmailOnderwerp" />
+                        </Grid>
+                        <Label DockPanel.Dock="Top" Content="_Tekst (invulvelden tussen { }, zie Sjablonen)" Target="{Binding ElementName=Tekstveld}" Padding="0,0,0,4" />
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding Waarschuwing, StringFormat='⚠ {0}'}" TextWrapping="Wrap" Margin="0,0,0,4"
+                                   Visibility="{Binding Waarschuwing, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Polite" />
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="12" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBox x:Name="Tekstveld" Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" AutomationProperties.AutomationId="EmailTekst" />
+                            <tg:Groepskader Grid.Row="2" Style="{StaticResource Kaart}" AutomationProperties.Name="Voorbeeld" AutomationProperties.AutomationId="EmailVoorbeeld">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,4">
+                                        <Run Text="Voorbeeld voor" /> <Run Text="{Binding GekozenOntvanger.Naam, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock DockPanel.Dock="Top" Text="{Binding VoorbeeldOnderwerp}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding VoorbeeldBijlagen, StringFormat='Bijlage: {0}'}" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                                               Visibility="{Binding VoorbeeldBijlagen, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+                                        <TextBlock Text="{Binding VoorbeeldTekst}" TextWrapping="Wrap" />
+                                    </ScrollViewer>
+                                </DockPanel>
+                            </tg:Groepskader>
+                        </Grid>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== Verzonden (besluit 195: zonder de tekst) ===== -->
+            <TabItem Header="Verzonden" AutomationProperties.AutomationId="SubtabVerzonden">
+                <DockPanel Margin="0,12,0,0">
+                    <TextBlock DockPanel.Dock="Top" Text="{Binding Daglimiettekst}" Style="{StaticResource Toelichting}" Margin="0,0,0,8" />
+                    <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
+                               Text="Verenigd bewaart aan wie, wanneer, het onderwerp en het sjabloon; niet de tekst zelf. De verzonden e-mails staan ook in Gmail." />
+                    <g:LeegScherm DockPanel.Dock="Top" Lijst="Logboek" Titel="Nog niets verstuurd" Tekst="Stel een bericht op en verstuur het; elke e-mail komt hier te staan."
+                                  Visibility="{Binding Logboek.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
+                    <DataGrid ItemsSource="{Binding Logboek}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column"
+                              AutomationProperties.Name="Verzonden e-mails" AutomationProperties.AutomationId="EmailLogboek">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Tijdstip" Binding="{Binding Tijdstip}" Width="Auto" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                            <DataGridTextColumn Header="Van" Binding="{Binding Van}" Width="*" />
+                            <DataGridTextColumn Header="Aan" Binding="{Binding Bericht.Naam}" Width="*" />
+                            <DataGridTextColumn Header="Adres" Binding="{Binding Bericht.Adres}" Width="*" />
+                            <DataGridTextColumn Header="Onderwerp" Binding="{Binding Bericht.Onderwerp}" Width="2*" />
+                            <DataGridTextColumn Header="Sjabloon" Binding="{Binding Bericht.Sjabloon}" Width="*" />
+                            <DataGridTextColumn Header="Fout" Binding="{Binding Bericht.Fout}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ===== Sjablonen ===== -->
+            <TabItem Header="Sjablonen" AutomationProperties.AutomationId="SubtabSjablonen">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="220" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="3*" MinWidth="420" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Top" Content="_Nieuw sjabloon" Command="{Binding NieuwSjabloonCommand}" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                AutomationProperties.AutomationId="NieuwSjabloon" />
+                        <ListBox ItemsSource="{Binding Sjablonen}" SelectedItem="{Binding Beheersjabloon}" DisplayMemberPath="Naam"
+                                 AutomationProperties.Name="Sjablonen" AutomationProperties.AutomationId="EmailSjablonen" />
+                    </DockPanel>
+
+                    <TextBlock Grid.Column="2" Style="{StaticResource Toelichting}" TextWrapping="Wrap"
+                               Text="Kies links een sjabloon om het aan te passen, of maak een nieuw sjabloon."
+                               Visibility="{Binding Bewerking, Converter={StaticResource NullNaarZichtbaar}}" />
+                    <DockPanel Grid.Column="2" DataContext="{Binding Bewerking}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}">
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                            <Button Content="Ver_wijderen..." Command="{Binding DataContext.VerwijderSjabloonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Margin="0,0,8,0" ToolTip="Een standaardsjabloon kan niet worden verwijderd" AutomationProperties.AutomationId="SjabloonVerwijderen" />
+                            <Button Content="Op_slaan" MinWidth="96" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
+                                    Command="{Binding DataContext.OpslaanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    ToolTip="Opslaan (Ctrl+S)" AutomationProperties.AutomationId="SjabloonOpslaan" />
+                        </StackPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
+                                   Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                        <tg:Groepskader DockPanel.Dock="Right" Width="240" Margin="16,0,0,0" Style="{StaticResource Kaart}"
+                                        AutomationProperties.Name="Invulvelden" AutomationProperties.AutomationId="Invulvelden">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="Invulvelden" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,0,0,8"
+                                           Text="Elke ontvanger krijgt deze velden ingevuld, bijvoorbeeld {aanhef}." />
+                                <ItemsControl ItemsSource="{Binding Invulvelden}" Focusable="False">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,6">
+                                                <TextBlock Text="{Binding Naam, StringFormat='{}{{{0}}}'}" FontFamily="Consolas" />
+                                                <TextBlock Text="{Binding Uitleg}" Style="{StaticResource Toelichting}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DockPanel>
+                        </tg:Groepskader>
+                        <Grid DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Content="Soo_rt" Target="{Binding ElementName=Soortkeuze}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <ComboBox x:Name="Soortkeuze" Grid.Column="1" ItemsSource="{Binding Source={x:Static vm:SjabloonBewerking.Soorten}}" SelectedItem="{Binding Soort}"
+                                      IsEnabled="{Binding IsNieuw}" HorizontalAlignment="Left" MinWidth="200" Margin="0,0,0,8"
+                                      ToolTip="Bepaalt welke invulvelden er zijn; alleen te kiezen bij een nieuw sjabloon" AutomationProperties.AutomationId="SjabloonSoort" />
+                            <Label Grid.Row="1" Content="Naa_m" Target="{Binding ElementName=Sjabloonnaamveld}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <TextBox x:Name="Sjabloonnaamveld" Grid.Row="1" Grid.Column="1" MaxLength="100" Margin="0,0,0,8"
+                                     Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="SjabloonNaam" />
+                            <Label Grid.Row="2" Content="_Onderwerp" Target="{Binding ElementName=Sjabloononderwerpveld}" VerticalAlignment="Center" Padding="0,0,12,0" />
+                            <TextBox x:Name="Sjabloononderwerpveld" Grid.Row="2" Grid.Column="1" MaxLength="200" Margin="0,0,0,8"
+                                     Text="{Binding Onderwerp, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="SjabloonOnderwerp" />
+                        </Grid>
+                        <Label DockPanel.Dock="Top" Content="_Tekst" Target="{Binding ElementName=Sjabloontekstveld}" Padding="0,0,0,4" />
+                        <TextBox x:Name="Sjabloontekstveld" Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" AutomationProperties.AutomationId="SjabloonTekst" />
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

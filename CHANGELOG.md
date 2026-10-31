@@ -4,6 +4,66 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.10.1] - 2026-10-31: Drempel en groepsindeling
+
+### Toegevoegd
+- **Drempel "zonder bon" per administratie** (besluit 214) bij Instellingen › Administraties, standaard € 10. Het filter *Zonder bon* in Boekhouding en de startkaart gebruiken de drempel van de eigen administratie.
+- **Instellingen › Groepen** (besluit 215): per groep het soort (speltak, bestuur, technisch, overig), ook na de import te wijzigen.
+
+## [0.10.0] - 2026-10-31: Stichting volwaardig
+
+### Toegevoegd
+- **Boekhouding, bank en facturen voor de Stichting** (besluiten 209 en 210, vervangen 61 en 107).
+  - **Instellingen › Facturen:** per administratie eigen gegevens (naam, adres, KvK, IBAN, termijn, voettekst, logo); de factuur-PDF en de QR-code gebruiken die van de eigen administratie.
+  - **Startwizard › Bank:** kies Vereniging of Stichting. Het klaaroverzicht toont ook de boekhouding en bank van de Stichting (optioneel).
+- **Gmail per administratie** (besluit 211).
+  - **Instellingen › E-mail:** per administratie een eigen afzender, clientbestand en koppeling.
+  - **E-mail › Opstellen:** kies bij *Van* de afzender, standaard de Vereniging. Een factuur van de Stichting gaat via de Stichting.
+  - De daglimiet geldt per afzender; *Verzonden* toont de kolom *Van*.
+
+### Gewijzigd
+- Migraties *EmailPerAdministratie* (logboek) en *ZonderBonDrempel* (administraties). De bestaande koppeling met Gmail blijft die van de Vereniging.
+- 905 geautomatiseerde tests (was 890).
+
+## [0.9.0] - 2026-10-30: E-mail via Gmail
+
+### Toegevoegd
+- **Pagina E-mail** (fase 6, besluiten 191–196 en 203–208) met de onderdelen *Opstellen*, *Verzonden* en *Sjablonen* in de navigatiebalk (Ctrl+6).
+  - **Opstellen:** kies groepen (speltakken, bestuur, overig) en de ontvangers per bericht: standaard, alleen voogden, alleen leden zelf, of voogden én leden. Standaard krijgen de voogden de e-mail bij leden met een actieve jeugdlidfunctie, en anders het lid zelf. Adressen worden ontdubbeld; wie onder één adres valt, staat samen in `{voornaam}` ("Anna en Bo"). Leden zonder geldig adres worden gemeld.
+  - Kies een sjabloon of schrijf een eigen tekst. Het voorbeeld toont de e-mail zoals de gekozen ontvanger hem krijgt; een onbekend invulveld geeft een waarschuwing. Met *Proef naar mezelf* gaat het voorbeeld naar uw eigen adres.
+  - *Versturen* vraagt eerst om bevestiging en stuurt elke ontvanger een eigen, persoonlijk ingevulde e-mail (geen BCC). Wat niet verstuurd kon worden, staat met de reden onder het bericht. Bij de daglimiet van 500 berichten stopt Verenigd en meldt hoeveel berichten niet verstuurd zijn.
+  - **Verzonden:** per bericht aan wie, wanneer, het onderwerp, het sjabloon en de status; de tekst zelf wordt niet bewaard.
+  - **Sjablonen:** zes standaardsjablonen (Mededeling speltak, Welkomstmail, Vooraankondiging incasso, Bericht bij stornering, Factuur, Herinnering factuur). Ze zijn aan te passen maar niet te verwijderen. U kunt eigen sjablonen toevoegen; per soort staat ernaast welke invulvelden er zijn, met uitleg.
+- **Berichten vanuit de modules:**
+  - **Welkomstmail** na een SOL3-import met nieuwe leden, alleen voor die leden (besluit 205).
+  - **Vooraankondiging** direct na *Definitief maken* van een incassorun, per betaler met bedrag, uitvoerdatum en mandaatkenmerk (besluit 206).
+  - **Bericht mailen** bij een stornering in Contributie › Openstaand, aan de voogden en leden onder die betaler (besluit 204).
+  - **Factuur mailen** na *Definitief maken*, met de PDF als bijlage, plus de knoppen *Mailen…* en *Herinnering sturen…* (bij een vervallen factuur) in Boekhouding › Facturen (besluit 207).
+- **Instellingen › E-mail:** uw naam en Gmail-adres als afzender, *Clientbestand inlezen…*, *Koppelen met Google…* en *Ontkoppelen…*. Verenigd vraagt alleen toestemming om te versturen, met de Gmail-API en OAuth; er staat geen wachtwoord in de app. Adres en sleutels staan versleuteld in de database, niet in Git.
+- Handleiding `docs/GOOGLE-CLOUD.md` voor het eenmalige Google Cloud-project: Gmail-API, toestemmingsscherm *In productie* en een OAuth-client voor een desktop-app.
+- Nieuwe pakketten: Google.Apis.Gmail.v1 en Google.Apis.Auth (Apache-2.0), MimeKit (MIT).
+- 889 geautomatiseerde tests (was 842).
+
+### Opgelost
+- UI-tests typen het wachtwoord alleen als de app de toetsenbordfocus heeft, anders stoppen ze. De navigatiebalk wordt bij uitklappen bijgewerkt in plaats van opnieuw opgebouwd, zodat de gekozen regel en de focus blijven (na de Windows-run van v0.8.0).
+
+## [0.8.0] - 2026-10-30: Herinrichting van de app
+
+### Gewijzigd
+- **Navigatiebalk in plaats van tabbladen** (besluiten 168, 178 en 181): links Start, Leden, Contributie, Boekhouding, Begroting (bij de Stichting: Meerjarenplan), E-mail en Instellingen. De onderdelen van Boekhouding en Contributie klappen uit onder hun module en zijn met één klik bereikbaar; de tabkoppen op de pagina's zijn weg. Ctrl+Tab en Ctrl+Shift+Tab gaan naar de volgende of vorige regel.
+- **Eén wisselaar voor de administratie** (besluiten 177 en 182), links bovenaan, met de accentkleur. Hij geldt voor de hele app; bij wisselen blijft dezelfde pagina staan, en bestaat die bij de andere administratie niet (Contributie bij de Stichting), dan gaat u naar Start. Ctrl+1…6 openen bij de gekozen administratie.
+- **Herstarten** opent de laatste pagina en administratie (vervangt het herstellen van tabbladen, besluit 12).
+- **Menubalk** (besluit 179): in Expert zichtbaar; in Eenvoudig verborgen en met Alt tijdelijk op te roepen. Alle sneltoetsen blijven werken.
+- **Eén hoofdactie per pagina** (besluit 168): de blauwe knop is de belangrijkste actie (bijvoorbeeld *Nieuwe post*, *Bankafschrift inlezen*, *Bonnen toevoegen*, *Nieuwe factuur*). *Opslaan* is alleen blauw waar opslaan de hoofdactie is (begroting, meerjarenplan, categorieën, tarieven).
+- **Statusregel** met ✓ (gelukt), ⚠ (waarschuwing) of ✕ (fout) en de melding van de pagina.
+
+### Toegevoegd
+- **Startpagina met kaarten** (besluit 183): inrichting afmaken, banktransacties te verwerken, conceptposten, bonnen in het postvak, incassorun van deze maand, openstaande storneringen, vervallen facturen en boekingen zonder bon. Een kaart verschijnt alleen als er iets te doen is; de knop gaat naar de juiste pagina.
+- **Lege schermen**: een lege lijst (journaal, bank, postvak, boekingsregels, facturen, relaties, leden, betalers, incassoruns, openstaand) toont uitleg en één knop.
+- **Beginjaar kiezen** bij het inrichten met het standaardschema of een sjabloonbestand (besluit 198): ook een eerder jaar, met beginsaldi per 1 januari van dat jaar.
+- Architectuurtests: hooguit één hoofdactie per pagina; elke hoofdlijst heeft een leeg scherm.
+- 842 geautomatiseerde tests (was 816).
+
 ## [0.7.1] - 2026-10-30: Uitleg over de SOL3-exports
 
 ### Toegevoegd

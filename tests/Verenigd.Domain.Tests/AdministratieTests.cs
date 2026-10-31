@@ -59,6 +59,19 @@ public class AdministratieTests
         Assert.Equal(Kleur.Parse("#1565C0"), Administratie.Standaardkleur(AdministratieSoort.Stichting));
     }
 
+    [Fact]
+    public void Drempel_zonder_bon_is_standaard_10_euro_en_instelbaar()
+    {
+        var a = Standaard();
+        Assert.Equal(1000, a.ZonderBonDrempel);
+
+        a.WijzigZonderBonDrempel(2500);
+        Assert.Equal(2500, a.ZonderBonDrempel);
+        a.WijzigZonderBonDrempel(0); // elke uitgave zonder bon tonen
+        Assert.Equal(0, a.ZonderBonDrempel);
+        Assert.Throws<ArgumentOutOfRangeException>(() => a.WijzigZonderBonDrempel(-1));
+    }
+
     private static Administratie Standaard() =>
         new(AdministratieSoort.Vereniging, "Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging));
 }

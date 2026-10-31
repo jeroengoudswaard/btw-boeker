@@ -50,6 +50,9 @@ public interface IDatabaseSessie : IAsyncDisposable
     /// <summary>De voortgang van de startwizard (besluit 173).</summary>
     Inrichting.IStartwizardOpslag Startwizard { get; }
 
+    /// <summary>Sjablonen, logboek en instellingen van e-mail (fase 6).</summary>
+    Email.IEmailOpslag Email { get; }
+
     /// <summary>Schrijft een consistente, versleutelde back-up (database + sleutelbestand) naar één bestand.</summary>
     Task MaakBackupAsync(string doelPad, CancellationToken annulering = default);
 }

@@ -17,7 +17,8 @@ public enum Weergavemodus
     Eenvoudig,
 }
 
-public sealed record OpenTabblad(ModuleSoort Module, AdministratieSoort? Administratie);
+/// <summary>De pagina die bij een herstart weer opent (besluit 177): module, administratie en onderdeel (subtabblad).</summary>
+public sealed record LaatstePagina(ModuleSoort Module, AdministratieSoort? Administratie, int? Onderdeel);
 
 /// <summary>Voorkeuren per Windows-gebruiker. Bevat geen persoonsgegevens van leden.</summary>
 public sealed record GebruikersInstellingen
@@ -29,7 +30,7 @@ public sealed record GebruikersInstellingen
 
     public string? LaatsteDatabase { get; init; }
 
-    public IReadOnlyList<OpenTabblad> OpenTabbladen { get; init; } = [];
+    public LaatstePagina? LaatstePagina { get; init; }
 
     /// <summary>De startwizard opent automatisch bij de eerste start, maar één keer (besluit 169).</summary>
     public bool StartwizardGetoond { get; init; }

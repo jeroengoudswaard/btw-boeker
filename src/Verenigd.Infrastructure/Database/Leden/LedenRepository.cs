@@ -20,6 +20,19 @@ internal sealed class LedenRepository(Func<VerenigdDbContext> maakContext) : ILe
         return await context.Groepen.AsNoTracking().OrderBy(g => g.Naam).ToListAsync(annulering).ConfigureAwait(false);
     }
 
+    public async Task BewaarGroepsoortenAsync(IReadOnlyDictionary<string, GroepSoort> soortPerGroep, CancellationToken annulering = default)
+    {
+        ArgumentNullException.ThrowIfNull(soortPerGroep);
+        await using var context = maakContext();
+        var namen = soortPerGroep.Keys.ToList();
+        foreach (var groep in await context.Groepen.Where(g => namen.Contains(g.Naam)).ToListAsync(annulering).ConfigureAwait(false))
+        {
+            groep.WijzigSoort(soortPerGroep[groep.Naam]);
+        }
+
+        await context.SaveChangesAsync(annulering).ConfigureAwait(false);
+    }
+
     public async Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default)
     {
         await using var context = maakContext();
