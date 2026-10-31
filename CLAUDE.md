@@ -261,6 +261,14 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 223 | Webapp: snelle knoppen | Bij een lid *Bellen*, *Bericht* en *E-mail* naar de voogd; bij twee voogden eerst een keuze (onderblad) |
 | 224 | Webapp: eerste scherm | De ledenlijst van de eigen speltak (geen startscherm met kaarten) |
 | 225 | Webapp: volgende stap | Eerst het uitgewerkte technische ontwerp van fase 7 (Supabase, beveiliging, synchronisatie) ter goedkeuring |
+| 226 | Webapp: techniek | SvelteKit/TypeScript als statische site (PWA, te installeren op het startscherm), met de officiële Supabase-bibliotheek |
+| 227 | Webapp: hosting | Cloudflare Pages |
+| 228 | Supabase-abonnement | Gratis (keuze bij besluit 37); pauzeert na 7 dagen zonder gebruik, de beheerder zet het project dan met de hand weer aan |
+| 229 | Gegevens op de server | Naam, geboortedatum, telefoon en e-mail van het lid, en de voogden; geen adres en niets financieels (besluit 35) |
+| 230 | Accounts leiding | De beheerder nodigt uit vanuit de desktop-app en kiest de speltak(ken), via een Edge Function (de `service_role`-sleutel blijft op de server, besluit 37) |
+| 231 | Inloggen webapp | E-mail en wachtwoord, daarna de TOTP-code; elke beveiligingsregel eist MFA |
+| 232 | Synchroniseren | Automatisch bij het openen van de database en met een knop; zonder internet werkt alles behalve synchroniseren |
+| 233 | Opdeling fase 7 | Alles in één versie (v0.12.0): server en synchroniseren, webapp lezen, voorstellen en de wachtrij in de desktop-app; één pull request |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
