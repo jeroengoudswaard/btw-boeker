@@ -410,6 +410,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Nieuw: `KerncijfersTests`, `StartTests`, de UI-test `Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel` en de tabs in de Instellingen-UI-test.
     - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 910/910).
     - Daarnaast een visuele controle: licht en donker, de accentkleur bij het wisselen van administratie, slepen, dubbelklikken en Snap met de titelbalk, de kerncijfers en de tellers.
+    - **Windows-test (2026-10-31, Windows 11, commit `0690fc9`): niet groen, 909/910 in beide runs** (met `--blame-hang --blame-hang-timeout 4m`). Build zonder waarschuwingen. Domain 243, Application 333, Architectuur 28 en Infrastructure 70 groen; App 235/236. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+      - Gefaald (2 van 2 runs, 1 ms): `AppUiTests.Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel` met "Tests marked with Timeout are only supported for async tests". De test is `public void` met `[Fact(Timeout = Timeout)]` (AppUiTests.cs:143–144); xUnit voert hem daardoor niet uit. Testprobleem; de titelbalk zelf is dus nog **niet** getest.
+      - Gevraagde fix: de test `async Task` maken (zoals de andere UI-tests, bijv. met `await Task.Yield()` of de bestaande asynchrone opbouw); eventueel een architectuurtest die `[Fact(Timeout = …)]` op een niet-asynchrone methode verbiedt. Daarna opnieuw de volledige suite op Windows, 2 runs (verwacht 910/910).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
