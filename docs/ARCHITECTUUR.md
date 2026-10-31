@@ -371,3 +371,15 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Startwizard:** `IStartwizardRegie.ImporteerBankafschriftAsync(administratie)`, `StartwizardViewModel.BankVoor` en `KanBankInlezen`, en `Inrichtingsstatus.BankStichting`.
 - **Drempel "zonder bon":** `Administratie.ZonderBonDrempel` (centen, standaard 1000). `Startkaarten.Bepaal` krijgt de drempels per administratie; `BoekhoudingViewModel` gebruikt de drempel van de eigen administratie.
 - **Groepen:** `ILedenRepository.BewaarGroepsoortenAsync` (op groepsnaam) en `GroepenInstellingenViewModel` (Instellingen › Groepen).
+
+## Uiterlijk Fluent Mica (v0.11.0, besluiten 216–221)
+
+- **Thema:** `Views/Thema/FluentMica.xaml` (samengevoegd in `App.xaml`).
+  - Stijlen: `Paginavlak`, `Navigatieregel`, `Teller`, `Kerncijfertitel`/`Kerncijferwaarde`, `Vensterknop` en `Sluitknop`.
+  - Lettertypen: `Lettertype` en `Koplettertype`.
+  - Alle kleuren zijn DynamicResources van het Fluent-thema, zodat licht en donker vanzelf werken.
+- **Accentkleur per administratie:** `Views/Thema/Accentkleuren.PasToe` zet de Fluent-sleutels (`AccentFillColor*Brush`, `AccentButton*`, `TextOnAccentFillColorPrimaryBrush`) op het hoofdvenster wanneer de gekozen administratie of haar kleur wijzigt. Zonder database gelden de Windows-kleuren.
+- **Titelbalk:** `WindowChrome` (CaptionHeight 36) met eigen knoppen via `SystemCommands`; `ShellWindow.OnStateChanged` corrigeert de marge van een gemaximaliseerd venster en wisselt Maximaliseren en Herstellen. De AutomationIds `VensterMinimaliseren`, `VensterMaximaliseren` en `VensterSluiten` zijn voor de UI-tests.
+- **Kerncijfers:** `Application/Inrichting/Kerncijfers.cs` (bankrekeningen via `Bankoverzicht.Saldi`, openstaande contributie via `Contributievorderingen`, resultaat via `Grootboek.Resultaat`, begroting naar rato via `Begrotingsrekenaar.Overzicht`; alleen-lezen en daarom toegestaan in de architectuurtest over de begroting). `OverzichtViewModel.Kerncijferregels` maakt er titel, bedrag en toelichting van.
+- **Tellers:** `ViewModels/Navigatietellers.Bepaal` vertaalt de startkaarten naar sleutels van de navigatiebalk (`Boekhouding.Bank`, …) en telt per module op. `NavigatieItem.Teller` wordt gezet na het bouwen van de navigatie en na elke vernieuwing van de startkaarten (ook bij wisselen van administratie).
+- **Instellingen:** `InstellingenView` is een TabControl met de tabs `SubtabAdministraties`, `SubtabIncasso`, `SubtabFacturen`, `SubtabEmail` en `SubtabGroepen`; de ViewModels zijn ongewijzigd.

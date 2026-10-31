@@ -258,6 +258,25 @@ public class ArchitectuurTests
         Assert.True(fouten.Count == 0, "Keyboard.Press zonder Release in: " + string.Join(", ", fouten));
     }
 
+    /// <summary>
+    /// xUnit voert een test met <c>[Fact(Timeout = …)]</c> alleen uit als hij asynchroon is
+    /// (anders faalt hij direct met "only supported for async tests"); gevonden in de Windows-run van v0.11.0.
+    /// </summary>
+    [Fact]
+    public void Tests_met_timeout_zijn_asynchroon()
+    {
+        var patroon = new System.Text.RegularExpressions.Regex(
+            @"\[(?:Fact|Theory)\([^\]]*Timeout[^\]]*\)\]\s*(?:\[[^\]]*\]\s*)*public\s+void\s+(\w+)");
+        var fouten = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "tests"), "*.cs", SearchOption.AllDirectories)
+            .Where(b => !b.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                     && !b.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .SelectMany(b => patroon.Matches(File.ReadAllText(b)).Select(m => Path.GetFileName(b) + ": " + m.Groups[1].Value))
+            .ToList();
+
+        Assert.True(fouten.Count == 0, "Test met Timeout is niet asynchroon: " + string.Join(", ", fouten));
+    }
+
     /// <summary>Besluit 168: elke hoofdlijst krijgt een leeg scherm met uitleg (en waar mogelijk één knop).</summary>
     [Theory]
     [InlineData("BoekhoudingView.xaml", "Posten")]
@@ -316,7 +335,7 @@ public class ArchitectuurTests
     [Fact]
     public void Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
     {
-        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs"];
+        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs", "Kerncijfers.cs"]; // Kerncijfers leest de begroting alleen, voor Start
         var overtredingen = Directory
             .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))

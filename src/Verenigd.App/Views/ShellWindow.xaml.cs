@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels;
+using Verenigd.App.Views.Thema;
 
 namespace Verenigd.App.Views;
 
@@ -16,6 +17,65 @@ public partial class ShellWindow : Window
     {
         InitializeComponent();
         DataContext = _viewModel = viewModel;
+        _viewModel.PropertyChanged += ViewModelGewijzigd;
+        Accentkleuren.PasToe(Resources, _viewModel.GekozenAdministratie?.Accentkleur);
+    }
+
+    /// <summary>Besluit 216: de accentkleur (knoppen, streepje, tellers) volgt de gekozen administratie.</summary>
+    private void ViewModelGewijzigd(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ShellViewModel.GekozenAdministratie))
+        {
+            if (_gevolgd is not null)
+            {
+                _gevolgd.PropertyChanged -= AdministratieGewijzigd;
+            }
+
+            _gevolgd = _viewModel.GekozenAdministratie;
+            if (_gevolgd is not null)
+            {
+                _gevolgd.PropertyChanged += AdministratieGewijzigd;
+            }
+
+            Accentkleuren.PasToe(Resources, _gevolgd?.Accentkleur);
+        }
+    }
+
+    private AdministratieViewModel? _gevolgd;
+
+    private void AdministratieGewijzigd(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AdministratieViewModel.Accentkleur))
+        {
+            Accentkleuren.PasToe(Resources, _gevolgd?.Accentkleur);
+        }
+    }
+
+    /// <summary>Besluit 221: een gemaximaliseerd venster met eigen titelbalk valt anders buiten het scherm; het pictogram wisselt.</summary>
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+        var rand = SystemParameters.WindowResizeBorderThickness;
+        Wortel.Margin = WindowState == WindowState.Maximized
+            ? new Thickness(rand.Left + 2, rand.Top + 2, rand.Right + 2, rand.Bottom + 2)
+            : new Thickness(0);
+        Maximaliseerknop.Content = WindowState == WindowState.Maximized ? "\uE923" : "\uE922";
+        System.Windows.Automation.AutomationProperties.SetName(Maximaliseerknop, WindowState == WindowState.Maximized ? "Herstellen" : "Maximaliseren");
+        Maximaliseerknop.ToolTip = WindowState == WindowState.Maximized ? "Herstellen" : "Maximaliseren";
+    }
+
+    private void Minimaliseren_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
+
+    private void Maximaliseren_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            SystemCommands.RestoreWindow(this);
+        }
+        else
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
     }
 
     protected override async void OnClosing(CancelEventArgs e)

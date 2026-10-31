@@ -125,12 +125,41 @@ public sealed class AppUiTests : IDisposable
 
         Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
         Zoek(venster, "InstellingenOpslaan");
+        foreach (var tab in new[] { "SubtabAdministraties", "SubtabIncasso", "SubtabFacturen", "SubtabEmail", "SubtabGroepen" })
+        {
+            Zoek(venster, tab); // besluit 219: een tab per onderdeel
+        }
+
+        Zoek(venster, "SubtabEmail").AsTabItem().Select();
+        Zoek(venster, "ClientbestandInlezenVereniging");
         Bewaar(venster, "04-instellingen");
 
         Sluit(venster);
 
         var bewaard = new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad();
         Assert.Equal(Application.Modules.ModuleSoort.Instellingen, bewaard.LaatstePagina?.Module);
+    }
+
+    [Fact(Timeout = Timeout)]
+    public async Task Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel()
+    {
+        await Task.Yield(); // xUnit voert een test met Timeout alleen asynchroon uit
+        BewaarInstellingen(new GebruikersInstellingen { StartwizardGetoond = true });
+        var venster = Start();
+
+        var maximaliseer = Zoek(venster, "VensterMaximaliseren").AsButton(); // besluit 221
+        Zoek(venster, "VensterMinimaliseren");
+        Zoek(venster, "VensterSluiten");
+        maximaliseer.Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Maximized, Wachttijd).Result);
+        Assert.Equal("Herstellen", Zoek(venster, "VensterMaximaliseren").Name);
+        Bewaar(venster, "17-gemaximaliseerd");
+
+        Zoek(venster, "VensterMaximaliseren").AsButton().Invoke();
+        Assert.True(Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Normal, Wachttijd).Result);
+        Assert.Equal("Verenigd", venster.Title);
+
+        Sluit(venster);
     }
 
     [Fact(Timeout = Timeout)]

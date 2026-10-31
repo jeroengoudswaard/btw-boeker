@@ -96,6 +96,7 @@ public sealed partial class ShellViewModel
         }
 
         BouwNavigatie();
+        _ = VernieuwStartkaartenAsync(); // kerncijfers en tellers horen bij de gekozen administratie
     }
 
     /// <summary>Zet de wisselaar zonder van pagina te wisselen (bij openen van een database of van een pagina).</summary>
@@ -171,6 +172,7 @@ public sealed partial class ShellViewModel
 
         WerkNavigatieBij(items);
         SynchroniseerNavigatie();
+        PasTellersToe();
     }
 
     /// <summary>
@@ -296,13 +298,38 @@ public sealed partial class ShellViewModel
 
     // ---- Startkaarten (besluit 183) ----------------------------------------------------------
 
+    private IReadOnlyList<Startkaart> _kaarten = [];
+
     private async Task VernieuwStartkaartenAsync()
     {
-        var kaarten = await Startkaarten.BepaalAsync(_sessie, DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime));
+        var vandaag = DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
+        _kaarten = await Startkaarten.BepaalAsync(_sessie, vandaag);
         _overzicht.Kaarten.Clear();
-        foreach (var kaart in kaarten)
+        foreach (var kaart in _kaarten)
         {
             _overzicht.Kaarten.Add(kaart);
+        }
+
+        _overzicht.Kerncijfers.Clear();
+        if (_sessie is not null && GekozenAdministratie is { } administratie)
+        {
+            var stand = await _sessie.Boekhouding.LaadAsync(administratie.Soort);
+            foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(stand, vandaag), vandaag.Year))
+            {
+                _overzicht.Kerncijfers.Add(regel);
+            }
+        }
+
+        PasTellersToe();
+    }
+
+    /// <summary>Besluit 220: de aantallen bij de regels van de navigatiebalk.</summary>
+    private void PasTellersToe()
+    {
+        var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten, GekozenAdministratie?.Soort) : new Dictionary<string, int>();
+        foreach (var regel in Navigatie)
+        {
+            regel.Teller = tellers.TryGetValue(regel.Sleutel, out var aantal) ? aantal : null;
         }
     }
 

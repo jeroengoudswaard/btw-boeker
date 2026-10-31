@@ -4,6 +4,27 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.11.0] - 2026-10-31: Nieuw uiterlijk (Fluent Mica)
+
+### Gewijzigd
+- **Uiterlijk Fluent Mica** (besluit 216), dicht bij Windows 11:
+  - lichte navigatiebalk; de gekozen regel heeft een vlak en een accentstreepje;
+  - een paginavlak met een afgeronde hoek, kaarten met een rand, ruimere marges (40 px) en Segoe UI Variable.
+  - Licht en donker volgen het Fluent-thema (Beeld › Thema).
+- **Accentkleur per administratie:** knoppen, streepje en tellers volgen de kleur van de gekozen administratie in plaats van de Windows-accentkleur.
+- **Eigen titelbalk** (besluit 221) met pictogram, titel en de vensterknoppen Minimaliseren, Maximaliseren/Herstellen en Sluiten. Slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven werken.
+- **Instellingen in tabs** (besluit 219): Administraties, Incasso, Facturen, E-mail en Groepen. *Opslaan* onderaan geldt voor alle tabs.
+- **De band met de administratie** is een rustige regel boven de pagina, met een gekleurde stip.
+
+### Toegevoegd
+- **Kerncijfers op Start** (besluit 217), voor de gekozen administratie:
+  - per bankrekening het saldo (volgens het laatste afschrift, anders volgens het grootboek);
+  - de openstaande contributie met het aantal storneringen (alleen de Vereniging);
+  - het resultaat van het jaar tot vandaag, naast de begroting naar rato.
+- **Tellers in de navigatiebalk** (besluit 220): bijvoorbeeld *Bank 3* en *Postvak 2*; een ingeklapte module telt de onderdelen op.
+- Architectuurtest: een test met een time-out is altijd asynchroon (xUnit voert een `void`-test met `Timeout` niet uit).
+- 911 geautomatiseerde tests (was 905).
+
 ## [0.10.1] - 2026-10-31: Drempel en groepsindeling
 
 ### Toegevoegd

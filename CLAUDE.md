@@ -251,6 +251,24 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 213 | Begroting Stichting | Geen jaarbegroting; het meerjarenplan volstaat |
 | 214 | Drempel "zonder bon" | Instelbaar per administratie (uitwerking van besluit 97), in v0.10.1 |
 | 215 | Groepsindeling wijzigen | Instellingen › Groepen: per groep het soort (speltak, bestuur, technisch, overig), ook buiten de import (aanvulling op besluit 43), in v0.10.1 |
+| 216 | Visueel ontwerp | Richting A *Fluent Mica* uit het ontwerpvoorstel (2026-10-31): dicht bij Windows 11, lichte navigatie met accentstreepje bij de gekozen regel, witte kaarten op een Mica-achtige achtergrond, accentkleur per administratie |
+| 217 | Kerncijfers op Start | Betaalrekening, spaarrekening, openstaande contributie en resultaat t/m vandaag (met begroot naar rato), per gekozen administratie |
+| 218 | Aanpak visueel ontwerp | Alles in één versie (thema, schil, Start en alle pagina's), na goedkeuring van de uitgewerkte schermen inclusief donkere modus |
+| 219 | Instellingen | Tabs per onderdeel (Administraties, Incasso, Facturen, E-mail, Groepen), per instelling een rij met uitleg links en invoer rechts, *Opslaan* onderaan |
+| 220 | Tellers in de navigatiebalk | Ja: aantallen bij de onderdelen (bijv. Bank 3, Postvak 2), uit dezelfde berekening als de startkaarten |
+| 221 | Titelbalk | Eigen titelbalk in de Mica-stijl (WindowChrome); slepen, dubbelklikken, Snap en de vensterknoppen blijven werken en worden apart getest |
+| 222 | Webapp: beeldtaal | Grote kop met veel ruimte boven (bereik met de duim), ronde kaarten, gekleurde initialen, menubalk onderin (Leden, Voorstellen, Account), accentkleur groen, licht en donker. Ontwerpcanvas: https://claude.ai/artifact/JxNbBv7MPtVw4i2DdNPPSr (privé). De kop klapt bij scrollen in |
+| 223 | Webapp: snelle knoppen | Bij een lid *Bellen*, *Bericht* en *E-mail* naar de voogd; bij twee voogden eerst een keuze (onderblad) |
+| 224 | Webapp: eerste scherm | De ledenlijst van de eigen speltak (geen startscherm met kaarten) |
+| 225 | Webapp: volgende stap | Eerst het uitgewerkte technische ontwerp van fase 7 (Supabase, beveiliging, synchronisatie) ter goedkeuring |
+| 226 | Webapp: techniek | SvelteKit/TypeScript als statische site (PWA, te installeren op het startscherm), met de officiële Supabase-bibliotheek |
+| 227 | Webapp: hosting | Cloudflare Pages |
+| 228 | Supabase-abonnement | Gratis (keuze bij besluit 37); pauzeert na 7 dagen zonder gebruik, de beheerder zet het project dan met de hand weer aan |
+| 229 | Gegevens op de server | Naam, geboortedatum, telefoon en e-mail van het lid, en de voogden; geen adres en niets financieels (besluit 35) |
+| 230 | Accounts leiding | De beheerder nodigt uit vanuit de desktop-app en kiest de speltak(ken), via een Edge Function (de `service_role`-sleutel blijft op de server, besluit 37) |
+| 231 | Inloggen webapp | E-mail en wachtwoord, daarna de TOTP-code; elke beveiligingsregel eist MFA |
+| 232 | Synchroniseren | Automatisch bij het openen van de database en met een knop; zonder internet werkt alles behalve synchroniseren |
+| 233 | Opdeling fase 7 | Alles in één versie (v0.12.0): server en synchroniseren, webapp lezen, voorstellen en de wachtrij in de desktop-app; één pull request |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -384,7 +402,30 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - ViewModel-tests 215/217 (de 2 Windows-padtests).
     - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 905/905), plus een visuele controle van Instellingen (blokken per administratie, drempel, Groepen) en E-mail › Opstellen (*Van*).
     - **Windows-test (2026-10-31, Windows 11, commit `4615391`): 905/905 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 243, Application 331, Architectuur 28, Infrastructure 70, App 233); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets (`GetAsyncKeyState`), geen achtergebleven testproces. Nog door de gebruiker te doen: de visuele controle hierboven.
-  - Pull request: één PR voor v0.10.0 en v0.10.1 na een geslaagde Windows-run. PR #12 (v0.8.0–v0.9.0) staat nog open; deze commits staan op dezelfde branch en komen daar dus ook bij, tenzij PR #12 eerst wordt gemerged.
+  - Gemerged als PR #12 (2026-10-31, `c38d6fa`), samen met v0.8.0 en v0.9.0, na groene CI; keuze van de gebruiker: v0.10.1 is de release op `main`.
+
+- **Visueel ontwerp: gereed**, v0.11.0 (2026-10-31). Besluiten 216–221 (keuzes 1A 2A 3B en 1A 2A 3A); de uitgewerkte schermen zijn goedgekeurd. Ontwerpcanvas: https://claude.ai/artifact/EA9pujXf1LkRJWP5S8pUsb (privé). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Wat er is gebouwd:
+    - thema `FluentMica.xaml`;
+    - accentkleur per administratie (`Accentkleuren`);
+    - eigen titelbalk (`WindowChrome`);
+    - kerncijfers op Start (`Kerncijfers`);
+    - tellers in de navigatiebalk (`Navigatietellers`);
+    - Instellingen in tabs.
+  - Uitwerkingen:
+    - De kerncijfers tonen per bankdagboek een kaart (dus betaal- en spaarrekening apart), met het saldo van het laatste afschrift of anders van het grootboek.
+    - De Snap-indeling bij het zweven boven Maximaliseren (Windows 11) werkt niet met een eigen titelbalk. Snap via Win+pijl en via slepen naar de rand werkt wel.
+    - Of de Fluent-accentknoppen de accentkleur van de administratie overnemen, moet op Windows worden gecontroleerd. Doen ze dat niet, dan zijn het alleen de sleutels in `Accentkleuren`.
+  - Tests: 910 in totaal.
+    - In de Linux-cloudsessie groen: Domain 243, Application 333, Infrastructure 70, Architectuur 28.
+    - ViewModel-tests 217/219 (de 2 Windows-padtests).
+    - Nieuw: `KerncijfersTests`, `StartTests`, de UI-test `Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel` en de tabs in de Instellingen-UI-test.
+    - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 910/910).
+    - Daarnaast een visuele controle: licht en donker, de accentkleur bij het wisselen van administratie, slepen, dubbelklikken en Snap met de titelbalk, de kerncijfers en de tellers.
+    - **Windows-test (2026-10-31, Windows 11, commit `0690fc9`): niet groen, 909/910 in beide runs** (met `--blame-hang --blame-hang-timeout 4m`). Build zonder waarschuwingen. Domain 243, Application 333, Architectuur 28 en Infrastructure 70 groen; App 235/236. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+      - Gefaald (2 van 2 runs, 1 ms): `AppUiTests.Eigen_titelbalk_maximaliseert_herstelt_en_toont_de_titel` met "Tests marked with Timeout are only supported for async tests". De test is `public void` met `[Fact(Timeout = Timeout)]` (AppUiTests.cs:143–144); xUnit voert hem daardoor niet uit. Testprobleem; de titelbalk zelf is dus nog **niet** getest.
+      - Gevraagde fix: de test `async Task` maken (zoals de andere UI-tests, bijv. met `await Task.Yield()` of de bestaande asynchrone opbouw); eventueel een architectuurtest die `[Fact(Timeout = …)]` op een niet-asynchrone methode verbiedt. Daarna opnieuw de volledige suite op Windows, 2 runs (verwacht 910/910).
+      - **Opgelost (2026-10-31, alleen testcode):** de test is `async Task` (met `await Task.Yield()`); architectuurtest `Tests_met_timeout_zijn_asynchroon` verbiedt `[Fact(Timeout = …)]` op een `public void`-test (faalde zonder de fix, slaagt met de fix). Tests: 911 (Architectuur 29). De gebruiker heeft v0.11.0 visueel gecontroleerd en geaccepteerd (2026-10-31). **Nog op Windows te draaien:** de titelbalktest (verwacht 911/911).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

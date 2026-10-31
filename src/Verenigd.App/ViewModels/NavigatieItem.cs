@@ -30,5 +30,9 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
 
     public bool HeeftOnderdelen { get; init; }
 
+    /// <summary>Besluit 220: het aantal dat er te doen is, of <c>null</c>.</summary>
+    [ObservableProperty]
+    public partial int? Teller { get; set; }
+
     public override string ToString() => Titel;
 }
