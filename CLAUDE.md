@@ -257,6 +257,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 219 | Instellingen | Tabs per onderdeel (Administraties, Incasso, Facturen, E-mail, Groepen), per instelling een rij met uitleg links en invoer rechts, *Opslaan* onderaan |
 | 220 | Tellers in de navigatiebalk | Ja: aantallen bij de onderdelen (bijv. Bank 3, Postvak 2), uit dezelfde berekening als de startkaarten |
 | 221 | Titelbalk | Eigen titelbalk in de Mica-stijl (WindowChrome); slepen, dubbelklikken, Snap en de vensterknoppen blijven werken en worden apart getest |
+| 222 | Webapp: beeldtaal | Grote kop met veel ruimte boven (bereik met de duim), ronde kaarten, gekleurde initialen, menubalk onderin (Leden, Voorstellen, Account), accentkleur groen, licht en donker. Ontwerpcanvas: https://claude.ai/artifact/JxNbBv7MPtVw4i2DdNPPSr (privé). De kop klapt bij scrollen in |
+| 223 | Webapp: snelle knoppen | Bij een lid *Bellen*, *Bericht* en *E-mail* naar de voogd; bij twee voogden eerst een keuze (onderblad) |
+| 224 | Webapp: eerste scherm | De ledenlijst van de eigen speltak (geen startscherm met kaarten) |
+| 225 | Webapp: volgende stap | Eerst het uitgewerkte technische ontwerp van fase 7 (Supabase, beveiliging, synchronisatie) ter goedkeuring |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
