@@ -331,6 +331,13 @@ internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
         return Task.CompletedTask;
     }
 
+    public Task NeemVoorstelOverAsync(Guid persoonId, string veld, string? waarde, DateTime nuUtc, CancellationToken annulering = default)
+    {
+        var persoon = Stand.Personen.SingleOrDefault(p => p.Id == persoonId) ?? throw new KeyNotFoundException();
+        persoon.NeemVoorstelOver(veld, waarde, nuUtc);
+        return Task.CompletedTask;
+    }
+
     public Task<ImportStand> LaadAsync(CancellationToken annulering = default) => Task.FromResult(Stand);
 
     public Task PasToeAsync(Func<ImportStand, ImportWijzigingen> wijziging, CancellationToken annulering = default)

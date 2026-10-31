@@ -1652,6 +1652,42 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Voogden", (string)null);
                 });
 
+            modelBuilder.Entity("Verenigd.Domain.Webapp.Webappinstellingen", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BeheerderEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("LaatsteGelukt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LaatsteMelding")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LaatsteSynchronisatieUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Projectadres")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PubliekeSleutel")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Vernieuwingssleutel")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Webappinstellingen", (string)null);
+                });
+
             modelBuilder.Entity("Verenigd.Infrastructure.Database.StartwizardRij", b =>
                 {
                     b.Property<int>("Id")

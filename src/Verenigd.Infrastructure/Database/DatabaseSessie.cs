@@ -27,6 +27,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         Boekhouding = new BoekhoudingRepository(MaakContext);
         Startwizard = new StartwizardOpslag(MaakContext);
         Email = new EmailOpslag(MaakContext);
+        Webapp = new WebappOpslag(MaakContext);
     }
 
     public string Pad { get; }
@@ -44,6 +45,8 @@ internal sealed class DatabaseSessie : IDatabaseSessie
     public IStartwizardOpslag Startwizard { get; }
 
     public Application.Email.IEmailOpslag Email { get; }
+
+    public Application.Webapp.IWebappOpslag Webapp { get; }
 
     public async Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
     {

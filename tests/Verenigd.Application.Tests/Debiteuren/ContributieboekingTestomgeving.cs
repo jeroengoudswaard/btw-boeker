@@ -81,6 +81,7 @@ internal sealed class ContributieboekingTestomgeving
         public IBoekhoudingRepository Boekhouding => omgeving.Boekhouding;
         public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
         public Verenigd.Application.Email.IEmailOpslag Email => throw new NotSupportedException();
+        public Verenigd.Application.Webapp.IWebappOpslag Webapp => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

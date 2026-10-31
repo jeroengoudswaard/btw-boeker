@@ -42,6 +42,16 @@ internal sealed class LedenRepository(Func<VerenigdDbContext> maakContext) : ILe
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
     }
 
+    public async Task NeemVoorstelOverAsync(Guid persoonId, string veld, string? waarde, DateTime nuUtc, CancellationToken annulering = default)
+    {
+        await using var context = maakContext();
+        var persoon = await context.Personen.Include(p => p.Voogden).Include(p => p.Herkomst).AsSplitQuery()
+            .SingleOrDefaultAsync(p => p.Id == persoonId, annulering).ConfigureAwait(false)
+            ?? throw new KeyNotFoundException("Het lid bestaat niet meer in Verenigd.");
+        persoon.NeemVoorstelOver(veld, waarde, nuUtc);
+        await context.SaveChangesAsync(annulering).ConfigureAwait(false);
+    }
+
     internal static IQueryable<Persoon> MetDetails(IQueryable<Persoon> personen) =>
         personen
             .Include(p => p.Functies).ThenInclude(f => f.Groep)

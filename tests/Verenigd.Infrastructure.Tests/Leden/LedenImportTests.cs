@@ -104,6 +104,22 @@ public sealed class LedenImportTests : IAsyncLifetime, IDisposable
     }
 
     [Fact]
+    public async Task Een_goedgekeurd_voorstel_van_de_leiding_wordt_opgeslagen_met_bron_leiding()
+    {
+        await ImporteerAsync(Exports());
+        var lid = (await _sessie.Leden.HaalAlleAsync()).First(p => p.Voogden.Count > 0);
+        var nu = new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc);
+
+        await _sessie.Leden.NeemVoorstelOverAsync(lid.Id, "voogd1_mobiel", "06 87654321", nu); // besluit 34
+        await _sessie.Leden.NeemVoorstelOverAsync(lid.Id, "voogd2_email", "twee@example.org", nu);
+
+        var opnieuw = (await _sessie.Leden.HaalAlleAsync()).Single(p => p.Id == lid.Id);
+        Assert.Equal("+31687654321", opnieuw.Voogden.Single(v => v.Volgnummer == 1).Mobiel);
+        Assert.Equal("twee@example.org", opnieuw.Voogden.Single(v => v.Volgnummer == 2).Email);
+        Assert.Contains(opnieuw.Herkomst, h => h.Veld == "Voogden" && h.Bron == Veldbron.Leiding);
+    }
+
+    [Fact]
     public async Task Zelfde_iban_wordt_een_betaler_gekoppeld_via_lidnummer()
     {
         await ImporteerAsync(Exports());
