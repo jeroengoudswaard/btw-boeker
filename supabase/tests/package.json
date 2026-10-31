@@ -1,0 +1,12 @@
+{
+  "name": "verenigd-supabase-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "pg": "8.13.1",
+    "vitest": "2.1.9"
+  }
+}
