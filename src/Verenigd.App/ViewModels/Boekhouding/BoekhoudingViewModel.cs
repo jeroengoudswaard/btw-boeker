@@ -469,7 +469,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         StandaardinrichtingViewModel wizard;
         try
         {
-            wizard = new StandaardinrichtingViewModel(_dienst, Soort, sjabloon(), Vandaag.Year);
+            wizard = new StandaardinrichtingViewModel(_dienst, Soort, sjabloon(), Vandaag.Year) { Bevestiging = _dialogen.Bevestig };
         }
         catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
         {

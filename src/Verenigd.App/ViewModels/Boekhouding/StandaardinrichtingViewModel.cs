@@ -171,6 +171,16 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
 
     public bool IsKlaar => Stap == InrichtStap.Klaar;
 
+    /// <summary>
+    /// Besluit 244: vraagt vóór het boeken van de beginsaldi om bevestiging (titel, vraag); <c>false</c> laat alles staan.
+    /// Zonder bevestiging (bijvoorbeeld in tests) wordt direct geboekt.
+    /// </summary>
+    public Func<string, string, bool>? Bevestiging { get; set; }
+
+    /// <summary>De vraag in het bevestigingsvenster: beginjaar, totalen en dat dit definitief is.</summary>
+    public string Bevestigingsvraag => string.Create(CultureInfo.CurrentCulture,
+        $"Het boekjaar begint op 1 januari {Beginjaar} met deze beginsaldi:\n\nTotaal debet: {TotaalDebettekst}\nTotaal credit: {TotaalCredittekst}\n\nDit is definitief. Het beginjaar en de beginsaldi worden de openingsbalans en kunnen daarna niet meer worden gewijzigd. Een fout herstelt u later met een memoriaalboeking.\n\nWilt u de boekhouding zo inrichten?");
+
     public string Volgendetekst => Stap == InrichtStap.Beginsaldi ? "Inrichten" : "Volgende";
 
     public string Beginsaldititel => $"Beginsaldi per 01-01-{Beginjaar.ToString(CultureInfo.InvariantCulture)}";
@@ -236,6 +246,11 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
                     Totalen();
                     break;
                 case InrichtStap.Beginsaldi:
+                    if (Bevestiging is { } bevestig && !bevestig("Beginsaldi definitief boeken", Bevestigingsvraag))
+                    {
+                        break;
+                    }
+
                     await RichtInAsync();
                     Stap = InrichtStap.Klaar;
                     break;
