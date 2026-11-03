@@ -472,6 +472,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Tests: 985 .NET in totaal. In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 94, Architectuur 31; ViewModel-tests 233/235 (de 2 Windows-padtests).
   - Pull request: PR #15 (2026-11-03), geopend met de Linux-metingen (keuze A); de Windows-meting en -run komen erbij.
   - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 985/985, App 253). Daarnaast de meting met de echte database: de regels "Duur …" uit het logbestand (alleen de tijden). v0.12.0 heeft nog geen meetpunten; daarvoor geldt de eerdere meting met de stopwatch.
+  - **Windows-test (2026-11-03, Windows 11, commit `9879201`): .NET 985/985 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 258, Application 349, Architectuur 31, Infrastructure 94, App 253); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+    - De testsuite zelf liep sneller dan op v0.12.0 (`6b50e70`): App ±1 min 15 s (was ±2 min), Infrastructure ±30 s (was ±45 s).
+    - Webapp (Node 22.23.4): svelte-check 382 bestanden 0 fouten 0 waarschuwingen, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). Niet getest: database- en Edge Function-tests (PostgreSQL nodig; CI-job `webapp-en-database`).
+    - **npm audit (webapp):** kwetsbaarheden alleen in ontwikkel- en testpakketten, waaronder één **kritieke** (`tinypool` ≤ 2.1.1, via `vitest`) en gemiddelde in `@vitest/mocker` ≤ 4.1.11, `cookie` < 0.7.0 (via `@sveltejs/kit`) en `deepmerge` (via `@sveltejs/vite-plugin-svelte(-inspector)`); ook `@sveltejs/adapter-static` is geraakt via `@sveltejs/kit`. `npm audit --omit=dev`: **0 kwetsbaarheden**, dus niets in wat bij de gebruikers komt (statische site). Gevraagd: de pakketten bijwerken (SvelteKit, Vite-plugin, Vitest) met de tests erbij, niet blind `npm audit fix --force` (grote versiesprongen); eventueel `npm audit --omit=dev` als controle in de CI.
+    - **Nog niet gedaan:** de meting met de echte database (regels "Duur …" uit het logbestand); die doet de gebruiker.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
