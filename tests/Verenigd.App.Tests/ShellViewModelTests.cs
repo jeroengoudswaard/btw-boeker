@@ -73,6 +73,40 @@ public sealed class ShellViewModelTests
         Assert.Equal("verenigd.vdb", shell.DatabaseNaam);
     }
 
+    /// <summary>Besluit 241: het welkomstscherm toont de laatst geopende database en opent hem met één klik.</summary>
+    [Fact]
+    public async Task Welkomstscherm_toont_de_laatst_geopende_database_en_opent_hem()
+    {
+        var pad = Path.Combine("Documenten", "Verenigd", "scouting.vdb");
+        _beheer.Voeg(pad, Wachtwoord);
+        _instellingen.Instellingen = new GebruikersInstellingen { LaatsteDatabase = pad };
+        var shell = MaakShell();
+
+        await shell.InitialiseerAsync(); // wachtwoordvraag geannuleerd
+
+        Assert.False(shell.IsDatabaseOpen);
+        Assert.True(shell.HeeftLaatsteDatabase);
+        Assert.Equal("scouting.vdb", shell.LaatsteDatabaseNaam);
+        Assert.Equal("Documenten › Verenigd", shell.LaatsteDatabaseMap);
+
+        _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, HerstelGevraagd: false));
+        await shell.OpenLaatsteDatabaseCommand.ExecuteAsync(null);
+
+        Assert.True(shell.IsDatabaseOpen);
+        Assert.False(shell.HeeftLaatsteDatabase);
+    }
+
+    [Fact]
+    public async Task Zonder_bestaande_laatste_database_geen_regel_op_het_welkomstscherm()
+    {
+        _instellingen.Instellingen = new GebruikersInstellingen { LaatsteDatabase = Path.Combine("weg", "oud.vdb") };
+        var shell = MaakShell();
+
+        await shell.InitialiseerAsync();
+
+        Assert.False(shell.HeeftLaatsteDatabase);
+    }
+
     [Fact]
     public async Task Verdwenen_laatste_database_wordt_niet_geopend()
     {

@@ -60,4 +60,17 @@ public class ModuleCatalogusTests
     {
         Assert.Equal([ModuleSoort.Overzicht], ModuleCatalogus.Alle.Where(m => !m.KanSluiten).Select(m => m.Soort));
     }
+
+    /// <summary>Besluit 242: elke pagina heeft een kop met één zin uitleg.</summary>
+    [Fact]
+    public void Elke_module_heeft_een_omschrijving_van_een_korte_zin()
+    {
+        foreach (var module in ModuleCatalogus.Alle)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(module.Omschrijving), module.Titel);
+            Assert.EndsWith(".", module.Omschrijving, StringComparison.Ordinal);
+            Assert.True(module.Omschrijving.Length <= 90, $"{module.Titel}: {module.Omschrijving.Length} tekens");
+            Assert.Equal(1, module.Omschrijving.Count(t => t == '.'));
+        }
+    }
 }

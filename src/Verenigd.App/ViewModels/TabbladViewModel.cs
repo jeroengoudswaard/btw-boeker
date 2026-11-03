@@ -39,6 +39,12 @@ public abstract class TabbladViewModel : ObservableObject
     /// <summary>De naam van de module in de tabtitel; Financiën volgt de weergave (besluit 127).</summary>
     protected virtual string Moduletitel => Module.Titel;
 
+    /// <summary>Besluit 242: de titel in de kop van de pagina (zonder de administratie, die staat ernaast).</summary>
+    public string Paginatitel => Moduletitel;
+
+    /// <summary>Besluit 242: één zin uitleg onder de titel.</summary>
+    public string Omschrijving => Module.Omschrijving;
+
     public bool KanSluiten => Module.KanSluiten;
 
     /// <summary>Het gekozen onderdeel (subtabblad) als getal, of <c>null</c> bij een pagina zonder onderdelen.</summary>
@@ -74,6 +80,7 @@ public abstract class TabbladViewModel : ObservableObject
         if (e.PropertyName == nameof(AdministratieViewModel.Naam))
         {
             OnPropertyChanged(nameof(Titel));
+            OnPropertyChanged(nameof(Paginatitel));
         }
     }
 }

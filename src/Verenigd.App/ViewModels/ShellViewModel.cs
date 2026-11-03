@@ -78,7 +78,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel))]
+    [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel), nameof(HeeftLaatsteDatabase), nameof(LaatsteDatabaseNaam), nameof(LaatsteDatabaseMap))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
         nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(ImporteerHistorieCommand), nameof(NieuweIncassorunCommand))]
@@ -110,6 +110,26 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     public bool IsDatabaseOpen => DatabaseNaam is not null;
 
+    /// <summary>Besluit 241: de laatst gebruikte database onder de tegels van het welkomstscherm, als hij nog bestaat.</summary>
+    public bool HeeftLaatsteDatabase => !IsDatabaseOpen && _instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad);
+
+    public string? LaatsteDatabaseNaam => HeeftLaatsteDatabase ? Path.GetFileName(_instellingen.LaatsteDatabase) : null;
+
+    /// <summary>De twee mappen boven het bestand, bijvoorbeeld "Documenten › Verenigd".</summary>
+    public string? LaatsteDatabaseMap
+    {
+        get
+        {
+            if (!HeeftLaatsteDatabase || Path.GetDirectoryName(_instellingen.LaatsteDatabase) is not { Length: > 0 } map)
+            {
+                return null;
+            }
+
+            var delen = map.Split([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(" › ", delen.TakeLast(2));
+        }
+    }
+
     /// <summary>Besluit 177: de administratie uit de wisselaar bovenaan geldt voor de hele app.</summary>
     public AdministratieViewModel? ActieveAdministratie => GekozenAdministratie;
 
@@ -137,6 +157,9 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         if (_instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad))
         {
             await OpenAsync(pad);
+            OnPropertyChanged(nameof(HeeftLaatsteDatabase));
+            OnPropertyChanged(nameof(LaatsteDatabaseNaam));
+            OnPropertyChanged(nameof(LaatsteDatabaseMap));
         }
         else if (!_instellingen.StartwizardGetoond)
         {
@@ -152,6 +175,15 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     public Task<bool> MagAfsluitenAsync() => SluitSessieAsync();
 
     // ---- Bestand ---------------------------------------------------------------------------
+
+    [RelayCommand]
+    private async Task OpenLaatsteDatabaseAsync()
+    {
+        if (HeeftLaatsteDatabase && _instellingen.LaatsteDatabase is { } pad)
+        {
+            await OpenAsync(pad);
+        }
+    }
 
     [RelayCommand]
     private async Task NieuweDatabaseAsync()

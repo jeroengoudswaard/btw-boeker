@@ -40,7 +40,7 @@
                                     Padding="8,4" Margin="0,0,4,4" Background="Transparent" BorderThickness="0"
                                     AutomationProperties.Name="{Binding Toegankelijkenaam}" AutomationProperties.AutomationId="{Binding Stap, StringFormat=Stap{0}}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Teken}" Margin="0,0,6,0" />
+                                    <TextBlock Text="{Binding Teken}" Margin="0,0,8,0" />
                                     <TextBlock x:Name="Steptitel" Text="{Binding Titel}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
                             </Button>

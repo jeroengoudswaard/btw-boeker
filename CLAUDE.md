@@ -274,6 +274,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 236 | Snelheid: verbinding | Gewijzigd na de eerste meting (2026-11-03, keuze A): hergebruik van verbindingen (pooling) aan, zodat de sleutelafleiding van SQLite3MC niet bij elke query opnieuw gebeurt; de bestandsversleuteling blijft gelijk. Bij sluiten van de database wordt de pool expliciet geleegd; een architectuurtest bewaakt dat. Gemeten (Linux, lege database): verbinding openen 48 → 4 ms, migraties 2,7 → 0,5 s, boekhouding laden 1,0 → 0,1 s |
 | 237 | Snelheid: opdeling | Eén versie v0.13.0 en één pull request, met de metingen van vóór en na; gebouwd na de merge van v0.12.0 |
 | 238 | Webapp-pakketten | Na de merge van v0.13.0 een aparte v0.13.1 met eigen pull request (keuze A): per pakket de nieuwste versie die minstens 2 weken oud is, met de tests ertussen; geen `npm audit fix --force`. In de CI `npm audit --omit=dev --audit-level=high` |
+| 239 | Kleur met betekenis | Ontwerpsysteem v0.14.0 (keuze 1C): de accentkleur van de administratie voor knoppen, selectie, wisselaar en tellers; elk onderdeel een eigen kleur, in het pictogram op een zachte tint en als dunne band boven de pagina. Kleur is nooit het enige kenmerk. Ontwerpcanvas: https://claude.ai/artifact/7PwtjhKyHFvtortd7kU8wP (privé) |
+| 240 | Maten | Vijf lettergroottes (32, 24, 16, 14, 12; pictogrammen apart), afstanden op een raster van 4, 8, 12, 16, 24, 32 en 48 px, twee rondingen (4 px bediening, 8 px vlakken; pillen 10). Gelijke dingen even groot. Bewaakt met architectuurtests |
+| 241 | Welkomstscherm | Drie even grote tegels (Nieuwe database als enige gekleurde), daaronder *Laatst geopend* met de laatst gebruikte database (keuze 2A) |
+| 242 | Paginakop en aanpak | Elke pagina dezelfde kop uit de schil: band in de onderdeelkleur, titel, één zin uitleg en de administratie. Alles in één versie v0.14.0 (keuze 3A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -490,6 +494,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`. De .NET-suite is niet nodig (geen .NET-wijziging).
   - **Windows-test (2026-11-03, Windows 11, commit `d7d7695`, Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde (npm 10, zoals verwacht); svelte-check 399 bestanden 0 fouten 0 waarschuwingen; Vitest 4.1.12 25/25; Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). `npm audit`: 4 lage meldingen over (`deepmerge` via `@sveltejs/vite-plugin-svelte` → `@sveltejs/kit` 3.1.0 → `@sveltejs/adapter-static`), de kritieke en gemiddelde zijn weg (`cookie` nu 2.0.1); `npm audit --omit=dev`: 0. .NET-suite niet opnieuw gedraaid (keuze van de gebruiker). Hiermee is de Windows-run voor PR #16 groen.
   - Gemerged als PR #16 (2026-11-03, `05fc72c`), na de groene Windows-run en groene CI.
+
+- **v0.14.0 Kleur en rust (besluiten 239–242): in uitvoering** (2026-11-03).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

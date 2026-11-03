@@ -74,7 +74,7 @@
                 <ItemsControl ItemsSource="{Binding Speltakken}" AutomationProperties.Name="Speltakken" AutomationProperties.AutomationId="Speltakken">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:SpeltakKeuze}">
-                            <CheckBox Content="{Binding Naam}" IsChecked="{Binding IsGekozen}" Margin="0,0,0,6" />
+                            <CheckBox Content="{Binding Naam}" IsChecked="{Binding IsGekozen}" Margin="0,0,0,8" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

@@ -795,6 +795,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     private void WoordenGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(Titel));
+        OnPropertyChanged(nameof(Paginatitel));
         OnPropertyChanged(nameof(Rapportkeuzes));
         if (_stand is not null)
         {

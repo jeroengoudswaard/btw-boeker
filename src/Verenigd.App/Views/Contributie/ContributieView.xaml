@@ -136,7 +136,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:LidKeuze}">
                                             <DockPanel Margin="0,0,0,4">
-                                                <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE711;" Padding="6,2"
+                                                <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE711;" Padding="8,4"
                                                         ToolTip="Ontkoppelen" AutomationProperties.Name="{Binding Naam, StringFormat={}{0} ontkoppelen}"
                                                         Command="{Binding DataContext.VerwijderLidCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}" />

@@ -302,6 +302,87 @@ public class ArchitectuurTests
         Assert.True(fouten.Count == 0, "Bulkbewerking zonder Wijzigingen?.Verhoog() in: " + string.Join(", ", fouten));
     }
 
+    // ---- Ontwerpsysteem (besluit 240) ------------------------------------------------------------
+
+    private static readonly double[] Lettergroottes = [12, 16, 24, 32];
+    private static readonly double[] Pictogramgroottes = [10, 12, 16, 20, 24, 32, 48];
+    private static readonly double[] Raster = [0, 4, 8, 12, 16, 24, 32, 48];
+    private static readonly double[] Rondingen = [0, 4, 8, 10, 14]; // 10: pil (teller), 14: kleurrondje van 28 px
+    private static readonly char[] Scheidingstekens = [',', ' '];
+    private static readonly string[] Afstandseigenschappen = ["Margin", "Padding"];
+
+    private static IEnumerable<(string Bestand, System.Xml.Linq.XElement Element)> XamlElementen() =>
+        Directory.EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.App"), "*.xaml", SearchOption.AllDirectories)
+            .Where(b => !b.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                     && !b.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .SelectMany(b => System.Xml.Linq.XDocument.Load(b).Descendants().Select(e => (Path.GetFileName(b), e)));
+
+    /// <summary>Waarde van een eigenschap: als attribuut, of als <c>Setter</c> (dan met de stijl als element).</summary>
+    private static IEnumerable<(string Bestand, System.Xml.Linq.XElement Element, string Waarde)> Waarden(string eigenschap)
+    {
+        foreach (var (bestand, element) in XamlElementen())
+        {
+            if (element.Attribute(eigenschap) is { } attribuut)
+            {
+                yield return (bestand, element, attribuut.Value);
+            }
+
+            if (element.Name.LocalName == "Setter" && (string?)element.Attribute("Property") == eigenschap && element.Attribute("Value") is { } waarde)
+            {
+                yield return (bestand, element.Parent ?? element, waarde.Value);
+            }
+        }
+    }
+
+    private static bool IsPictogram(System.Xml.Linq.XElement element)
+    {
+        var lettertype = (string?)element.Attribute("FontFamily")
+            ?? element.Elements().Where(e => e.Name.LocalName == "Setter" && (string?)e.Attribute("Property") == "FontFamily")
+                .Select(e => (string?)e.Attribute("Value")).FirstOrDefault();
+        return lettertype is not null && (lettertype.Contains("Pictogrammen", StringComparison.Ordinal) || lettertype.Contains("Icons", StringComparison.Ordinal));
+    }
+
+    private static IEnumerable<double> Getallen(string waarde) =>
+        waarde.Split(Scheidingstekens).Where(d => d.Length > 0).Select(d => double.Parse(d, System.Globalization.CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void Lettergroottes_volgen_de_schaal()
+    {
+        var fouten = Waarden("FontSize")
+            .Where(w => !w.Waarde.StartsWith('{'))
+            .Where(w => !(IsPictogram(w.Element) ? Pictogramgroottes : Lettergroottes).Contains(Getallen(w.Waarde).Single()))
+            .Select(w => $"{w.Bestand}: {w.Element.Name.LocalName} FontSize={w.Waarde}")
+            .ToList();
+        Assert.True(fouten.Count == 0, "Lettergrootte buiten 12/16/24/32 (14 is de standaard):\n" + string.Join("\n", fouten));
+    }
+
+    [Fact]
+    public void Marges_en_opvulling_liggen_op_het_raster()
+    {
+        var fouten = Afstandseigenschappen
+            .SelectMany(Waarden)
+            .Where(w => !w.Waarde.StartsWith('{'))
+            .Where(w => Getallen(w.Waarde).Any(g => !Raster.Contains(Math.Abs(g))))
+            .Select(w => $"{w.Bestand}: {w.Element.Name.LocalName} {w.Waarde}")
+            .Concat(XamlElementen()
+                .Where(e => e.Element.Name.LocalName == "Thickness")
+                .Where(e => Getallen(e.Element.Value).Any(g => !Raster.Contains(Math.Abs(g))))
+                .Select(e => $"{e.Bestand}: Thickness {e.Element.Value}"))
+            .ToList();
+        Assert.True(fouten.Count == 0, "Afstand buiten 0/4/8/12/16/24/32/48:\n" + string.Join("\n", fouten));
+    }
+
+    [Fact]
+    public void Rondingen_zijn_4_of_8_en_pillen_en_rondjes_half_zo_hoog()
+    {
+        var fouten = Waarden("CornerRadius")
+            .Where(w => !w.Waarde.StartsWith('{'))
+            .Where(w => Getallen(w.Waarde).Any(g => !Rondingen.Contains(g)))
+            .Select(w => $"{w.Bestand}: {w.Element.Name.LocalName} CornerRadius={w.Waarde}")
+            .ToList();
+        Assert.True(fouten.Count == 0, "Ronding buiten 4/8 (pil 10, rondje 14):\n" + string.Join("\n", fouten));
+    }
+
     /// <summary>
     /// xUnit voert een test met <c>[Fact(Timeout = …)]</c> alleen uit als hij asynchroon is
     /// (anders faalt hij direct met "only supported for async tests"); gevonden in de Windows-run van v0.11.0.

@@ -102,7 +102,7 @@
                 <Button Style="{StaticResource Sluitknop}" Content="&#xE8BB;" Click="Afsluiten_Click" ToolTip="Sluiten"
                         AutomationProperties.Name="Sluiten" AutomationProperties.AutomationId="VensterSluiten" />
             </StackPanel>
-            <Image Source="/Assets/Verenigd.ico" Width="16" Height="16" Margin="14,0,10,0" VerticalAlignment="Center" AutomationProperties.Name="Verenigd" />
+            <Image Source="/Assets/Verenigd.ico" Width="16" Height="16" Margin="16,0,8,0" VerticalAlignment="Center" AutomationProperties.Name="Verenigd" />
             <TextBlock Text="{Binding Venstertitel}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </DockPanel>
@@ -198,7 +198,7 @@
                    BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Padding="8,0">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" Margin="0,0,6,0" VerticalAlignment="Center"
+                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" Margin="0,0,8,0" VerticalAlignment="Center"
                                Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}"
                                ToolTip="Versleuteld" />
                     <TextBlock Text="{Binding DatabaseNaam, TargetNullValue='Geen database geopend'}" />
@@ -208,7 +208,7 @@
             <StatusBarItem Visibility="{Binding ActieveAdministratie, Converter={StaticResource NietNullNaarZichtbaar}}"
                            AutomationProperties.AutomationId="StatusAdministratie">
                 <StackPanel Orientation="Horizontal">
-                    <Ellipse Width="10" Height="10" Margin="0,0,6,0" VerticalAlignment="Center"
+                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
                              Fill="{Binding ActieveAdministratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
                     <TextBlock Text="{Binding ActieveAdministratieNaam}" FontWeight="SemiBold" />
                 </StackPanel>
@@ -220,7 +220,7 @@
             <!-- Besluit 168: ✓ gelukt, ⚠ waarschuwing, ✕ fout; de tekst zegt wat er gebeurde. -->
             <StatusBarItem AutomationProperties.AutomationId="Statusregel" AutomationProperties.LiveSetting="Polite">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Statusteken}" FontWeight="SemiBold" Margin="0,0,6,0">
+                    <TextBlock Text="{Binding Statusteken}" FontWeight="SemiBold" Margin="0,0,8,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
@@ -245,8 +245,8 @@
         <!-- ===== Navigatiebalk met administratiewisselaar (besluiten 168, 177, 178 en 181) ===== -->
         <Border DockPanel.Dock="Left" Width="248" Background="Transparent">
             <DockPanel Margin="8,8,8,8">
-                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,14" Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
-                    <Label Content="_Administratie" Target="{Binding ElementName=Administratiewisselaar}" Padding="2,0,0,4" FontSize="12"
+                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,16" Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
+                    <Label Content="_Administratie" Target="{Binding ElementName=Administratiewisselaar}" Padding="4,0,0,4" FontSize="12"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     <ComboBox x:Name="Administratiewisselaar" ItemsSource="{Binding Administraties}" SelectedItem="{Binding GekozenAdministratie}"
                               HorizontalAlignment="Stretch" MinHeight="44"
@@ -254,7 +254,7 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:AdministratieViewModel}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center"
+                                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
                                              Fill="{Binding Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
                                     <StackPanel>
                                         <TextBlock Text="{Binding Naam}" FontWeight="SemiBold" />
@@ -290,7 +290,7 @@
                             </DockPanel>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsSubitem}" Value="True">
-                                    <Setter TargetName="Regel" Property="Margin" Value="32,-2,0,-2" />
+                                    <Setter TargetName="Regel" Property="Margin" Value="32,-4,0,-4" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HeeftOnderdelen}" Value="True">
                                     <Setter TargetName="Pijl" Property="Visibility" Value="Visible" />
@@ -312,7 +312,7 @@
                     <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
                         <DockPanel>
                             <!-- Band (besluit 177): een accentstreep en de naam van de pagina met de administratie. -->
-                            <Border DockPanel.Dock="Top" Padding="40,10,40,0" Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                            <Border DockPanel.Dock="Top" Padding="48,8,48,0" Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
                                              Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />

@@ -92,16 +92,16 @@
                                             Command="{Binding DataContext.Shell.KaartOpenenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}" AutomationProperties.Name="{Binding Titel}"
                                             AutomationProperties.AutomationId="{Binding Soort, StringFormat=Kaart_{0}}" />
-                                    <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="6" Margin="0,0,12,0" VerticalAlignment="Top"
+                                    <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Top"
                                             Background="{DynamicResource SubtleFillColorSecondaryBrush}">
                                         <TextBlock Text="{Binding Aantal}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                    Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
                                     </Border>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Titel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Titel}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
                                         <TextBlock Text="{Binding Administratie}" Style="{StaticResource Toelichting}" FontSize="12"
                                                    Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
-                                        <TextBlock Text="{Binding Tekst}" Style="{StaticResource Toelichting}" Margin="0,6,0,0" />
+                                        <TextBlock Text="{Binding Tekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -112,7 +112,7 @@
                 <Border Style="{StaticResource Kaart}" MaxWidth="480" HorizontalAlignment="Left"
                         Visibility="{Binding Kaarten.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}">
                     <StackPanel>
-                        <TextBlock Text="✓ Alles is bij" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="✓ Alles is bij" FontSize="16" FontWeight="SemiBold" />
                         <TextBlock Style="{StaticResource Toelichting}" Text="Er staat niets klaar. Kies links een onderdeel om verder te werken." />
                     </StackPanel>
                 </Border>

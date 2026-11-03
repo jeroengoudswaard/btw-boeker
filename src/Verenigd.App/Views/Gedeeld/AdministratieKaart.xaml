@@ -42,7 +42,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Width="28" Height="28" Margin="0,0,6,0" Padding="0"
+                            <Button Width="28" Height="28" Margin="0,0,8,0" Padding="0"
                                     Background="{Binding}" ToolTip="{Binding}" AutomationProperties.Name="{Binding}"
                                     Command="{Binding DataContext.KiesKleurCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}">
