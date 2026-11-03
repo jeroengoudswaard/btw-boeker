@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { supabase } from '$lib/supabase';
+  import { supabase } from '#lib/supabase.ts';
 
   let code = $state('');
   let fout: string | null = $state(null);

@@ -273,6 +273,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 235 | Snelheid: traag volgens de gebruiker | Een database aanmaken, wisselen (pagina en administratie) en overzichten maken |
 | 236 | Snelheid: verbinding | Gewijzigd na de eerste meting (2026-11-03, keuze A): hergebruik van verbindingen (pooling) aan, zodat de sleutelafleiding van SQLite3MC niet bij elke query opnieuw gebeurt; de bestandsversleuteling blijft gelijk. Bij sluiten van de database wordt de pool expliciet geleegd; een architectuurtest bewaakt dat. Gemeten (Linux, lege database): verbinding openen 48 → 4 ms, migraties 2,7 → 0,5 s, boekhouding laden 1,0 → 0,1 s |
 | 237 | Snelheid: opdeling | Eén versie v0.13.0 en één pull request, met de metingen van vóór en na; gebouwd na de merge van v0.12.0 |
+| 238 | Webapp-pakketten | Na de merge van v0.13.0 een aparte v0.13.1 met eigen pull request (keuze A): per pakket de nieuwste versie die minstens 2 weken oud is, met de tests ertussen; geen `npm audit fix --force`. In de CI `npm audit --omit=dev --audit-level=high` |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -477,6 +478,16 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Webapp (Node 22.23.4): svelte-check 382 bestanden 0 fouten 0 waarschuwingen, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). Niet getest: database- en Edge Function-tests (PostgreSQL nodig; CI-job `webapp-en-database`).
     - **npm audit (webapp):** kwetsbaarheden alleen in ontwikkel- en testpakketten, waaronder één **kritieke** (`tinypool` ≤ 2.1.1, via `vitest`) en gemiddelde in `@vitest/mocker` ≤ 4.1.11, `cookie` < 0.7.0 (via `@sveltejs/kit`) en `deepmerge` (via `@sveltejs/vite-plugin-svelte(-inspector)`); ook `@sveltejs/adapter-static` is geraakt via `@sveltejs/kit`. `npm audit --omit=dev`: **0 kwetsbaarheden**, dus niets in wat bij de gebruikers komt (statische site). Gevraagd: de pakketten bijwerken (SvelteKit, Vite-plugin, Vitest) met de tests erbij, niet blind `npm audit fix --force` (grote versiesprongen); eventueel `npm audit --omit=dev` als controle in de CI.
     - **Nog niet gedaan:** de meting met de echte database (regels "Duur …" uit het logbestand); die doet de gebruiker.
+
+  - Gemerged als PR #15 (2026-11-03, `823f034`), na de groene Windows-run en groene CI (keuze A: eerst mergen, dan de pakketten apart).
+
+- **v0.13.1 Webapp-pakketten (besluit 238): gereed** (2026-11-03). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - SvelteKit 3.1, adapter-static 4.0, vite-plugin-svelte 7.3, Vite 8.3, Vitest 4.1, TypeScript 6.0; Playwright blijft 1.63.0 (de browser in CI en de cloudsessie hoort daarbij).
+  - Gevolgen van SvelteKit 3: instellingen in `vite.config.ts` (`svelte.config.js` weg), `#lib` via `imports` in `package.json` in plaats van `$lib`, imports met extensie, `tsconfig.json` verwijst naar `$app/tsconfig`.
+  - Vitest 5 en TypeScript 7 bewust overgeslagen. npm 10 loopt vast bij het opnieuw uitrekenen van de afhankelijkheden (`edgesOut`); het lockbestand is gemaakt met npm 11.21.1. `npm ci` werkt met npm 10.
+  - `npm audit`: de kritieke en gemiddelde meldingen zijn weg; er blijven 4 lage over (`deepmerge` via vite-plugin-svelte, nog geen oplossing). Met `--omit=dev`: 0.
+  - Tests (Linux): svelte-check 399 bestanden 0 fouten, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen, build in orde; .NET ongewijzigd (alleen het versienummer).
+  - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`. De .NET-suite is niet nodig (geen .NET-wijziging).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

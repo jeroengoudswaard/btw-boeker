@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import GroteKop from '$lib/onderdelen/GroteKop.svelte';
-  import Onderbalk from '$lib/onderdelen/Onderbalk.svelte';
-  import { bewaak, laad, openVoorstellen, stand } from '$lib/gegevens.svelte';
-  import { volledigeNaam } from '$lib/leden';
-  import { weergaveTelefoon } from '$lib/telefoon';
-  import { veldOmschrijving } from '$lib/voorstellen';
+  import GroteKop from '#lib/onderdelen/GroteKop.svelte';
+  import Onderbalk from '#lib/onderdelen/Onderbalk.svelte';
+  import { bewaak, laad, openVoorstellen, stand } from '#lib/gegevens.svelte.ts';
+  import { volledigeNaam } from '#lib/leden.ts';
+  import { weergaveTelefoon } from '#lib/telefoon.ts';
+  import { veldOmschrijving } from '#lib/voorstellen.ts';
 
   let tab: 'open' | 'klaar' = $state('open');
   const lijst = $derived(stand.voorstellen.filter((v) => (tab === 'open' ? v.status === 'open' : v.status !== 'open')));

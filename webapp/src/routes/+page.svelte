@@ -1,11 +1,11 @@
 <script lang="ts">
   // Eerste scherm: de ledenlijst van de eigen speltak (besluit 224).
   import { onMount } from 'svelte';
-  import Avatar from '$lib/onderdelen/Avatar.svelte';
-  import GroteKop from '$lib/onderdelen/GroteKop.svelte';
-  import Onderbalk from '$lib/onderdelen/Onderbalk.svelte';
-  import { bewaak, laad, openVoorstellen, stand } from '$lib/gegevens.svelte';
-  import { groepeer, initialen, isLeiding, leeftijd, volledigeNaam, type Lid } from '$lib/leden';
+  import Avatar from '#lib/onderdelen/Avatar.svelte';
+  import GroteKop from '#lib/onderdelen/GroteKop.svelte';
+  import Onderbalk from '#lib/onderdelen/Onderbalk.svelte';
+  import { bewaak, laad, openVoorstellen, stand } from '#lib/gegevens.svelte.ts';
+  import { groepeer, initialen, isLeiding, leeftijd, volledigeNaam, type Lid } from '#lib/leden.ts';
 
   let zoek = $state('');
   const groepen = $derived(groepeer(stand.leden, stand.speltak, zoek));

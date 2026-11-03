@@ -65,6 +65,10 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Webapp kwetsbaarheden (alleen wat bij de gebruiker komt)
+        working-directory: webapp
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Webapp controleren en testen
         working-directory: webapp
         run: |

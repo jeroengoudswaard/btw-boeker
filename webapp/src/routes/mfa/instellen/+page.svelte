@@ -2,7 +2,7 @@
   // Eenmalig: de authenticator-app koppelen (TOTP). Zonder MFA geeft de database niets (besluit 33).
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { supabase } from '$lib/supabase';
+  import { supabase } from '#lib/supabase.ts';
 
   let qr: string | null = $state(null);
   let geheim: string | null = $state(null);

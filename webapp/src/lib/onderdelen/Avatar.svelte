@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { kleurVoor } from '$lib/leden';
+  import { kleurVoor } from '#lib/leden.ts';
   let { id, tekst, grootte = 42 }: { id: string; tekst: string; grootte?: number } = $props();
   const kleur = $derived(kleurVoor(id));
 </script>

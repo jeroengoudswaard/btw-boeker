@@ -4,6 +4,16 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.13.1] - 2026-11-03: Webapp-pakketten bijgewerkt
+
+### Gewijzigd
+- **Webapp:** SvelteKit 3.1, adapter-static 4.0, vite-plugin-svelte 7.3, Vite 8.3, Vitest 4.1 en TypeScript 6.0 (was SvelteKit 2.70, Vite 6.4, Vitest 3.2, TypeScript 5.9). De schermen en het gedrag zijn ongewijzigd.
+  - De instellingen staan nu in `vite.config.ts` (`svelte.config.js` is vervallen); `$lib` heet `#lib` en imports noemen de extensie.
+- **CI:** `npm audit --omit=dev --audit-level=high` in de job `webapp-en-database`.
+
+### Beveiliging
+- `npm audit` van de webapp: de kritieke melding (`tinypool`) en de gemiddelde meldingen (`@vitest/mocker`, `cookie`) zijn weg. Er blijven 4 meldingen met de laagste ernst over, alle 4 door `deepmerge` in de Vite-plugin van Svelte; daarvoor bestaat nog geen oplossing. Alles zat in ontwikkel- en testpakketten: wat bij de gebruikers komt had en heeft 0 meldingen (`npm audit --omit=dev`).
+
 ## [0.13.0] - 2026-11-03: Sneller (besluiten 234–237)
 
 ### Gewijzigd
