@@ -4,6 +4,24 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.12.0] - 2026-11-03: Webapp voor de leiding (fase 7)
+
+### Toegevoegd
+- **Webapp voor de leiding** (besluiten 33, 222–231), als statische site op Cloudflare Pages, te installeren op de telefoon:
+  - inloggen met e-mail, wachtwoord en de code uit een authenticator-app (MFA verplicht);
+  - na de uitnodiging zelf een wachtwoord kiezen en de app koppelen;
+  - de ledenlijst van de eigen speltak, met de leiding apart en zoeken;
+  - per lid de voogden en contactgegevens, met *Bellen*, *Bericht* en *E-mail* (bij twee voogden eerst een keuze);
+  - *Wijzigen* maakt een voorstel per veld; *Voorstellen* toont de status (wacht, goedgekeurd, afgewezen);
+  - licht en donker.
+- **Supabase** (besluiten 35–38): database met beveiliging per speltak (Row-Level Security), alleen een kopie van ledengegevens zonder adres en zonder financiële gegevens; Edge Function voor uitnodigen en intrekken. Handleiding: `docs/SUPABASE.md`.
+- **Pagina Webapp** in de desktop-app (besluiten 34, 230, 232):
+  - *Voorstellen*: per veld goedkeuren of afwijzen, met een waarschuwing als Verenigd intussen iets anders heeft; goedkeuren wijzigt het lid met bron *leiding*;
+  - *Leiding*: uitnodigen per speltak, speltakken wijzigen en toegang intrekken;
+  - *Synchroniseren*: project invullen, inloggen als beheerder (wachtwoord en code), nu synchroniseren; ook automatisch bij het openen van de database.
+- CI-job voor de beveiligingstests (PostgreSQL) en de webapp.
+- 1048 geautomatiseerde tests (was 911): .NET 972 (Domain 258, Application 349, Infrastructure 86, Architectuur 29, App 250 inclusief de nieuwe UI-test van de pagina Webapp), beveiliging en Edge Function 47, webapp 29 (25 Vitest en 4 Playwright).
+
 ## [0.11.0] - 2026-10-31: Nieuw uiterlijk (Fluent Mica)
 
 ### Gewijzigd

@@ -427,6 +427,24 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
       - Gevraagde fix: de test `async Task` maken (zoals de andere UI-tests, bijv. met `await Task.Yield()` of de bestaande asynchrone opbouw); eventueel een architectuurtest die `[Fact(Timeout = …)]` op een niet-asynchrone methode verbiedt. Daarna opnieuw de volledige suite op Windows, 2 runs (verwacht 910/910).
       - **Opgelost (2026-10-31, alleen testcode):** de test is `async Task` (met `await Task.Yield()`); architectuurtest `Tests_met_timeout_zijn_asynchroon` verbiedt `[Fact(Timeout = …)]` op een `public void`-test (faalde zonder de fix, slaagt met de fix). Tests: 911 (Architectuur 29). De gebruiker heeft v0.11.0 visueel gecontroleerd en geaccepteerd (2026-10-31). **Nog op Windows te draaien:** de titelbalktest (verwacht 911/911).
 
+  - Gemerged als PR #13 (2026-10-31, `6e389f8`), na groene CI (keuze van de gebruiker: mergen vóór zijn eigen acceptatietest).
+
+- **Fase 7 (Webapp groepsleiders): gereed**, v0.12.0 (2026-11-03). Besluiten 222–233. Ontwerpcanvas: https://claude.ai/artifact/JxNbBv7MPtVw4i2DdNPPSr (privé). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/SUPABASE.md.
+  - Wat er is gebouwd:
+    - `supabase/`: migratie met tabellen, Row-Level Security (alles met MFA, leiding alleen de eigen speltak, alleen voorstellen invoegen) en functies voor de beheerder; Edge Function `leiding` (uitnodigen en intrekken);
+    - desktop: `WebappDienst`, `SupabaseServer`, `Persoon.NeemVoorstelOver` (bron leiding), tabel `Webappinstellingen` (migratie *Webapp*), pagina *Webapp* met Voorstellen, Leiding en Synchroniseren, synchroniseren bij het openen van de database;
+    - `webapp/`: SvelteKit (statisch, PWA) met de schermen uit het canvas.
+  - Uitwerkingen:
+    - Het Supabase-project (adres, publieke sleutel, e-mailadres beheerder) vult u in bij *Webapp › Synchroniseren*, niet bij Instellingen: daar staan ook het inloggen en de status.
+    - Wijzigen in de webapp kan voor: e-mail en telefoon van het lid, en naam, e-mail, telefoon en mobiel van voogd 1 en 2. Naam, geboortedatum en functies komen alleen uit SOL3.
+    - De beheerder wordt eenmalig met een SQL-regel in Supabase aangewezen en koppelt de authenticator-app via de webapp (docs/SUPABASE.md).
+    - Na de uitnodiging kiest de leider een wachtwoord op `/wachtwoord` en koppelt daarna de app.
+  - Tests: 1048 in totaal.
+    - In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 86, Architectuur 29; ViewModel-tests 230/232 (de 2 Windows-padtests).
+    - Beveiligingstests database 32 en Edge Function 15 (tegen een lokale PostgreSQL 16), webapp 25 Vitest en 4 Playwright; nieuwe CI-job `webapp-en-database`.
+    - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 250, .NET 972/972, met de nieuwe UI-test `Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen`).
+    - **Nog door de gebruiker te doen:** Supabase en Cloudflare inrichten volgens docs/SUPABASE.md, daarna een proef met één testleider.
+
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
 ## Privacy

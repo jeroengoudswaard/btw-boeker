@@ -383,3 +383,23 @@ Grootboek bij een historisch jaar: Saldo/Saldibalans/W&V/Balans uit HistorischeT
 - **Kerncijfers:** `Application/Inrichting/Kerncijfers.cs` (bankrekeningen via `Bankoverzicht.Saldi`, openstaande contributie via `Contributievorderingen`, resultaat via `Grootboek.Resultaat`, begroting naar rato via `Begrotingsrekenaar.Overzicht`; alleen-lezen en daarom toegestaan in de architectuurtest over de begroting). `OverzichtViewModel.Kerncijferregels` maakt er titel, bedrag en toelichting van.
 - **Tellers:** `ViewModels/Navigatietellers.Bepaal` vertaalt de startkaarten naar sleutels van de navigatiebalk (`Boekhouding.Bank`, …) en telt per module op. `NavigatieItem.Teller` wordt gezet na het bouwen van de navigatie en na elke vernieuwing van de startkaarten (ook bij wisselen van administratie).
 - **Instellingen:** `InstellingenView` is een TabControl met de tabs `SubtabAdministraties`, `SubtabIncasso`, `SubtabFacturen`, `SubtabEmail` en `SubtabGroepen`; de ViewModels zijn ongewijzigd.
+
+## Webapp voor de leiding (v0.12.0, fase 7, besluiten 33–38 en 222–233)
+
+```
+Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀── lezen / voorstel ──  Webapp (telefoon)
+  WebappDienst + SupabaseServer  ◀── voorstellen ──  RLS per speltak                          SvelteKit (statisch)
+```
+
+- **Server** (`supabase/`):
+  - `migrations/…_webapp_leiding.sql`: tabellen `speltakken`, `leden`, `lid_speltakken`, `voogden`, `beheerders`, `leiding`, `leiding_speltakken`, `voorstellen`. Geen kolom voor adres of financiële gegevens (een test controleert de kolomnamen).
+  - Row-Level Security op elke tabel: alles eist `aal2` (MFA). De leiding leest alleen leden met een functie in de eigen speltak (`mag_lid_zien`) en mag alleen `voorstellen` invoegen (alleen de kolommen `lid_id`, `veld`, `oud`, `nieuw`; status en indiener zet de server).
+  - De beheerder schrijft alleen via functies met een eigen controle (`controleer_beheerder`): `synchroniseer_leden(jsonb)` (upsert; vertrokken leden en hun voorstellen verdwijnen), `handel_voorstel_af`, `zet_leiding_speltakken`.
+  - `functions/leiding`: Edge Function voor uitnodigen en intrekken. Alleen hier staat de `service_role`-sleutel (besluit 37); de logica (`logica.ts`) is los getest.
+  - `tests/`: 32 beveiligingstests tegen een echte PostgreSQL (`lokaal.sh` start er een zonder Docker; CI gebruikt een service-container), met `supabase-stub.sql` voor rollen, `auth.uid()` en `auth.jwt()`; plus 15 tests van de Edge Function.
+- **Desktop:**
+  - Domain: `Leidingveld` (de velden waarvoor de leiding een voorstel mag doen; gelijk aan de controle op de server) en `Persoon.NeemVoorstelOver` (bron *leiding*, telefoon genormaliseerd). `Webapp/Webappinstellingen` (projectadres, publieke sleutel, e-mailadres beheerder, vernieuwingssleutel, laatste synchronisatie).
+  - Application (`Application/Webapp`): `Webappkopie.Maak` (alleen leden met een actieve functie in een speltak; een test controleert dat de typen geen adres of financiële eigenschap hebben), `WebappDienst` (inloggen, sessie vernieuwen met roterende sleutel, synchroniseren, voorstellen met huidige waarde en afwijking, goedkeuren eerst lokaal en dan op de server, leiding), poort `IWebappServer`.
+  - Infrastructure: `Webapp/SupabaseServer` via HTTP (Auth: wachtwoord, `factors/{id}/challenge` en `verify`; PostgREST; Edge Function). Foutmeldingen zonder persoonsgegevens; geen verbinding of een gepauzeerd project wordt `WebappOnbereikbaarException`. Tabel `Webappinstellingen` (migratie *Webapp*).
+  - App: module `Webapp` (achteraan in `ModuleSoort`, zodat bewaarde waarden gelijk blijven) met de onderdelen *Voorstellen*, *Leiding* en *Synchroniseren*; `WebappViewModel`. De schil synchroniseert na het openen van de database (`SynchroniseerWebappAsync`, alleen als de beheerder is ingelogd).
+- **Webapp** (`webapp/`): SvelteKit 2 met Svelte 5, `adapter-static` (één `index.html` als terugval), officiële `@supabase/supabase-js`. Logica in `src/lib` (`telefoon.ts` volgt `Telefoonnummer`, `leden.ts`, `voorstellen.ts`) met Vitest; schermen in `src/routes`; Playwright-tests met een nagebootste Supabase-server (`page.route`). Beveiligingskoppen in `static/_headers` (Cloudflare Pages). Inrichten: `docs/SUPABASE.md`.

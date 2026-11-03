@@ -31,3 +31,43 @@ jobs:
         with:
           name: testresultaten
           path: TestResults
+
+  # Fase 7: de database-beveiliging (Row-Level Security) tegen een echte PostgreSQL en de webapp.
+  webapp-en-database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Beveiligingstests database en Edge Function
+        working-directory: supabase/tests
+        env:
+          PG_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          npm ci
+          npx vitest run
+
+      - name: Webapp installeren
+        working-directory: webapp
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Webapp controleren en testen
+        working-directory: webapp
+        run: |
+          npm run check
+          npm test
+          npm run test:e2e
