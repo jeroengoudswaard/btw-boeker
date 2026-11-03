@@ -33,6 +33,12 @@ internal sealed class LedenRepository(Func<VerenigdDbContext> maakContext) : ILe
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
     }
 
+    public async Task<int> TelAsync(CancellationToken annulering = default)
+    {
+        await using var context = maakContext();
+        return await context.Personen.CountAsync(annulering).ConfigureAwait(false);
+    }
+
     public async Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default)
     {
         await using var context = maakContext();

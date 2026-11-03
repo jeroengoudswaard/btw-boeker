@@ -18,7 +18,7 @@ public sealed partial class BoekhoudingViewModel
 
     private BankDienst Bankdienst => _bankdienst ??= new BankDienst(_sessie, _tijd);
 
-    public ObservableCollection<MutatieRegel> Mutaties { get; } = [];
+    public Verzameling<MutatieRegel> Mutaties { get; } = [];
 
     public ObservableCollection<BoekingsregelRegel> Boekingsregels { get; } = [];
 
@@ -272,11 +272,7 @@ public sealed partial class BoekhoudingViewModel
                 _ => true,
             })
             .OrderBy(m => m.DatumWaarde).ThenBy(m => m.Mutatie.Sleutel, StringComparer.Ordinal);
-        Mutaties.Clear();
-        foreach (var regel in zichtbaar)
-        {
-            Mutaties.Add(regel);
-        }
+        Mutaties.Vervang(zichtbaar);
 
         KiesMutatie(selectie);
         if (dagboek is null)

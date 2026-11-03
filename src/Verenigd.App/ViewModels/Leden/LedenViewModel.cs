@@ -33,7 +33,7 @@ public sealed partial class LedenViewModel : TabbladViewModel, IPaginameldingen
     public static IReadOnlyList<Lidtypekeuze> Lidtypekeuzes { get; } =
         [new(null, "Alle lidtypes"), new(Lidtype.Jeugdlid, "Jeugdlid"), new(Lidtype.Kaderlid, "Kaderlid")];
 
-    public ObservableCollection<LidRegel> Leden { get; } = [];
+    public Verzameling<LidRegel> Leden { get; } = [];
 
     public IAsyncRelayCommand VernieuwCommand { get; }
 
@@ -188,11 +188,7 @@ public sealed partial class LedenViewModel : TabbladViewModel, IPaginameldingen
     {
         var zoek = Zoektekst?.Trim() ?? string.Empty;
         var geselecteerd = GeselecteerdLid;
-        Leden.Clear();
-        foreach (var regel in _alle.Where(Voldoet))
-        {
-            Leden.Add(regel);
-        }
+        Leden.Vervang(_alle.Where(Voldoet));
 
         GeselecteerdLid = geselecteerd is not null && Leden.Contains(geselecteerd) ? geselecteerd : null;
         OnPropertyChanged(nameof(Aantaltekst));

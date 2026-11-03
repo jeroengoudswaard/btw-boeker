@@ -43,7 +43,7 @@ public sealed partial class BankImportRekeningRegel : ObservableObject
     public int AantalNieuw => Import.Nieuw.Count;
     public int AlBekend => Import.AlBekend;
     public int BuitenBoekjaar => Import.BuitenBoekjaar;
-    public ObservableCollection<string> Meldingen { get; }
+    public Verzameling<string> Meldingen { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fout))]
@@ -74,11 +74,7 @@ public sealed partial class BankImportRekeningRegel : ObservableObject
     /// <summary>Besluit 80: waarschuwen als het eerste beginsaldo niet gelijk is aan het grootboek.</summary>
     private void VernieuwBeginsaldo()
     {
-        Meldingen.Clear();
-        foreach (var melding in Import.Meldingen)
-        {
-            Meldingen.Add(melding);
-        }
+        Meldingen.Vervang(Import.Meldingen);
 
         if (GekozenRekening is { } rekening && BankimportPlanner.ControleerBeginsaldo(_stand, rekening, Import) is { } waarschuwing)
         {
@@ -118,7 +114,7 @@ public sealed partial class BankImportViewModel : ObservableObject
 
     public ObservableCollection<BankImportRekeningRegel> Rekeningen { get; } = [];
 
-    public ObservableCollection<string> Meldingen { get; } = [];
+    public Verzameling<string> Meldingen { get; } = [];
 
     public IAsyncRelayCommand VolgendeCommand { get; }
 
@@ -215,11 +211,7 @@ public sealed partial class BankImportViewModel : ObservableObject
             Rekeningen.Add(regel);
         }
 
-        Meldingen.Clear();
-        foreach (var melding in _voorstel.Meldingen)
-        {
-            Meldingen.Add(melding);
-        }
+        Meldingen.Vervang(_voorstel.Meldingen);
 
         OnPropertyChanged(nameof(Totaaltekst));
         ControleerCodes();

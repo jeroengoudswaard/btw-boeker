@@ -80,6 +80,21 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
+    public async Task Start_vernieuwen_laadt_de_boekhouding_per_administratie_maar_een_keer()
+    {
+        var shell = await OpenAsync();
+        var boekhouding = (InMemoryBoekhoudingOpslag)_beheer.LaatsteSessie!.Boekhouding;
+        await Task.Delay(50); // het vernieuwen na openen loopt op de achtergrond
+        boekhouding.KeerGeladen = 0;
+
+        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting); // vernieuwt Start
+        await Task.Delay(50);
+
+        // Kaarten, inrichtingsstatus en kerncijfers samen: Vereniging en Stichting elk één keer (was 5 keer).
+        Assert.Equal(2, boekhouding.KeerGeladen);
+    }
+
+    [Fact]
     public async Task Een_onderdeel_kiezen_klapt_de_module_uit_en_opent_het_subtabblad()
     {
         var shell = await OpenAsync();

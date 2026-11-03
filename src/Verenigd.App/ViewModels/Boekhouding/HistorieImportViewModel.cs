@@ -60,9 +60,9 @@ public sealed partial class HistorieImportViewModel : ObservableObject
 
     public string Titel => _voorstel is null ? "Historie" : $"Historie {_voorstel.Jaar.ToString(CultureInfo.InvariantCulture)}";
 
-    public ObservableCollection<HistorieRekeningRegel> Rekeningen { get; } = [];
+    public Verzameling<HistorieRekeningRegel> Rekeningen { get; } = [];
 
-    public ObservableCollection<string> Meldingen { get; } = [];
+    public Verzameling<string> Meldingen { get; } = [];
 
     public IAsyncRelayCommand VolgendeCommand { get; }
 
@@ -131,17 +131,9 @@ public sealed partial class HistorieImportViewModel : ObservableObject
     private void Lees()
     {
         _voorstel = HistorieInlezer.Lees(_lezer.LeesAlle(_pad));
-        Rekeningen.Clear();
-        foreach (var rekening in _voorstel.Rekeningen)
-        {
-            Rekeningen.Add(new HistorieRekeningRegel(rekening));
-        }
+        Rekeningen.Vervang((_voorstel.Rekeningen).Select(rekening => new HistorieRekeningRegel(rekening)));
 
-        Meldingen.Clear();
-        foreach (var melding in _voorstel.Meldingen)
-        {
-            Meldingen.Add(melding);
-        }
+        Meldingen.Vervang(_voorstel.Meldingen);
 
         OnPropertyChanged(nameof(Titel));
         OnPropertyChanged(nameof(Overzicht));

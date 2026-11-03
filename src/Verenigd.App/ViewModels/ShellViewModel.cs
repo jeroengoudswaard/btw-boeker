@@ -170,7 +170,12 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
         try
         {
-            var herstelsleutel = await _beheer.MaakAanAsync(pad, wachtwoord);
+            Herstelsleutel herstelsleutel;
+            using (Meetpunt.Start(_logger, "Aanmaken database"))
+            {
+                herstelsleutel = await _beheer.MaakAanAsync(pad, wachtwoord);
+            }
+
             ShellLog.DatabaseAangemaakt(_logger, Path.GetFileName(pad));
             _dialogen.ToonHerstelsleutel(herstelsleutel);
             _instellingen = _instellingen with { LaatstePagina = null };
@@ -852,11 +857,19 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 }
                 else
                 {
-                    sessie = await _beheer.OpenAsync(pad, invoer.Wachtwoord ?? "");
+                    using (Meetpunt.Start(_logger, "Openen database (sleutel en migraties)"))
+                    {
+                        sessie = await _beheer.OpenAsync(pad, invoer.Wachtwoord ?? "");
+                    }
+
                 }
 
                 var zelfdeAlsVorige = string.Equals(pad, _instellingen.LaatsteDatabase, StringComparison.OrdinalIgnoreCase);
-                await NaOpenenAsync(sessie, herstelPagina: zelfdeAlsVorige);
+                using (Meetpunt.Start(_logger, "Na openen (eerste pagina)"))
+                {
+                    await NaOpenenAsync(sessie, herstelPagina: zelfdeAlsVorige);
+                }
+
                 return;
             }
             catch (OngeldigeSleutelException ex)

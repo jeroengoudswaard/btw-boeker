@@ -138,7 +138,7 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
 
     public ObservableCollection<InrichtRekeningRegel> Rekeningen { get; } = [];
 
-    public ObservableCollection<InrichtRekeningRegel> Balansrekeningen { get; } = [];
+    public Verzameling<InrichtRekeningRegel> Balansrekeningen { get; } = [];
 
     public IAsyncRelayCommand VolgendeCommand { get; }
 
@@ -229,11 +229,7 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
                     Stap = InrichtStap.Rekeningen;
                     break;
                 case InrichtStap.Rekeningen:
-                    Balansrekeningen.Clear();
-                    foreach (var regel in Rekeningen.Where(r => r.IsGekozen && r.IsBalans))
-                    {
-                        Balansrekeningen.Add(regel);
-                    }
+                    Balansrekeningen.Vervang(Rekeningen.Where(r => r.IsGekozen && r.IsBalans));
 
                     VerschilBewustBoeken = false;
                     Stap = InrichtStap.Beginsaldi;

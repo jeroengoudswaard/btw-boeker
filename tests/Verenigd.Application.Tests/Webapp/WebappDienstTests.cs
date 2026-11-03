@@ -211,6 +211,8 @@ public class WebappDienstTests
 
         public Task<IReadOnlyList<Persoon>> HaalAlleAsync(CancellationToken annulering = default) => Task.FromResult<IReadOnlyList<Persoon>>(Personen);
 
+        public Task<int> TelAsync(CancellationToken annulering = default) => Task.FromResult(Personen.Count);
+
         public Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default) => Task.FromResult<IReadOnlyList<Groep>>([Welpen]);
 
         public Task BewaarGroepsoortenAsync(IReadOnlyDictionary<string, GroepSoort> soortPerGroep, CancellationToken annulering = default) => Task.CompletedTask;

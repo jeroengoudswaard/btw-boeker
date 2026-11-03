@@ -65,7 +65,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
         set => Subtab = value is { } i ? (ContributieSubtab)i : ContributieSubtab.Leden;
     }
 
-    public ObservableCollection<TariefRegel> Tarieven { get; } = [];
+    public Verzameling<TariefRegel> Tarieven { get; } = [];
 
     public ObservableCollection<BetalerRegel> Betalers { get; } = [];
 
@@ -432,11 +432,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
             _tarievenPerJaar[Boekjaar] = regels;
         }
 
-        Tarieven.Clear();
-        foreach (var regel in regels)
-        {
-            Tarieven.Add(regel);
-        }
+        Tarieven.Vervang(regels);
     }
 
     private void PasLedenfilterToe()

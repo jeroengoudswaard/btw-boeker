@@ -105,10 +105,10 @@ public sealed record Inrichtingsstatus(
         }
 
         var administraties = await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false);
-        var leden = await sessie.Leden.HaalAlleAsync(annulering).ConfigureAwait(false);
+        var aantalLeden = await sessie.Leden.TelAsync(annulering).ConfigureAwait(false);
         var vereniging = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
         var stichting = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting, annulering).ConfigureAwait(false);
         var contributie = await sessie.Contributie.LaadAsync(annulering).ConfigureAwait(false);
-        return Bepaal(administraties, leden.Count, vereniging, stichting, contributie, jaar);
+        return Bepaal(administraties, aantalLeden, vereniging, stichting, contributie, jaar);
     }
 }

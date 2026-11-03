@@ -15,9 +15,9 @@ public sealed partial class BoekhoudingViewModel
 
     private FactuurDienst Factuurdienst => field ??= new FactuurDienst(_sessie, _tijd);
 
-    public ObservableCollection<FactuurRegel> Facturen { get; } = [];
+    public Verzameling<FactuurRegel> Facturen { get; } = [];
 
-    public ObservableCollection<RelatieRegel> Relaties { get; } = [];
+    public Verzameling<RelatieRegel> Relaties { get; } = [];
 
     public IReadOnlyList<Factuurfilter> Factuurfilters { get; } = Enum.GetValues<Factuurfilter>();
 
@@ -51,11 +51,7 @@ public sealed partial class BoekhoudingViewModel
     {
         KoppelRelaties(false);
         var gekozenRelatie = GeselecteerdeRelatie?.Id;
-        Relaties.Clear();
-        foreach (var relatie in _stand!.Relaties)
-        {
-            Relaties.Add(new RelatieRegel(relatie));
-        }
+        Relaties.Vervang((_stand!.Relaties).Select(relatie => new RelatieRegel(relatie)));
 
         KoppelRelaties(true);
         GeselecteerdeRelatie = Relaties.FirstOrDefault(r => r.Id == gekozenRelatie);
@@ -76,11 +72,7 @@ public sealed partial class BoekhoudingViewModel
         _factuurselectieWordtGezet = true;
         try
         {
-            Facturen.Clear();
-            foreach (var factuur in zichtbaar)
-            {
-                Facturen.Add(factuur);
-            }
+            Facturen.Vervang(zichtbaar);
 
             GeselecteerdeFactuur = Facturen.FirstOrDefault(f => f.Id == selectie);
         }

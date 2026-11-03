@@ -19,7 +19,7 @@ public sealed partial class BoekhoudingViewModel
     /// <summary>De bijlagen van de post in de editor.</summary>
     public ObservableCollection<BijlageRegel> Postbijlagen { get; } = [];
 
-    public ObservableCollection<BonRegel> Postvak { get; } = [];
+    public Verzameling<BonRegel> Postvak { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BonKoppelenCommand), nameof(BonVerwijderenCommand), nameof(BonBekijkenCommand), nameof(BonGegevensOpslaanCommand))]
@@ -48,11 +48,7 @@ public sealed partial class BoekhoudingViewModel
         BerekenZonderBon();
         LaadPostbijlagen();
         var selectie = GeselecteerdeBon?.Id;
-        Postvak.Clear();
-        foreach (var bijlage in _stand!.Bijlagen.Where(b => b.IsInPostvak).OrderBy(b => b.ToegevoegdUtc))
-        {
-            Postvak.Add(new BonRegel(bijlage, Postkeuzes));
-        }
+        Postvak.Vervang((_stand!.Bijlagen.Where(b => b.IsInPostvak).OrderBy(b => b.ToegevoegdUtc)).Select(bijlage => new BonRegel(bijlage, Postkeuzes)));
 
         GeselecteerdeBon = Postvak.FirstOrDefault(b => b.Id == selectie) ?? Postvak.FirstOrDefault();
         OnPropertyChanged(nameof(Postvaktekst));

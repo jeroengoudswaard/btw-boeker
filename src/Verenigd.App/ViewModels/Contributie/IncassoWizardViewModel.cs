@@ -52,9 +52,9 @@ public sealed partial class IncassoWizardViewModel : ObservableObject
 
     public ObservableCollection<PostWeergave> Posten { get; } = [];
 
-    public ObservableCollection<ZelfTeInnenWeergave> ZelfTeInnen { get; } = [];
+    public Verzameling<ZelfTeInnenWeergave> ZelfTeInnen { get; } = [];
 
-    public ObservableCollection<string> Meldingen { get; } = [];
+    public Verzameling<string> Meldingen { get; } = [];
 
     public IAsyncRelayCommand VolgendeCommand { get; }
 
@@ -159,17 +159,9 @@ public sealed partial class IncassoWizardViewModel : ObservableObject
                 [.. post.Regels.Select(r => new PostRegelWeergave(r.Naam, r.Maand.ToString(), r.Categorie, r.Bedrag.ToString(), r.IsNaheffing))]));
         }
 
-        ZelfTeInnen.Clear();
-        foreach (var regel in _voorstel.ZelfTeInnen)
-        {
-            ZelfTeInnen.Add(new ZelfTeInnenWeergave(regel.Lidnummer.Waarde, regel.Naam, regel.Maanden, regel.Bedrag?.ToString() ?? "onbekend", regel.Reden));
-        }
+        ZelfTeInnen.Vervang((_voorstel.ZelfTeInnen).Select(regel => new ZelfTeInnenWeergave(regel.Lidnummer.Waarde, regel.Naam, regel.Maanden, regel.Bedrag?.ToString() ?? "onbekend", regel.Reden)));
 
-        Meldingen.Clear();
-        foreach (var melding in _voorstel.Meldingen)
-        {
-            Meldingen.Add(melding);
-        }
+        Meldingen.Vervang(_voorstel.Meldingen);
 
         IsGecontroleerd = false;
         OnPropertyChanged(nameof(IsLeeg));
