@@ -283,6 +283,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 245 | Tarieven in de startwizard | De stap Contributie heeft zelf een tabel met per categorie het maandbedrag; de wizard stuurt niet meer naar Contributie › Tarieven (keuze 3A; vervangt de uitwerking van v0.7.0) |
 | 246 | Categorie corrigeren of wisselen | Bij het wijzigen van de categorie de keuze *Correctie* (vanaf Lid sinds) of *Wissel* (vanaf de 1e van de volgende maand); *Correctie* is de standaard zolang er met de oude categorie niets is geïncasseerd (keuze 4A; aanvulling op besluit 54) |
 | 247 | Lid sinds terugval | Heeft een lid in export 4 geen startdatum, dan geldt de *Startdatum functie* uit export 1 (keuze 5A; aanvulling op besluit 24) |
+| 248 | Ronding webapp | Vlakken en knoppen in de webapp 8 px, net als de desktop (keuze 1A); pull request v0.14.0 pas na de Windows-run en de visuele controle (keuze 2B) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -512,6 +513,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Waarom de cloudsessie dit niet zag: daar draaien de ViewModel-tests via een tijdelijk net10.0-project, kennelijk zonder deze analyseregel als fout.
     - Gevraagde fix: de array naar een `private static readonly string[]`-veld verplaatsen (of de waarden als `[Theory]`-data); daarna op Windows de volledige suite, 2 runs (verwacht 1006/1006, App 266). Advies: de analyseregels van het echte `Verenigd.App.Tests`-project ook in de cloudsessie laten meewegen, zodat zulke buildfouten eerder opvallen.
     - Webapp niet opnieuw getest: geen wijzigingen in `webapp/` sinds v0.13.1.
+    - **Opgelost (2026-11-03, alleen testcode):** de array is een `static readonly`-veld. Werkwijze voortaan: in de cloudsessie ook het echte testproject bouwen met `dotnet build tests/Verenigd.App.Tests -p:EnableWindowsTargeting=true`; die build vond de CA1861-fout wel (gecontroleerd). **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 1006/1006, App 266), plus de visuele controle.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

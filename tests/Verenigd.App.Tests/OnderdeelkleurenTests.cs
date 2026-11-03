@@ -10,6 +10,7 @@ public class OnderdeelkleurenTests
     private static readonly Kleur LichteGrond = new(0xFF, 0xFF, 0xFF);
     private static readonly Kleur DonkereGrond = new(0x20, 0x20, 0x20);
     private static readonly Kleur DonkereKaart = new(0x2B, 0x2B, 0x2B);
+    private static readonly string[] Speltakken = ["Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts", "Leiding"];
 
     [Fact]
     public void Elk_onderdeel_heeft_een_kleur_en_de_echte_onderdelen_verschillen()
@@ -62,7 +63,7 @@ public class OnderdeelkleurenTests
         Assert.Contains(Onderdeelkleuren.VoorGroep("Welpen"), Onderdeelkleuren.Palet);
         Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(null));
         Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(""));
-        var kleuren = new[] { "Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts", "Leiding" }.Select(Onderdeelkleuren.VoorGroep).Distinct().Count();
+        var kleuren = Speltakken.Select(Onderdeelkleuren.VoorGroep).Distinct().Count();
         Assert.True(kleuren >= 4, $"Maar {kleuren} kleuren voor zes groepen");
     }
 
