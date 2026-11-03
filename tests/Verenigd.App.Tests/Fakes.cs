@@ -181,6 +181,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
     public InMemoryContributieOpslag Contributie { get; } = new();
     public InMemoryStartwizardOpslag Startwizard { get; } = new();
     public InMemoryEmailOpslag Email { get; } = new();
+    public InMemoryWebappOpslag Webapp { get; } = new();
     public FakeSessie? LaatsteSessie { get; private set; }
     public List<(string Backup, string Doel)> Teruggezet { get; } = [];
 
@@ -212,7 +213,7 @@ internal sealed class FakeDatabaseBeheer : IDatabaseBeheer
         }
 
         Contributie.Leden = Leden;
-        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie) { Startwizard = Startwizard, Email = Email };
+        LaatsteSessie = new FakeSessie(pad, Repository, Leden, Contributie) { Startwizard = Startwizard, Email = Email, Webapp = Webapp };
         return Task.FromResult<IDatabaseSessie>(LaatsteSessie);
     }
 
@@ -248,6 +249,7 @@ internal sealed class FakeSessie(
     public ILedenImportOpslag LedenImport { get; } = leden;
     public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard { get; init; } = new InMemoryStartwizardOpslag();
     public Verenigd.Application.Email.IEmailOpslag Email { get; init; } = new InMemoryEmailOpslag();
+    public Verenigd.Application.Webapp.IWebappOpslag Webapp { get; init; } = new InMemoryWebappOpslag();
     public List<string> Backups { get; } = [];
     public bool Gesloten { get; private set; }
 
@@ -657,6 +659,15 @@ internal sealed class FakeThemaService : IThemaService
 internal sealed class VasteTijd(DateTimeOffset nu) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => nu;
+}
+
+internal sealed class InMemoryWebappOpslag : Verenigd.Application.Webapp.IWebappOpslag
+{
+    public Verenigd.Domain.Webapp.Webappinstellingen Instellingen { get; } = new();
+
+    public Task<Verenigd.Domain.Webapp.Webappinstellingen> LaadAsync(CancellationToken annulering = default) => Task.FromResult(Instellingen);
+
+    public Task BewaarAsync(Verenigd.Domain.Webapp.Webappinstellingen instellingen, CancellationToken annulering = default) => Task.CompletedTask;
 }
 
 internal sealed class InMemoryEmailOpslag : Verenigd.Application.Email.IEmailOpslag

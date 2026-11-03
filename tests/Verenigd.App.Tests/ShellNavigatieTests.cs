@@ -60,10 +60,23 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
 
-        Assert.Equal(["Start", "Leden", "Contributie", "Boekhouding", "Begroting", "Email", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
+        Assert.Equal(["Start", "Leden", "Contributie", "Boekhouding", "Begroting", "Email", "Webapp", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
         Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
         Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
         Assert.IsType<OverzichtViewModel>(shell.GeselecteerdTabblad);
+    }
+
+    [Fact]
+    public async Task Webapp_heeft_de_onderdelen_voorstellen_leiding_en_synchroniseren()
+    {
+        var shell = await OpenAsync();
+
+        await Kies(shell, "Webapp");
+
+        Assert.IsType<ViewModels.Webapp.WebappViewModel>(shell.GeselecteerdTabblad);
+        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Voorstellen");
+        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Leiding");
+        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Synchroniseren");
     }
 
     [Fact]

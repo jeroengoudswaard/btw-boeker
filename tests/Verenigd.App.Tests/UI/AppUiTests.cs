@@ -250,6 +250,33 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
+    public async Task Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        VoerWachtwoordIn(venster);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Kies(venster, "Nav_Webapp"); // fase 7
+        Zoek(venster, "WebappTabblad");
+        Zoek(venster, "WebappNietGekoppeld");
+        foreach (var onderdeel in new[] { "Voorstellen", "Leiding", "Synchroniseren" })
+        {
+            Zoek(venster, $"Nav_Webapp.{onderdeel}");
+        }
+
+        Zoek(venster, "WebappProject");
+        Assert.False(Zoek(venster, "WebappInloggenKnop").IsEnabled); // nog geen project, wachtwoord en code
+        Bewaar(venster, "18-webapp");
+
+        Sluit(venster);
+    }
+
+    [Fact(Timeout = Timeout)]
     public async Task Email_toont_onderdelen_koppelmelding_en_standaardsjablonen()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");

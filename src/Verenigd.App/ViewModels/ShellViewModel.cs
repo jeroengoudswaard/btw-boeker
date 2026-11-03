@@ -647,6 +647,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
             ModuleSoort.Email => new EmailViewModel(_sessie!, _dialogen, _tijd, _boekhouding, Administratienaam),
+            ModuleSoort.Webapp => new Webapp.WebappViewModel(_sessie!, _dialogen, _tijd, _boekhouding.Webapp),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         tab.EmailAanbieden = OpenEmailAsync;
@@ -681,6 +682,42 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             case EmailViewModel email:
                 email.VernieuwCommand.Execute(null);
                 break;
+            case Webapp.WebappViewModel webapp:
+                webapp.VernieuwCommand.Execute(null);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Besluit 232: bij het openen van de database automatisch synchroniseren met de webapp, als de beheerder is ingelogd.
+    /// Zonder internet of bij een gepauzeerd project alleen een waarschuwing in de statusregel; de rest van de app werkt gewoon.
+    /// </summary>
+    private async Task SynchroniseerWebappAsync(IDatabaseSessie sessie)
+    {
+        var dienst = new Application.Webapp.WebappDienst(sessie, _boekhouding.Webapp, _tijd);
+        try
+        {
+            if (!(await dienst.LaadAsync()).IsGekoppeld)
+            {
+                return;
+            }
+
+            var resultaat = await dienst.SynchroniseerAsync();
+            if (ReferenceEquals(_sessie, sessie))
+            {
+                ZetStatus(Statussoort.Gelukt, $"Webapp gesynchroniseerd: {resultaat.Leden} leden, {resultaat.OpenVoorstellen} voorstellen open.");
+            }
+        }
+        catch (Application.Webapp.WebappException ex)
+        {
+            if (ReferenceEquals(_sessie, sessie))
+            {
+                ZetStatus(Statussoort.Waarschuwing, "Webapp: " + ex.Message);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // De database is intussen gesloten.
         }
     }
 
@@ -870,6 +907,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
         ZetStatus(Statussoort.Info, "Gereed");
         ShellLog.DatabaseGeopend(_logger, DatabaseNaam);
+        _ = SynchroniseerWebappAsync(sessie);
 
         // Besluit 170: was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
         if (!_startwizardActief && await sessie.Startwizard.LaadAsync() is { KanHervatten: true, Stap: { } stap }
