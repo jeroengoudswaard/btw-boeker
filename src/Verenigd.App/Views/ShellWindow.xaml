@@ -285,12 +285,21 @@
                                     <TextBlock Text="{Binding Teller}" FontSize="12" FontWeight="SemiBold" TextAlignment="Center"
                                                Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                                 </Border>
-                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" Width="20" Margin="0,0,12,0" VerticalAlignment="Center" />
+                                <!-- Besluit 239: het pictogram in de kleur van het onderdeel, op een zachte tint. -->
+                                <Border x:Name="Tegel" Width="28" Height="28" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Center"
+                                        Background="{Binding Module, Converter={StaticResource Onderdeeltint}}">
+                                    <TextBlock x:Name="Glyph" FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" FontSize="16"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{Binding Module, Converter={StaticResource Onderdeelkleur}}" />
+                                </Border>
                                 <TextBlock x:Name="Titeltekst" Text="{Binding Titel}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                             </DockPanel>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsSubitem}" Value="True">
-                                    <Setter TargetName="Regel" Property="Margin" Value="32,-4,0,-4" />
+                                    <Setter TargetName="Regel" Property="Margin" Value="24,0,0,0" />
+                                    <Setter TargetName="Tegel" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="Tegel" Property="Height" Value="24" />
+                                    <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HeeftOnderdelen}" Value="True">
                                     <Setter TargetName="Pijl" Property="Visibility" Value="Visible" />
@@ -311,17 +320,30 @@
                 <ContentControl.ContentTemplate>
                     <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
                         <DockPanel>
-                            <!-- Band (besluit 177): een accentstreep en de naam van de pagina met de administratie. -->
-                            <Border DockPanel.Dock="Top" Padding="48,8,48,0" Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
-                                             Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                                    <TextBlock FontSize="12" AutomationProperties.AutomationId="AdministratieBand"
-                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                        <Run Text="{Binding Titel, Mode=OneWay}" />
-                                    </TextBlock>
+                            <!-- Besluiten 239 en 242: een band in de onderdeelkleur en dezelfde kop op elke pagina. -->
+                            <Border DockPanel.Dock="Top" Height="4" CornerRadius="8,0,0,0"
+                                    Background="{Binding Module.Soort, Converter={StaticResource Onderdeelkleur}}"
+                                    Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}" />
+                            <Grid DockPanel.Dock="Top" Margin="48,24,48,0"
+                                  Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Paginatitel}" Style="{StaticResource Paginatitel}" Margin="0" AutomationProperties.HeadingLevel="Level1" />
+                                    <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
                                 </StackPanel>
-                            </Border>
+                                <Border Grid.Column="1" VerticalAlignment="Top" Margin="16,4,0,0" Padding="12,4" CornerRadius="10"
+                                        BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                        Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                 Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
+                                        <TextBlock Text="{Binding Administratie.Naam}" FontSize="12" AutomationProperties.AutomationId="AdministratieBand" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                             <ContentControl Content="{Binding}" Focusable="False" />
                         </DockPanel>
                     </DataTemplate>

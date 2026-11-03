@@ -22,12 +22,11 @@
             </StackPanel>
         </Border>
 
-        <TextBlock DockPanel.Dock="Top" Text="Instellingen" Style="{StaticResource Paginatitel}" Margin="48,32,48,12" />
         <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="48,0,48,8"
                    Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
 
         <!-- Besluit 219: een tab per onderdeel, zoals de Windows-instellingen; Opslaan onderaan geldt voor alle tabs. -->
-        <TabControl Margin="32,0,32,0" AutomationProperties.AutomationId="InstellingenOnderdelen">
+        <TabControl Margin="32,24,32,0" AutomationProperties.AutomationId="InstellingenOnderdelen">
             <TabItem Header="Administraties" AutomationProperties.AutomationId="SubtabAdministraties">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">

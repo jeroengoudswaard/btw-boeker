@@ -20,11 +20,13 @@
             <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
             <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
             <conv:HoofdactieStijlConverter x:Key="HoofdactieStijl" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeelkleur" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeeltint" Tint="True" />
 
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
             <!-- Standaardmaten volgens de Windows-richtlijnen (veelvouden van 4/8). -->
-            <Thickness x:Key="PaginaMarge">48,32,48,32</Thickness>
+            <Thickness x:Key="PaginaMarge">48,24,48,32</Thickness>
             <Thickness x:Key="KaartPadding">16</Thickness>
 
             <Style x:Key="Paginatitel" TargetType="TextBlock">

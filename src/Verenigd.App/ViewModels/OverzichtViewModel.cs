@@ -17,6 +17,9 @@ public sealed class OverzichtViewModel(ShellViewModel shell)
 {
     public ShellViewModel Shell { get; } = shell;
 
+    /// <summary>In de navigatie en de paginakop heet het overzicht "Start".</summary>
+    protected override string Moduletitel => "Start";
+
     /// <summary>Alleen kaarten waar iets te doen is.</summary>
     public Verzameling<Startkaart> Kaarten { get; } = [];
 
