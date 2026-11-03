@@ -269,6 +269,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 231 | Inloggen webapp | E-mail en wachtwoord, daarna de TOTP-code; elke beveiligingsregel eist MFA |
 | 232 | Synchroniseren | Automatisch bij het openen van de database en met een knop; zonder internet werkt alles behalve synchroniseren |
 | 233 | Opdeling fase 7 | Alles in één versie (v0.12.0): server en synchroniseren, webapp lezen, voorstellen en de wachtrij in de desktop-app; één pull request |
+| 234 | Snelheid: meten | Eerst meten: meetpunten (duur per handeling in het logbestand, zonder persoonsgegevens), een kunstmatige testdatabase en prestatietests met een tijdsbudget; de gebruiker meet één keer op Windows met de echte database (alleen tijden) |
+| 235 | Snelheid: traag volgens de gebruiker | Een database aanmaken, wisselen (pagina en administratie) en overzichten maken |
+| 236 | Snelheid: verbinding | Eén open verbinding per sessie en de sleutel direct meegeven (geen sleutelafleiding per verbinding); netjes sluiten bij sluiten en back-up; een architectuurtest bewaakt dat er geen losse verbindingen meer worden geopend |
+| 237 | Snelheid: opdeling | Eén versie v0.13.0 en één pull request, met de metingen van vóór en na; gebouwd na de merge van v0.12.0 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -453,6 +457,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
       - Niet op Windows getest: de database- en Edge Function-tests (32 + 15); daarvoor is PostgreSQL 16 nodig (CI-job `webapp-en-database`).
       - Hiermee is de Windows-run voor PR #14 groen.
     - **Nog door de gebruiker te doen:** Supabase en Cloudflare inrichten volgens docs/SUPABASE.md, daarna een proef met één testleider.
+
+  - Gemerged als PR #14 (2026-11-03, `afec39c`), na de groene Windows-run en groene CI.
+
+- **v0.13.0 Sneller (besluiten 234–237): in uitvoering** (2026-11-03).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
