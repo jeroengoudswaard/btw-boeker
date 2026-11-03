@@ -259,6 +259,29 @@ public class ArchitectuurTests
     }
 
     /// <summary>
+    /// Besluit 236: verbindingen met de versleutelde database ontstaan alleen in DatabaseBeheer en DatabaseSessie (met pooling),
+    /// en een sessie leegt bij sluiten zijn pool, zodat er geen bestandshandles open blijven.
+    /// </summary>
+    [Fact]
+    public void Verbindingen_alleen_via_databasebeheer_en_de_pool_wordt_geleegd()
+    {
+        var map = Path.Combine(Repositorymap(), "src");
+        var toegestaan = new[] { "DatabaseBeheer.cs", "DatabaseSessie.cs", "OntwerpDbContextFactory.cs" };
+        var fouten = Directory.EnumerateFiles(map, "*.cs", SearchOption.AllDirectories)
+            .Where(b => !b.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                     && !b.Contains(Path.DirectorySeparatorChar + "Migraties" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .Where(b => !toegestaan.Contains(Path.GetFileName(b)))
+            .Where(b => File.ReadAllText(b) is var t && (t.Contains("new SqliteConnection(", StringComparison.Ordinal) || t.Contains("UseSqlite(", StringComparison.Ordinal)))
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.True(fouten.Count == 0, "Eigen databaseverbinding in: " + string.Join(", ", fouten));
+
+        var sessie = File.ReadAllText(Path.Combine(map, "Verenigd.Infrastructure", "Database", "DatabaseSessie.cs"));
+        var sluiten = sessie[sessie.IndexOf("public ValueTask DisposeAsync()", StringComparison.Ordinal)..];
+        Assert.Contains("LeegPool(", sluiten[..sluiten.IndexOf('}')], StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// xUnit voert een test met <c>[Fact(Timeout = …)]</c> alleen uit als hij asynchroon is
     /// (anders faalt hij direct met "only supported for async tests"); gevonden in de Windows-run van v0.11.0.
     /// </summary>

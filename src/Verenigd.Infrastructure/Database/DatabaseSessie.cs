@@ -56,7 +56,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
             // SQLite online-backup: consistent, ook terwijl de database open is. De kopie houdt dezelfde sleutel.
             var kopie = Path.Combine(werkmap.FullName, DatabaseBeheer.BackupDatabaseNaam);
             using (var bron = new SqliteConnection(DatabaseBeheer.Verbindingstekst(Pad, _databasesleutel)))
-            using (var doel = new SqliteConnection(DatabaseBeheer.Verbindingstekst(kopie, _databasesleutel)))
+            using (var doel = new SqliteConnection(DatabaseBeheer.Verbindingstekst(kopie, _databasesleutel, pooling: false))) // de kopie gaat direct weer dicht
             {
                 await bron.OpenAsync(annulering).ConfigureAwait(false);
                 await doel.OpenAsync(annulering).ConfigureAwait(false);
@@ -79,6 +79,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
 
     public ValueTask DisposeAsync()
     {
+        DatabaseBeheer.LeegPool(Pad, _databasesleutel); // besluit 236: geen open bestandshandles na sluiten
         CryptographicOperations.ZeroMemory(_databasesleutel);
         return ValueTask.CompletedTask;
     }

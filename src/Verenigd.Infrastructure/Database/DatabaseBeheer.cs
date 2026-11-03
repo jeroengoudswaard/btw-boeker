@@ -43,6 +43,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         }
         finally
         {
+            LeegPool(pad, databasesleutel);
             CryptographicOperations.ZeroMemory(databasesleutel);
         }
 
@@ -94,14 +95,26 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
     internal static VerenigdDbContext MaakContext(string pad, ReadOnlySpan<byte> databasesleutel) =>
         new(new DbContextOptionsBuilder<VerenigdDbContext>().UseSqlite(Verbindingstekst(pad, databasesleutel)).Options);
 
-    internal static string Verbindingstekst(string pad, ReadOnlySpan<byte> databasesleutel) =>
+    /// <summary>
+    /// Besluit 236: verbindingen worden hergebruikt (pooling). Elke nieuwe versleutelde verbinding laat SQLite3MC de sleutel
+    /// opnieuw afleiden (tientallen milliseconden); zonder pooling gebeurde dat bij elke query. Wie een pool gebruikt, leegt
+    /// hem ook weer (<see cref="LeegPool"/>), zodat er na sluiten geen bestandshandles open blijven.
+    /// </summary>
+    internal static string Verbindingstekst(string pad, ReadOnlySpan<byte> databasesleutel, bool pooling = true) =>
         new SqliteConnectionStringBuilder
         {
             DataSource = pad,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Password = Convert.ToHexString(databasesleutel),
-            Pooling = false, // Geen open bestandshandles na sluiten (nodig voor back-up en bestandsbeheer).
+            Pooling = pooling,
         }.ToString();
+
+    /// <summary>Sluit de verbindingen in de pool van deze database, zodat het bestand vrij is (sluiten, back-up, verwijderen).</summary>
+    internal static void LeegPool(string pad, ReadOnlySpan<byte> databasesleutel)
+    {
+        using var verbinding = new SqliteConnection(Verbindingstekst(pad, databasesleutel));
+        SqliteConnection.ClearPool(verbinding);
+    }
 
     private static async Task<IDatabaseSessie> OpenSessieAsync(string pad, byte[] databasesleutel, CancellationToken annulering)
     {
@@ -112,6 +125,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         }
         catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteNotADatabase)
         {
+            LeegPool(pad, databasesleutel);
             CryptographicOperations.ZeroMemory(databasesleutel);
             throw new DatabaseBestandException(
                 "Het sleutelbestand hoort niet bij deze database, of de database is beschadigd.", ex);

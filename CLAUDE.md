@@ -271,7 +271,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 233 | Opdeling fase 7 | Alles in één versie (v0.12.0): server en synchroniseren, webapp lezen, voorstellen en de wachtrij in de desktop-app; één pull request |
 | 234 | Snelheid: meten | Eerst meten: meetpunten (duur per handeling in het logbestand, zonder persoonsgegevens), een kunstmatige testdatabase en prestatietests met een tijdsbudget; de gebruiker meet één keer op Windows met de echte database (alleen tijden) |
 | 235 | Snelheid: traag volgens de gebruiker | Een database aanmaken, wisselen (pagina en administratie) en overzichten maken |
-| 236 | Snelheid: verbinding | Eén open verbinding per sessie en de sleutel direct meegeven (geen sleutelafleiding per verbinding); netjes sluiten bij sluiten en back-up; een architectuurtest bewaakt dat er geen losse verbindingen meer worden geopend |
+| 236 | Snelheid: verbinding | Gewijzigd na de eerste meting (2026-11-03, keuze A): hergebruik van verbindingen (pooling) aan, zodat de sleutelafleiding van SQLite3MC niet bij elke query opnieuw gebeurt; de bestandsversleuteling blijft gelijk. Bij sluiten van de database wordt de pool expliciet geleegd; een architectuurtest bewaakt dat. Gemeten (Linux, lege database): verbinding openen 48 → 4 ms, migraties 2,7 → 0,5 s, boekhouding laden 1,0 → 0,1 s |
 | 237 | Snelheid: opdeling | Eén versie v0.13.0 en één pull request, met de metingen van vóór en na; gebouwd na de merge van v0.12.0 |
 
 ## Stand van zaken (bijwerken na elke sessie)
