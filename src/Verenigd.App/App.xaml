@@ -66,8 +66,9 @@
                 <Setter Property="HorizontalAlignment" Value="Right" />
                 <Setter Property="Margin" Value="0,24,0,0" />
             </Style>
+            <!-- Besluit 240: knoppen in de voet van een venster even breed (120 px), de hoofdactie rechts. -->
             <Style x:Key="DialoogKnop" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="MinWidth" Value="96" />
+                <Setter Property="MinWidth" Value="120" />
                 <Setter Property="Margin" Value="8,0,0,0" />
             </Style>
         </ResourceDictionary>

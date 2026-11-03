@@ -49,4 +49,20 @@ public static class Onderdeelkleuren
         static byte Meng(byte voor, byte achter) => (byte)Math.Round((voor * Tintdekking) + (achter * (1 - Tintdekking)), MidpointRounding.AwayFromZero);
         return new Kleur(Meng(kleur.R, grond.R), Meng(kleur.G, grond.G), Meng(kleur.B, grond.B));
     }
+
+    /// <summary>Een vaste kleur per groep (voor de initialen in Leden), zonder grijs; geen groep is grijs.</summary>
+    public static Kleur VoorGroep(string? groep)
+    {
+        if (string.IsNullOrWhiteSpace(groep))
+        {
+            return Grijs;
+        }
+
+        var kleuren = Palet.Where(k => k != Grijs).ToList();
+        var som = groep.Aggregate(0, (totaal, teken) => unchecked((totaal * 31) + teken));
+        return kleuren[(int)((uint)som % (uint)kleuren.Count)];
+    }
+
+    public static string Initialen(string voornaam, string achternaam) =>
+        string.Concat(new[] { voornaam, achternaam }.Where(d => !string.IsNullOrWhiteSpace(d)).Select(d => char.ToUpperInvariant(d.Trim()[0])));
 }

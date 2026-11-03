@@ -53,4 +53,25 @@ public class OnderdeelkleurenTests
         Assert.Equal(ModuleSoort.Contributie, Onderdeelkleuren.OnderdeelVan(Verenigd.Application.Inrichting.Startkaartsoort.Incassorun));
         Assert.Equal(ModuleSoort.Boekhouding, Onderdeelkleuren.OnderdeelVan(Verenigd.Application.Inrichting.Startkaartsoort.Bank));
     }
+
+    /// <summary>Gekleurde initialen per groep, zoals in de webapp: dezelfde groep altijd dezelfde kleur.</summary>
+    [Fact]
+    public void Een_groep_heeft_altijd_dezelfde_kleur_uit_het_palet()
+    {
+        Assert.Equal(Onderdeelkleuren.VoorGroep("Welpen"), Onderdeelkleuren.VoorGroep("Welpen"));
+        Assert.Contains(Onderdeelkleuren.VoorGroep("Welpen"), Onderdeelkleuren.Palet);
+        Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(null));
+        Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(""));
+        var kleuren = new[] { "Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts", "Leiding" }.Select(Onderdeelkleuren.VoorGroep).Distinct().Count();
+        Assert.True(kleuren >= 4, $"Maar {kleuren} kleuren voor zes groepen");
+    }
+
+    [Theory]
+    [InlineData("Anna", "Vries", "AV")]
+    [InlineData("bo", "jansen", "BJ")]
+    [InlineData("", "Bakker", "B")]
+    public void Initialen_zijn_de_eerste_letters_van_voor_en_achternaam(string voornaam, string achternaam, string verwacht)
+    {
+        Assert.Equal(verwacht, Onderdeelkleuren.Initialen(voornaam, achternaam));
+    }
 }
