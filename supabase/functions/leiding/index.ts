@@ -7,7 +7,9 @@ import { verwerk, type Diensten } from './logica.ts';
 const url = Deno.env.get('SUPABASE_URL')!;
 const anon = Deno.env.get('SUPABASE_ANON_KEY')!;
 const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const webapp = Deno.env.get('WEBAPP_URL') ?? undefined;
+// Na de uitnodiging kiest de leider eerst een wachtwoord (pagina /wachtwoord van de webapp).
+const webapp = Deno.env.get('WEBAPP_URL')?.replace(/\/$/, '');
+const naUitnodiging = webapp ? `${webapp}/wachtwoord` : undefined;
 
 const beheer = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
 const alsGebruiker = (token: string) =>
@@ -33,7 +35,7 @@ const diensten: Diensten = {
     return !error && (data?.length ?? 0) > 0;
   },
   async nodigUit(email) {
-    const { data, error } = await beheer.auth.admin.inviteUserByEmail(email, { redirectTo: webapp });
+    const { data, error } = await beheer.auth.admin.inviteUserByEmail(email, { redirectTo: naUitnodiging });
     if (error || !data.user) throw error ?? new Error('Geen gebruiker');
     return data.user.id;
   },
