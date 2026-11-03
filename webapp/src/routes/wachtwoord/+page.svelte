@@ -2,7 +2,7 @@
   // Na de uitnodiging (besluit 230) of "wachtwoord vergeten": een (nieuw) wachtwoord kiezen.
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { routeVoor, supabase, toegang } from '$lib/supabase';
+  import { routeVoor, supabase, toegang } from '#lib/supabase.ts';
 
   let wachtwoord = $state('');
   let herhaling = $state('');

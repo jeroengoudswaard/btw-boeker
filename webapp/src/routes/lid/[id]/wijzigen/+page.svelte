@@ -3,11 +3,11 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { dienIn } from '$lib/api';
-  import { bewaak, laad, stand } from '$lib/gegevens.svelte';
-  import { volledigeNaam } from '$lib/leden';
-  import { weergaveTelefoon } from '$lib/telefoon';
-  import { huidigeWaarde, voorstellenUit, type Veld } from '$lib/voorstellen';
+  import { dienIn } from '#lib/api.ts';
+  import { bewaak, laad, stand } from '#lib/gegevens.svelte.ts';
+  import { volledigeNaam } from '#lib/leden.ts';
+  import { weergaveTelefoon } from '#lib/telefoon.ts';
+  import { huidigeWaarde, voorstellenUit, type Veld } from '#lib/voorstellen.ts';
 
   const lid = $derived(stand.leden.find((l) => l.id === page.params.id));
   let formulier: Partial<Record<Veld, string>> = $state({});

@@ -2,11 +2,11 @@
   // Lid: grote avatar, snelle knoppen naar de voogd (besluit 223), voogden en gegevens.
   import { onMount } from 'svelte';
   import { page } from '$app/state';
-  import Avatar from '$lib/onderdelen/Avatar.svelte';
-  import { bewaak, laad, openVoorstellen, stand } from '$lib/gegevens.svelte';
-  import { initialen, isLeiding, volledigeNaam, type Voogd } from '$lib/leden';
-  import { weergaveTelefoon } from '$lib/telefoon';
-  import { veldOmschrijving } from '$lib/voorstellen';
+  import Avatar from '#lib/onderdelen/Avatar.svelte';
+  import { bewaak, laad, openVoorstellen, stand } from '#lib/gegevens.svelte.ts';
+  import { initialen, isLeiding, volledigeNaam, type Voogd } from '#lib/leden.ts';
+  import { weergaveTelefoon } from '#lib/telefoon.ts';
+  import { veldOmschrijving } from '#lib/voorstellen.ts';
 
   type Actie = 'bellen' | 'bericht' | 'email';
   const lid = $derived(stand.leden.find((l) => l.id === page.params.id));

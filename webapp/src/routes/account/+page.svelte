@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import GroteKop from '$lib/onderdelen/GroteKop.svelte';
-  import Onderbalk from '$lib/onderdelen/Onderbalk.svelte';
-  import { bewaak, laad, openVoorstellen, stand } from '$lib/gegevens.svelte';
-  import { supabase } from '$lib/supabase';
+  import GroteKop from '#lib/onderdelen/GroteKop.svelte';
+  import Onderbalk from '#lib/onderdelen/Onderbalk.svelte';
+  import { bewaak, laad, openVoorstellen, stand } from '#lib/gegevens.svelte.ts';
+  import { supabase } from '#lib/supabase.ts';
 
   let email = $state('');
 

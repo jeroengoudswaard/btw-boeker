@@ -1,7 +1,7 @@
 <script lang="ts">
   // Stap 1 van 2: e-mail en wachtwoord; daarna de code uit de authenticator-app (besluit 231).
   import { goto } from '$app/navigation';
-  import { routeVoor, supabase, toegang } from '$lib/supabase';
+  import { routeVoor, supabase, toegang } from '#lib/supabase.ts';
 
   let email = $state('');
   let wachtwoord = $state('');
