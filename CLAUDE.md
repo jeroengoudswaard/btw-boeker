@@ -470,6 +470,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Gemeten (Linux, 3000 posten): Startkaarten 5,3 → 0,2 s, boekhouding laden 1,8 → 0,7 s (daarna 0 ms zolang er niets wijzigt).
   - Niet gedaan: werk van de UI-thread afhalen. Eerst de meting op Windows; als die nog trage handelingen toont, volgt dat gericht.
   - Tests: 985 .NET in totaal. In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 94, Architectuur 31; ViewModel-tests 233/235 (de 2 Windows-padtests).
+  - Pull request: PR #15 (2026-11-03), geopend met de Linux-metingen (keuze A); de Windows-meting en -run komen erbij.
   - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 985/985, App 253). Daarnaast de meting met de echte database: de regels "Duur …" uit het logbestand (alleen de tijden). v0.12.0 heeft nog geen meetpunten; daarvoor geldt de eerdere meting met de stopwatch.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
