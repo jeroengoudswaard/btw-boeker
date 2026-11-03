@@ -460,7 +460,17 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
   - Gemerged als PR #14 (2026-11-03, `afec39c`), na de groene Windows-run en groene CI.
 
-- **v0.13.0 Sneller (besluiten 234–237): in uitvoering** (2026-11-03).
+- **v0.13.0 Sneller (besluiten 234–237): gereed** (2026-11-03). Zie CHANGELOG.md (tabel vóór en na) en docs/ARCHITECTUUR.md.
+  - Wat er is gebouwd:
+    - meetpunten in het logbestand (`Meetpunt`, "Duur …");
+    - pooling met `LeegPool` bij sluiten (besluit 236);
+    - momentopname van de boekhouding per sessie (`Wijzigingen`-teller, verhoogd na elke `SaveChanges`);
+    - Start laadt elke administratie één keer (`Startkaarten.LaadAsync`, `TelAsync`);
+    - `Verzameling.Vervang` voor 26 lijsten.
+  - Gemeten (Linux, 3000 posten): Startkaarten 5,3 → 0,2 s, boekhouding laden 1,8 → 0,7 s (daarna 0 ms zolang er niets wijzigt).
+  - Niet gedaan: werk van de UI-thread afhalen. Eerst de meting op Windows; als die nog trage handelingen toont, volgt dat gericht.
+  - Tests: 985 .NET in totaal. In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 94, Architectuur 31; ViewModel-tests 233/235 (de 2 Windows-padtests).
+  - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 985/985, App 253). Daarnaast de meting met de echte database: de regels "Duur …" uit het logbestand (alleen de tijden). v0.12.0 heeft nog geen meetpunten; daarvoor geldt de eerdere meting met de stopwatch.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
