@@ -15,6 +15,7 @@ namespace Verenigd.Infrastructure.Database;
 internal sealed class DatabaseSessie : IDatabaseSessie
 {
     private readonly byte[] _databasesleutel;
+    private readonly Wijzigingen _wijzigingen = new();
 
     public DatabaseSessie(string pad, byte[] databasesleutel)
     {
@@ -24,7 +25,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         Leden = new LedenRepository(MaakContext);
         LedenImport = new LedenImportOpslag(MaakContext);
         Contributie = new ContributieRepository(MaakContext);
-        Boekhouding = new BoekhoudingRepository(MaakContext);
+        Boekhouding = new BoekhoudingRepository(MaakContext, _wijzigingen);
         Startwizard = new StartwizardOpslag(MaakContext);
         Email = new EmailOpslag(MaakContext);
         Webapp = new WebappOpslag(MaakContext);
@@ -56,7 +57,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
             // SQLite online-backup: consistent, ook terwijl de database open is. De kopie houdt dezelfde sleutel.
             var kopie = Path.Combine(werkmap.FullName, DatabaseBeheer.BackupDatabaseNaam);
             using (var bron = new SqliteConnection(DatabaseBeheer.Verbindingstekst(Pad, _databasesleutel)))
-            using (var doel = new SqliteConnection(DatabaseBeheer.Verbindingstekst(kopie, _databasesleutel)))
+            using (var doel = new SqliteConnection(DatabaseBeheer.Verbindingstekst(kopie, _databasesleutel, pooling: false))) // de kopie gaat direct weer dicht
             {
                 await bron.OpenAsync(annulering).ConfigureAwait(false);
                 await doel.OpenAsync(annulering).ConfigureAwait(false);
@@ -79,9 +80,10 @@ internal sealed class DatabaseSessie : IDatabaseSessie
 
     public ValueTask DisposeAsync()
     {
+        DatabaseBeheer.LeegPool(Pad, _databasesleutel); // besluit 236: geen open bestandshandles na sluiten
         CryptographicOperations.ZeroMemory(_databasesleutel);
         return ValueTask.CompletedTask;
     }
 
-    private VerenigdDbContext MaakContext() => DatabaseBeheer.MaakContext(Pad, _databasesleutel);
+    private VerenigdDbContext MaakContext() => DatabaseBeheer.MaakContext(Pad, _databasesleutel, _wijzigingen);
 }

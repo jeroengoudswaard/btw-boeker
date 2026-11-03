@@ -78,21 +78,25 @@ public static class Startkaarten
     }
 
     /// <summary>Haalt de gegevens op en bepaalt de kaarten; zonder database geen kaarten.</summary>
-    public static async Task<IReadOnlyList<Startkaart>> BepaalAsync(IDatabaseSessie? sessie, DateOnly vandaag, CancellationToken annulering = default)
-    {
-        if (sessie is null)
-        {
-            return [];
-        }
+    public static async Task<IReadOnlyList<Startkaart>> BepaalAsync(IDatabaseSessie? sessie, DateOnly vandaag, CancellationToken annulering = default) =>
+        sessie is null ? [] : (await LaadAsync(sessie, vandaag, annulering).ConfigureAwait(false)).Kaarten;
 
-        var status = await Inrichtingsstatus.BepaalAsync(sessie, vandaag.Year, annulering).ConfigureAwait(false);
+    /// <summary>
+    /// Besluit 234: alles voor Start in één keer laden (boekhouding per administratie één keer, niet ook nog eens voor de
+    /// inrichtingsstatus en de kerncijfers). De kerncijfers rekenen met <see cref="Startgegevens.Boekhouding"/>.
+    /// </summary>
+    public static async Task<Startgegevens> LaadAsync(IDatabaseSessie sessie, DateOnly vandaag, CancellationToken annulering = default)
+    {
+        ArgumentNullException.ThrowIfNull(sessie);
+        var administraties = await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false);
+        var aantalLeden = await sessie.Leden.TelAsync(annulering).ConfigureAwait(false);
         var voortgang = await sessie.Startwizard.LaadAsync(annulering).ConfigureAwait(false);
         var vereniging = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
         var stichting = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting, annulering).ConfigureAwait(false);
         var contributie = await sessie.Contributie.LaadAsync(annulering).ConfigureAwait(false);
-        var drempels = (await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false))
-            .ToDictionary(a => a.Soort, a => new Bedrag(a.ZonderBonDrempel));
-        return Bepaal(status, voortgang, vereniging, stichting, contributie, vandaag, drempels);
+        var status = Inrichtingsstatus.Bepaal(administraties, aantalLeden, vereniging, stichting, contributie, vandaag.Year);
+        var drempels = administraties.ToDictionary(a => a.Soort, a => new Bedrag(a.ZonderBonDrempel));
+        return new Startgegevens(Bepaal(status, voortgang, vereniging, stichting, contributie, vandaag, drempels), vereniging, stichting);
     }
 
     private static void VoegIncassorunToe(List<Startkaart> kaarten, IncassoStand contributie, DateOnly vandaag)
@@ -118,4 +122,11 @@ public static class Startkaarten
         string.Create(CultureInfo.InvariantCulture, $"{aantal} {(aantal == 1 ? een : meer)}");
 
     private static string Tekst(FormattableString tekst) => tekst.ToString(CultureInfo.InvariantCulture);
+}
+
+/// <summary>De kaarten van Start plus de geladen boekhoudingen, zodat de kerncijfers niet opnieuw hoeven te laden.</summary>
+public sealed record Startgegevens(IReadOnlyList<Startkaart> Kaarten, BoekhoudingStand Vereniging, BoekhoudingStand Stichting)
+{
+    public BoekhoudingStand Boekhouding(AdministratieSoort administratie) =>
+        administratie == AdministratieSoort.Stichting ? Stichting : Vereniging;
 }

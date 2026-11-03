@@ -333,6 +333,8 @@ internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
         return Task.CompletedTask;
     }
 
+    public Task<int> TelAsync(CancellationToken annulering = default) => Task.FromResult(Stand.Personen.Count);
+
     public Task NeemVoorstelOverAsync(Guid persoonId, string veld, string? waarde, DateTime nuUtc, CancellationToken annulering = default)
     {
         var persoon = Stand.Personen.SingleOrDefault(p => p.Id == persoonId) ?? throw new KeyNotFoundException();
@@ -521,8 +523,14 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
     public List<object> Van(AdministratieSoort administratie) =>
         _gegevens.TryGetValue(administratie, out var lijst) ? lijst : _gegevens[administratie] = [];
 
-    public Task<Verenigd.Application.Boekhouding.BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default) =>
-        Task.FromResult(Stand(administratie));
+    /// <summary>Hoe vaak de hele boekhouding is geladen (besluit 234: niet dubbel laden).</summary>
+    public int KeerGeladen { get; set; }
+
+    public Task<Verenigd.Application.Boekhouding.BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default)
+    {
+        KeerGeladen++;
+        return Task.FromResult(Stand(administratie));
+    }
 
     public Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default) =>
         Task.FromResult(_gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Bijlagen.BijlageInhoud>()

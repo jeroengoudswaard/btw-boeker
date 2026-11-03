@@ -4,13 +4,40 @@ using Verenigd.Domain.Administraties;
 
 namespace Verenigd.Infrastructure.Database;
 
-internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext) : IBoekhoudingRepository
+internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext, Wijzigingen? wijzigingen = null) : IBoekhoudingRepository
 {
+    private readonly Dictionary<AdministratieSoort, (long Versie, BoekhoudingStand Stand)> _momentopnamen = [];
+    private readonly Lock _slot = new();
+
+    /// <summary>
+    /// Besluit 234: een momentopname per administratie, opnieuw geladen zodra er sinds het laden iets is opgeslagen
+    /// (<see cref="Wijzigingen"/>). Wijzigen gaat altijd via <see cref="PasToeAsync{T}"/> met een eigen, vers geladen stand,
+    /// dus de momentopname zelf wordt nooit aangepast.
+    /// </summary>
     public async Task<BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default)
     {
+        var versie = wijzigingen?.Versie;
+        lock (_slot)
+        {
+            if (versie is not null && _momentopnamen.TryGetValue(administratie, out var bewaard) && bewaard.Versie == versie)
+            {
+                return bewaard.Stand;
+            }
+        }
+
         await using var context = maakContext();
         context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
-        return await LaadAsync(context, administratie, annulering).ConfigureAwait(false);
+        var stand = await LaadAsync(context, administratie, annulering).ConfigureAwait(false);
+        if (versie is { } geladen)
+        {
+            lock (_slot)
+            {
+                // De versie van vóór het laden: is er tijdens het laden iets opgeslagen, dan laadt de volgende keer opnieuw.
+                _momentopnamen[administratie] = (geladen, stand);
+            }
+        }
+
+        return stand;
     }
 
     public async Task<byte[]?> LaadBijlageInhoudAsync(Guid bijlageId, CancellationToken annulering = default)

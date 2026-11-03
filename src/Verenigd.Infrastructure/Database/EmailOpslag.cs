@@ -38,6 +38,7 @@ internal sealed class EmailOpslag(Func<VerenigdDbContext> maakContext) : IEmailO
     {
         await using var context = maakContext();
         await context.Emailsjablonen.Where(s => s.Id == id && !s.IsStandaard).ExecuteDeleteAsync(annulering).ConfigureAwait(false);
+        context.Wijzigingen?.Verhoog(); // ExecuteDelete gaat buiten SaveChanges om
     }
 
     public async Task BewaarInstellingenAsync(Emailinstellingen instellingen, CancellationToken annulering = default)

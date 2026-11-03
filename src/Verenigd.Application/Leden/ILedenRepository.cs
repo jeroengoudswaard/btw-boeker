@@ -7,6 +7,9 @@ public interface ILedenRepository
     /// <summary>Alle personen, inclusief uitgeschreven leden, met functies (en groepen) en voogden.</summary>
     Task<IReadOnlyList<Persoon>> HaalAlleAsync(CancellationToken annulering = default);
 
+    /// <summary>Het aantal personen (ook uitgeschreven), zonder ze te laden.</summary>
+    Task<int> TelAsync(CancellationToken annulering = default);
+
     Task<IReadOnlyList<Groep>> HaalGroepenAsync(CancellationToken annulering = default);
 
     /// <summary>Besluit 215: het soort per groep (op naam) wijzigen, ook buiten de import.</summary>

@@ -125,9 +125,9 @@ public sealed partial class WebappViewModel : TabbladViewModel, IPaginameldingen
         set => Subtab = value is { } i ? (WebappSubtab)i : WebappSubtab.Voorstellen;
     }
 
-    public ObservableCollection<VoorstelRegel> Voorstellen { get; } = [];
+    public Verzameling<VoorstelRegel> Voorstellen { get; } = [];
 
-    public ObservableCollection<LeiderRegel> Leiding { get; } = [];
+    public Verzameling<LeiderRegel> Leiding { get; } = [];
 
     /// <summary>De speltakken uit de groepsindeling (besluiten 43 en 215).</summary>
     public ObservableCollection<SpeltakKeuze> Speltakken { get; } = [];
@@ -380,11 +380,7 @@ public sealed partial class WebappViewModel : TabbladViewModel, IPaginameldingen
     private async Task LaadVoorstellenAsync()
     {
         var regels = await _dienst.HaalVoorstellenAsync();
-        Voorstellen.Clear();
-        foreach (var regel in regels)
-        {
-            Voorstellen.Add(new VoorstelRegel(regel));
-        }
+        Voorstellen.Vervang((regels).Select(regel => new VoorstelRegel(regel)));
 
         OnPropertyChanged(nameof(HeeftVoorstellen));
     }
@@ -393,11 +389,7 @@ public sealed partial class WebappViewModel : TabbladViewModel, IPaginameldingen
     {
         var leiding = await _dienst.HaalLeidingAsync();
         GekozenLeider = null;
-        Leiding.Clear();
-        foreach (var leider in leiding)
-        {
-            Leiding.Add(new LeiderRegel(leider));
-        }
+        Leiding.Vervang((leiding).Select(leider => new LeiderRegel(leider)));
     }
 
     /// <summary>Vaste statusteksten (besluit 168): ⚠ als de server onbereikbaar is, ✕ bij een andere fout.</summary>

@@ -4,6 +4,31 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.13.0] - 2026-11-03: Sneller (besluiten 234–237)
+
+### Gewijzigd
+- **Verbindingen hergebruiken** (besluit 236): de versleutelde database leidt de sleutel niet meer bij elke query opnieuw af. Bij sluiten wordt de pool geleegd, zodat het bestand direct vrij is.
+- **Boekhouding één keer laden:** de boekhouding wordt per administratie bewaard en pas opnieuw geladen na een wijziging. Start laadt elke administratie één keer (was tot 5 keer).
+- **Lijsten in één keer vullen:** 26 lijsten melden een nieuwe inhoud in één keer aan het scherm in plaats van per regel.
+
+### Toegevoegd
+- **Meetpunten** (besluit 234): de duur van aanmaken, openen, navigeren, wisselen, Start, boekhouding laden en overzichten staat in het logbestand (regels "Duur …", zonder persoonsgegevens).
+- Prestatietests op een kunstmatige database met 3000 posten, en architectuurtests voor de pool en de wijzigingsteller.
+
+### Metingen (Linux-cloudsessie, kunstmatige database met 3000 posten, gemiddelde van 2 runs)
+
+| Handeling | v0.12.0 | v0.13.0 |
+|---|---|---|
+| Verbinding openen (lege database) | 48 ms | 4 ms |
+| Database openen met migraties (lege database) | 2,7 s | 0,5 s |
+| Boekhouding laden, eerste keer | 1,8 s | 0,7 s |
+| Boekhouding laden, zonder wijziging sindsdien | 1,8 s | 0 ms |
+| Startkaarten en kerncijfers | 5,3 s | 0,2 s |
+| Eén post boeken¹ | 0,35 s | 0,25 s |
+| Saldibalans, balans, W&V | ±30 ms | ±30 ms |
+
+¹ Gemeten met volledig geoptimaliseerde JIT (`DOTNET_TieredCompilation=0`). Met de standaardinstelling lijkt boeken in de test trager (0,30 → 0,53 s), omdat v0.12.0 vooraf veel vaker laadde en de code daardoor al opgewarmd was.
+
 ## [0.12.0] - 2026-11-03: Webapp voor de leiding (fase 7)
 
 ### Toegevoegd

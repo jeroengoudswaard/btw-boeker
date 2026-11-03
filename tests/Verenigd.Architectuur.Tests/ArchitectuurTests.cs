@@ -259,6 +259,50 @@ public class ArchitectuurTests
     }
 
     /// <summary>
+    /// Besluit 236: verbindingen met de versleutelde database ontstaan alleen in DatabaseBeheer en DatabaseSessie (met pooling),
+    /// en een sessie leegt bij sluiten zijn pool, zodat er geen bestandshandles open blijven.
+    /// </summary>
+    [Fact]
+    public void Verbindingen_alleen_via_databasebeheer_en_de_pool_wordt_geleegd()
+    {
+        var map = Path.Combine(Repositorymap(), "src");
+        var toegestaan = new[] { "DatabaseBeheer.cs", "DatabaseSessie.cs", "OntwerpDbContextFactory.cs" };
+        var fouten = Directory.EnumerateFiles(map, "*.cs", SearchOption.AllDirectories)
+            .Where(b => !b.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                     && !b.Contains(Path.DirectorySeparatorChar + "Migraties" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .Where(b => !toegestaan.Contains(Path.GetFileName(b)))
+            .Where(b => File.ReadAllText(b) is var t && (t.Contains("new SqliteConnection(", StringComparison.Ordinal) || t.Contains("UseSqlite(", StringComparison.Ordinal)))
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.True(fouten.Count == 0, "Eigen databaseverbinding in: " + string.Join(", ", fouten));
+
+        var sessie = File.ReadAllText(Path.Combine(map, "Verenigd.Infrastructure", "Database", "DatabaseSessie.cs"));
+        var sluiten = sessie[sessie.IndexOf("public ValueTask DisposeAsync()", StringComparison.Ordinal)..];
+        Assert.Contains("LeegPool(", sluiten[..sluiten.IndexOf('}')], StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Besluit 234: de momentopname van de boekhouding is geldig zolang de wijzigingsteller van de sessie gelijk blijft.
+    /// <c>SaveChanges</c> verhoogt de teller vanzelf; een bulkbewerking (<c>ExecuteDelete</c>, <c>ExecuteUpdate</c>,
+    /// <c>ExecuteSql</c>) gaat daar buitenom en moet de teller daarom zelf verhogen.
+    /// </summary>
+    [Fact]
+    public void Bulkbewerkingen_verhogen_de_wijzigingsteller()
+    {
+        var map = Path.Combine(Repositorymap(), "src", "Verenigd.Infrastructure");
+        var fouten = Directory.EnumerateFiles(map, "*.cs", SearchOption.AllDirectories)
+            .Where(b => !b.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                     && !b.Contains(Path.DirectorySeparatorChar + "Migraties" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .Where(b => File.ReadAllText(b) is var t
+                     && (t.Contains("ExecuteDelete", StringComparison.Ordinal) || t.Contains("ExecuteUpdate", StringComparison.Ordinal)
+                         || t.Contains("ExecuteSql", StringComparison.Ordinal))
+                     && !t.Contains("Wijzigingen?.Verhoog()", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.True(fouten.Count == 0, "Bulkbewerking zonder Wijzigingen?.Verhoog() in: " + string.Join(", ", fouten));
+    }
+
+    /// <summary>
     /// xUnit voert een test met <c>[Fact(Timeout = …)]</c> alleen uit als hij asynchroon is
     /// (anders faalt hij direct met "only supported for async tests"); gevonden in de Windows-run van v0.11.0.
     /// </summary>

@@ -112,7 +112,7 @@ public sealed partial class ImportWizardViewModel : ObservableObject
 
     public IReadOnlyList<ExportBestandRegel> Bestanden { get; }
 
-    public ObservableCollection<GroepKeuzeRegel> Groepen { get; } = [];
+    public Verzameling<GroepKeuzeRegel> Groepen { get; } = [];
 
     public ObservableCollection<WijzigingRegel> Nieuw { get; } = [];
 
@@ -241,11 +241,7 @@ public sealed partial class ImportWizardViewModel : ObservableObject
         _analyse = await _dienst.AnalyseerAsync(Bestanden.ToDictionary(b => b.Export, b => b.Pad!));
         var voorstel = _analyse.Voorstel;
 
-        Groepen.Clear();
-        foreach (var groep in voorstel.NieuweGroepen)
-        {
-            Groepen.Add(new GroepKeuzeRegel(groep.Naam, groep.VoorgesteldeSoort));
-        }
+        Groepen.Vervang((voorstel.NieuweGroepen).Select(groep => new GroepKeuzeRegel(groep.Naam, groep.VoorgesteldeSoort)));
 
         Vul(Nieuw, voorstel.Nieuw.Select(r => new WijzigingRegel(r.Lidnummer.Waarde, r.Naam, string.Empty, null, null)));
         Vul(Gewijzigd, voorstel.Gewijzigd.SelectMany(r => r.Wijzigingen.Select(w => new WijzigingRegel(r.Lidnummer.Waarde, r.Naam, w.Veld, w.Oud, w.Nieuw))));

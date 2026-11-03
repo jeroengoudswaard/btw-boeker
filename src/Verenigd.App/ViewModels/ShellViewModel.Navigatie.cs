@@ -76,6 +76,8 @@ public sealed partial class ShellViewModel
             return;
         }
 
+        using var meting = Meetpunt.Start(_logger, "Wisselen van administratie");
+
         BouwModuleMenu();
         if (GeselecteerdTabblad is { Administratie: { } huidig } pagina && huidig.Soort != value.Soort)
         {
@@ -117,6 +119,7 @@ public sealed partial class ShellViewModel
 
     private void Navigeer(NavigatieItem item)
     {
+        using var meting = Meetpunt.Start(_logger, "Navigeren naar " + item.Sleutel);
         var administratie = GekozenAdministratie?.Soort;
         var definitie = ModuleCatalogus.Geef(item.Module);
         var verzoek = new ModuleVerzoek(item.Module, definitie.PerAdministratie ? definitie.AlleenVoor ?? administratie : null);
@@ -319,19 +322,17 @@ public sealed partial class ShellViewModel
 
     private async Task VernieuwStartkaartenAsync()
     {
+        using var meting = Meetpunt.Start(_logger, "Startpagina (kaarten, kerncijfers, tellers)");
         var vandaag = DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
-        _kaarten = await Startkaarten.BepaalAsync(_sessie, vandaag);
-        _overzicht.Kaarten.Clear();
-        foreach (var kaart in _kaarten)
-        {
-            _overzicht.Kaarten.Add(kaart);
-        }
+        var gegevens = _sessie is null ? null : await Startkaarten.LaadAsync(_sessie, vandaag);
+        _kaarten = gegevens?.Kaarten ?? [];
+        _overzicht.Kaarten.Vervang(_kaarten);
 
         _overzicht.Kerncijfers.Clear();
-        if (_sessie is not null && GekozenAdministratie is { } administratie)
+        if (gegevens is not null && GekozenAdministratie is { } administratie)
         {
-            var stand = await _sessie.Boekhouding.LaadAsync(administratie.Soort);
-            foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(stand, vandaag), vandaag.Year))
+            // Besluit 234: dezelfde geladen boekhouding als de kaarten, niet opnieuw laden.
+            foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(gegevens.Boekhouding(administratie.Soort), vandaag), vandaag.Year))
             {
                 _overzicht.Kerncijfers.Add(regel);
             }

@@ -269,6 +269,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 231 | Inloggen webapp | E-mail en wachtwoord, daarna de TOTP-code; elke beveiligingsregel eist MFA |
 | 232 | Synchroniseren | Automatisch bij het openen van de database en met een knop; zonder internet werkt alles behalve synchroniseren |
 | 233 | Opdeling fase 7 | Alles in één versie (v0.12.0): server en synchroniseren, webapp lezen, voorstellen en de wachtrij in de desktop-app; één pull request |
+| 234 | Snelheid: meten | Eerst meten: meetpunten (duur per handeling in het logbestand, zonder persoonsgegevens), een kunstmatige testdatabase en prestatietests met een tijdsbudget; de gebruiker meet één keer op Windows met de echte database (alleen tijden) |
+| 235 | Snelheid: traag volgens de gebruiker | Een database aanmaken, wisselen (pagina en administratie) en overzichten maken |
+| 236 | Snelheid: verbinding | Gewijzigd na de eerste meting (2026-11-03, keuze A): hergebruik van verbindingen (pooling) aan, zodat de sleutelafleiding van SQLite3MC niet bij elke query opnieuw gebeurt; de bestandsversleuteling blijft gelijk. Bij sluiten van de database wordt de pool expliciet geleegd; een architectuurtest bewaakt dat. Gemeten (Linux, lege database): verbinding openen 48 → 4 ms, migraties 2,7 → 0,5 s, boekhouding laden 1,0 → 0,1 s |
+| 237 | Snelheid: opdeling | Eén versie v0.13.0 en één pull request, met de metingen van vóór en na; gebouwd na de merge van v0.12.0 |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -453,6 +457,26 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
       - Niet op Windows getest: de database- en Edge Function-tests (32 + 15); daarvoor is PostgreSQL 16 nodig (CI-job `webapp-en-database`).
       - Hiermee is de Windows-run voor PR #14 groen.
     - **Nog door de gebruiker te doen:** Supabase en Cloudflare inrichten volgens docs/SUPABASE.md, daarna een proef met één testleider.
+
+  - Gemerged als PR #14 (2026-11-03, `afec39c`), na de groene Windows-run en groene CI.
+
+- **v0.13.0 Sneller (besluiten 234–237): gereed** (2026-11-03). Zie CHANGELOG.md (tabel vóór en na) en docs/ARCHITECTUUR.md.
+  - Wat er is gebouwd:
+    - meetpunten in het logbestand (`Meetpunt`, "Duur …");
+    - pooling met `LeegPool` bij sluiten (besluit 236);
+    - momentopname van de boekhouding per sessie (`Wijzigingen`-teller, verhoogd na elke `SaveChanges`);
+    - Start laadt elke administratie één keer (`Startkaarten.LaadAsync`, `TelAsync`);
+    - `Verzameling.Vervang` voor 26 lijsten.
+  - Gemeten (Linux, 3000 posten): Startkaarten 5,3 → 0,2 s, boekhouding laden 1,8 → 0,7 s (daarna 0 ms zolang er niets wijzigt).
+  - Niet gedaan: werk van de UI-thread afhalen. Eerst de meting op Windows; als die nog trage handelingen toont, volgt dat gericht.
+  - Tests: 985 .NET in totaal. In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 94, Architectuur 31; ViewModel-tests 233/235 (de 2 Windows-padtests).
+  - Pull request: PR #15 (2026-11-03), geopend met de Linux-metingen (keuze A); de Windows-meting en -run komen erbij.
+  - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 985/985, App 253). Daarnaast de meting met de echte database: de regels "Duur …" uit het logbestand (alleen de tijden). v0.12.0 heeft nog geen meetpunten; daarvoor geldt de eerdere meting met de stopwatch.
+  - **Windows-test (2026-11-03, Windows 11, commit `9879201`): .NET 985/985 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 258, Application 349, Architectuur 31, Infrastructure 94, App 253); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+    - De testsuite zelf liep sneller dan op v0.12.0 (`6b50e70`): App ±1 min 15 s (was ±2 min), Infrastructure ±30 s (was ±45 s).
+    - Webapp (Node 22.23.4): svelte-check 382 bestanden 0 fouten 0 waarschuwingen, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). Niet getest: database- en Edge Function-tests (PostgreSQL nodig; CI-job `webapp-en-database`).
+    - **npm audit (webapp):** kwetsbaarheden alleen in ontwikkel- en testpakketten, waaronder één **kritieke** (`tinypool` ≤ 2.1.1, via `vitest`) en gemiddelde in `@vitest/mocker` ≤ 4.1.11, `cookie` < 0.7.0 (via `@sveltejs/kit`) en `deepmerge` (via `@sveltejs/vite-plugin-svelte(-inspector)`); ook `@sveltejs/adapter-static` is geraakt via `@sveltejs/kit`. `npm audit --omit=dev`: **0 kwetsbaarheden**, dus niets in wat bij de gebruikers komt (statische site). Gevraagd: de pakketten bijwerken (SvelteKit, Vite-plugin, Vitest) met de tests erbij, niet blind `npm audit fix --force` (grote versiesprongen); eventueel `npm audit --omit=dev` als controle in de CI.
+    - **Nog niet gedaan:** de meting met de echte database (regels "Duur …" uit het logbestand); die doet de gebruiker.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

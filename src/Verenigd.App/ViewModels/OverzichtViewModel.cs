@@ -18,7 +18,7 @@ public sealed class OverzichtViewModel(ShellViewModel shell)
     public ShellViewModel Shell { get; } = shell;
 
     /// <summary>Alleen kaarten waar iets te doen is.</summary>
-    public ObservableCollection<Startkaart> Kaarten { get; } = [];
+    public Verzameling<Startkaart> Kaarten { get; } = [];
 
     /// <summary>Leeg zolang de boekhouding van de gekozen administratie niet is ingericht.</summary>
     public ObservableCollection<Kerncijferregel> Kerncijfers { get; } = [];

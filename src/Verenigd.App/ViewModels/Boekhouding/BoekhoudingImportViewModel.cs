@@ -74,9 +74,9 @@ public sealed partial class BoekhoudingImportViewModel : ObservableObject
 
     public ObservableCollection<ImportRekeningRegel> Rekeningen { get; } = [];
 
-    public ObservableCollection<ImportRekeningRegel> Beginbalans { get; } = [];
+    public Verzameling<ImportRekeningRegel> Beginbalans { get; } = [];
 
-    public ObservableCollection<string> Meldingen { get; } = [];
+    public Verzameling<string> Meldingen { get; } = [];
 
     public IAsyncRelayCommand VolgendeCommand { get; }
 
@@ -208,22 +208,14 @@ public sealed partial class BoekhoudingImportViewModel : ObservableObject
             Rekeningen.Add(regel);
         }
 
-        Meldingen.Clear();
-        foreach (var melding in voorstel.Meldingen)
-        {
-            Meldingen.Add(melding);
-        }
+        Meldingen.Vervang(voorstel.Meldingen);
 
         OnPropertyChanged(nameof(Beginbalanstitel));
     }
 
     private void ToonBeginbalans()
     {
-        Beginbalans.Clear();
-        foreach (var regel in Rekeningen.Where(r => !r.Overslaan && (r.Bron.Debet != Bedrag.Nul || r.Bron.Credit != Bedrag.Nul)))
-        {
-            Beginbalans.Add(regel);
-        }
+        Beginbalans.Vervang(Rekeningen.Where(r => !r.Overslaan && (r.Bron.Debet != Bedrag.Nul || r.Bron.Credit != Bedrag.Nul)));
 
         VerschilBewustBoeken = false;
         Totalen();

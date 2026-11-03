@@ -103,13 +103,13 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
         set => Subtab = value is { } i ? (EmailSubtab)i : EmailSubtab.Opstellen;
     }
 
-    public ObservableCollection<Emailsjabloon> Sjablonen { get; } = [];
+    public Verzameling<Emailsjabloon> Sjablonen { get; } = [];
 
-    public ObservableCollection<VerzondenRegel> Logboek { get; } = [];
+    public Verzameling<VerzondenRegel> Logboek { get; } = [];
 
     public ObservableCollection<GroepKeuze> Groepen { get; } = [];
 
-    public ObservableCollection<Emailontvanger> Ontvangers { get; } = [];
+    public Verzameling<Emailontvanger> Ontvangers { get; } = [];
 
     public ObservableCollection<Mislukking> Mislukt { get; } = [];
 
@@ -231,11 +231,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
     {
         var gekozen = GekozenSjabloon?.Id;
         var beheer = Beheersjabloon?.Id;
-        Sjablonen.Clear();
-        foreach (var sjabloon in sjablonen.OrderBy(s => s.Soort).ThenBy(s => s.Naam, StringComparer.CurrentCulture))
-        {
-            Sjablonen.Add(sjabloon);
-        }
+        Sjablonen.Vervang(sjablonen.OrderBy(s => s.Soort).ThenBy(s => s.Naam, StringComparer.CurrentCulture));
 
         // Opnieuw kiezen zonder onderwerp en tekst te overschrijven.
         _sjabloonStil = true;
@@ -377,11 +373,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
             ZonderAdres = zonder.Count == 0 ? null : $"Geen geldig e-mailadres bij: {string.Join(", ", zonder.Select(l => l.VolledigeNaam))}.";
         }
 
-        Ontvangers.Clear();
-        foreach (var ontvanger in ontvangers)
-        {
-            Ontvangers.Add(ontvanger);
-        }
+        Ontvangers.Vervang(ontvangers);
 
         GekozenOntvanger = Ontvangers.FirstOrDefault();
         OnPropertyChanged(nameof(Aantaltekst));
@@ -465,11 +457,7 @@ public sealed partial class EmailViewModel : TabbladViewModel, IPaginameldingen
     {
         _stand = stand;
         IsGekoppeld = stand.Instellingen(GekozenAfzender.Administratie) is { IsGekoppeld: true, Afzenderadres: not null };
-        Logboek.Clear();
-        foreach (var bericht in stand.Logboek.OrderByDescending(b => b.TijdstipUtc))
-        {
-            Logboek.Add(new VerzondenRegel(bericht, _naam(bericht.Administratie)));
-        }
+        Logboek.Vervang((stand.Logboek.OrderByDescending(b => b.TijdstipUtc)).Select(bericht => new VerzondenRegel(bericht, _naam(bericht.Administratie))));
 
         OnPropertyChanged(nameof(Daglimiettekst));
     }

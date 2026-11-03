@@ -21,7 +21,7 @@ public sealed partial class ContributieViewModel
     /// <summary>Per jeugdlidcategorie de opbrengstrekening (Contributie › Tarieven).</summary>
     public ObservableCollection<OpbrengstRegel> Opbrengstrekeningen { get; } = [];
 
-    public ObservableCollection<VorderingRegel> Vorderingen { get; } = [];
+    public Verzameling<VorderingRegel> Vorderingen { get; } = [];
 
     [ObservableProperty]
     public partial IReadOnlyList<Grootboekrekening> Opbrengstkeuzes { get; private set; } = [];
@@ -89,11 +89,7 @@ public sealed partial class ContributieViewModel
         var gekozen = GeselecteerdeVordering?.Vordering;
         var alle = Contributievorderingen.Bereken(_boekhouding).Select(v => new VorderingRegel(v)).ToList();
         TotaalOpenstaand = new Bedrag(alle.Where(v => v.IsOpen).Sum(v => v.Stand.Saldo)).ToString();
-        Vorderingen.Clear();
-        foreach (var regel in alle.Where(v => !AlleenOpenstaand || v.IsOpen))
-        {
-            Vorderingen.Add(regel);
-        }
+        Vorderingen.Vervang(alle.Where(v => !AlleenOpenstaand || v.IsOpen));
 
         GeselecteerdeVordering = Vorderingen.FirstOrDefault(v => v.Vordering == gekozen);
     }

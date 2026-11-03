@@ -71,9 +71,9 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     public IAsyncRelayCommand<JaarRegel> HeropenBoekjaarCommand { get; }
 
-    public ObservableCollection<PostRegel> Posten { get; } = [];
+    public Verzameling<PostRegel> Posten { get; } = [];
 
-    public ObservableCollection<RekeningRegel> Rekeningen { get; } = [];
+    public Verzameling<RekeningRegel> Rekeningen { get; } = [];
 
     public ObservableCollection<KaartRegel> KaartMutaties { get; } = [];
 
@@ -282,6 +282,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     private async Task LaadAsync(Guid? postSelectie)
     {
+        using var meting = Meetpunt.Start(_logger, "Boekhouding laden " + Soort);
         _stand = await _dienst.LaadAsync(Soort);
         IsIngericht = _stand.IsIngericht || _stand.Dagboeken.Count > 0;
         IsGeladen = true;
@@ -294,11 +295,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         KoppelRekeningen(false);
-        Rekeningen.Clear();
-        foreach (var rekening in Rekeningkeuzes)
-        {
-            Rekeningen.Add(new RekeningRegel(rekening, Rubrieken.FirstOrDefault(r => r.Id == rekening.Rubriek?.Id), Grootboek.Saldo(_stand, rekening, Jaar)));
-        }
+        Rekeningen.Vervang((Rekeningkeuzes).Select(rekening => new RekeningRegel(rekening, Rubrieken.FirstOrDefault(r => r.Id == rekening.Rubriek?.Id), Grootboek.Saldo(_stand, rekening, Jaar))));
 
         KoppelRekeningen(true);
 
@@ -348,11 +345,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         _selectieWordtGezet = true;
         try
         {
-            Posten.Clear();
-            foreach (var post in zichtbaar)
-            {
-                Posten.Add(post);
-            }
+            Posten.Vervang(zichtbaar);
 
             GeselecteerdePost = Posten.FirstOrDefault(p => p.Id == selectie);
         }
@@ -818,6 +811,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     private void BerekenRapport()
     {
+        using var meting = Meetpunt.Start(_logger, "Overzicht maken " + Rapportsoort);
         Rapport = _stand is null || !IsIngericht ? null : Rapportsoort switch
         {
             Rapportsoort.Balans => Rapporten.Balans(Grootboek.Balans(_stand, Jaar), Administratienaam),
