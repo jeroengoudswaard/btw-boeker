@@ -488,6 +488,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - `npm audit`: de kritieke en gemiddelde meldingen zijn weg; er blijven 4 lage over (`deepmerge` via vite-plugin-svelte, nog geen oplossing). Met `--omit=dev`: 0.
   - Tests (Linux): svelte-check 399 bestanden 0 fouten, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen, build in orde; .NET ongewijzigd (alleen het versienummer).
   - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`. De .NET-suite is niet nodig (geen .NET-wijziging).
+  - **Windows-test (2026-11-03, Windows 11, commit `d7d7695`, Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde (npm 10, zoals verwacht); svelte-check 399 bestanden 0 fouten 0 waarschuwingen; Vitest 4.1.12 25/25; Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). `npm audit`: 4 lage meldingen over (`deepmerge` via `@sveltejs/vite-plugin-svelte` → `@sveltejs/kit` 3.1.0 → `@sveltejs/adapter-static`), de kritieke en gemiddelde zijn weg (`cookie` nu 2.0.1); `npm audit --omit=dev`: 0. .NET-suite niet opnieuw gedraaid (keuze van de gebruiker). Hiermee is de Windows-run voor PR #16 groen.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
