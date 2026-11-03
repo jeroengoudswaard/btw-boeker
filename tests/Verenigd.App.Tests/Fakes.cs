@@ -422,7 +422,7 @@ internal sealed class InMemoryContributieOpslag : IContributieRepository
     {
         foreach (var regel in invoer)
         {
-            LidCategorieen.RemoveAll(c => c.Lidnummer == regel.Lidnummer && c.Ingangsdatum == regel.Ingangsdatum);
+            LidCategorieen.RemoveAll(c => c.Lidnummer == regel.Lidnummer && (c.Ingangsdatum == regel.Ingangsdatum || c.Ingangsdatum == regel.Vervangt));
             LidCategorieen.Add(new LidCategorie(regel.Lidnummer, Categorieen.Single(c => c.Id == regel.CategorieId), regel.Ingangsdatum));
         }
 

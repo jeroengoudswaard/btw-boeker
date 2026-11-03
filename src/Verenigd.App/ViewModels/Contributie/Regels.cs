@@ -38,10 +38,12 @@ public sealed partial class LidCategorieRegel : ObservableObject
     private readonly DateOnly? _lidSinds;
     private readonly bool _heeftBetaler;
     private readonly bool _heeftMachtiging;
+    private readonly DateOnly? _huidigVanaf;
+    private readonly bool _oudeIsGeincasseerd;
 
     public LidCategorieRegel(
         Persoon persoon, Contributiecategorie? huidig, DateOnly? huidigVanaf, Contributiecategorie? voorstel, string? betaler,
-        bool heeftMachtiging, DateOnly vandaag)
+        bool heeftMachtiging, DateOnly vandaag, bool oudeIsGeincasseerd = false)
     {
         ArgumentNullException.ThrowIfNull(persoon);
         Lidnummer = persoon.Lidnummer;
@@ -51,6 +53,8 @@ public sealed partial class LidCategorieRegel : ObservableObject
             .Select(f => f.Groep.Naam)
             .Distinct());
         _origineel = huidig;
+        _huidigVanaf = huidigVanaf;
+        _oudeIsGeincasseerd = oudeIsGeincasseerd;
         _vandaag = vandaag;
         _lidSinds = persoon.LidSinds;
         _heeftBetaler = betaler is not null;
@@ -68,7 +72,7 @@ public sealed partial class LidCategorieRegel : ObservableObject
     public string Betalertekst { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Waarschuwing), nameof(Fout))]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Waarschuwing), nameof(Fout), nameof(KanCorrigerenOfWisselen), nameof(Vervangt))]
     public partial Contributiecategorie? GekozenCategorie { get; set; }
 
     [ObservableProperty]
@@ -76,6 +80,16 @@ public sealed partial class LidCategorieRegel : ObservableObject
     public partial DateTime? Ingangsdatum { get; set; }
 
     public bool IsGewijzigd => GekozenCategorie is not null && !ReferenceEquals(GekozenCategorie, _origineel);
+
+    /// <summary>Besluit 246: een lid met een categorie krijgt bij een wijziging de keuze tussen correctie en wissel.</summary>
+    public bool KanCorrigerenOfWisselen => _origineel is not null && IsGewijzigd;
+
+    /// <summary>Correctie: vervangt de oude categorie vanaf Lid sinds. Wissel: vanaf de 1e van de volgende maand (besluit 54).</summary>
+    [ObservableProperty]
+    public partial bool IsCorrectie { get; set; }
+
+    /// <summary>Bij een correctie de ingangsdatum van de toewijzing die wordt vervangen.</summary>
+    public DateOnly? Vervangt => KanCorrigerenOfWisselen && IsCorrectie ? _huidigVanaf : null;
 
     public string? Fout => IsGewijzigd && Ingangsdatum is null ? "Vul de ingangsdatum in." : null;
 
@@ -106,11 +120,31 @@ public sealed partial class LidCategorieRegel : ObservableObject
             return;
         }
 
-        // Eerste categorie: vanaf "Lid sinds". Wissel: vanaf de 1e van de volgende maand (besluit 54).
-        Ingangsdatum = _origineel is null
-            ? Weergave.AlsDateTime(_lidSinds ?? new DateOnly(_vandaag.Year, _vandaag.Month, 1))
-            : Weergave.AlsDateTime(Maand.Van(_vandaag).Volgende.EersteDag);
+        // Eerste categorie: vanaf "Lid sinds". Daarna (besluit 246) standaard een correctie zolang er met de oude categorie
+        // niets is geïncasseerd, anders een wissel vanaf de 1e van de volgende maand (besluit 54).
+        if (_origineel is null)
+        {
+            Ingangsdatum = Weergave.AlsDateTime(_lidSinds ?? new DateOnly(_vandaag.Year, _vandaag.Month, 1));
+            return;
+        }
+
+        IsCorrectie = !_oudeIsGeincasseerd;
+        ZetIngangsdatum();
     }
+
+    partial void OnIsCorrectieChanged(bool value)
+    {
+        OnPropertyChanged(nameof(Vervangt));
+        if (KanCorrigerenOfWisselen)
+        {
+            ZetIngangsdatum();
+        }
+    }
+
+    private void ZetIngangsdatum() =>
+        Ingangsdatum = IsCorrectie
+            ? Weergave.AlsDateTime(_lidSinds ?? _huidigVanaf ?? new DateOnly(_vandaag.Year, _vandaag.Month, 1))
+            : Weergave.AlsDateTime(Maand.Van(_vandaag).Volgende.EersteDag);
 }
 
 /// <summary>Eén categorie in het subtabblad "Tarieven" voor het gekozen boekjaar.</summary>

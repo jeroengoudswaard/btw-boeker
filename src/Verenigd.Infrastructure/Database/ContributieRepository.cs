@@ -56,7 +56,8 @@ internal sealed class ContributieRepository(Func<VerenigdDbContext> maakContext)
         foreach (var regel in invoer)
         {
             var categorie = categorieen.Find(c => c.Id == regel.CategorieId) ?? throw new KeyNotFoundException("De categorie bestaat niet.");
-            context.LidCategorieen.RemoveRange(bestaand.Where(b => b.Lidnummer == regel.Lidnummer && b.Ingangsdatum == regel.Ingangsdatum));
+            context.LidCategorieen.RemoveRange(bestaand.Where(b => b.Lidnummer == regel.Lidnummer
+                && (b.Ingangsdatum == regel.Ingangsdatum || b.Ingangsdatum == regel.Vervangt)));
             context.LidCategorieen.Add(new LidCategorie(regel.Lidnummer, categorie, regel.Ingangsdatum));
         }
 

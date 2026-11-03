@@ -109,6 +109,31 @@ public class PersoonTests
         Assert.Equal(new DateOnly(2018, 11, 7), persoon.LidSinds);
     }
 
+    /// <summary>Besluit 247: zonder startdatum in de functies geldt de startdatum uit export 1.</summary>
+    [Fact]
+    public void Lid_sinds_valt_terug_op_de_startdatum_uit_de_ledenbasis()
+    {
+        var persoon = new Persoon(Lidnummer.Parse("100000001"), Gegevens() with { Startdatum = new DateOnly(2019, 9, 14) }, Nu);
+        Assert.Equal(new DateOnly(2019, 9, 14), persoon.LidSinds);
+
+        persoon.WerkFunctiesBij([new FunctieGegevens("Welpen", "Welp", Lidtype.Jeugdlid, null, null, "Actief")], Groepen, Importdatum, Nu);
+        Assert.Equal(new DateOnly(2019, 9, 14), persoon.LidSinds);
+
+        persoon.WerkFunctiesBij([new FunctieGegevens("Welpen", "Welp", Lidtype.Jeugdlid, new DateOnly(2021, 2, 1), null, "Actief")], Groepen, Importdatum, Nu);
+        Assert.Equal(new DateOnly(2021, 2, 1), persoon.LidSinds);
+    }
+
+    [Fact]
+    public void Startdatum_uit_de_ledenbasis_is_een_sol3_veld()
+    {
+        var persoon = NieuwePersoon();
+        var wijzigingen = persoon.VergelijkGegevens(persoon.Gegevens with { Startdatum = new DateOnly(2019, 9, 14) });
+
+        Assert.Equal("Startdatum", Assert.Single(wijzigingen).Veld);
+        persoon.WerkGegevensBij(persoon.Gegevens with { Startdatum = new DateOnly(2019, 9, 14) }, Nu);
+        Assert.Equal(new DateOnly(2019, 9, 14), persoon.Startdatum);
+    }
+
     [Fact]
     public void Lid_sinds_zonder_functies_is_null()
     {

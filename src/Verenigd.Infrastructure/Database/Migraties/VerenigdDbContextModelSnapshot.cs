@@ -1549,6 +1549,9 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("Startdatum")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");

@@ -128,7 +128,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
         {
             var categorieen = _alleLeden
                 .Where(l => l.IsGewijzigd)
-                .Select(l => new LidCategorieInvoer(l.Lidnummer, l.GekozenCategorie!.Id, DateOnly.FromDateTime(l.Ingangsdatum!.Value)))
+                .Select(l => new LidCategorieInvoer(l.Lidnummer, l.GekozenCategorie!.Id, DateOnly.FromDateTime(l.Ingangsdatum!.Value), l.Vervangt))
                 .ToList();
             if (categorieen.Count > 0)
             {
@@ -226,7 +226,8 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
                 return new LidCategorieRegel(
                     p, huidig?.Categorie, huidig?.Ingangsdatum, CategorieVoorstel.Bepaal(p, _stand.Categorieen, vandaag),
                     betaler is null ? null : betaler.Rekeninghouder ?? betaler.Iban.ToString(),
-                    betaler?.HeeftActieveMachtiging(vandaag) == true, vandaag);
+                    betaler?.HeeftActieveMachtiging(vandaag) == true, vandaag,
+                    huidig is not null && IsGeincasseerd(p.Lidnummer, huidig.Categorie.Naam));
             })];
         foreach (var regel in _alleLeden)
         {
@@ -470,4 +471,11 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
         OnPropertyChanged(nameof(KanOpslaan));
         OpslaanCommand.NotifyCanExecuteChanged();
     }
+
+    /// <summary>Besluit 246: is er voor dit lid al iets geïncasseerd met deze categorie (in een niet geannuleerde run)?</summary>
+    private bool IsGeincasseerd(Domain.Gedeeld.Lidnummer lidnummer, string categorie) =>
+        _stand.Runs.Where(r => r.Status != IncassorunStatus.Geannuleerd)
+            .SelectMany(r => r.Posten)
+            .SelectMany(p => p.Regels)
+            .Any(r => !r.IsGeannuleerd && r.Lidnummer == lidnummer && string.Equals(r.Categorie, categorie, StringComparison.Ordinal));
 }

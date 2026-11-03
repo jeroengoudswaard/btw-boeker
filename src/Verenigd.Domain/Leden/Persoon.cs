@@ -56,6 +56,9 @@ public sealed class Persoon
     public string? Plaats { get; private set; }
     public string? Land { get; private set; }
 
+    /// <summary>Besluit 247: de "Startdatum functie" uit export 1, terugval voor <see cref="LidSinds"/>.</summary>
+    public DateOnly? Startdatum { get; private set; }
+
     /// <summary>Gezet als het lid uit de SOL3-export verdwenen is (besluit 25). Personen worden nooit verwijderd.</summary>
     public DateOnly? UitgeschrevenOp { get; private set; }
 
@@ -72,11 +75,12 @@ public sealed class Persoon
         string.Join(' ', new[] { Voornaam, Tussenvoegsel, Achternaam }.Where(d => !string.IsNullOrWhiteSpace(d)));
 
     /// <summary>Afgeleid: de vroegste startdatum van alle functies, ook van technische groepen (besluiten 24 en 40).</summary>
-    public DateOnly? LidSinds => _functies.Min(f => f.Startdatum);
+    /// <summary>Besluiten 24 en 247: de vroegste startdatum van een functie, anders de startdatum uit export 1.</summary>
+    public DateOnly? LidSinds => _functies.Min(f => f.Startdatum) ?? Startdatum;
 
     public LidGegevens Gegevens => new(
         Voornaam, Tussenvoegsel, Achternaam, Geboortedatum, Gender, Email, Telefoon, ContactpersoonId, Status,
-        Straat, Huisnummer, Toevoeging, Postcode, Plaats, Land);
+        Straat, Huisnummer, Toevoeging, Postcode, Plaats, Land, Startdatum);
 
     public IReadOnlyList<Veldwijziging> VergelijkGegevens(LidGegevens nieuw)
     {
@@ -347,6 +351,7 @@ public sealed class Persoon
         Postcode = gegevens.Postcode;
         Plaats = gegevens.Plaats;
         Land = gegevens.Land;
+        Startdatum = gegevens.Startdatum;
     }
 
     private void ZetHerkomst(string veld, Veldbron bron, DateTime nuUtc)

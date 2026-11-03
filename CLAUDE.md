@@ -278,6 +278,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 240 | Maten | Vijf lettergroottes (32, 24, 16, 14, 12; pictogrammen apart), afstanden op een raster van 4, 8, 12, 16, 24, 32 en 48 px, twee rondingen (4 px bediening, 8 px vlakken; pillen 10). Gelijke dingen even groot. Bewaakt met architectuurtests |
 | 241 | Welkomstscherm | Drie even grote tegels (Nieuwe database als enige gekleurde), daaronder *Laatst geopend* met de laatst gebruikte database (keuze 2A) |
 | 242 | Paginakop en aanpak | Elke pagina dezelfde kop uit de schil: band in de onderdeelkleur, titel, één zin uitleg en de administratie. Alles in één versie v0.14.0 (keuze 3A) |
+| 243 | Webapp in dezelfde stijl | Eerst de webappschermen op het canvas ter goedkeuring, daarna v0.14.1 met een eigen pull request (keuze 1A) |
+| 244 | Beginsaldi definitief | In de stap *Beginsaldi* een ⚠-kader (beginjaar en saldi worden de openingsbalans, daarna alleen nog memoriaalboekingen) en uitleg over debet en credit; vóór het boeken een bevestigingsvenster met het beginjaar en de totalen debet en credit (keuze 2B) |
+| 245 | Tarieven in de startwizard | De stap Contributie heeft zelf een tabel met per categorie het maandbedrag; de wizard stuurt niet meer naar Contributie › Tarieven (keuze 3A; vervangt de uitwerking van v0.7.0) |
+| 246 | Categorie corrigeren of wisselen | Bij het wijzigen van de categorie de keuze *Correctie* (vanaf Lid sinds) of *Wissel* (vanaf de 1e van de volgende maand); *Correctie* is de standaard zolang er met de oude categorie niets is geïncasseerd (keuze 4A; aanvulling op besluit 54) |
+| 247 | Lid sinds terugval | Heeft een lid in export 4 geen startdatum, dan geldt de *Startdatum functie* uit export 1 (keuze 5A; aanvulling op besluit 24) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
