@@ -427,6 +427,33 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
       - Gevraagde fix: de test `async Task` maken (zoals de andere UI-tests, bijv. met `await Task.Yield()` of de bestaande asynchrone opbouw); eventueel een architectuurtest die `[Fact(Timeout = …)]` op een niet-asynchrone methode verbiedt. Daarna opnieuw de volledige suite op Windows, 2 runs (verwacht 910/910).
       - **Opgelost (2026-10-31, alleen testcode):** de test is `async Task` (met `await Task.Yield()`); architectuurtest `Tests_met_timeout_zijn_asynchroon` verbiedt `[Fact(Timeout = …)]` op een `public void`-test (faalde zonder de fix, slaagt met de fix). Tests: 911 (Architectuur 29). De gebruiker heeft v0.11.0 visueel gecontroleerd en geaccepteerd (2026-10-31). **Nog op Windows te draaien:** de titelbalktest (verwacht 911/911).
 
+  - Gemerged als PR #13 (2026-10-31, `6e389f8`), na groene CI (keuze van de gebruiker: mergen vóór zijn eigen acceptatietest).
+
+- **Fase 7 (Webapp groepsleiders): gereed**, v0.12.0 (2026-11-03). Besluiten 222–233. Ontwerpcanvas: https://claude.ai/artifact/JxNbBv7MPtVw4i2DdNPPSr (privé). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/SUPABASE.md.
+  - Wat er is gebouwd:
+    - `supabase/`: migratie met tabellen, Row-Level Security (alles met MFA, leiding alleen de eigen speltak, alleen voorstellen invoegen) en functies voor de beheerder; Edge Function `leiding` (uitnodigen en intrekken);
+    - desktop: `WebappDienst`, `SupabaseServer`, `Persoon.NeemVoorstelOver` (bron leiding), tabel `Webappinstellingen` (migratie *Webapp*), pagina *Webapp* met Voorstellen, Leiding en Synchroniseren, synchroniseren bij het openen van de database;
+    - `webapp/`: SvelteKit (statisch, PWA) met de schermen uit het canvas.
+  - Uitwerkingen:
+    - Het Supabase-project (adres, publieke sleutel, e-mailadres beheerder) vult u in bij *Webapp › Synchroniseren*, niet bij Instellingen: daar staan ook het inloggen en de status.
+    - Wijzigen in de webapp kan voor: e-mail en telefoon van het lid, en naam, e-mail, telefoon en mobiel van voogd 1 en 2. Naam, geboortedatum en functies komen alleen uit SOL3.
+    - De beheerder wordt eenmalig met een SQL-regel in Supabase aangewezen en koppelt de authenticator-app via de webapp (docs/SUPABASE.md).
+    - Na de uitnodiging kiest de leider een wachtwoord op `/wachtwoord` en koppelt daarna de app.
+  - Tests: 1048 in totaal.
+    - In de Linux-cloudsessie groen: Domain 258, Application 349, Infrastructure 86, Architectuur 29; ViewModel-tests 230/232 (de 2 Windows-padtests).
+    - Beveiligingstests database 32 en Edge Function 15 (tegen een lokale PostgreSQL 16), webapp 25 Vitest en 4 Playwright; nieuwe CI-job `webapp-en-database`.
+    - **Nog op Windows te draaien:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 250, .NET 972/972, met de nieuwe UI-test `Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen`).
+    - **Windows-test (2026-11-03, Windows 11, commit `b7536b5`): run 1 971/972, run 2 972/972** (met `--blame-hang --blame-hang-timeout 4m`). Build zonder waarschuwingen. Domain 258, Application 349, Architectuur 29 en Infrastructure 86 in beide runs groen; App run 1 249/250, run 2 250/250. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+      - Instabiel: `Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen` faalde in run 1 met "Element 'WebappProject' niet gevonden" (AppUiTests.cs:272, na 31 s); de navigatie-onderdelen ervoor (`WebappTabblad`, `WebappNietGekoppeld`, `Nav_Webapp.*`) werden wel gevonden. Daarna 3× los gedraaid: 3× geslaagd. Totaal 1 van 5 keer gefaald. Oorzaak onbekend (geen schermafbeelding van het moment); vermoedelijk timing: het veld verschijnt later of buiten de UIA-boom (bijv. pas na het laden van de instellingen, of in een ingeklapt/scrollgebied).
+      - Gevraagd: nagaan wanneer `WebappProject` in de boom komt (async laden, `Visibility`, virtualisatie); in de test eerst wachten op een "geladen"-kenmerk van de pagina, en bij falen automatisch een schermafbeelding en `Diagnose()` bewaren. Daarna opnieuw de volledige suite op Windows, 2 runs.
+      - **Aangepakt (2026-11-03):** de pagina zette zichzelf pas op *Synchroniseren* ná het laden van de groepen, en een fout bij dat laden verdween stil (AsyncRelayCommand). Nu leest `VernieuwAsync` eerst de stand en kiest direct het onderdeel; een databasefout wordt een zichtbare melding (✕ in `WebappFout`). De test kiest *Synchroniseren* ook expliciet en gebruikt `ZoekMetDiagnose`: bij falen een schermafbeelding in `%TEMP%\verenigd-ui-fouten` (of `VERENIGD_SCREENSHOTS`) plus `Diagnose()` en de foutmelding van de pagina in de testmelding. De precieze oorzaak is niet bewezen. **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 972/972); faalt de test opnieuw, dan graag de schermafbeelding en de melding.
+      - Niet op Windows getest: de webapp (svelte-check, Vitest, Playwright) en de database- en Edge Function-tests; Node.js en PostgreSQL staan niet op deze pc. Die lopen in de CI-job `webapp-en-database`.
+    - **Windows-test (2026-11-03, Windows 11, commit `6b50e70`): .NET 972/972 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 258, Application 349, Architectuur 29, Infrastructure 86, App 250); build zonder waarschuwingen. `Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen` slaagde in beide runs. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces.
+      - Webapp op Windows (Node 22.23.4, npm 10.9.9; nu geïnstalleerd): `npm ci`, svelte-check 382 bestanden 0 fouten 0 waarschuwingen, Vitest 25/25, Playwright 4 geslaagd en 2 overgeslagen (de schermafbeeldingstests licht/donker, bewust niet ingeschakeld).
+      - Niet op Windows getest: de database- en Edge Function-tests (32 + 15); daarvoor is PostgreSQL 16 nodig (CI-job `webapp-en-database`).
+      - Hiermee is de Windows-run voor PR #14 groen.
+    - **Nog door de gebruiker te doen:** Supabase en Cloudflare inrichten volgens docs/SUPABASE.md, daarna een proef met één testleider.
+
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
 ## Privacy

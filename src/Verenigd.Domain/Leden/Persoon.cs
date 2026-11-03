@@ -271,6 +271,55 @@ public sealed class Persoon
         LaatstGewijzigdUtc = nuUtc;
     }
 
+    /// <summary>
+    /// Een goedgekeurd voorstel van de leiding (besluit 34): het veld krijgt de nieuwe waarde met bron "leiding" (besluit 38).
+    /// Telefoonnummers worden genormaliseerd (besluit 32); een lege waarde maakt het veld leeg.
+    /// </summary>
+    public void NeemVoorstelOver(string veld, string? waarde, DateTime nuUtc)
+    {
+        ArgumentNullException.ThrowIfNull(veld);
+        if (!Leidingveld.IsGeldig(veld))
+        {
+            throw new ArgumentException($"Voor het veld '{veld}' kan de leiding geen voorstel doen.", nameof(veld));
+        }
+
+        var schoon = string.IsNullOrWhiteSpace(waarde) ? null : waarde.Trim();
+        static string? Normaal(string? t) => t is null ? null : Telefoonnummer.Normaliseer(t).Waarde;
+
+        switch (veld)
+        {
+            case Leidingveld.Email:
+                Email = schoon;
+                ZetHerkomst("E-mail", Veldbron.Leiding, nuUtc);
+                break;
+            case Leidingveld.Telefoon:
+                Telefoon = Normaal(schoon);
+                ZetHerkomst("Telefoon", Veldbron.Leiding, nuUtc);
+                break;
+            default:
+                var (volgnummer, deel) = Leidingveld.Voogdveld(veld);
+                var voogd = _voogden.Find(v => v.Volgnummer == volgnummer);
+                if (voogd is null)
+                {
+                    voogd = new Voogd(new VoogdGegevens(volgnummer!.Value, null, true, null, null, null));
+                    _voogden.Add(voogd);
+                }
+
+                var huidig = voogd.Gegevens;
+                voogd.Neem(deel switch
+                {
+                    "naam" => huidig with { Naam = schoon, NaamOnbekend = schoon is null },
+                    "email" => huidig with { Email = schoon },
+                    "telefoon" => huidig with { Telefoon = Normaal(schoon) },
+                    _ => huidig with { Mobiel = Normaal(schoon) },
+                });
+                ZetHerkomst("Voogden", Veldbron.Leiding, nuUtc);
+                break;
+        }
+
+        LaatstGewijzigdUtc = nuUtc;
+    }
+
     private IEnumerable<Functie> TeBeeindigen(IReadOnlyList<FunctieGegevens> nieuw, DateOnly importdatum) =>
         _functies.Where(f => (f.Einddatum is null || f.Einddatum > importdatum) && !nieuw.Any(f.HeeftSleutel));
 

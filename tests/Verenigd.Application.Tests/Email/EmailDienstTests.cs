@@ -221,6 +221,7 @@ public sealed class EmailDienstTests
         public IBoekhoudingRepository Boekhouding => throw new NotSupportedException();
         public IStartwizardOpslag Startwizard => throw new NotSupportedException();
         public IEmailOpslag Email { get; } = email;
+        public Verenigd.Application.Webapp.IWebappOpslag Webapp => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default) => Task.CompletedTask;
 

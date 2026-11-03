@@ -164,6 +164,7 @@ public sealed class Sol3ImportDienstTests : IDisposable
         public Verenigd.Application.Boekhouding.IBoekhoudingRepository Boekhouding => throw new NotSupportedException();
         public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
         public Verenigd.Application.Email.IEmailOpslag Email => throw new NotSupportedException();
+        public Verenigd.Application.Webapp.IWebappOpslag Webapp => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

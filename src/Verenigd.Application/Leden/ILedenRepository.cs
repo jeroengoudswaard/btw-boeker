@@ -14,4 +14,8 @@ public interface ILedenRepository
 
     /// <exception cref="KeyNotFoundException">De persoon bestaat niet (meer).</exception>
     Task BewaarNotitiesAsync(Guid persoonId, string? notities, DateTime nuUtc, CancellationToken annulering = default);
+
+    /// <summary>Besluit 34: een goedgekeurd voorstel van de leiding overnemen (zie <see cref="Persoon.NeemVoorstelOver"/>).</summary>
+    /// <exception cref="KeyNotFoundException">De persoon bestaat niet (meer).</exception>
+    Task NeemVoorstelOverAsync(Guid persoonId, string veld, string? waarde, DateTime nuUtc, CancellationToken annulering = default);
 }

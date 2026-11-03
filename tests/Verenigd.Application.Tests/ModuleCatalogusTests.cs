@@ -35,6 +35,7 @@ public class ModuleCatalogusTests
     [InlineData(ModuleSoort.Leden)]
     [InlineData(ModuleSoort.Email)]
     [InlineData(ModuleSoort.Instellingen)]
+    [InlineData(ModuleSoort.Webapp)]
     public void Gedeelde_modules_horen_niet_bij_een_administratie(ModuleSoort soort)
     {
         Assert.False(ModuleCatalogus.Geef(soort).PerAdministratie);

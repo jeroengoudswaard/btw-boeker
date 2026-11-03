@@ -1,0 +1,13 @@
+{
+  "name": "Verenigd · leiding",
+  "short_name": "Verenigd",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F3F3F5",
+  "theme_color": "#2E7D32",
+  "lang": "nl",
+  "icons": [
+    { "src": "/icoon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icoon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

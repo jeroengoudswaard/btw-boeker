@@ -45,6 +45,8 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Communicatie.VerzondenBericht> VerzondenBerichten => Set<Domain.Communicatie.VerzondenBericht>();
     public DbSet<Domain.Communicatie.Emailinstellingen> Emailinstellingen => Set<Domain.Communicatie.Emailinstellingen>();
 
+    public DbSet<Domain.Webapp.Webappinstellingen> Webappinstellingen => Set<Domain.Webapp.Webappinstellingen>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Administratie>(b =>
@@ -123,6 +125,20 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
             b.Ignore(i => i.HeeftClient);
             b.Ignore(i => i.IsGekoppeld);
             b.Ignore(i => i.Administratie);
+        });
+
+        modelBuilder.Entity<Domain.Webapp.Webappinstellingen>(b =>
+        {
+            b.ToTable("Webappinstellingen");
+            b.HasKey(i => i.Id);
+            b.Property(i => i.Id).ValueGeneratedNever();
+            b.Property(i => i.Projectadres).HasMaxLength(Domain.Webapp.Webappinstellingen.MaximaleLengte);
+            b.Property(i => i.PubliekeSleutel).HasMaxLength(Domain.Webapp.Webappinstellingen.MaximaleLengte);
+            b.Property(i => i.BeheerderEmail).HasMaxLength(320);
+            b.Property(i => i.Vernieuwingssleutel).HasMaxLength(Domain.Webapp.Webappinstellingen.MaximaleLengte);
+            b.Property(i => i.LaatsteMelding).HasMaxLength(500);
+            b.Ignore(i => i.IsIngesteld);
+            b.Ignore(i => i.IsGekoppeld);
         });
     }
 }

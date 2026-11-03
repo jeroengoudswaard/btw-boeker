@@ -11,6 +11,8 @@
         xmlns:contributievm="clr-namespace:Verenigd.App.ViewModels.Contributie"
         xmlns:contributie="clr-namespace:Verenigd.App.Views.Contributie"
         xmlns:emailvm="clr-namespace:Verenigd.App.ViewModels.Email"
+        xmlns:webappvm="clr-namespace:Verenigd.App.ViewModels.Webapp"
+        xmlns:webapp="clr-namespace:Verenigd.App.Views.Webapp"
         xmlns:email="clr-namespace:Verenigd.App.Views.Email"
         xmlns:boekhoudingvm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
         xmlns:boekhouding="clr-namespace:Verenigd.App.Views.Boekhouding"
@@ -50,6 +52,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type emailvm:EmailViewModel}">
             <email:EmailView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type webappvm:WebappViewModel}">
+            <webapp:WebappView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">

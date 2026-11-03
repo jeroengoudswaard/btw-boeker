@@ -11,6 +11,9 @@ public enum ModuleSoort
     Begroting,
     Email,
     Instellingen,
+
+    /// <summary>Fase 7: de webapp voor de leiding (voorstellen, leiding, synchroniseren). Achteraan, zodat bewaarde waarden gelijk blijven.</summary>
+    Webapp,
 }
 
 /// <param name="Pictogram">Codepunt uit het lettertype Segoe Fluent Icons.</param>
@@ -40,6 +43,7 @@ public static class ModuleCatalogus
         new(ModuleSoort.Begroting, "Begroting", "", 5, PerAdministratie: true, KanSluiten: true, Fase: 5),
         new(ModuleSoort.Email, "E-mail", "", 6, PerAdministratie: false, KanSluiten: true, Fase: 6),
         new(ModuleSoort.Instellingen, "Instellingen", "", null, PerAdministratie: false, KanSluiten: true, Fase: 1),
+        new(ModuleSoort.Webapp, "Webapp", "\uE774", null, PerAdministratie: false, KanSluiten: true, Fase: 7),
     ];
 
     public static ModuleDefinitie Geef(ModuleSoort soort) => Alle.Single(m => m.Soort == soort);

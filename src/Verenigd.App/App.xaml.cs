@@ -17,6 +17,9 @@ namespace Verenigd.App;
 
 public partial class App : System.Windows.Application
 {
+    /// <summary>Eén HttpClient voor de webapp (fase 7), voor de hele levensduur van de app.</summary>
+    private static readonly System.Net.Http.HttpClient WebappHttp = new() { Timeout = TimeSpan.FromSeconds(30) };
+
     private IHost? _host;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -44,7 +47,8 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
         builder.Services.AddSingleton<IThemaService, WpfThemaService>();
         var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(), new Infrastructure.Pdf.FactuurPdfMaker(),
-            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer(), Verzender: new Infrastructure.Email.GmailVerzender(), Koppeling: new Infrastructure.Email.GoogleKoppeling());
+            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer(), Verzender: new Infrastructure.Email.GmailVerzender(), Koppeling: new Infrastructure.Email.GoogleKoppeling(),
+            Server: new Infrastructure.Webapp.SupabaseServer(WebappHttp));
         WoordenResources.Koppel(Resources, hulpmiddelen.Woorden);
         builder.Services.AddSingleton(hulpmiddelen);
         builder.Services.AddSingleton<ShellViewModel>();

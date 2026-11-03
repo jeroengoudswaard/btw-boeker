@@ -250,6 +250,35 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
+    public async Task Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        VoerWachtwoordIn(venster);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Kies(venster, "Nav_Webapp"); // fase 7
+        Zoek(venster, "WebappTabblad");
+        Zoek(venster, "WebappNietGekoppeld");
+        foreach (var onderdeel in new[] { "Voorstellen", "Leiding", "Synchroniseren" })
+        {
+            Zoek(venster, $"Nav_Webapp.{onderdeel}");
+        }
+
+        // Zonder koppeling opent de pagina zelf op Synchroniseren; de test kiest het onderdeel ook expliciet.
+        Kies(venster, "Nav_Webapp.Synchroniseren");
+        ZoekMetDiagnose(venster, "WebappProject", "WebappFout");
+        Assert.False(ZoekMetDiagnose(venster, "WebappInloggenKnop", "WebappFout").IsEnabled); // nog geen project, wachtwoord en code
+        Bewaar(venster, "18-webapp");
+
+        Sluit(venster);
+    }
+
+    [Fact(Timeout = Timeout)]
     public async Task Email_toont_onderdelen_koppelmelding_en_standaardsjablonen()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
@@ -524,6 +553,35 @@ public sealed class AppUiTests : IDisposable
     private static AutomationElement Zoek(AutomationElement bron, string automationId) =>
         Retry.WhileNull(() => bron.FindFirstDescendant(c => c.ByAutomationId(automationId)), Wachttijd).Result
         ?? throw new Xunit.Sdk.XunitException($"Element '{automationId}' niet gevonden.");
+
+    /// <summary>
+    /// Zoals <see cref="Zoek"/>, maar bij falen altijd een schermafbeelding (in %TEMP%\verenigd-ui-fouten, of in
+    /// VERENIGD_SCREENSHOTS) en de diagnose plus een eventuele foutmelding van de pagina in de melding.
+    /// </summary>
+    private AutomationElement ZoekMetDiagnose(Window venster, string automationId, string? foutmeldingId = null)
+    {
+        var element = Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByAutomationId(automationId)), Wachttijd).Result;
+        if (element is not null)
+        {
+            return element;
+        }
+
+        var map = Environment.GetEnvironmentVariable("VERENIGD_SCREENSHOTS") ?? Path.Combine(Path.GetTempPath(), "verenigd-ui-fouten"); // blijft na de test bestaan
+        var bestand = Path.Combine(map, $"fout-{automationId}-{DateTime.Now:HHmmss}.png");
+        try
+        {
+            Directory.CreateDirectory(map);
+            Capture.Element(venster).ToFile(bestand);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            bestand = "(geen schermafbeelding: " + ex.Message + ")";
+        }
+
+        var fout = foutmeldingId is null ? null : venster.FindFirstDescendant(c => c.ByAutomationId(foutmeldingId))?.Name;
+        throw new Xunit.Sdk.XunitException(
+            $"Element '{automationId}' niet gevonden. {Diagnose(venster)}; foutmelding pagina: '{fout ?? "(geen)"}'; schermafbeelding: {bestand}");
+    }
 
     private string Diagnose(Window venster)
     {

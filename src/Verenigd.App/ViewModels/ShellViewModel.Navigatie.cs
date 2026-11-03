@@ -167,6 +167,12 @@ public sealed partial class ShellViewModel
                 items.AddRange(Emailonderdelen());
             }
 
+            items.Add(Module(ModuleSoort.Webapp, "Webapp", "Webapp", heeftOnderdelen: true, uitgeklapt: open == ModuleSoort.Webapp));
+            if (open == ModuleSoort.Webapp)
+            {
+                items.AddRange(Webapponderdelen());
+            }
+
             items.Add(Module(ModuleSoort.Instellingen, "Instellingen", "Instellingen"));
         }
 
@@ -286,6 +292,17 @@ public sealed partial class ShellViewModel
             (Email.EmailSubtab.Sjablonen, "Sjablonen"),
         ];
         return onderdelen.Select(o => new NavigatieItem($"Email.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Email, (int)o.Subtab));
+    }
+
+    private static IEnumerable<NavigatieItem> Webapponderdelen()
+    {
+        (Webapp.WebappSubtab Subtab, string Titel)[] onderdelen =
+        [
+            (Webapp.WebappSubtab.Voorstellen, "Voorstellen"),
+            (Webapp.WebappSubtab.Leiding, "Leiding"),
+            (Webapp.WebappSubtab.Synchroniseren, "Synchroniseren"),
+        ];
+        return onderdelen.Select(o => new NavigatieItem($"Webapp.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Webapp, (int)o.Subtab));
     }
 
     private static NavigatieItem Module(ModuleSoort soort, string sleutel, string titel, bool heeftOnderdelen = false, bool uitgeklapt = false) =>

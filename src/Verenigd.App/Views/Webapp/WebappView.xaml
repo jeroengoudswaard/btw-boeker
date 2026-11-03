@@ -1,0 +1,190 @@
+<UserControl x:Class="Verenigd.App.Views.Webapp.WebappView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:g="clr-namespace:Verenigd.App.Views.Gedeeld"
+             xmlns:tg="clr-namespace:Verenigd.App.Views.Toegankelijkheid"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Webapp"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:WebappViewModel}"
+             AutomationProperties.AutomationId="WebappTabblad">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding VernieuwCommand}" />
+    </UserControl.InputBindings>
+
+    <DockPanel Margin="{StaticResource PaginaMarge}">
+        <!-- Niet ingelogd: uitleg en één knop naar het onderdeel Synchroniseren (besluit 168) -->
+        <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" Margin="0,0,0,12" AutomationProperties.Name="Webapp niet gekoppeld"
+                        Visibility="{Binding IsGekoppeld, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="WebappNietGekoppeld">
+            <TextBlock TextWrapping="Wrap">
+                <Run Text="⚠ De webapp is nog niet gekoppeld." FontWeight="SemiBold" />
+                <Run Text="Vul bij Synchroniseren het Supabase-project in en log in als beheerder met uw wachtwoord en de code uit de authenticator-app (zie docs/SUPABASE.md)." />
+            </TextBlock>
+        </tg:Groepskader>
+
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0,8,0,0"
+                   Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Assertive"
+                   AutomationProperties.AutomationId="WebappFout" />
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Melding}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
+                   Visibility="{Binding Melding, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Polite"
+                   AutomationProperties.AutomationId="WebappMelding" />
+
+        <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="WebappSubtabbladen">
+            <!-- De navigatiebalk kiest het onderdeel (besluit 178); de tabkoppen zijn verborgen. -->
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <!-- ===== Voorstellen (besluit 34): per veld goedkeuren of afwijzen ===== -->
+            <TabItem Header="Voorstellen" AutomationProperties.AutomationId="SubtabVoorstellen">
+                <DockPanel Margin="0,12,0,0">
+                    <TextBlock DockPanel.Dock="Top" Text="Voorstellen van de leiding" Style="{StaticResource Sectietitel}" />
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
+                               Text="Een goedgekeurd voorstel wijzigt het lid in Verenigd (bron: leiding). Wijzigt het een SOL3-veld, voer het dan ook in SOL in." />
+                    <g:LeegScherm DockPanel.Dock="Top" Lijst="Voorstellen" Titel="Geen voorstellen" Tekst="Wijzigt de leiding iets in de webapp, dan staat het hier na het synchroniseren."
+                                  Visibility="{Binding Voorstellen.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
+                    <ItemsControl ItemsSource="{Binding Voorstellen}" Focusable="False" AutomationProperties.Name="Voorstellen" AutomationProperties.AutomationId="Voorstellen">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:VoorstelRegel}">
+                                <Border Style="{StaticResource Kaart}" Margin="0,0,0,8" AutomationProperties.Name="{Binding Lidnaam}">
+                                    <DockPanel>
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Goedkeuren" Margin="0,0,8,0" IsEnabled="{Binding KanGoedkeuren}"
+                                                    Command="{Binding DataContext.GoedkeurenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+                                                    AutomationProperties.Name="{Binding Lidnaam, StringFormat='Goedkeuren voor {0}'}" />
+                                            <Button Content="Afwijzen"
+                                                    Command="{Binding DataContext.AfwijzenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+                                                    AutomationProperties.Name="{Binding Lidnaam, StringFormat='Afwijzen voor {0}'}" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,16,0">
+                                            <TextBlock FontWeight="SemiBold">
+                                                <Run Text="{Binding Lidnaam, Mode=OneWay}" />
+                                                <Run Text="·" />
+                                                <Run Text="{Binding Omschrijving, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                                                <Run Text="{Binding Oud, Mode=OneWay, TargetNullValue='(leeg)'}" TextDecorations="Strikethrough"
+                                                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                <Run Text=" → " />
+                                                <Run Text="{Binding Nieuw, Mode=OneWay}" FontWeight="SemiBold" />
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Waarschuwing}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                                       Visibility="{Binding Waarschuwing, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                            <TextBlock Style="{StaticResource Toelichting}" FontSize="12" Margin="0,4,0,0">
+                                                <Run Text="{Binding IngediendDoor, Mode=OneWay}" />
+                                                <Run Text="·" />
+                                                <Run Text="{Binding Wanneer, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ===== Leiding (besluit 230): uitnodigen per speltak ===== -->
+            <TabItem Header="Leiding" AutomationProperties.AutomationId="SubtabLeiding">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" MinWidth="320" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="2*" MinWidth="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Leiding met toegang" Style="{StaticResource Sectietitel}" />
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Content="_Speltakken opslaan" Command="{Binding BewaarSpeltakkenCommand}" Margin="0,0,8,0"
+                                    ToolTip="De aangevinkte speltakken (rechts) gelden voor de gekozen leider" />
+                            <Button Content="Toegang _intrekken" Command="{Binding TrekInCommand}" CommandParameter="{Binding GekozenLeider}" />
+                        </StackPanel>
+                        <g:LeegScherm DockPanel.Dock="Top" Lijst="Leiding" Titel="Nog geen leiding uitgenodigd" Tekst="Nodig rechts een leider uit; die krijgt een e-mail om een wachtwoord en de authenticator-app in te stellen."
+                                      Visibility="{Binding Leiding.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
+                        <DataGrid ItemsSource="{Binding Leiding}" SelectedItem="{Binding GekozenLeider}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Leiding" AutomationProperties.AutomationId="Leiding">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*" />
+                                <DataGridTextColumn Header="E-mail" Binding="{Binding Email}" Width="*" />
+                                <DataGridTextColumn Header="Speltakken" Binding="{Binding Speltakkentekst}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <tg:Groepspaneel Grid.Column="2" AutomationProperties.Name="Leider uitnodigen" AutomationProperties.AutomationId="LeiderUitnodigen">
+                        <TextBlock Text="Leider uitnodigen" Style="{StaticResource Sectietitel}" />
+                        <Label Content="_Naam" Target="{Binding ElementName=NieuweNaam}" Padding="0,0,0,4" />
+                        <TextBox x:Name="NieuweNaam" Text="{Binding NieuweNaam, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                        <Label Content="_E-mailadres" Target="{Binding ElementName=NieuwEmail}" Padding="0,0,0,4" />
+                        <TextBox x:Name="NieuwEmail" Text="{Binding NieuwEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                        <TextBlock Text="Speltakken" FontWeight="SemiBold" Margin="0,4,0,4" />
+                        <ItemsControl ItemsSource="{Binding Speltakken}" Focusable="False" Margin="0,0,0,12">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:SpeltakKeuze}">
+                                    <CheckBox IsChecked="{Binding IsGekozen}" Content="{Binding Naam}" Margin="0,0,0,4" AutomationProperties.Name="{Binding Naam}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="_Uitnodigen" Command="{Binding NodigUitCommand}" HorizontalAlignment="Left" Style="{StaticResource AccentButtonStyle}"
+                                ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="Uitnodigen" />
+                    </tg:Groepspaneel>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== Synchroniseren (besluiten 37, 231 en 232) ===== -->
+            <TabItem Header="Synchroniseren" AutomationProperties.AutomationId="SubtabSynchroniseren">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                    <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+                        <tg:Groepskader Style="{StaticResource Kaart}" Margin="0,0,0,12" AutomationProperties.Name="Synchroniseren" AutomationProperties.AutomationId="WebappSynchroniseren"
+                                        Visibility="{Binding IsGekoppeld, Converter={StaticResource BoolNaarZichtbaar}}">
+                            <StackPanel>
+                                <TextBlock Text="Synchroniseren" Style="{StaticResource Sectietitel}" />
+                                <TextBlock Text="{Binding Synchronisatietekst}" TextWrapping="Wrap" Margin="0,0,0,8" AutomationProperties.AutomationId="Synchronisatietekst" />
+                                <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,0,0,12"
+                                           Text="Verenigd zet de ledengegevens van de speltakken (zonder adres en zonder financiële gegevens) op de server en haalt de voorstellen op. Dit gebeurt ook bij het openen van de database." />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Nu _synchroniseren" Command="{Binding SynchroniseerCommand}" Margin="0,0,8,0" AutomationProperties.AutomationId="NuSynchroniseren" />
+                                    <Button Content="_Uitloggen" Command="{Binding OntkoppelCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </tg:Groepskader>
+
+                        <tg:Groepskader Style="{StaticResource Kaart}" Margin="0,0,0,12" AutomationProperties.Name="Supabase-project" AutomationProperties.AutomationId="WebappProject">
+                            <StackPanel>
+                                <TextBlock Text="Supabase-project" Style="{StaticResource Sectietitel}" />
+                                <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,0,0,8"
+                                           Text="Het projectadres en de publieke sleutel staan in Supabase bij Project Settings › API. Gebruik nooit de service_role-sleutel." />
+                                <Label Content="_Projectadres" Target="{Binding ElementName=Projectadres}" Padding="0,0,0,4" />
+                                <TextBox x:Name="Projectadres" Text="{Binding Projectadres, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                                <Label Content="Publieke _sleutel" Target="{Binding ElementName=PubliekeSleutel}" Padding="0,0,0,4" />
+                                <TextBox x:Name="PubliekeSleutel" Text="{Binding PubliekeSleutel, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                                <Label Content="E-mailadres _beheerder" Target="{Binding ElementName=BeheerderEmail}" Padding="0,0,0,4" />
+                                <TextBox x:Name="BeheerderEmail" Text="{Binding BeheerderEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
+                                <Button Content="Project _opslaan" Command="{Binding BewaarProjectCommand}" HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </tg:Groepskader>
+
+                        <tg:Groepskader Style="{StaticResource Kaart}" AutomationProperties.Name="Inloggen als beheerder" AutomationProperties.AutomationId="WebappInloggen"
+                                        Visibility="{Binding IsGekoppeld, Converter={StaticResource OnwaarNaarZichtbaar}}">
+                            <StackPanel>
+                                <TextBlock Text="Inloggen als beheerder" Style="{StaticResource Sectietitel}" />
+                                <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,0,0,8"
+                                           Text="Eenmalig per pc; Verenigd onthoudt de sessie versleuteld in de database. Het wachtwoord wordt niet bewaard." />
+                                <Label Content="_Wachtwoord" Target="{Binding ElementName=Wachtwoord}" Padding="0,0,0,4" />
+                                <PasswordBox x:Name="Wachtwoord" PasswordChanged="Wachtwoord_PasswordChanged" Margin="0,0,0,8" />
+                                <Label Content="_Code uit de authenticator-app" Target="{Binding ElementName=Code}" Padding="0,0,0,4" />
+                                <TextBox x:Name="Code" Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" MaxLength="7" Width="120" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                                <Button Content="_Inloggen" Command="{Binding InloggenCommand}" HorizontalAlignment="Left" Style="{StaticResource AccentButtonStyle}"
+                                        ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="WebappInloggenKnop" />
+                            </StackPanel>
+                        </tg:Groepskader>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>
