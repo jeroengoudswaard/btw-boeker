@@ -474,7 +474,7 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
 
     /// <summary>Besluit 246: is er voor dit lid al iets geïncasseerd met deze categorie (in een niet geannuleerde run)?</summary>
     private bool IsGeincasseerd(Domain.Gedeeld.Lidnummer lidnummer, string categorie) =>
-        _stand.Runs.Where(r => r.Status != IncassorunStatus.Geannuleerd)
+        _stand is not null && _stand.Runs.Where(r => r.Status != IncassorunStatus.Geannuleerd)
             .SelectMany(r => r.Posten)
             .SelectMany(p => p.Regels)
             .Any(r => !r.IsGeannuleerd && r.Lidnummer == lidnummer && string.Equals(r.Categorie, categorie, StringComparison.Ordinal));
