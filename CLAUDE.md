@@ -507,6 +507,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Webapp in dezelfde stijl (243): drie schermen op het canvas ter goedkeuring; bouwen als v0.14.1.
   - Tests: 1006 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 351, Infrastructure 95, Architectuur 34; ViewModel-tests 246/248 (de 2 Windows-padtests).
   - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 1006/1006, App 266), plus een visuele controle in licht en donker: welkomstscherm, navigatie met onderdeelkleuren, paginakop en band, Start, Leden, de stap Contributie in de startwizard, de stap Beginsaldi en de keuze correctie/wissel in Contributie › Leden.
+  - **Windows-test (2026-11-03, Windows 11, commit `30a0094`): niet groen, buildfout in het testproject.** `dotnet build` (hele oplossing, Debug): 1 fout, 0 waarschuwingen. `tests/Verenigd.App.Tests/OnderdeelkleurenTests.cs(65,23): error CA1861` ("Prefer 'static readonly' fields over constant array arguments"): de inline array `new[] { "Bevers", "Welpen", … }` in `Een_groep_heeft_altijd_dezelfde_kleur_uit_het_palet`; waarschuwingen tellen als fout. De app zelf (`src/Verenigd.App`) bouwt zonder fouten en waarschuwingen.
+    - Gevolg: `Verenigd.App.Tests` (ViewModel- en FlaUI-UI-tests, verwacht 266) is in geen van beide runs gedraaid. De rest groen in 2 runs (met `--blame-hang --blame-hang-timeout 4m`): Domain 260, Application 351, Architectuur 34, Infrastructure 95 (740/740). Geen hang, geen ingedrukte toets, geen achtergebleven testproces.
+    - Waarom de cloudsessie dit niet zag: daar draaien de ViewModel-tests via een tijdelijk net10.0-project, kennelijk zonder deze analyseregel als fout.
+    - Gevraagde fix: de array naar een `private static readonly string[]`-veld verplaatsen (of de waarden als `[Theory]`-data); daarna op Windows de volledige suite, 2 runs (verwacht 1006/1006, App 266). Advies: de analyseregels van het echte `Verenigd.App.Tests`-project ook in de cloudsessie laten meewegen, zodat zulke buildfouten eerder opvallen.
+    - Webapp niet opnieuw getest: geen wijzigingen in `webapp/` sinds v0.13.1.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
