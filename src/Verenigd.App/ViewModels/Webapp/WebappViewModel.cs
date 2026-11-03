@@ -198,27 +198,39 @@ public sealed partial class WebappViewModel : TabbladViewModel, IPaginameldingen
     private async Task VernieuwAsync()
     {
         Foutmelding = null;
-        var groepen = await _sessie.Leden.HaalGroepenAsync();
-        Speltakken.Clear();
-        foreach (var groep in groepen.Where(g => g.Soort == GroepSoort.Speltak).OrderBy(g => g.Naam, StringComparer.Ordinal))
+        try
         {
-            var keuze = new SpeltakKeuze(groep.Naam);
-            keuze.PropertyChanged += (_, _) => NodigUitCommand.NotifyCanExecuteChanged();
-            Speltakken.Add(keuze);
-        }
+            // Eerst de stand (licht), zodat de pagina meteen op het juiste onderdeel staat; daarna de speltakken.
+            await LeesStandAsync();
+            if (!IsGekoppeld)
+            {
+                Subtab = WebappSubtab.Synchroniseren;
+            }
 
-        await LeesStandAsync();
-        if (!IsGekoppeld)
+            var groepen = await _sessie.Leden.HaalGroepenAsync();
+            Speltakken.Clear();
+            foreach (var groep in groepen.Where(g => g.Soort == GroepSoort.Speltak).OrderBy(g => g.Naam, StringComparer.Ordinal))
+            {
+                var keuze = new SpeltakKeuze(groep.Naam);
+                keuze.PropertyChanged += (_, _) => NodigUitCommand.NotifyCanExecuteChanged();
+                Speltakken.Add(keuze);
+            }
+        }
+        catch (Exception ex) when (ex is System.Data.Common.DbException or InvalidOperationException or IOException)
         {
-            Subtab = WebappSubtab.Synchroniseren;
+            // Niet stil laten verdwijnen: de pagina toont wat er misging (besluit 168).
+            Foutmelding = "✕ Laden mislukt. Kies F5 om het opnieuw te proberen.";
             return;
         }
 
-        await VoerUitAsync(async () =>
+        if (IsGekoppeld)
         {
-            await LaadVoorstellenAsync();
-            await LaadLeidingAsync();
-        });
+            await VoerUitAsync(async () =>
+            {
+                await LaadVoorstellenAsync();
+                await LaadLeidingAsync();
+            });
+        }
     }
 
     private async Task LeesStandAsync()
