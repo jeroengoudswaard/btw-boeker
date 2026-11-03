@@ -303,6 +303,8 @@ internal sealed class InMemoryAdministratieRepository : IAdministratieRepository
 internal sealed class InMemoryLedenOpslag : ILedenRepository, ILedenImportOpslag
 {
     public ImportStand Stand { get; private set; } = ImportStand.Leeg;
+
+    public void VoegGroepToe(Groep groep) => Stand = Stand with { Groepen = [.. Stand.Groepen, groep] };
     public List<(Guid Id, string? Notities)> BewaardeNotities { get; } = [];
     public int AantalKeerGeladen { get; private set; }
 

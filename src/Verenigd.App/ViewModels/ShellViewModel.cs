@@ -576,19 +576,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     Task IStartwizardRegie.ImporteerBankafschriftAsync(AdministratieSoort administratie) =>
         InBoekhoudingAsync(administratie, boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
 
-    void IStartwizardRegie.OpenTarieven()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging);
-        if (KanModuleOpenen(verzoek))
-        {
-            OpenModule(verzoek);
-            if (GeselecteerdTabblad is ContributieViewModel contributie)
-            {
-                contributie.Subtab = ContributieSubtab.Tarieven;
-            }
-        }
-    }
-
     /// <summary>Opent Boekhouding voor een administratie, wacht tot die geladen is en voert dan een actie uit.</summary>
     private async Task InBoekhoudingAsync(AdministratieSoort administratie, Func<BoekhoudingViewModel, Task> actie)
     {
