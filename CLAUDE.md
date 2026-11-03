@@ -500,7 +500,13 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Windows-test (2026-11-03, Windows 11, commit `d7d7695`, Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde (npm 10, zoals verwacht); svelte-check 399 bestanden 0 fouten 0 waarschuwingen; Vitest 4.1.12 25/25; Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). `npm audit`: 4 lage meldingen over (`deepmerge` via `@sveltejs/vite-plugin-svelte` → `@sveltejs/kit` 3.1.0 → `@sveltejs/adapter-static`), de kritieke en gemiddelde zijn weg (`cookie` nu 2.0.1); `npm audit --omit=dev`: 0. .NET-suite niet opnieuw gedraaid (keuze van de gebruiker). Hiermee is de Windows-run voor PR #16 groen.
   - Gemerged als PR #16 (2026-11-03, `05fc72c`), na de groene Windows-run en groene CI.
 
-- **v0.14.0 Kleur en rust (besluiten 239–242): in uitvoering** (2026-11-03).
+- **v0.14.0 Kleur en rust (besluiten 239–247): gereed** (2026-11-03). Ontwerpcanvas: https://claude.ai/artifact/7PwtjhKyHFvtortd7kU8wP (privé). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Ontwerpsysteem: onderdeelkleuren (`Onderdeelkleuren`), paginakop uit de schil, welkomstscherm met drie tegels en *Laatst geopend*, Start met gelijke kaarten, Leden met gekleurde initialen; architectuurtests voor lettergroottes, raster en rondingen.
+  - Uit de proef van de gebruiker: tarieven in de startwizard (245), beginsaldi definitief met uitleg en bevestiging (244), correctie of wissel van een categorie (246), Lid sinds met terugval op export 1 (247, migratie *StartdatumLid*).
+  - Nog open: of het categorievoorstel nu goed werkt hangt af van de functies in export 4; als het na een nieuwe import nog misgaat, graag geanonimiseerde voorbeeldwaarden (*Startdatum functie*, *Role Membership Type*, *Naam organisatie eenheid*) en de categorienamen bij Tarieven.
+  - Webapp in dezelfde stijl (243): drie schermen op het canvas ter goedkeuring; bouwen als v0.14.1.
+  - Tests: 1006 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 351, Infrastructure 95, Architectuur 34; ViewModel-tests 246/248 (de 2 Windows-padtests).
+  - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht 1006/1006, App 266), plus een visuele controle in licht en donker: welkomstscherm, navigatie met onderdeelkleuren, paginakop en band, Start, Leden, de stap Contributie in de startwizard, de stap Beginsaldi en de keuze correctie/wissel in Contributie › Leden.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
