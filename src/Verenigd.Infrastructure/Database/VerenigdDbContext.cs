@@ -10,6 +10,23 @@ namespace Verenigd.Infrastructure.Database;
 
 public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> options) : DbContext(options)
 {
+    /// <summary>Besluit 234: na elk geslaagd opslaan verhoogd, zodat momentopnamen weten dat ze verouderd zijn.</summary>
+    internal Wijzigingen? Wijzigingen { get; init; }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        var aantal = base.SaveChanges(acceptAllChangesOnSuccess);
+        Wijzigingen?.Verhoog();
+        return aantal;
+    }
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var aantal = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
+        Wijzigingen?.Verhoog();
+        return aantal;
+    }
+
     public DbSet<Administratie> Administraties => Set<Administratie>();
 
     public DbSet<Persoon> Personen => Set<Persoon>();

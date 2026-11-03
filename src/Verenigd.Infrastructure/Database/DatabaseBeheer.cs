@@ -92,8 +92,8 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         }
     }
 
-    internal static VerenigdDbContext MaakContext(string pad, ReadOnlySpan<byte> databasesleutel) =>
-        new(new DbContextOptionsBuilder<VerenigdDbContext>().UseSqlite(Verbindingstekst(pad, databasesleutel)).Options);
+    internal static VerenigdDbContext MaakContext(string pad, ReadOnlySpan<byte> databasesleutel, Wijzigingen? wijzigingen = null) =>
+        new(new DbContextOptionsBuilder<VerenigdDbContext>().UseSqlite(Verbindingstekst(pad, databasesleutel)).Options) { Wijzigingen = wijzigingen };
 
     /// <summary>
     /// Besluit 236: verbindingen worden hergebruikt (pooling). Elke nieuwe versleutelde verbinding laat SQLite3MC de sleutel

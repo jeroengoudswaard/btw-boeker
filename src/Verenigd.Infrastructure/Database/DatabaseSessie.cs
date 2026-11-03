@@ -15,6 +15,7 @@ namespace Verenigd.Infrastructure.Database;
 internal sealed class DatabaseSessie : IDatabaseSessie
 {
     private readonly byte[] _databasesleutel;
+    private readonly Wijzigingen _wijzigingen = new();
 
     public DatabaseSessie(string pad, byte[] databasesleutel)
     {
@@ -24,7 +25,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         Leden = new LedenRepository(MaakContext);
         LedenImport = new LedenImportOpslag(MaakContext);
         Contributie = new ContributieRepository(MaakContext);
-        Boekhouding = new BoekhoudingRepository(MaakContext);
+        Boekhouding = new BoekhoudingRepository(MaakContext, _wijzigingen);
         Startwizard = new StartwizardOpslag(MaakContext);
         Email = new EmailOpslag(MaakContext);
         Webapp = new WebappOpslag(MaakContext);
@@ -84,5 +85,5 @@ internal sealed class DatabaseSessie : IDatabaseSessie
         return ValueTask.CompletedTask;
     }
 
-    private VerenigdDbContext MaakContext() => DatabaseBeheer.MaakContext(Pad, _databasesleutel);
+    private VerenigdDbContext MaakContext() => DatabaseBeheer.MaakContext(Pad, _databasesleutel, _wijzigingen);
 }
