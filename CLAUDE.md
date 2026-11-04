@@ -542,19 +542,23 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
   - Gemerged als PR #18 (2026-11-04, `5df925d`), na de groene webapp-run en groene CI (akkoord van de gebruiker).
 
-- **v0.15.0 Publiceren (besluiten 250–254): gebouwd** (2026-11-04). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/PUBLICEREN.md.
+- **v0.15.0 Publiceren (besluiten 250–254): gereed en gepubliceerd** (2026-11-04). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/PUBLICEREN.md.
   - Wat er is gebouwd:
     - `installer/` (WiX 5): MSI met de self-contained publicatie win-x64, per computer, snelkoppeling in Start, vaste UpgradeCode;
     - `.github/workflows/release.yml`: bij een tag `v*` MSI, webapp (`BASE_PATH=/verenigd/app`) en schermafbeeldingen naar de release `verenigd` in de websiterepository; bij een PR op `installer/` alleen bouwen;
     - `Demodatabase` (verzonnen groep "Scouting De Voorbeeldgroep", 20 leden, boekingen in het lopende jaar) en de UI-test `Schermafbeeldingen_voor_de_website_uit_de_demodatabase` (alleen met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN`);
     - webapp op GitHub Pages: basispad via `pad()`, alle pagina's vooraf gebouwd, lid via `/lid?id=…`, CSP in `<meta>` met alleen de ingestelde server, melding "server nog niet ingericht".
-  - Websiterepository (`jeroengoudswaard.github.io`): pagina `verenigd/` (tweetalig, bèta, alleen scouting, SmartScreen-uitleg), categorie *Boekhouden en administratie* met kaart, sitemap, `verenigd:verenigd` in `pages.yml`, schermafbeeldingen van de webapp. **Nog niet gepusht:** de downloadlink werkt pas na de eerste release.
+  - Websiterepository (`jeroengoudswaard.github.io`): pagina `verenigd/` (tweetalig, bèta, alleen scouting, SmartScreen-uitleg), categorie *Boekhouden en administratie* met kaart, sitemap, `verenigd:verenigd` in `pages.yml`, schermafbeeldingen van desktop en webapp. **Live** sinds 2026-11-04 (`3a98cd7`); het icoon op de site is sinds `baa5cad` het echte app-icoon (`assets/verenigd.png`, gemaakt uit `assets/bron/verenigd-icoon-1024.png`) in plaats van een vereenvoudigde SVG.
   - Uitwerkingen:
     - De desktopschermafbeeldingen komen uit de release-workflow; lukt FlaUI niet op de GitHub-runner, dan gaat de release door zonder (waarschuwing) en kan de gebruiker ze op Windows maken (docs/PUBLICEREN.md).
     - WiX 5 in plaats van 6 (WiX 6 vraagt een onderhoudsbijdrage, OSMF).
     - Supabase-adres en publieke sleutel later als repository-variabelen `SUPABASE_URL` en `SUPABASE_PUBLISHABLE_KEY`.
   - Tests: 1013 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 351, Infrastructure 96 (nieuw: `DemodatabaseTests`), Architectuur 34; ViewModel-tests 251/253 (de 2 Windows-padtests); `Verenigd.App.Tests` bouwt zonder waarschuwingen. Webapp: svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 4 (nieuw: `pages.spec.ts` onder `/verenigd/app`) en 2 overgeslagen.
-  - **Nog door de gebruiker te doen:** het geheim `WEBSITE_TOKEN` aanmaken (docs/PUBLICEREN.md). Na de merge de tag `v0.15.0` pushen; daarna de MSI op Windows installeren en starten, en de websitepagina live zetten.
+  - Gemerged als PR #19 (2026-11-04, `79970a4`), na groene CI (inclusief de MSI-build op Windows; eerste poging faalde op ICE38/43/57, opgelost met een HKCU-sleutel voor de snelkoppeling).
+  - **Gepubliceerd** (2026-11-04): de gebruiker pushte de tag `v0.15.0` (een cloudsessie kan geen tags pushen: HTTP 403). Release-run geslaagd: `Verenigd.msi` en `Verenigd-0.15.0.msi` (71 MB) en `verenigd-web.zip` op de release `verenigd` van de website; desktopschermafbeeldingen lukten op de runner.
+    - De runner heeft een scherm van 1024×768: het venster viel rechts buiten beeld en onder de taakbalk. De schermafbeeldingen op de website zijn met de hand bijgesneden (984×680); de test maximaliseert het venster voortaan (na v0.15.0, nog niet uitgebracht).
+    - Code signing (vraag van de gebruiker): voor de bèta niet (besluit 253); richting de definitieve versie is de Microsoft Store met MSIX het voorstel (gratis voor particulieren); nog geen besluit.
+  - **Nog door de gebruiker te doen:** de MSI downloaden, installeren en starten (met de SmartScreen-stappen van de pagina); de branch `verenigd` in de websiterepository verwijderen (mocht niet vanuit de cloudsessie).
   - **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 1013/1013, App 272), plus één keer de schermafbeeldingentest met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN` (controleren of de PNG's goed zijn).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.

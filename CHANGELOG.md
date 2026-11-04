@@ -4,6 +4,9 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Gewijzigd
+- **Schermafbeeldingen voor de website:** de test maximaliseert het venster in plaats van het op 1280×800 te zetten. Op de GitHub-runner (scherm 1024×768) viel het venster anders rechts buiten beeld en onder de taakbalk.
+
 ## [0.15.0] - 2026-11-04: Publiceren (besluiten 250–254)
 
 ### Toegevoegd
