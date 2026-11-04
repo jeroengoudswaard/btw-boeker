@@ -533,6 +533,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - .NET: `dotnet build` van de hele oplossing 0 fouten 0 waarschuwingen; `OnderdeelkleurenTests` 13/13 (met `Groepskleur_is_gelijk_aan_die_in_de_webapp`).
     - **Volledige .NET-suite (2026-11-04, commit `d6740e3`): 1011/1011 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 260, Application 351, Architectuur 34, Infrastructure 95, App 271); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces. De instabiele Alt-test van v0.14.0 slaagde in beide runs (nog niet aangepast, dus blijft een aandachtspunt).
     - Hiermee is de Windows-run voor v0.14.1 groen.
+  - **Windows-test na besluit 249 (2026-11-04, Windows 11, commit `db876ff`, met `main` v0.14.0 samengevoegd; Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde; svelte-check 402 bestanden 0 fouten 0 waarschuwingen; Vitest 39/39 (3 bestanden); Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen), inclusief "lid: bellen vraagt eerst wie (voogden en het lid zelf), wijzigen wordt een voorstel". `npm audit --omit=dev`: 0. Hiermee is de webapp-run voor PR #18 groen.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
