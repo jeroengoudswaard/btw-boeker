@@ -17,7 +17,7 @@ async function sessie(page: Page, aal: 'aal1' | 'aal2') {
 }
 
 const leden = [
-  { id: 'l1', lidnummer: '1', voornaam: 'Bram', tussenvoegsel: 'de', achternaam: 'Jong', geboortedatum: '2018-03-01', email: null, telefoon: null,
+  { id: 'l1', lidnummer: '1', voornaam: 'Bram', tussenvoegsel: 'de', achternaam: 'Jong', geboortedatum: '2018-03-01', email: null, telefoon: '+31633333333',
     voogden: [{ volgnummer: 1, naam: 'Petra Jong', email: 'p@example.org', telefoon: null, mobiel: '+31611111111' },
               { volgnummer: 2, naam: 'Kees Jong', email: null, telefoon: null, mobiel: '+31622222222' }],
     lid_speltakken: [{ speltak: 'Welpen', rol: 'Jeugdlid', is_leiding: false }] },
@@ -80,7 +80,7 @@ test('met MFA: ledenlijst met leiding apart en zoeken', async ({ page }) => {
   await expect(page.getByRole('link', { name: /Bram de Jong/ })).toBeVisible();
 });
 
-test('lid: bellen met twee voogden vraagt eerst wie, wijzigen wordt een voorstel', async ({ page }) => {
+test('lid: bellen vraagt eerst wie (voogden en het lid zelf), wijzigen wordt een voorstel', async ({ page }) => {
   const ingediend = await server(page);
   await sessie(page, 'aal2');
   await page.goto('/');
@@ -89,8 +89,9 @@ test('lid: bellen met twee voogden vraagt eerst wie, wijzigen wordt een voorstel
 
   await page.getByRole('button', { name: 'Bellen' }).click();
   const blad = page.getByRole('dialog', { name: 'Bellen naar' });
-  await expect(blad.getByRole('link')).toHaveCount(2);
+  await expect(blad.getByRole('link')).toHaveCount(3);
   await expect(blad.getByRole('link', { name: /Petra Jong/ })).toHaveAttribute('href', 'tel:+31611111111');
+  await expect(blad.getByRole('link', { name: /Lid zelf/ })).toHaveAttribute('href', 'tel:+31633333333'); // besluit 249
   await blad.getByRole('button', { name: 'Annuleren' }).click();
 
   await page.getByRole('link', { name: 'Wijzigen' }).click();

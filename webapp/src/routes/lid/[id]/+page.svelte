@@ -1,32 +1,28 @@
 <script lang="ts">
-  // Lid: grote avatar, snelle knoppen naar de voogd (besluit 223), voogden en gegevens.
+  // Lid: grote avatar, snelle knoppen (besluiten 223 en 249: kiezen uit voogd 1, voogd 2 en het lid zelf), voogden en gegevens.
   import { onMount } from 'svelte';
   import { page } from '$app/state';
   import Avatar from '#lib/onderdelen/Avatar.svelte';
   import { bewaak, laad, openVoorstellen, stand } from '#lib/gegevens.svelte.ts';
+  import { contactopties, type Actie } from '#lib/contact.ts';
   import { initialen, isLeiding, volledigeNaam, type Voogd } from '#lib/leden.ts';
   import { weergaveTelefoon } from '#lib/telefoon.ts';
   import { veldOmschrijving } from '#lib/voorstellen.ts';
 
-  type Actie = 'bellen' | 'bericht' | 'email';
   const lid = $derived(stand.leden.find((l) => l.id === page.params.id));
   const voogden = $derived(lid?.voogden ?? []);
   const open = $derived(lid ? openVoorstellen(lid.id) : []);
   let keuze: Actie | null = $state(null);
   let blad: HTMLDialogElement | undefined = $state();
 
-  const nummer = (v: Voogd) => v.mobiel ?? v.telefoon;
-  const doel = (v: Voogd, actie: Actie) =>
-    actie === 'email' ? (v.email ? `mailto:${v.email}` : null)
-    : nummer(v) ? `${actie === 'bellen' ? 'tel' : 'sms'}:${nummer(v)}` : null;
-  const geschikt = (actie: Actie) => voogden.filter((v) => doel(v, actie));
+  const opties = (actie: Actie) => (lid ? contactopties(lid, actie) : []);
   const voogdnaam = (v: Voogd) => v.naam ?? `Voogd ${v.volgnummer}`;
   const datum = (d: string | null) => (d ? d.split('-').reverse().join('-') : '—');
   const functie = $derived(lid?.functies.find((f) => f.speltak === stand.speltak) ?? lid?.functies[0]);
 
   function kies(actie: Actie) {
-    const kandidaten = geschikt(actie);
-    if (kandidaten.length === 1) location.href = doel(kandidaten[0], actie)!;
+    const kandidaten = opties(actie);
+    if (kandidaten.length === 1) location.href = kandidaten[0].href;
     else if (kandidaten.length > 1) {
       keuze = actie;
       blad?.showModal();
@@ -55,9 +51,9 @@
       <p>{functie?.speltak} · {lid && isLeiding(lid, functie?.speltak ?? '') ? 'leiding' : 'jeugdlid'} · {lid.lidnummer}</p>
     </div>
 
-    <section class="snel" aria-label="Contact met voogd">
+    <section class="snel" aria-label="Contact">
       {#each [['bellen', 'Bellen'], ['bericht', 'Bericht'], ['email', 'E-mail']] as [actie, tekst] (actie)}
-        <button type="button" class="kaart" disabled={geschikt(actie as Actie).length === 0} onclick={() => kies(actie as Actie)}>
+        <button type="button" class="kaart" disabled={opties(actie as Actie).length === 0} onclick={() => kies(actie as Actie)}>
           {#if actie === 'bellen'}
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"/></svg>
           {:else if actie === 'bericht'}
@@ -101,10 +97,10 @@
 <dialog bind:this={blad} aria-labelledby="bladkop" onclose={() => (keuze = null)}>
   <h2 id="bladkop">{keuze === 'bellen' ? 'Bellen naar' : keuze === 'bericht' ? 'Bericht aan' : 'E-mail aan'}</h2>
   {#if keuze}
-    {#each geschikt(keuze) as v (v.volgnummer)}
-      <a class="keuze" href={doel(v, keuze)}>
-        <Avatar tekst={`V${v.volgnummer}`} />
-        <span><span class="naam">{voogdnaam(v)}</span><span class="zacht">Voogd {v.volgnummer} · {keuze === 'email' ? v.email : weergaveTelefoon(nummer(v)!)}</span></span>
+    {#each opties(keuze) as optie (optie.href)}
+      <a class="keuze" href={optie.href}>
+        <Avatar tekst={optie.rol === 'Lid zelf' ? initialen(lid!) : optie.rol.replace('Voogd ', 'V')} groep={optie.rol === 'Lid zelf' ? functie?.speltak : null} />
+        <span><span class="naam">{optie.wie}</span><span class="zacht">{optie.rol} · {optie.soort} · {optie.weergave}</span></span>
       </a>
     {/each}
   {/if}

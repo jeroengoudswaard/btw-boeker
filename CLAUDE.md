@@ -284,6 +284,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 246 | Categorie corrigeren of wisselen | Bij het wijzigen van de categorie de keuze *Correctie* (vanaf Lid sinds) of *Wissel* (vanaf de 1e van de volgende maand); *Correctie* is de standaard zolang er met de oude categorie niets is geïncasseerd (keuze 4A; aanvulling op besluit 54) |
 | 247 | Lid sinds terugval | Heeft een lid in export 4 geen startdatum, dan geldt de *Startdatum functie* uit export 1 (keuze 5A; aanvulling op besluit 24) |
 | 248 | Ronding webapp | Vlakken en knoppen in de webapp 8 px, net als de desktop (keuze 1A); pull request v0.14.0 pas na de Windows-run en de visuele controle (keuze 2B) |
+| 249 | Bellen, bericht en e-mail in de webapp | Het keuzeblad toont alle mogelijkheden: voogd 1, voogd 2 en het lid zelf, met mobiel en vast als aparte regels; bij één mogelijkheid direct. Een bericht alleen naar mobiele nummers (+316, +324). Aanvulling op besluit 223 (keuze A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -517,7 +518,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 - **v0.14.1 Webapp in dezelfde stijl (besluiten 243 en 248): gereed** (2026-11-04), op een lokale branch `webapp-v0.14.1`; een eigen pull request na de merge van v0.14.0. Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
   - Palet, letterschaal, raster en rondingen 8 px gelijk aan de desktop; initialen in de groepskleur (zelfde berekening als `Onderdeelkleuren.VoorGroep`); onderbalk met onderdeelkleur; test `ontwerp.test.ts`.
-  - Tests (Linux): svelte-check 400 bestanden 0 fouten, Vitest 34/34, Playwright 4 geslaagd (plus de 2 schermafbeeldingen licht en donker, bekeken); .NET: nieuwe theorie `Groepskleur_is_gelijk_aan_die_in_de_webapp` (5 gevallen).
+  - Besluit 249: keuzeblad bij Bellen, Bericht en E-mail met voogd 1, voogd 2 en het lid zelf (`contact.ts`, `contactopties`).
+  - Tests (Linux): svelte-check 402 bestanden 0 fouten, Vitest 39/39, Playwright 4 geslaagd (plus de 2 schermafbeeldingen licht en donker, bekeken); .NET: nieuwe theorie `Groepskleur_is_gelijk_aan_die_in_de_webapp` (5 gevallen).
   - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`, en de .NET-suite (verwacht 1011/1011, App 271).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
