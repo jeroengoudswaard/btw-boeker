@@ -515,6 +515,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Webapp niet opnieuw getest: geen wijzigingen in `webapp/` sinds v0.13.1.
     - **Opgelost (2026-11-03, alleen testcode):** de array is een `static readonly`-veld. Werkwijze voortaan: in de cloudsessie ook het echte testproject bouwen met `dotnet build tests/Verenigd.App.Tests -p:EnableWindowsTargeting=true`; die build vond de CA1861-fout wel (gecontroleerd). **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 1006/1006, App 266), plus de visuele controle.
 
+- **v0.14.1 Webapp in dezelfde stijl (besluiten 243 en 248): gereed** (2026-11-04), op een lokale branch `webapp-v0.14.1`; een eigen pull request na de merge van v0.14.0. Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Palet, letterschaal, raster en rondingen 8 px gelijk aan de desktop; initialen in de groepskleur (zelfde berekening als `Onderdeelkleuren.VoorGroep`); onderbalk met onderdeelkleur; test `ontwerp.test.ts`.
+  - Tests (Linux): svelte-check 400 bestanden 0 fouten, Vitest 34/34, Playwright 4 geslaagd (plus de 2 schermafbeeldingen licht en donker, bekeken); .NET: nieuwe theorie `Groepskleur_is_gelijk_aan_die_in_de_webapp` (5 gevallen).
+  - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`, en de .NET-suite (verwacht 1011/1011, App 271).
+
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
 ## Privacy

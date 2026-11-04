@@ -75,4 +75,17 @@ public class OnderdeelkleurenTests
     {
         Assert.Equal(verwacht, Onderdeelkleuren.Initialen(voornaam, achternaam));
     }
+
+    /// <summary>Besluit 243: dezelfde verwachtingen als src/lib/ontwerp.test.ts in de webapp, zodat beide dezelfde kleur geven.</summary>
+    [Theory]
+    [InlineData("Bevers", "Violet")]
+    [InlineData("Welpen", "Amber")]
+    [InlineData("Scouts", "Groenblauw")]
+    [InlineData("Explorers", "Koraal")]
+    [InlineData("Junioren", "Indigo")]
+    public void Groepskleur_is_gelijk_aan_die_in_de_webapp(string groep, string kleur)
+    {
+        var verwacht = (Kleur)typeof(Onderdeelkleuren).GetField(kleur)!.GetValue(null)!;
+        Assert.Equal(verwacht, Onderdeelkleuren.VoorGroep(groep));
+    }
 }

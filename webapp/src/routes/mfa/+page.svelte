@@ -60,15 +60,15 @@
 </main>
 
 <style>
-  .inlog { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 28px; }
-  .kop { min-height: 260px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 12px; padding-bottom: 28px; text-align: center; }
-  h1 { margin: 0; font-size: 30px; }
+  .inlog { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 32px; }
+  .kop { min-height: 260px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 12px; padding-bottom: 32px; text-align: center; }
+  h1 { margin: 0; font-size: 32px; }
   .kop p { margin: 0; color: var(--zacht); max-width: 290px; }
-  .vak { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .vak { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
   .wie { display: flex; justify-content: space-between; align-items: center; gap: 8px; overflow-wrap: anywhere; }
-  .label { font-size: 13px; font-weight: 600; color: var(--zacht); }
+  .label { font-size: 12px; font-weight: 600; color: var(--zacht); }
   #code {
-    min-height: 56px; border-radius: 14px; border: 2px solid var(--accent); background: var(--achtergrond); font-size: 28px;
+    min-height: 56px; border-radius: 14px; border: 2px solid var(--accent); background: var(--achtergrond); font-size: 24px;
     letter-spacing: 0.4em; text-align: center; font-variant-numeric: tabular-nums;
   }
   .link { background: none; border: 0; color: var(--accent-tekst); font-weight: 600; min-height: 44px; cursor: pointer; }

@@ -42,19 +42,34 @@ export function initialen(lid: Pick<Lid, 'voornaam' | 'achternaam'>): string {
   return ((lid.voornaam[0] ?? '') + (lid.achternaam[0] ?? '')).toUpperCase();
 }
 
-/** Vaste pastelkleur per lid (zelfde ID = zelfde kleur); paren met voldoende contrast. */
-export const KLEUREN = [
-  { vlak: '#DCEEDD', inkt: '#1F5E23' },
-  { vlak: '#DCE8F7', inkt: '#1B4A80' },
-  { vlak: '#F1E0F5', inkt: '#6A2380' },
-  { vlak: '#FBE4D5', inkt: '#8A3A0B' },
-  { vlak: '#EAF0DA', inkt: '#4A5A1B' },
+/**
+ * Besluiten 239 en 243: hetzelfde palet als de desktop-app (Onderdeelkleuren). De tint is de kleur voor 16 % dekkend,
+ * zodat hij in licht en donker klopt; elke kleur haalt minstens 3 : 1 op de tint en de grond van beide thema's.
+ */
+export const PALET = [
+  { naam: 'Koraal', inkt: '#CF5A33' },
+  { naam: 'Amber', inkt: '#AE7209' },
+  { naam: 'Indigo', inkt: '#6A77D7' },
+  { naam: 'Violet', inkt: '#9E63D2' },
+  { naam: 'Blauw', inkt: '#2786B9' },
+  { naam: 'Groenblauw', inkt: '#148D7F' },
+  { naam: 'Grijs', inkt: '#7F7F78' },
 ] as const;
 
-export function kleurVoor(id: string): (typeof KLEUREN)[number] {
+export type Paletkleur = (typeof PALET)[number];
+
+/** De tint achter een pictogram of initialen: de kleur voor 16 % dekkend. */
+export function tint(kleur: Paletkleur): string {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(kleur.inkt.slice(i, i + 2), 16));
+  return `rgba(${r}, ${g}, ${b}, 0.16)`;
+}
+
+/** Vaste kleur per groep, gelijk aan Onderdeelkleuren.VoorGroep in de desktop-app; zonder groep grijs. */
+export function kleurVoorGroep(groep: string | null | undefined): Paletkleur {
+  if (!groep?.trim()) return PALET[6];
   let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return KLEUREN[h % KLEUREN.length];
+  for (let i = 0; i < groep.length; i++) h = (Math.imul(h, 31) + groep.charCodeAt(i)) >>> 0;
+  return PALET[h % 6];
 }
 
 export function leeftijd(geboortedatum: string | null, vandaag = new Date()): number | null {

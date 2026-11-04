@@ -50,7 +50,7 @@
     <p>{stand.geladen ? 'Dit lid is niet (meer) zichtbaar voor u.' : 'Laden…'}</p>
   {:else}
     <div class="kop">
-      <Avatar id={lid.id} tekst={initialen(lid)} grootte={96} />
+      <Avatar groep={functie?.speltak} tekst={initialen(lid)} grootte={72} />
       <h1>{volledigeNaam(lid)}</h1>
       <p>{functie?.speltak} · {lid && isLeiding(lid, functie?.speltak ?? '') ? 'leiding' : 'jeugdlid'} · {lid.lidnummer}</p>
     </div>
@@ -103,7 +103,7 @@
   {#if keuze}
     {#each geschikt(keuze) as v (v.volgnummer)}
       <a class="keuze" href={doel(v, keuze)}>
-        <Avatar id={`voogd${v.volgnummer}${lid?.id}`} tekst={`V${v.volgnummer}`} />
+        <Avatar tekst={`V${v.volgnummer}`} />
         <span><span class="naam">{voogdnaam(v)}</span><span class="zacht">Voogd {v.volgnummer} · {keuze === 'email' ? v.email : weergaveTelefoon(nummer(v)!)}</span></span>
       </a>
     {/each}
@@ -112,35 +112,35 @@
 </dialog>
 
 <style>
-  .boven { display: flex; justify-content: space-between; align-items: center; padding-top: 44px; }
+  .boven { display: flex; justify-content: space-between; align-items: center; padding-top: 48px; }
   .rond { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--tekst); }
   .wijzig { min-height: 44px; padding: 0 16px; display: flex; align-items: center; font-weight: 600; text-decoration: none; }
-  .kop { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 16px; text-align: center; }
-  .kop h1 { margin: 6px 0 0; font-size: 26px; }
+  .kop { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 16px; text-align: center; }
+  .kop h1 { margin: 8px 0 0; font-size: 24px; }
   .kop p { margin: 0; color: var(--zacht); }
-  .snel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .snel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
   .snel button {
-    border: 0; min-height: 76px; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 6px; font-size: 13px; color: var(--tekst); cursor: pointer;
+    border: 0; min-height: 76px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; font-size: 12px; color: var(--tekst); cursor: pointer;
   }
   .snel button svg { color: var(--accent); }
   .snel button:disabled { opacity: 0.45; cursor: default; }
-  .melding { margin: 0 0 10px; }
-  .blok { padding: 6px 0; }
-  .voogd { padding: 10px 20px; }
+  .melding { margin: 0 0 8px; }
+  .blok { padding: 8px 0; }
+  .voogd { padding: 8px 24px; }
   .voogd + .voogd { border-top: 1px solid var(--lijn); }
-  dl { margin: 0; padding: 8px 20px 12px; display: grid; grid-template-columns: minmax(0, 130px) minmax(0, 1fr); gap: 10px 12px; font-size: 15px; }
+  dl { margin: 0; padding: 8px 24px 12px; display: grid; grid-template-columns: minmax(0, 130px) minmax(0, 1fr); gap: 8px 12px; font-size: 16px; }
   dt { color: var(--zacht); }
   dd { margin: 0; overflow-wrap: anywhere; }
   .zacht { color: var(--zacht); font-size: 14px; }
-  .klein { font-size: 12px; text-align: center; margin-top: 14px; }
+  .klein { font-size: 12px; text-align: center; margin-top: 16px; }
   dialog {
-    border: 0; border-radius: 30px; padding: 22px 8px 12px; width: min(100% - 20px, 540px); margin: auto auto 12px;
+    border: 0; border-radius: 8px; padding: 24px 8px 12px; width: min(100% - 20px, 540px); margin: auto auto 12px;
     background: var(--kaart); color: var(--tekst);
   }
   dialog::backdrop { background: rgb(0 0 0 / 0.38); }
-  dialog h2 { margin: 0 0 8px; padding: 0 16px; font-size: 20px; }
-  .keuze { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px; border-radius: 20px; text-decoration: none; color: var(--tekst); }
+  dialog h2 { margin: 0 0 8px; padding: 0 16px; font-size: 16px; }
+  .keuze { display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 0 16px; border-radius: 8px; text-decoration: none; color: var(--tekst); }
   .keuze:hover { background: var(--achtergrond); }
   .keuze .naam, .keuze .zacht { display: block; }
   .breed { width: 100%; margin-top: 8px; }

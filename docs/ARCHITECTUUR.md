@@ -429,3 +429,9 @@ Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀�
 - **Beginsaldi:** `StandaardinrichtingViewModel.Bevestiging` (de `BoekhoudingViewModel` geeft `IDialoogService.Bevestig` mee) en `Bevestigingsvraag`.
 - **Correctie of wissel:** `LidCategorieRegel.IsCorrectie`, `KanCorrigerenOfWisselen` en `Vervangt`; `LidCategorieInvoer.Vervangt` laat de opslag de oude toewijzing verwijderen.
 - **Lid sinds:** `LidGegevens.Startdatum` en `Persoon.Startdatum` (kolom *Startdatum* in `Personen`); `Persoon.LidSinds` = vroegste functiestart, anders deze datum. *Startdatum functie* is in export 1 nu verplicht.
+
+### Webapp in dezelfde stijl (v0.14.1)
+
+- `webapp/src/lib/leden.ts`: `PALET` (gelijk aan `Onderdeelkleuren`), `tint()` (16 % dekkend, werkt in licht en donker) en `kleurVoorGroep()` (zelfde hash als `Onderdeelkleuren.VoorGroep`; `Groepskleur_is_gelijk_aan_die_in_de_webapp` en `ontwerp.test.ts` hebben dezelfde verwachtingen).
+- `Avatar.svelte` kleurt op groep (`groep`), niet meer op lid-ID. De onderbalk kleurt het actieve onderdeel.
+- `ontwerp.test.ts` leest alle `.svelte`- en `.css`-bestanden: lettergroottes 12/14/16/24/32, rondingen 4/8 (pil 10, rondje 14) en afstanden op het raster (plus 96 px boven de grote kop, besluit 222).

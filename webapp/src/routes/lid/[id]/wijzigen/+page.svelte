@@ -94,14 +94,14 @@
 </main>
 
 <style>
-  header { padding: clamp(64px, 14vh, 120px) 8px 10px; }
-  h1 { margin: 0; font-size: 34px; }
+  header { padding: clamp(64px, 14vh, 96px) 8px 8px; }
+  h1 { margin: 0; font-size: 32px; }
   header p { margin: 4px 0 0; color: var(--zacht); }
-  .melding { margin: 6px 0 0; }
+  .melding { margin: 8px 0 0; }
   .gewijzigd { background: var(--accent-vlak); }
   .gewijzigd > span:first-child { color: var(--accent-inkt); font-weight: 600; }
   .knoppen {
-    position: sticky; bottom: 0; display: flex; gap: 10px; padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+    position: sticky; bottom: 0; display: flex; gap: 8px; padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
     background: linear-gradient(transparent, var(--achtergrond) 30%);
   }
   .knoppen > * { flex: 1; }

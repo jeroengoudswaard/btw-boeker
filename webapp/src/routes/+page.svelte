@@ -60,7 +60,7 @@
     <section class="kaart lijst" aria-label={groep.titel}>
       {#each groep.leden as lid (lid.id)}
         <a href={`/lid/${lid.id}`} class="regel">
-          <Avatar id={lid.id} tekst={initialen(lid)} />
+          <Avatar groep={stand.speltak} tekst={initialen(lid)} />
           <span class="tekst">
             <span class="naam">{volledigeNaam(lid)}</span>
             <span class="onder">{onderregel(lid)}</span>
@@ -75,22 +75,22 @@
 
 <style>
   .speltakkeuze select {
-    font: inherit; font-size: 34px; font-weight: 700; border: 0; background: transparent; color: var(--tekst);
-    padding: 0 28px 0 0; appearance: none; min-height: 44px; cursor: pointer;
+    font: inherit; font-size: 32px; font-weight: 600; border: 0; background: transparent; color: var(--tekst);
+    padding: 0 32px 0 0; appearance: none; min-height: 44px; cursor: pointer;
     background-image: linear-gradient(45deg, transparent 50%, var(--zacht) 50%), linear-gradient(135deg, var(--zacht) 50%, transparent 50%);
     background-position: calc(100% - 14px) 55%, calc(100% - 8px) 55%; background-size: 6px 6px; background-repeat: no-repeat;
   }
-  .zoeken { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 16px; border-radius: 23px; background: var(--veld); color: var(--zacht); }
+  .zoeken { display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 8px; background: var(--veld); color: var(--zacht); }
   .zoeken input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 16px; color: var(--tekst); }
   .lijst { padding: 4px 0; }
-  .regel { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 18px; text-decoration: none; color: var(--tekst); }
+  .regel { display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 0 16px; text-decoration: none; color: var(--tekst); }
   .regel + .regel .tekst { border-top: 1px solid var(--lijn); }
   .tekst { flex: 1; min-width: 0; padding: 12px 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
   .naam { font-size: 16px; }
-  .onder { font-size: 13px; color: var(--zacht); }
-  .label { padding: 3px 10px; border-radius: 12px; background: var(--let-op-vlak); color: var(--let-op-inkt); font-size: 12px; font-weight: 600; }
-  .leeg { padding: 22px; margin-top: 14px; }
-  .leeg h2 { margin: 0 0 4px; font-size: 18px; }
+  .onder { font-size: 12px; color: var(--zacht); }
+  .label { padding: 4px 8px; border-radius: 8px; background: var(--let-op-vlak); color: var(--let-op-inkt); font-size: 12px; font-weight: 600; }
+  .leeg { padding: 24px; margin-top: 16px; }
+  .leeg h2 { margin: 0 0 4px; font-size: 16px; }
   .leeg p { margin: 0; color: var(--zacht); }
-  .melding { margin: 14px 0 0; }
+  .melding { margin: 16px 0 0; }
 </style>
