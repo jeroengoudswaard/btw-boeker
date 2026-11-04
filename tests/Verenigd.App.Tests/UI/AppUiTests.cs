@@ -539,18 +539,16 @@ public sealed class AppUiTests : IDisposable
         }
     }
 
-    /// <summary>Elke schermafbeelding even groot, zodat de website een rustig raster heeft.</summary>
+    /// <summary>
+    /// Gemaximaliseerd, zodat het venster altijd binnen het scherm valt. Op de GitHub-runner is het scherm 1024×768: een
+    /// vaste grootte van 1280×800 viel daar rechts buiten beeld en onder de taakbalk (release v0.15.0).
+    /// </summary>
     private static void ZetVenstergrootte(Window venster)
     {
-        if (venster.Patterns.Window.IsSupported && venster.Patterns.Window.Pattern.WindowVisualState.Value != WindowVisualState.Normal)
+        if (venster.Patterns.Window.IsSupported)
         {
-            venster.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Normal);
-        }
-
-        if (venster.Patterns.Transform.IsSupported)
-        {
-            venster.Patterns.Transform.Pattern.Move(40, 40);
-            venster.Patterns.Transform.Pattern.Resize(1280, 800);
+            venster.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+            Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Maximized, Wachttijd);
         }
     }
 
