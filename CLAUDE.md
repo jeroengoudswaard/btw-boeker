@@ -285,6 +285,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 247 | Lid sinds terugval | Heeft een lid in export 4 geen startdatum, dan geldt de *Startdatum functie* uit export 1 (keuze 5A; aanvulling op besluit 24) |
 | 248 | Ronding webapp | Vlakken en knoppen in de webapp 8 px, net als de desktop (keuze 1A); pull request v0.14.0 pas na de Windows-run en de visuele controle (keuze 2B) |
 | 249 | Bellen, bericht en e-mail in de webapp | Het keuzeblad toont alle mogelijkheden: voogd 1, voogd 2 en het lid zelf, met mobiel en vast als aparte regels; bij één mogelijkheid direct. Een bericht alleen naar mobiele nummers (+316, +324). Aanvulling op besluit 223 (keuze A) |
+| 250 | Installatiebestand | Een MSI (WiX), gebouwd door GitHub Actions op Windows bij een versietag (`v*`); de MSI en de webappbuild gaan naar de release `verenigd` in de websiterepository (keuze 1A) |
+| 251 | .NET in de MSI | Self-contained win-x64: werkt direct op Windows 10/11 zonder losse .NET-installatie (keuze 2A) |
+| 252 | Schermafbeeldingen website | Uit een demo-database met verzonnen gegevens, gemaakt door een script in licht en donker; nooit echte gegevens (keuze 3A) |
+| 253 | Codesigning | Voor de bèta geen certificaat; de pagina legt uit hoe je de melding "Onbekende uitgever" (SmartScreen) passeert (keuze 4A) |
+| 254 | Webapp op GitHub Pages (wijzigt besluit 227) | De webapp draait op jeroengoudswaard.github.io/verenigd/app/; beveiligingskoppen via `<meta>` (CSP), zonder frame-ancestors en Permissions-Policy (keuze 5A). De koppeling met Supabase volgt later. Websitepagina *Verenigd* in een nieuwe categorie *Boekhouden en administratie*, met bèta-melding en de opmerking dat het nu alleen voor scouting geschikt is |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -534,6 +539,23 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - **Volledige .NET-suite (2026-11-04, commit `d6740e3`): 1011/1011 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 260, Application 351, Architectuur 34, Infrastructure 95, App 271); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces. De instabiele Alt-test van v0.14.0 slaagde in beide runs (nog niet aangepast, dus blijft een aandachtspunt).
     - Hiermee is de Windows-run voor v0.14.1 groen.
   - **Windows-test na besluit 249 (2026-11-04, Windows 11, commit `db876ff`, met `main` v0.14.0 samengevoegd; Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde; svelte-check 402 bestanden 0 fouten 0 waarschuwingen; Vitest 39/39 (3 bestanden); Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen), inclusief "lid: bellen vraagt eerst wie (voogden en het lid zelf), wijzigen wordt een voorstel". `npm audit --omit=dev`: 0. Hiermee is de webapp-run voor PR #18 groen.
+
+  - Gemerged als PR #18 (2026-11-04, `5df925d`), na de groene webapp-run en groene CI (akkoord van de gebruiker).
+
+- **v0.15.0 Publiceren (besluiten 250–254): gebouwd** (2026-11-04). Zie CHANGELOG.md, docs/ARCHITECTUUR.md en de handleiding docs/PUBLICEREN.md.
+  - Wat er is gebouwd:
+    - `installer/` (WiX 5): MSI met de self-contained publicatie win-x64, per computer, snelkoppeling in Start, vaste UpgradeCode;
+    - `.github/workflows/release.yml`: bij een tag `v*` MSI, webapp (`BASE_PATH=/verenigd/app`) en schermafbeeldingen naar de release `verenigd` in de websiterepository; bij een PR op `installer/` alleen bouwen;
+    - `Demodatabase` (verzonnen groep "Scouting De Voorbeeldgroep", 20 leden, boekingen in het lopende jaar) en de UI-test `Schermafbeeldingen_voor_de_website_uit_de_demodatabase` (alleen met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN`);
+    - webapp op GitHub Pages: basispad via `pad()`, alle pagina's vooraf gebouwd, lid via `/lid?id=…`, CSP in `<meta>` met alleen de ingestelde server, melding "server nog niet ingericht".
+  - Websiterepository (`jeroengoudswaard.github.io`): pagina `verenigd/` (tweetalig, bèta, alleen scouting, SmartScreen-uitleg), categorie *Boekhouden en administratie* met kaart, sitemap, `verenigd:verenigd` in `pages.yml`, schermafbeeldingen van de webapp. **Nog niet gepusht:** de downloadlink werkt pas na de eerste release.
+  - Uitwerkingen:
+    - De desktopschermafbeeldingen komen uit de release-workflow; lukt FlaUI niet op de GitHub-runner, dan gaat de release door zonder (waarschuwing) en kan de gebruiker ze op Windows maken (docs/PUBLICEREN.md).
+    - WiX 5 in plaats van 6 (WiX 6 vraagt een onderhoudsbijdrage, OSMF).
+    - Supabase-adres en publieke sleutel later als repository-variabelen `SUPABASE_URL` en `SUPABASE_PUBLISHABLE_KEY`.
+  - Tests: 1013 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 351, Infrastructure 96 (nieuw: `DemodatabaseTests`), Architectuur 34; ViewModel-tests 251/253 (de 2 Windows-padtests); `Verenigd.App.Tests` bouwt zonder waarschuwingen. Webapp: svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 4 (nieuw: `pages.spec.ts` onder `/verenigd/app`) en 2 overgeslagen.
+  - **Nog door de gebruiker te doen:** het geheim `WEBSITE_TOKEN` aanmaken (docs/PUBLICEREN.md). Na de merge de tag `v0.15.0` pushen; daarna de MSI op Windows installeren en starten, en de websitepagina live zetten.
+  - **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 1013/1013, App 272), plus één keer de schermafbeeldingentest met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN` (controleren of de PNG's goed zijn).
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 

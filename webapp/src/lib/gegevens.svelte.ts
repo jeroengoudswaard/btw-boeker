@@ -2,6 +2,7 @@
 import { goto } from '$app/navigation';
 import { haalLeden, haalVoorstellen, mijnSpeltakken, type Voorstel } from './api';
 import type { Lid } from './leden';
+import { pad } from './pad.ts';
 import { routeVoor, toegang } from './supabase';
 
 export const stand = $state({
@@ -17,7 +18,7 @@ export const stand = $state({
 export async function bewaak(): Promise<boolean> {
   const stap = await toegang();
   if (stap !== 'klaar') {
-    await goto(routeVoor(stap), { replaceState: true });
+    await goto(pad(routeVoor(stap)), { replaceState: true });
     return false;
   }
   return true;

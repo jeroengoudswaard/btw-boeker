@@ -1,0 +1,45 @@
+<!--
+  Verenigd voor Windows 10/11 (64-bit), per computer geïnstalleerd in Program Files.
+  De UpgradeCode blijft altijd gelijk: een nieuwe versie vervangt de oude (MajorUpgrade). De database en instellingen van de
+  gebruiker staan buiten de installatiemap en blijven bij bijwerken en verwijderen staan.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Verenigd"
+           Manufacturer="Jeroen Goudswaard"
+           Version="$(var.Versie)"
+           UpgradeCode="27C7D719-6DE1-4A0B-9E18-0FBA08375583"
+           Language="1043"
+           Scope="perMachine"
+           Compressed="yes">
+    <SummaryInformation Description="Verenigd: leden, contributie en boekhouding voor een scoutinggroep" Codepage="1252" />
+
+    <MajorUpgrade DowngradeErrorMessage="Er is al een nieuwere versie van Verenigd aanwezig. De installatie stopt." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="Verenigd.ico" SourceFile="..\src\Verenigd.App\Assets\Verenigd.ico" />
+    <Property Id="ARPPRODUCTICON" Value="Verenigd.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://jeroengoudswaard.github.io/verenigd/" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Verenigd" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="Snelkoppeling">
+        <Shortcut Id="SnelkoppelingStartmenu"
+                  Name="Verenigd"
+                  Description="Leden, contributie en boekhouding"
+                  Target="[INSTALLFOLDER]Verenigd.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="Verenigd.ico" />
+        <RegistryValue Root="HKLM" Key="Software\Verenigd" Name="Snelkoppeling" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <Feature Id="Verenigd" Title="Verenigd">
+      <Files Directory="INSTALLFOLDER" Include="$(var.PublicatieMap)\**" />
+      <ComponentRef Id="Snelkoppeling" />
+    </Feature>
+  </Package>
+</Wix>

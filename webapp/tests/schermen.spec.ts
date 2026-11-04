@@ -50,18 +50,20 @@ async function server(page: Page) {
   return ingediend;
 }
 
-test.skip(!process.env.SCHERMEN, 'alleen op verzoek: SCHERMEN=1');
+test.skip(!process.env.SCHERMEN, 'alleen op verzoek: SCHERMEN=1 (in test-results) of SCHERMEN=<map> (website, besluit 252)');
+const map = process.env.SCHERMEN === '1' ? 'test-results' : (process.env.SCHERMEN ?? 'test-results');
 
 for (const schema of ['light', 'dark'] as const) {
   test(`schermafbeeldingen ${schema}`, async ({ page }) => {
+    const naam = schema === 'light' ? 'licht' : 'donker';
     await page.emulateMedia({ colorScheme: schema });
     await server(page);
     await sessie(page, 'aal2');
     await page.goto('/');
     await page.getByRole('link', { name: /Bram de Jong/ }).waitFor();
-    await page.screenshot({ path: `test-results/leden-${schema}.png` });
+    await page.screenshot({ path: `${map}/verenigd-webapp-leden-${naam}.png` });
     await page.getByRole('link', { name: /Bram de Jong/ }).click();
     await page.getByRole('heading', { name: 'Bram de Jong' }).waitFor();
-    await page.screenshot({ path: `test-results/lid-${schema}.png` });
+    await page.screenshot({ path: `${map}/verenigd-webapp-lid-${naam}.png` });
   });
 }

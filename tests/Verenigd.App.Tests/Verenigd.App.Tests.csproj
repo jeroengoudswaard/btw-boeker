@@ -26,6 +26,7 @@
     <Compile Include="..\Verenigd.Application.Tests\Bank\CamtVoorbeeld.cs" Link="Boekhouding\CamtVoorbeeld.cs" />
     <Compile Include="..\Verenigd.Application.Tests\Boekhouding\HistorieVoorbeeld.cs" Link="Boekhouding\HistorieVoorbeeld.cs" />
     <Compile Include="..\Verenigd.Infrastructure.Tests\Bijlagen\Testpdf.cs" Link="UI\Testpdf.cs" />
+    <Compile Include="..\Verenigd.Infrastructure.Tests\Demo\Demodatabase.cs" Link="UI\Demodatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

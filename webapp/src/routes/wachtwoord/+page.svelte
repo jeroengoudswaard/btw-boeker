@@ -1,5 +1,6 @@
 <script lang="ts">
   // Na de uitnodiging (besluit 230) of "wachtwoord vergeten": een (nieuw) wachtwoord kiezen.
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { routeVoor, supabase, toegang } from '#lib/supabase.ts';
@@ -12,9 +13,9 @@
   onMount(async () => {
     // De link in de e-mail zet de sessie (detectSessionInUrl); even wachten tot die er is.
     const { data } = await supabase.auth.getSession();
-    if (!data.session) return goto('/inloggen', { replaceState: true });
+    if (!data.session) return goto(pad('/inloggen'), { replaceState: true });
     // Met een gekoppelde app eerst de code; daarna terug naar hier.
-    if ((await toegang()) === 'mfa') return goto('/mfa?verder=/wachtwoord', { replaceState: true });
+    if ((await toegang()) === 'mfa') return goto(pad('/mfa?verder=/wachtwoord'), { replaceState: true });
   });
 
   async function bewaar(e: SubmitEvent) {
@@ -25,7 +26,7 @@
     const { error } = await supabase.auth.updateUser({ password: wachtwoord });
     if (error) return (fout = 'Opslaan lukte niet. Kies een ander wachtwoord of probeer het later opnieuw.');
     wachtwoord = herhaling = '';
-    await goto(routeVoor(await toegang()), { replaceState: true });
+    await goto(pad(routeVoor(await toegang())), { replaceState: true });
   }
 </script>
 

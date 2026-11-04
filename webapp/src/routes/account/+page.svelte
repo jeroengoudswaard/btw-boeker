@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import GroteKop from '#lib/onderdelen/GroteKop.svelte';
@@ -19,7 +20,7 @@
     stand.geladen = false;
     stand.leden = [];
     stand.voorstellen = [];
-    await goto('/inloggen', { replaceState: true });
+    await goto(pad('/inloggen'), { replaceState: true });
   }
 </script>
 
@@ -31,7 +32,7 @@
     <div class="veldregel"><span>Beveiliging</span>✓ Wachtwoord en authenticator-app</div>
   </section>
   <p class="zacht">De gegevens komen uit de ledenadministratie van de vereniging. Wijzigingen zijn voorstellen; de beheerder verwerkt ze.</p>
-  <a class="knop neutraal breed" href="/wachtwoord">Wachtwoord wijzigen</a>
+  <a class="knop neutraal breed" href={pad('/wachtwoord')}>Wachtwoord wijzigen</a>
   <button class="knop neutraal breed" onclick={uitloggen}>Uitloggen</button>
 </main>
 <Onderbalk open={openVoorstellen().length} />

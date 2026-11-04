@@ -1,7 +1,8 @@
 <script lang="ts">
   // Stap 1 van 2: e-mail en wachtwoord; daarna de code uit de authenticator-app (besluit 231).
+  import { pad } from '#lib/pad.ts';
   import { goto } from '$app/navigation';
-  import { routeVoor, supabase, toegang } from '#lib/supabase.ts';
+  import { routeVoor, serverIngericht, supabase, toegang } from '#lib/supabase.ts';
 
   let email = $state('');
   let wachtwoord = $state('');
@@ -20,7 +21,7 @@
       return;
     }
     wachtwoord = '';
-    await goto(routeVoor(await toegang()), { replaceState: true });
+    await goto(pad(routeVoor(await toegang())), { replaceState: true });
   }
 
   async function vergeten() {
@@ -29,7 +30,7 @@
       fout = 'Vul eerst uw e-mailadres in.';
       return;
     }
-    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${location.origin}/wachtwoord` });
+    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${location.origin}${pad('/wachtwoord')}` });
     melding = 'Als dit adres bekend is, ontvangt u een e-mail om een nieuw wachtwoord te kiezen.';
   }
 </script>
@@ -44,11 +45,14 @@
     <label class="veldregel"><span>E-mailadres</span><input type="email" autocomplete="username" required bind:value={email} /></label>
     <label class="veldregel"><span>Wachtwoord</span><input type="password" autocomplete="current-password" required bind:value={wachtwoord} /></label>
   </form>
+  {#if !serverIngericht}
+    <p class="melding info" role="status" data-testid="niet-ingericht">⚠ De server voor deze webapp is nog niet ingericht. Inloggen kan pas als de beheerder de koppeling heeft gemaakt.</p>
+  {/if}
   {#if fout}<p class="fout" role="alert">✕ {fout}</p>{/if}
   {#if melding}<p class="melding info" role="status">{melding}</p>{/if}
   <div class="vul"></div>
-  <button type="button" class="link" onclick={vergeten}>Wachtwoord vergeten?</button>
-  <button class="knop hoofd" form="inlog" disabled={bezig}>Inloggen</button>
+  <button type="button" class="link" onclick={vergeten} disabled={!serverIngericht}>Wachtwoord vergeten?</button>
+  <button class="knop hoofd" form="inlog" disabled={bezig || !serverIngericht}>Inloggen</button>
 </main>
 
 <style>

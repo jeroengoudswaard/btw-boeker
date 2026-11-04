@@ -13,6 +13,7 @@ using Verenigd.Application.Instellingen;
 using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Instellingen;
 using Verenigd.Infrastructure.Pdf;
+using Verenigd.Infrastructure.Tests.Demo;
 using Verenigd.Tests.Gedeeld;
 using static Verenigd.Application.Tests.Import.Sol3Voorbeeld;
 using FlauiApplicatie = FlaUI.Core.Application;
@@ -493,6 +494,72 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
+    /// <summary>
+    /// Besluit 252: schermafbeeldingen voor de website, uit een demodatabase met verzonnen gegevens, in licht en donker.
+    /// Draait alleen als <c>VERENIGD_WEBSITE_SCHERMAFBEELDINGEN</c> naar een map wijst (de release-workflow zet dat).
+    /// </summary>
+    [Fact(Timeout = Timeout * 2)]
+    [Trait("Categorie", "Schermafbeeldingen")]
+    public async Task Schermafbeeldingen_voor_de_website_uit_de_demodatabase()
+    {
+        var uitvoer = Environment.GetEnvironmentVariable("VERENIGD_WEBSITE_SCHERMAFBEELDINGEN");
+        if (string.IsNullOrWhiteSpace(uitvoer))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(uitvoer);
+        var db = Path.Combine(_datamap, "voorbeeldgroep.vdb");
+        await Demodatabase.MaakAsync(db, _datamap, DateTimeOffset.Now);
+
+        foreach (var (thema, naam) in new[] { (Thema.Licht, "licht"), (Thema.Donker, "donker") })
+        {
+            BewaarInstellingen(new GebruikersInstellingen { LaatsteDatabase = db, Thema = thema, StartwizardGetoond = true });
+            var venster = Start();
+            VoerWachtwoordIn(venster, Demodatabase.Wachtwoord);
+            Assert.True(
+                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - voorbeeldgroep.vdb - Verenigd", Wachttijd).Result,
+                venster.Title);
+            ZetVenstergrootte(venster);
+
+            Zoek(venster, "Startkaarten");
+            Schermafbeelding(venster, uitvoer, $"start-{naam}");
+            Kies(venster, "Nav_Leden");
+            Zoek(venster, "Ledenlijst");
+            Schermafbeelding(venster, uitvoer, $"leden-{naam}");
+            Kies(venster, "Nav_Boekhouding");
+            Zoek(venster, "Journaalposten");
+            Schermafbeelding(venster, uitvoer, $"boekhouding-{naam}");
+            Kies(venster, "Nav_Boekhouding.Rapporten");
+            Zoek(venster, "Rapport");
+            Schermafbeelding(venster, uitvoer, $"rapport-{naam}");
+            Sluit(venster);
+            _app!.Dispose();
+            _app = null;
+        }
+    }
+
+    /// <summary>Elke schermafbeelding even groot, zodat de website een rustig raster heeft.</summary>
+    private static void ZetVenstergrootte(Window venster)
+    {
+        if (venster.Patterns.Window.IsSupported && venster.Patterns.Window.Pattern.WindowVisualState.Value != WindowVisualState.Normal)
+        {
+            venster.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Normal);
+        }
+
+        if (venster.Patterns.Transform.IsSupported)
+        {
+            venster.Patterns.Transform.Pattern.Move(40, 40);
+            venster.Patterns.Transform.Pattern.Resize(1280, 800);
+        }
+    }
+
+    private static void Schermafbeelding(Window venster, string map, string naam)
+    {
+        Thread.Sleep(600); // Animaties van het Fluent-thema en het laden van de pagina laten uitlopen.
+        Capture.Element(venster).ToFile(Path.Combine(map, $"verenigd-{naam}.png"));
+    }
+
     private static void Kies(AutomationElement venster, string automationId) => Zoek(venster, automationId).AsListBoxItem().Select();
 
     /// <summary>
@@ -500,7 +567,7 @@ public sealed class AppUiTests : IDisposable
     /// foreground lock) kwamen de toetsen elders terecht; nu stopt de test dan zonder te typen, zodat het testwachtwoord
     /// nooit in een ander venster belandt.
     /// </summary>
-    private void VoerWachtwoordIn(Window venster)
+    private void VoerWachtwoordIn(Window venster, string wachtwoord = Wachtwoord)
     {
         var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result
             ?? throw new Xunit.Sdk.XunitException("Het wachtwoordvenster verscheen niet. " + Diagnose(venster));
@@ -521,7 +588,7 @@ public sealed class AppUiTests : IDisposable
             throw new Xunit.Sdk.XunitException("Het wachtwoordveld kreeg geen toetsenbordfocus; er is niets getypt. " + Diagnose(venster));
         }
 
-        Keyboard.Type(Wachtwoord);
+        Keyboard.Type(wachtwoord);
         Keyboard.Type(VirtualKeyShort.ENTER);
     }
 

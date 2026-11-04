@@ -1,5 +1,6 @@
 <script lang="ts">
   // Lid: grote avatar, snelle knoppen (besluiten 223 en 249: kiezen uit voogd 1, voogd 2 en het lid zelf), voogden en gegevens.
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import { page } from '$app/state';
   import Avatar from '#lib/onderdelen/Avatar.svelte';
@@ -9,7 +10,7 @@
   import { weergaveTelefoon } from '#lib/telefoon.ts';
   import { veldOmschrijving } from '#lib/voorstellen.ts';
 
-  const lid = $derived(stand.leden.find((l) => l.id === page.params.id));
+  const lid = $derived(stand.leden.find((l) => l.id === page.url.searchParams.get('id')));
   const voogden = $derived(lid?.voogden ?? []);
   const open = $derived(lid ? openVoorstellen(lid.id) : []);
   let keuze: Actie | null = $state(null);
@@ -36,10 +37,10 @@
 
 <main class="pagina">
   <div class="boven">
-    <a href="/" class="rond" aria-label="Terug naar Leden">
+    <a href={pad('/')} class="rond" aria-label="Terug naar Leden">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </a>
-    {#if lid}<a href={`/lid/${lid.id}/wijzigen`} class="wijzig">Wijzigen</a>{/if}
+    {#if lid}<a href={pad(`/lid/wijzigen?id=${encodeURIComponent(lid.id)}`)} class="wijzig">Wijzigen</a>{/if}
   </div>
 
   {#if !lid}
