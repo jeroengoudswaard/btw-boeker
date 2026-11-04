@@ -149,7 +149,8 @@ public static class Sol3Inlezer
             huishouden?.Waarde(Kolom.Toevoeging),
             huishouden is null ? null : LeesPostcode(huishouden, land, melder),
             huishouden?.Waarde(Kolom.Plaats) is { } plaats ? Plaatsnaam(plaats) : null,
-            land);
+            land,
+            Datum(lid, Kolom.Startdatum, export, melder));
     }
 
     private static string? LeesPostcode(CsvRegel huishouden, string? land, Melder melder)

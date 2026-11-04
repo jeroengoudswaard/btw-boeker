@@ -20,21 +20,23 @@
             <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
             <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
             <conv:HoofdactieStijlConverter x:Key="HoofdactieStijl" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeelkleur" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeeltint" Tint="True" />
 
             <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
             <!-- Standaardmaten volgens de Windows-richtlijnen (veelvouden van 4/8). -->
-            <Thickness x:Key="PaginaMarge">40,28,40,28</Thickness>
+            <Thickness x:Key="PaginaMarge">48,24,48,32</Thickness>
             <Thickness x:Key="KaartPadding">16</Thickness>
 
             <Style x:Key="Paginatitel" TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource Koplettertype}" />
-                <Setter Property="FontSize" Value="28" />
+                <Setter Property="FontSize" Value="24" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Margin" Value="0,0,0,16" />
             </Style>
             <Style x:Key="Sectietitel" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontSize" Value="16" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Margin" Value="0,8,0,8" />
             </Style>
@@ -57,15 +59,16 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Padding" Value="18" />
+                <Setter Property="Padding" Value="16" />
             </Style>
             <Style x:Key="Knoppenbalk" TargetType="StackPanel">
                 <Setter Property="Orientation" Value="Horizontal" />
                 <Setter Property="HorizontalAlignment" Value="Right" />
                 <Setter Property="Margin" Value="0,24,0,0" />
             </Style>
+            <!-- Besluit 240: knoppen in de voet van een venster even breed (120 px), de hoofdactie rechts. -->
             <Style x:Key="DialoogKnop" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="MinWidth" Value="96" />
+                <Setter Property="MinWidth" Value="120" />
                 <Setter Property="Margin" Value="8,0,0,0" />
             </Style>
         </ResourceDictionary>

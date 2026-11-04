@@ -69,7 +69,7 @@
                 <Button Command="{Binding AfdrukkenCommand}" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Afdrukken, ook naar PDF (Ctrl+P)"
                         AutomationProperties.AutomationId="Afdrukken">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE749;" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE749;" VerticalAlignment="Center" Margin="0,0,8,0" />
                         <AccessText Text="Af_drukken..." />
                     </StackPanel>
                 </Button>
@@ -213,16 +213,16 @@
                                         <ItemsControl ItemsSource="{Binding Postbijlagen}" AutomationProperties.AutomationId="PostBijlagenlijst" Focusable="False">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="{x:Type vm:BijlageRegel}">
-                                                    <DockPanel Margin="0,2">
-                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" Margin="4,0,0,0"
+                                                    <DockPanel Margin="0,4">
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="8,4" Margin="4,0,0,0"
                                                                 ToolTip="Verwijderen" AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Verwijder {0}}"
                                                                 Command="{Binding DataContext.BijlageVerwijderenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}" />
-                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74E;" Padding="6,2" Margin="4,0,0,0"
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE74E;" Padding="8,4" Margin="4,0,0,0"
                                                                 ToolTip="Opslaan als..." AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Sla {0} op als}"
                                                                 Command="{Binding DataContext.BijlageOpslaanCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}" />
-                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE8A7;" Padding="6,2" Margin="4,0,0,0"
+                                                        <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE8A7;" Padding="8,4" Margin="4,0,0,0"
                                                                 ToolTip="Bekijken" AutomationProperties.Name="{Binding Bestandsnaam, StringFormat=Bekijk {0}}"
                                                                 Command="{Binding DataContext.BijlageBekijkenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                 CommandParameter="{Binding}" />
@@ -278,7 +278,7 @@
                                         <DataGridTemplateColumn Width="Auto">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
-                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" ToolTip="Regel verwijderen"
+                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="8,4" ToolTip="Regel verwijderen"
                                                             AutomationProperties.Name="Regel verwijderen"
                                                             Command="{Binding DataContext.VerwijderRegelCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}" />
@@ -652,7 +652,7 @@
                                 <Button Command="{Binding FactuurPdfCommand}" Margin="0,0,8,0" ToolTip="De factuur opslaan als PDF met betaal-QR-code"
                                         AutomationProperties.AutomationId="FactuurPdf">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xEA90;" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xEA90;" VerticalAlignment="Center" Margin="0,0,8,0" />
                                         <AccessText Text="Als PDF opslaa_n..." />
                                     </StackPanel>
                                 </Button>
@@ -776,7 +776,7 @@
                                         <DataGridTemplateColumn Width="Auto">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:FactuurregelRij}">
-                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="6,2" ToolTip="Regel verwijderen"
+                                                    <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE74D;" Padding="8,4" ToolTip="Regel verwijderen"
                                                             AutomationProperties.Name="Regel verwijderen"
                                                             Command="{Binding DataContext.RegelVerwijderenCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}" />
@@ -862,7 +862,7 @@
                                 <TextBox x:Name="RelatieIban" Grid.Row="6" Grid.Column="1" Margin="0,0,0,8" FontFamily="Consolas" MaxLength="42"
                                          Text="{Binding Iban, UpdateSourceTrigger=PropertyChanged}" ToolTip="Wordt gebruikt om betalingen in de bank te herkennen"
                                          AutomationProperties.AutomationId="RelatieIban" />
-                                <TextBlock Grid.Row="7" Text="Soort" VerticalAlignment="Center" Margin="5,0,0,8" />
+                                <TextBlock Grid.Row="7" Text="Soort" VerticalAlignment="Center" Margin="4,0,0,8" />
                                 <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
                                     <CheckBox Content="Debiteur" IsChecked="{Binding IsDebiteur}" Margin="0,0,16,0" />
                                     <CheckBox Content="Crediteur" IsChecked="{Binding IsCrediteur}" Margin="0,0,16,0" />

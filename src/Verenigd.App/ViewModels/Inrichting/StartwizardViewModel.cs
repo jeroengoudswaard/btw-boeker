@@ -36,9 +36,6 @@ public interface IStartwizardRegie
     Task RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze);
 
     Task ImporteerBankafschriftAsync(AdministratieSoort administratie);
-
-    /// <summary>Opent Contributie · Vereniging op het subtabblad Tarieven.</summary>
-    void OpenTarieven();
 }
 
 /// <summary>Eén stap in de stappenbalk bovenaan.</summary>
@@ -164,7 +161,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
         new(Status.IncassoIngesteld, Status.IncassoIngesteld ? "De incassogegevens zijn ingevuld." : "Nog geen incassogegevens: kies Extra › Instellingen › Incasso."),
         new(Status.TarievenIngevuld, Status.TarievenIngevuld
             ? string.Create(CultureInfo.CurrentCulture, $"De tarieven van {Jaar} zijn ingevuld.")
-            : string.Create(CultureInfo.CurrentCulture, $"Nog geen tarieven voor {Jaar}: open Contributie › Tarieven.")),
+            : string.Create(CultureInfo.CurrentCulture, $"Nog geen tarieven voor {Jaar}: vul ze hieronder in.")),
     ];
 
     /// <summary>Laadt de status en de gegevens van de stappen.</summary>
@@ -260,20 +257,24 @@ public sealed partial class StartwizardViewModel : ObservableObject
     [RelayCommand]
     private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(BankVoor));
 
-    /// <summary>
-    /// De tarieven staan op het subtabblad Tarieven (per boekjaar en categorie); de wizard bewaart de incassogegevens,
-    /// onthoudt deze stap en opent dat subtabblad.
-    /// </summary>
+    /// <summary>Besluit 245: de tarieven van dit jaar per categorie, in de stap Contributie zelf.</summary>
+    public Verzameling<TariefRegel> Tarieven { get; } = [];
+
     [RelayCommand]
-    private async Task TarievenInvullenAsync()
+    private async Task LaadTarievenAsync()
     {
-        if (!await BewaarStapAsync())
+        if (_regie.Sessie is not { } sessie)
         {
+            Tarieven.Vervang([]);
             return;
         }
 
-        _regie.OpenTarieven();
-        await LaterVerderAsync();
+        var speltakken = (await sessie.Leden.HaalGroepenAsync()).Where(g => g.Soort == Domain.Leden.GroepSoort.Speltak).Select(g => g.Naam);
+        await new Application.Incasso.IncassoDienst(sessie, _tijd).ZorgVoorStandaardcategorieenAsync(speltakken);
+        var stand = await sessie.Contributie.LaadAsync();
+        Tarieven.Vervang(stand.Categorieen
+            .OrderBy(c => c.Soort).ThenBy(c => c.Naam, StringComparer.CurrentCulture)
+            .Select(c => new TariefRegel(c, stand.Tarieven.FirstOrDefault(t => t.Boekjaar == Jaar && t.Categorie.Id == c.Id))));
     }
 
     private async Task NaDatabaseAsync(Func<Task> actie)
@@ -320,6 +321,22 @@ public sealed partial class StartwizardViewModel : ObservableObject
             }
         }
 
+        if (Huidig == Startstap.Contributie && _regie.Sessie is { } contributieSessie)
+        {
+            if (Tarieven.FirstOrDefault(t => t.Fout is not null) is { } tariefFout)
+            {
+                Foutmelding = $"{tariefFout.Categorie}: {tariefFout.Fout}";
+                return false;
+            }
+
+            var bedragen = Tarieven.Where(t => t.IsGewijzigd && t.Bedrag is not null).ToDictionary(t => t.CategorieId, t => t.Bedrag!.Value);
+            if (bedragen.Count > 0)
+            {
+                await contributieSessie.Contributie.BewaarTarievenAsync(Jaar, bedragen);
+                await LaadTarievenAsync();
+            }
+        }
+
         if (Huidig == Startstap.Contributie && Incasso is { IsGewijzigd: true } incasso)
         {
             if (incasso.Fout is { } fout)
@@ -356,6 +373,8 @@ public sealed partial class StartwizardViewModel : ObservableObject
             {
                 await Incasso.LaadCommand.ExecuteAsync(null);
             }
+
+            await LaadTarievenAsync();
         }
 
         MarkeerStappen();

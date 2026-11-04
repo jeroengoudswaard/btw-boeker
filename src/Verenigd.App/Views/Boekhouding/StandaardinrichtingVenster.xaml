@@ -74,7 +74,7 @@
                 <ItemsControl ItemsSource="{Binding Speltakken}" AutomationProperties.Name="Speltakken" AutomationProperties.AutomationId="Speltakken">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:SpeltakKeuze}">
-                            <CheckBox Content="{Binding Naam}" IsChecked="{Binding IsGekozen}" Margin="0,0,0,6" />
+                            <CheckBox Content="{Binding Naam}" IsChecked="{Binding IsGekozen}" Margin="0,0,0,8" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -122,8 +122,38 @@
                     <ComboBox x:Name="BeginjaarKeuze" ItemsSource="{Binding Beginjaren}" SelectedItem="{Binding Beginjaar}" Width="90"
                               ToolTip="Het eerste boekjaar in Verenigd; de beginsaldi gelden per 1 januari van dat jaar" AutomationProperties.AutomationId="InrichtenBeginjaar" />
                 </StackPanel>
+                <!-- Besluit 244: dit is definitief; daarna alleen nog memoriaalboekingen. -->
+                <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" Margin="0,0,0,12"
+                                AutomationProperties.Name="Definitief" AutomationProperties.AutomationId="BeginsaldiDefinitief">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="⚠" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Top"
+                                   Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="Dit is definitief" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Toelichting}" Margin="0,4,0,0"
+                                       Text="Het beginjaar en de beginsaldi worden de openingsbalans van de boekhouding. Daarna kunt u ze niet meer wijzigen: een fout herstelt u met een memoriaalboeking. Neem de bedragen dus over uit de eindbalans of de bankafschriften per 31 december van het vorige jaar." />
+                        </StackPanel>
+                    </DockPanel>
+                </tg:Groepskader>
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,12" AutomationProperties.Name="Uitleg debet en credit">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Debet" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}"
+                                   Text="Wat de vereniging heeft of nog krijgt: het saldo op de bank en in de kas, nog te ontvangen contributie of bedragen die al vooruit zijn betaald." />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Credit" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}"
+                                   Text="Waar dat tegenover staat: het eigen vermogen (de reserve) en wat de vereniging nog moet betalen, zoals openstaande rekeningen of vooruit ontvangen bedragen." />
+                    </StackPanel>
+                </Grid>
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,8" TextWrapping="Wrap"
-                           Text="Vul de saldi in waarmee de groep begint, bijvoorbeeld het banksaldo (debet) en de reserve (credit). Leeg laten mag; dan begint u zonder openingsbalans." />
+                           Text="Bij een kloppende balans is het totaal debet gelijk aan het totaal credit. Leeg laten mag; dan begint u zonder openingsbalans." />
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
                     <TextBlock>
                         <Run Text="Totaal debet " /><Run Text="{Binding TotaalDebettekst, Mode=OneWay}" FontWeight="SemiBold" />

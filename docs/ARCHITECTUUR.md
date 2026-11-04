@@ -417,3 +417,15 @@ Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀�
 - SvelteKit 3.1, adapter-static 4.0, vite-plugin-svelte 7.3, Vite 8.3, Vitest 4.1 en TypeScript 6.0: telkens de nieuwste versie die minstens 2 weken oud was. TypeScript 7 en Vitest 5 zijn bewust overgeslagen (lossen niets op; Vitest 5 loopt in npm 10 vast, zie hieronder).
 - `npm audit --omit=dev --audit-level=high` staat in de CI-job `webapp-en-database`: een kwetsbaarheid in wat bij de gebruiker komt laat de build falen. Ontwikkelpakketten tellen daar niet mee.
 - Het lockbestand is gemaakt met npm 11: npm 10 (10.9.x) stopt bij het opnieuw berekenen van deze afhankelijkheden met `Cannot read properties of null (reading 'edgesOut')`. `npm ci` werkt met npm 10 wel. Pakketten wijzigen: `npx npm@11 install`.
+
+## Kleur en rust (v0.14.0, besluiten 239–247)
+
+- **Onderdeelkleuren** (`ViewModels/Onderdeelkleuren.cs`): één palet (Koraal, Amber, Indigo, Violet, Blauw, Groenblauw, Grijs) voor licht én donker; elke kleur haalt minstens 3 : 1 op de tint (16 % dekking) en op de grond van beide thema's (test). `Voor(ModuleSoort)`, `OnderdeelVan(Startkaartsoort)`, `VoorGroep(naam)` (vaste kleur per groep, voor initialen) en `Initialen`. In XAML via `OnderdeelkleurConverter` (`Onderdeelkleur`, `Onderdeeltint`) en `{conv:Paletkleur Naam=…}`.
+- **Stijlen** in `FluentMica.xaml`: `Welkomstitel` (32), `Pictogramtegel`, `Keuzetegel`, `Hoofdtegel` (de gekleurde keuze), `Tekstknop`. `Paginatitel` is 24 en `Sectietitel` 16; `DialoogKnop` minstens 120 px.
+- **Paginakop uit de schil:** `TabbladViewModel.Paginatitel` en `Omschrijving` (uit `ModuleDefinitie.Omschrijving`); de schil tekent de band (onderdeelkleur), de titel, de zin en de administratie. Pagina's tekenen geen eigen titel meer.
+- **Architectuurtests** (XAML als XML gelezen): lettergroottes 12/16/24/32 (pictogrammen 10–48), `Margin`/`Padding`/`Thickness` op 0/4/8/12/16/24/32/48, `CornerRadius` 4/8 (pil 10, rondje 14).
+- **Laatst geopend:** `ShellViewModel.HeeftLaatsteDatabase`, `LaatsteDatabaseNaam`, `LaatsteDatabaseMap`, `OpenLaatsteDatabaseCommand`.
+- **Startwizard:** `StartwizardViewModel.Tarieven` (`TariefRegel`, zoals Contributie › Tarieven) en `LaadTarievenCommand`; bewaren bij *Volgende*.
+- **Beginsaldi:** `StandaardinrichtingViewModel.Bevestiging` (de `BoekhoudingViewModel` geeft `IDialoogService.Bevestig` mee) en `Bevestigingsvraag`.
+- **Correctie of wissel:** `LidCategorieRegel.IsCorrectie`, `KanCorrigerenOfWisselen` en `Vervangt`; `LidCategorieInvoer.Vervangt` laat de opslag de oude toewijzing verwijderen.
+- **Lid sinds:** `LidGegevens.Startdatum` en `Persoon.Startdatum` (kolom *Startdatum* in `Personen`); `Persoon.LidSinds` = vroegste functiestart, anders deze datum. *Startdatum functie* is in export 1 nu verplicht.

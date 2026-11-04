@@ -4,6 +4,23 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.14.0] - 2026-11-03: Kleur en rust (besluiten 239–247)
+
+### Gewijzigd
+- **Ontwerpsysteem** (besluiten 239–240):
+  - kleur met betekenis: de administratie houdt de accentkleur, elk onderdeel krijgt een eigen kleur (Leden koraal, Contributie amber, Boekhouding indigo, Begroting violet, E-mail blauw, Webapp groenblauw), in het pictogram en als band boven de pagina;
+  - vijf lettergroottes (32, 24, 16, 14, 12), afstanden op een raster van 4 tot 48 px, rondingen 4 en 8 px; drie architectuurtests bewaken dit.
+- **Elke pagina dezelfde kop** (besluit 242): titel, één zin uitleg en de administratie, uit de schil.
+- **Welkomstscherm** (besluit 241): drie even grote tegels, *Nieuwe database* als enige gekleurd, en *Laatst geopend* met de laatst gebruikte database.
+- **Start:** kerncijfers en kaarten even breed; het getal op een kaart in de kleur van het onderdeel.
+- **Leden:** gekleurde initialen per groep. De knoppen onderaan een venster zijn even breed.
+- **Startwizard** (besluit 245): de tarieven vult u in de stap Contributie zelf in; de wizard stuurt niet meer naar Contributie › Tarieven.
+- **Beginsaldi** (besluit 244): een kader dat dit definitief is (daarna alleen memoriaalboekingen), uitleg over debet en credit, en een bevestiging met het beginjaar en de totalen.
+- **Categorie van een lid** (besluit 246): bij het wijzigen de keuze *Correctie* (vanaf Lid sinds, vervangt de oude) of *Wissel* (vanaf de 1e van de volgende maand); *Correctie* is de standaard zolang er met de oude categorie niets is geïncasseerd.
+
+### Opgelost
+- **Lid sinds bleef leeg** als de functies in export 4 geen startdatum hadden: de *Startdatum functie* uit export 1 wordt nu ingelezen als terugval (besluit 247, migratie *StartdatumLid*). Bestaande leden krijgen die bij de volgende SOL3-import.
+
 ## [0.13.1] - 2026-11-03: Webapp-pakketten bijgewerkt
 
 ### Gewijzigd

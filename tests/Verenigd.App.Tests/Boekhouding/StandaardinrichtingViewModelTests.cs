@@ -33,6 +33,35 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         return pad;
     }
 
+    /// <summary>Besluit 244: vóór het boeken een bevestiging met het beginjaar en de totalen; nee laat alles staan.</summary>
+    [Fact]
+    public async Task Beginsaldi_worden_pas_geboekt_na_bevestiging_met_beginjaar_en_totalen()
+    {
+        string? vraag = null;
+        var antwoord = false;
+        var wizard = Wizard();
+        wizard.Bevestiging = (_, tekst) =>
+        {
+            vraag = tekst;
+            return antwoord;
+        };
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+        Assert.Equal(InrichtStap.Beginsaldi, wizard.Stap);
+
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+
+        Assert.Equal(InrichtStap.Beginsaldi, wizard.Stap);
+        Assert.Contains("2026", vraag, StringComparison.Ordinal);
+        Assert.Contains(wizard.TotaalDebettekst, vraag, StringComparison.Ordinal);
+        Assert.Contains("memoriaal", vraag, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty((await Dienst.LaadAsync(AdministratieSoort.Vereniging)).Rekeningen);
+
+        antwoord = true;
+        await wizard.VolgendeCommand.ExecuteAsync(null);
+        Assert.Equal(InrichtStap.Klaar, wizard.Stap);
+    }
+
     [Fact]
     public async Task Vereniging_inrichten_met_speltakken_keuzes_en_beginsaldi()
     {

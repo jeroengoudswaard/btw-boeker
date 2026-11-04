@@ -8,7 +8,7 @@
         <ItemsControl ItemsSource="{x:Static imp:Sol3Exportuitleg.Klikroute}" Focusable="False" Margin="0,0,0,8" AutomationProperties.Name="Klikroute in SOL3">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -37,7 +37,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type imp:Sol3Kolom}">
                                             <!-- Optioneel staat ook in de tekst, zodat de kleur niet het enige kenmerk is. -->
-                                            <TextBlock x:Name="Kolomnaam" Text="{Binding Weergave}" Margin="0,0,12,2" />
+                                            <TextBlock x:Name="Kolomnaam" Text="{Binding Weergave}" Margin="0,0,12,4" />
                                             <DataTemplate.Triggers>
                                                 <DataTrigger Binding="{Binding IsVerplicht}" Value="False">
                                                     <Setter TargetName="Kolomnaam" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />

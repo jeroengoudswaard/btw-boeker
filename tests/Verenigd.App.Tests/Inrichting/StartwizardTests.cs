@@ -6,6 +6,8 @@ using Verenigd.App.ViewModels.Inrichting;
 using Verenigd.Application.Inrichting;
 using Verenigd.Application.Instellingen;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien;
+using Verenigd.Domain.Leden;
 
 namespace Verenigd.App.Tests.Inrichting;
 
@@ -214,21 +216,34 @@ public sealed class StartwizardTests
         Assert.NotNull(_beheer.Contributie.Instellingen);
     }
 
+    /// <summary>Besluit 245: de tarieven vult u in de wizard zelf in; Volgende bewaart ze en de wizard blijft open.</summary>
     [Fact]
-    public async Task Tarieven_invullen_sluit_de_wizard_en_opent_contributie_op_tarieven()
+    public async Task Tarieven_worden_in_de_wizard_ingevuld_en_bij_volgende_bewaard()
     {
         var shell = await MaakShellMetOpenDatabase();
+        _beheer.Leden.VoegGroepToe(new Groep("Welpen", GroepSoort.Speltak));
         _dialogen.Startwizard = async w =>
         {
             w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Contributie));
-            await w.TarievenInvullenCommand.ExecuteAsync(null);
-            Assert.True(w.IsGesloten);
+            await w.LaadTarievenCommand.ExecuteAsync(null);
+            var welpen = w.Tarieven.Single(t => t.Categorie == "Jeugdlid Welpen");
+            Assert.False(w.Tarieven.Single(t => t.Categorie == "Leiding").IsBewerkbaar);
+
+            welpen.Bedragtekst = "12,5o";
+            await w.VolgendeCommand.ExecuteAsync(null);
+            Assert.Equal(Startstap.Contributie, w.Huidig);
+            Assert.NotNull(w.Foutmelding);
+
+            welpen.Bedragtekst = "12,50";
+            await w.VolgendeCommand.ExecuteAsync(null);
+            Assert.Equal(Startstap.Klaar, w.Huidig);
+            Assert.False(w.IsGesloten);
         };
 
         await shell.StartwizardCommand.ExecuteAsync(null);
 
-        var contributie = Assert.IsType<ContributieViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(ContributieSubtab.Tarieven, contributie.Subtab);
-        Assert.Equal(new Startwizardvoortgang(Startstap.Contributie, false), _beheer.Startwizard.Voortgang);
+        var tarief = Assert.Single(_beheer.Contributie.Tarieven);
+        Assert.Equal(new Bedrag(1250), tarief.Maandbedrag);
+        Assert.Equal("Jeugdlid Welpen", tarief.Categorie.Naam);
     }
 }

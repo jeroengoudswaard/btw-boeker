@@ -62,8 +62,9 @@ public sealed class ContributieViewModelTests
         Assert.False(vm.HeeftOnopgeslagenWijzigingen);
     }
 
+    /// <summary>Besluit 246: zonder incasso met de oude categorie is een wijziging standaard een correctie vanaf Lid sinds.</summary>
     [Fact]
-    public async Task Categoriewissel_krijgt_standaard_de_eerste_van_volgende_maand()
+    public async Task Categorie_corrigeren_vervangt_de_oude_vanaf_lid_sinds()
     {
         var vm = await OpenMetLedenAsync();
         vm.VoorstellenOvernemenCommand.Execute(null);
@@ -72,9 +73,43 @@ public sealed class ContributieViewModelTests
         var anna = vm.Leden.Single(l => l.Naam == "Anna Vries");
         anna.GekozenCategorie = vm.Categorieen.Single(c => c.Naam == "Jeugdlid Junioren");
 
+        Assert.True(anna.KanCorrigerenOfWisselen);
+        Assert.True(anna.IsCorrectie);
+        Assert.Equal(new DateTime(2018, 11, 7), anna.Ingangsdatum);
+        await vm.BewaarAsync();
+        var annaCategorieen = _omgeving.Opslag.LidCategorieen.Where(c => c.Lidnummer == Lidnummer.Parse("100000001")).ToList();
+        Assert.Equal("Jeugdlid Junioren", Assert.Single(annaCategorieen).Categorie.Naam);
+    }
+
+    /// <summary>Besluiten 54 en 246: een wissel gaat in op de 1e van de volgende maand; de historie blijft.</summary>
+    [Fact]
+    public async Task Categoriewissel_gaat_in_op_de_eerste_van_volgende_maand()
+    {
+        var vm = await OpenMetLedenAsync();
+        vm.VoorstellenOvernemenCommand.Execute(null);
+        await vm.BewaarAsync();
+
+        var anna = vm.Leden.Single(l => l.Naam == "Anna Vries");
+        anna.GekozenCategorie = vm.Categorieen.Single(c => c.Naam == "Jeugdlid Junioren");
+        anna.IsCorrectie = false;
+
         Assert.Equal(new DateTime(2027, 3, 1), anna.Ingangsdatum);
         await vm.BewaarAsync();
         Assert.Equal(4, _omgeving.Opslag.LidCategorieen.Count); // historie blijft bewaard
+
+        anna.IsCorrectie = true;
+        Assert.Equal(new DateTime(2018, 11, 7), anna.Ingangsdatum);
+    }
+
+    [Fact]
+    public async Task Eerste_categorie_kent_geen_keuze_tussen_correctie_en_wissel()
+    {
+        var vm = await OpenMetLedenAsync();
+
+        var anna = vm.Leden.Single(l => l.Naam == "Anna Vries");
+        anna.GekozenCategorie = vm.Categorieen.Single(c => c.Naam == "Jeugdlid Welpen");
+
+        Assert.False(anna.KanCorrigerenOfWisselen);
     }
 
     [Fact]

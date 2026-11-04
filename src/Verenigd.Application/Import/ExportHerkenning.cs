@@ -56,7 +56,7 @@ public static class ExportHerkenning
         [Sol3Export.LedenBasis] =
         [
             Kolom.Lidnummer, Kolom.Voornaam, Kolom.Tussenvoegsel, Kolom.Achternaam, Kolom.Geboortedatum, Kolom.Gender,
-            Kolom.Email, Kolom.Telefoon, Kolom.Status, Kolom.ContactpersoonId,
+            Kolom.Email, Kolom.Telefoon, Kolom.Startdatum, Kolom.Status, Kolom.ContactpersoonId,
         ],
         [Sol3Export.Huishouden] =
         [

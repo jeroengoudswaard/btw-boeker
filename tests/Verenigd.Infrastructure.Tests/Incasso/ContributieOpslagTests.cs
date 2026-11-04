@@ -154,6 +154,22 @@ public sealed class ContributieOpslagTests : IAsyncLifetime, IDisposable
         Assert.Equal("Leiding", LidCategorie.Op(stand.LidCategorieen, lid, new DateOnly(2027, 3, 1))!.Categorie.Naam);
     }
 
+    /// <summary>Besluit 246: een correctie vervangt de oude toewijzing, ook als de ingangsdatum verschuift.</summary>
+    [Fact]
+    public async Task Correctie_vervangt_de_oude_toewijzing()
+    {
+        var welpen = await RichtInAsync();
+        var lid = Lidnummer.Parse("100000001");
+        var leiding = (await Repo.LaadAsync()).Categorieen.Single(c => c.Soort == CategorieSoort.Leiding);
+        await Repo.BewaarLidCategorieenAsync([new(lid, welpen.Id, new DateOnly(2026, 11, 1))]);
+
+        await Repo.BewaarLidCategorieenAsync([new(lid, leiding.Id, new DateOnly(2019, 9, 14), Vervangt: new DateOnly(2026, 11, 1))]);
+
+        var toewijzing = Assert.Single((await Repo.LaadAsync()).LidCategorieen);
+        Assert.Equal("Leiding", toewijzing.Categorie.Naam);
+        Assert.Equal(new DateOnly(2019, 9, 14), toewijzing.Ingangsdatum);
+    }
+
     [Fact]
     public async Task Betaler_met_machtiging_en_leden_verplaatsen()
     {

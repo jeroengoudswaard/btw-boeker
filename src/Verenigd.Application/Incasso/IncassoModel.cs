@@ -57,7 +57,8 @@ public sealed record IncassoVoorstel(
 
 public sealed record IncassoBestand(string Bestandsnaam, byte[] Inhoud);
 
-public sealed record LidCategorieInvoer(Lidnummer Lidnummer, int CategorieId, DateOnly Ingangsdatum);
+/// <param name="Vervangt">Besluit 246: bij een correctie de ingangsdatum van de toewijzing die wordt vervangen.</param>
+public sealed record LidCategorieInvoer(Lidnummer Lidnummer, int CategorieId, DateOnly Ingangsdatum, DateOnly? Vervangt = null);
 
 public sealed record BetalerInvoer(
     Guid? Id,

@@ -11,7 +11,7 @@
              d:DataContext="{d:DesignInstance Type=vm:InstellingenViewModel}">
     <DockPanel>
         <!-- Opdrachtbalk onderaan, zoals in Windows-instellingenvensters -->
-        <Border DockPanel.Dock="Bottom" Padding="40,12" BorderThickness="0,1,0,0"
+        <Border DockPanel.Dock="Bottom" Padding="48,12" BorderThickness="0,1,0,0"
                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0"
@@ -22,15 +22,14 @@
             </StackPanel>
         </Border>
 
-        <TextBlock DockPanel.Dock="Top" Text="Instellingen" Style="{StaticResource Paginatitel}" Margin="40,28,40,12" />
-        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="40,0,40,8"
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="48,0,48,8"
                    Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
 
         <!-- Besluit 219: een tab per onderdeel, zoals de Windows-instellingen; Opslaan onderaan geldt voor alle tabs. -->
-        <TabControl Margin="32,0,32,0" AutomationProperties.AutomationId="InstellingenOnderdelen">
+        <TabControl Margin="32,24,32,0" AutomationProperties.AutomationId="InstellingenOnderdelen">
             <TabItem Header="Administraties" AutomationProperties.AutomationId="SubtabAdministraties">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,20,8,24" MaxWidth="760" HorizontalAlignment="Left">
+                    <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
                            Text="De accentkleur ziet u terug in de wisselaar links bovenaan, het streepje bij de gekozen regel, de tellers en de knoppen in de accentkleur. Zo is altijd duidelijk in welke administratie u werkt." />
 
@@ -54,7 +53,7 @@
             </TabItem>
             <TabItem Header="Incasso" AutomationProperties.AutomationId="SubtabIncasso">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,20,8,24" MaxWidth="760" HorizontalAlignment="Left">
+                    <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">
                 <!-- ===== Incasso (fase 3) ===== -->
                 <tg:Groepspaneel DataContext="{Binding Incasso}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}"
                             AutomationProperties.Name="Incasso (Vereniging)" AutomationProperties.AutomationId="InstellingenIncasso">
@@ -68,7 +67,7 @@
             </TabItem>
             <TabItem Header="Facturen" AutomationProperties.AutomationId="SubtabFacturen">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,20,8,24" MaxWidth="760" HorizontalAlignment="Left">
+                    <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">
                 <!-- ===== Facturen per administratie (besluiten 112 en 209) ===== -->
                 <ItemsControl ItemsSource="{Binding Facturen}" Focusable="False">
                     <ItemsControl.ItemTemplate>
@@ -122,7 +121,7 @@
                                                  Text="{Binding Termijn, UpdateSourceTrigger=PropertyChanged}" />
                                         <Label Grid.Row="8" Content="Tekst onder de _factuur" Target="{Binding ElementName=FactuurVoetVeld}" VerticalAlignment="Center" />
                                         <TextBox x:Name="FactuurVoetVeld" Grid.Row="8" Grid.Column="1" Margin="0,0,0,8" MaxLength="500" Text="{Binding Voettekst, UpdateSourceTrigger=PropertyChanged}" />
-                                        <TextBlock Grid.Row="9" Text="Logo" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                        <TextBlock Grid.Row="9" Text="Logo" VerticalAlignment="Center" Margin="4,0,0,0" />
                                         <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal">
                                             <TextBlock Text="{Binding Logotekst}" VerticalAlignment="Center" Margin="0,0,12,0" AutomationProperties.AutomationId="{Binding Administratie, StringFormat=FactuurLogo{0}}" />
                                             <Button Content="Logo kie_zen..." Command="{Binding KiesLogoCommand}" Margin="0,0,8,0" ToolTip="PNG of JPG, maximaal 2 MB" />
@@ -141,7 +140,7 @@
             </TabItem>
             <TabItem Header="E-mail" AutomationProperties.AutomationId="SubtabEmail">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,20,8,24" MaxWidth="760" HorizontalAlignment="Left">
+                    <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">
                 <!-- ===== E-mail per administratie (besluiten 192, 193 en 211) ===== -->
                 <ItemsControl ItemsSource="{Binding Emailkoppelingen}" Focusable="False">
                     <ItemsControl.ItemTemplate>
@@ -168,16 +167,16 @@
                                         <Label Grid.Row="1" Content="_Het Gmail-adres" Target="{Binding ElementName=AfzenderadresVeld}" VerticalAlignment="Center" />
                                         <TextBox x:Name="AfzenderadresVeld" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8" MaxLength="254" Text="{Binding Afzenderadres, UpdateSourceTrigger=PropertyChanged}"
                                                  ToolTip="Het gmail.com-adres waarmee u bij Google toestemming geeft" AutomationProperties.AutomationId="{Binding Administratie, StringFormat=Afzenderadres{0}}" />
-                                        <TextBlock Grid.Row="2" Text="Clientbestand" VerticalAlignment="Center" Margin="5,0,0,8" />
+                                        <TextBlock Grid.Row="2" Text="Clientbestand" VerticalAlignment="Center" Margin="4,0,0,8" />
                                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
                                             <TextBlock Text="{Binding Clienttekst}" VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="300"
                                                        AutomationProperties.AutomationId="{Binding Administratie, StringFormat=Clientbestand{0}}" />
                                             <Button Content="_Clientbestand inlezen..." Command="{Binding LeesClientbestandCommand}"
                                                     ToolTip="Het JSON-bestand van een OAuth-client van het type Desktop-app" AutomationProperties.AutomationId="{Binding Administratie, StringFormat=ClientbestandInlezen{0}}" />
                                         </StackPanel>
-                                        <TextBlock Grid.Row="3" Text="Koppeling" VerticalAlignment="Top" Margin="5,6,0,0" />
+                                        <TextBlock Grid.Row="3" Text="Koppeling" VerticalAlignment="Top" Margin="4,8,0,0" />
                                         <StackPanel Grid.Row="3" Grid.Column="1">
-                                            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,6,0,8" AutomationProperties.AutomationId="{Binding Administratie, StringFormat=EmailStatus{0}}"
+                                            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,8,0,8" AutomationProperties.AutomationId="{Binding Administratie, StringFormat=EmailStatus{0}}"
                                                        AutomationProperties.LiveSetting="Polite" />
                                             <StackPanel Orientation="Horizontal">
                                                 <Button Content="Koppelen met Google..." Command="{Binding KoppelCommand}" Margin="0,0,8,0"
@@ -198,7 +197,7 @@
             </TabItem>
             <TabItem Header="Groepen" AutomationProperties.AutomationId="SubtabGroepen">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,20,8,24" MaxWidth="760" HorizontalAlignment="Left">
+                    <StackPanel Margin="8,24,8,24" MaxWidth="760" HorizontalAlignment="Left">
                 <!-- ===== Groepen (besluit 215) ===== -->
                 <tg:Groepspaneel DataContext="{Binding Groepen}" Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}" Margin="0,24,0,0"
                                  AutomationProperties.Name="Groepen" AutomationProperties.AutomationId="InstellingenGroepen">
@@ -210,7 +209,7 @@
                     <ItemsControl ItemsSource="{Binding Regels}" Focusable="False">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <DockPanel Margin="0,0,0,6">
+                                <DockPanel Margin="0,0,0,8">
                                     <ComboBox DockPanel.Dock="Right" Width="160" ItemsSource="{Binding Source={x:Static lvm:GroepenInstellingenViewModel.Soorten}}"
                                               SelectedItem="{Binding Soort}" AutomationProperties.Name="{Binding Naam, StringFormat='Soort van {0}'}" />
                                     <TextBlock Text="{Binding Naam}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />

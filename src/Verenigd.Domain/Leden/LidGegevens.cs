@@ -16,7 +16,8 @@ public sealed record LidGegevens(
     string? Toevoeging,
     string? Postcode,
     string? Plaats,
-    string? Land)
+    string? Land,
+    DateOnly? Startdatum = null)
 {
     internal const string Datumnotatie = "dd-MM-yyyy";
 
@@ -38,6 +39,7 @@ public sealed record LidGegevens(
         ("Postcode", g => g.Postcode),
         ("Plaats", g => g.Plaats),
         ("Land", g => g.Land),
+        ("Startdatum", g => g.Startdatum?.ToString(Datumnotatie, System.Globalization.CultureInfo.InvariantCulture)),
     ];
 }
 

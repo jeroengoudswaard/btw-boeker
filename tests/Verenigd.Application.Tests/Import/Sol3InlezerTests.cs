@@ -110,6 +110,15 @@ public class Sol3InlezerTests
         Assert.Null(gegevens.Telefoon);
     }
 
+    /// <summary>Besluit 247: de startdatum uit export 1 gaat mee, als terugval voor "Lid sinds".</summary>
+    [Fact]
+    public void Startdatum_uit_export_1_wordt_ingelezen()
+    {
+        var import = Lees(leden: [Lid(Een)]);
+
+        Assert.Equal(new DateOnly(2025, 9, 19), Enige(import).Gegevens.Startdatum);
+    }
+
     [Fact]
     public void Ongeldig_lidnummer_wordt_overgeslagen_met_waarschuwing()
     {

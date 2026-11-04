@@ -37,6 +37,8 @@ public sealed partial class LidRegel : ObservableObject
             .ThenBy(f => f.Groep.Naam, StringComparer.CurrentCulture)
             .Select(f => new FunctieRegel(f.ToString(), f.Groep.Naam, f.Lidtype, f.IsActief(vandaag), f.Groep.Soort == GroepSoort.Technisch))];
         Groepen = string.Join(", ", Functies.Where(f => f.IsActief && !f.IsTechnisch).Select(f => f.Groep).Distinct());
+        Initialen = Onderdeelkleuren.Initialen(persoon.Voornaam, persoon.Achternaam);
+        Groepskleur = Onderdeelkleuren.VoorGroep(Functies.FirstOrDefault(f => f.IsActief && !f.IsTechnisch)?.Groep);
         Lidtypetekst = string.Join(", ", Functies.Where(f => f.IsActief && f.Lidtype != Lidtype.Onbekend).Select(f => f.Lidtype.ToString()).Distinct());
         Voogden = [.. persoon.Voogden.OrderBy(v => v.Volgnummer).Select(v => new VoogdRegel(
             $"Voogd {v.Volgnummer}",
@@ -69,6 +71,11 @@ public sealed partial class LidRegel : ObservableObject
     public string Groepen { get; }
 
     public string Lidtypetekst { get; }
+
+    /// <summary>Gekleurde initialen in de lijst, met de kleur van de eerste actieve groep.</summary>
+    public string Initialen { get; }
+
+    public Domain.Administraties.Kleur Groepskleur { get; }
 
     public bool IsUitgeschreven => UitgeschrevenOp is not null;
 

@@ -67,6 +67,24 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Voorstel" Binding="{Binding Voorstel.Naam}" IsReadOnly="True" Width="*" />
+                            <!-- Besluit 246: bij een gewijzigde categorie de keuze tussen correctie (vanaf Lid sinds) en wissel (volgende maand). -->
+                            <DataGridTemplateColumn Header="Soort wijziging" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:LidCategorieRegel}">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                                    Visibility="{Binding KanCorrigerenOfWisselen, Converter={StaticResource BoolNaarZichtbaar}}">
+                                            <RadioButton Content="Correctie" IsChecked="{Binding IsCorrectie}" Margin="0,0,12,0" MinWidth="0"
+                                                         GroupName="{Binding Lidnummer, StringFormat=Wijziging{0}}"
+                                                         ToolTip="De oude categorie was fout: de nieuwe geldt vanaf Lid sinds en vervangt de oude."
+                                                         AutomationProperties.Name="{Binding Naam, StringFormat=Correctie voor {0}}" />
+                                            <RadioButton Content="Wissel" IsChecked="{Binding IsCorrectie, Converter={StaticResource Niet}}" MinWidth="0"
+                                                         GroupName="{Binding Lidnummer, StringFormat=Wijziging{0}}"
+                                                         ToolTip="Het lid gaat over naar een andere categorie: de nieuwe geldt vanaf de 1e van de volgende maand."
+                                                         AutomationProperties.Name="{Binding Naam, StringFormat=Wissel voor {0}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Vanaf" Width="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type vm:LidCategorieRegel}">
@@ -136,7 +154,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:LidKeuze}">
                                             <DockPanel Margin="0,0,0,4">
-                                                <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE711;" Padding="6,2"
+                                                <Button DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Content="&#xE711;" Padding="8,4"
                                                         ToolTip="Ontkoppelen" AutomationProperties.Name="{Binding Naam, StringFormat={}{0} ontkoppelen}"
                                                         Command="{Binding DataContext.VerwijderLidCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}" />

@@ -6,6 +6,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Verenigd.App.ViewModels.Inrichting"
+        xmlns:cvm="clr-namespace:Verenigd.App.ViewModels.Contributie"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:StartwizardViewModel}"
         Title="Verenigd instellen"
@@ -40,7 +41,7 @@
                                     Padding="8,4" Margin="0,0,4,4" Background="Transparent" BorderThickness="0"
                                     AutomationProperties.Name="{Binding Toegankelijkenaam}" AutomationProperties.AutomationId="{Binding Stap, StringFormat=Stap{0}}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Teken}" Margin="0,0,6,0" />
+                                    <TextBlock Text="{Binding Teken}" Margin="0,0,8,0" />
                                     <TextBlock x:Name="Steptitel" Text="{Binding Titel}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
                             </Button>
@@ -214,10 +215,36 @@
                 <!-- ===== Contributie ===== -->
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Contributie}">
                     <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                               Text="De gegevens uit het incassocontract; met Volgende worden ze opgeslagen. De tarieven per categorie vult u in onder Contributie › Tarieven." />
-                    <g:IncassoKaart DataContext="{Binding Incasso}" Margin="0,0,0,12" />
-                    <Button Content="_Tarieven invullen..." Command="{Binding TarievenInvullenCommand}" HorizontalAlignment="Left"
-                            ToolTip="Slaat de incassogegevens op, onthoudt deze stap en opent Contributie › Tarieven" AutomationProperties.AutomationId="StartwizardTarieven" />
+                               Text="De gegevens uit het incassocontract en de maandbedragen per categorie; met Volgende worden ze opgeslagen." />
+                    <g:IncassoKaart DataContext="{Binding Incasso}" Margin="0,0,0,24" />
+                    <!-- Besluit 245: de tarieven in de wizard zelf, voor het huidige jaar. -->
+                    <TextBlock Style="{StaticResource Sectietitel}" Margin="0,0,0,4">
+                        <Run Text="Tarieven" /><Run Text=" " /><Run Text="{Binding Jaar, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12"
+                               Text="Het bedrag dat elke maand wordt geïncasseerd. Leiding en Vrijgesteld betalen geen contributie." />
+                    <ItemsControl ItemsSource="{Binding Tarieven}" Focusable="False" MaxWidth="480" HorizontalAlignment="Left"
+                                  AutomationProperties.Name="Tarieven" AutomationProperties.AutomationId="StartwizardTarieven">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type cvm:TariefRegel}">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Categorie}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="€" VerticalAlignment="Center" Margin="0,0,8,0"
+                                               Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                    <TextBox Grid.Column="2" Text="{Binding Bedragtekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right"
+                                             Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}"
+                                             ToolTip="{Binding Fout}" AutomationProperties.Name="{Binding Categorie, StringFormat=Maandbedrag {0}}" />
+                                    <TextBlock Grid.Column="2" Text="geen contributie" Style="{StaticResource Toelichting}" VerticalAlignment="Center"
+                                               Visibility="{Binding IsBewerkbaar, Converter={StaticResource OnwaarNaarZichtbaar}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
 
                 <!-- ===== Klaar ===== -->

@@ -79,7 +79,20 @@
                           AutomationProperties.Name="Ledenlijst" AutomationProperties.AutomationId="Ledenlijst">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Lidnummer" Binding="{Binding Lidnummer}" Width="Auto" />
-                        <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="2*" SortMemberPath="Achternaam" />
+                        <DataGridTemplateColumn Header="Naam" Width="2*" SortMemberPath="Achternaam" ClipboardContentBinding="{Binding Naam}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:LidRegel}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Grid Width="28" Height="28" Margin="0,0,12,0">
+                                            <Ellipse Fill="{Binding Groepskleur, Converter={StaticResource KleurNaarBrush}}" Opacity="0.16" />
+                                            <TextBlock Text="{Binding Initialen}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       Foreground="{Binding Groepskleur, Converter={StaticResource KleurNaarBrush}}" AutomationProperties.Name="" />
+                                        </Grid>
+                                        <TextBlock Text="{Binding Naam}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Groep" Binding="{Binding Groepen}" Width="*" />
                         <DataGridTextColumn Header="Lidtype" Binding="{Binding Lidtypetekst}" Width="Auto" />
                         <DataGridTextColumn Header="Geboortedatum" Binding="{Binding Geboortedatum}" Width="Auto" />
