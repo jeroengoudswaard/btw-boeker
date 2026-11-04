@@ -2,8 +2,9 @@
   // Menubalk onderin: Leden, Voorstellen, Account (besluit 222).
   import { page } from '$app/state';
   import { PALET, tint } from '#lib/leden.ts';
+  import { huidig, pad as metBasis } from '#lib/pad.ts';
   let { open = 0 }: { open?: number } = $props();
-  const pad = $derived(page.url.pathname);
+  const pad = $derived(huidig(page.url.pathname));
   const items = [
     // Besluit 239: het actieve onderdeel in zijn eigen kleur (Leden koraal, Voorstellen groenblauw als de webapp, Account grijs).
     { href: '/', tekst: 'Leden', kleur: PALET[0], actief: (p: string) => p === '/' || p.startsWith('/lid') },
@@ -14,7 +15,7 @@
 
 <nav aria-label="Hoofdmenu">
   {#each items as item (item.href)}
-    <a href={item.href} aria-current={item.actief(pad) ? 'page' : undefined} class:actief={item.actief(pad)}>
+    <a href={metBasis(item.href)} aria-current={item.actief(pad) ? 'page' : undefined} class:actief={item.actief(pad)}>
       <span class="pictogram" style={item.actief(pad) ? `background:${tint(item.kleur)};color:${item.kleur.inkt}` : undefined}>
         {#if item.tekst === 'Leden'}
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 19c.8-3.4 3.3-5 6-5s5.2 1.6 6 5"/><path d="M16 5.5a3 3 0 010 5.5M18 14c1.6.7 2.6 2.4 3 5"/></svg>

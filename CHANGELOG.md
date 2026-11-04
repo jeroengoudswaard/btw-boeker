@@ -4,6 +4,21 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.15.0] - 2026-11-04: Publiceren (besluiten 250–254)
+
+### Toegevoegd
+- **Installatiebestand (MSI)** (besluiten 250 en 251): `installer/` (WiX 5) met de self-contained publicatie voor win-x64, dus zonder losse .NET-installatie. Installeert per computer in *Program Files\Verenigd*, met een snelkoppeling in het menu Start; een nieuwe versie vervangt de oude, de database en instellingen blijven staan.
+- **Release-workflow** `.github/workflows/release.yml`: bij een versietag (`v0.15.0`) bouwen en testen op Windows, de MSI maken en samen met de webapp publiceren naar de release `verenigd` op de website; de website wordt daarna opnieuw gepubliceerd. Bij een pull request dat het installatiebestand wijzigt alleen bouwen. Zie docs/PUBLICEREN.md.
+- **Schermafbeeldingen voor de website** (besluit 252): een demodatabase met verzonnen gegevens (`Demodatabase`, getest) en de UI-test `Schermafbeeldingen_voor_de_website_uit_de_demodatabase`, in licht en donker; alleen met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN`. De webapp-schermen komen uit `schermen.spec.ts` (`SCHERMEN=<map>`).
+
+### Gewijzigd
+- **Webapp op GitHub Pages** (besluit 254):
+  - bouwt met `BASE_PATH` (bijv. `/verenigd/app`) voor een submap; alle links gaan via `pad()`;
+  - elke pagina wordt vooraf als bestand gebouwd, zodat een directe link of verversen ook zonder terugvalpagina werkt; een lid staat daarom in de zoekparameter (`/lid?id=…`, was `/lid/<id>`);
+  - een Content-Security-Policy in de pagina (`<meta>`), met alleen de ingestelde Supabase-server; frame-ancestors en Permissions-Policy blijven via `static/_headers` (Cloudflare);
+  - zonder ingestelde server toont het inlogscherm dat de server nog niet is ingericht (inloggen uitgeschakeld);
+  - de vervolgstap na de MFA-code accepteert alleen een pad binnen de app (geen `//andere-site`).
+
 ## [0.14.1] - 2026-11-04: Webapp in dezelfde stijl (besluiten 243 en 248)
 
 ### Gewijzigd

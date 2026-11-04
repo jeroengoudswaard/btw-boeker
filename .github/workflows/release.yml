@@ -1,0 +1,165 @@
+# Besluiten 250–254: het installatiebestand (MSI), de webapp voor GitHub Pages en de schermafbeeldingen voor de website.
+#
+# - Bij een versietag (v0.15.0): bouwen, testen en publiceren naar de release "verenigd" in de websiterepository
+#   (jeroengoudswaard/jeroengoudswaard.github.io). Daarvoor is het geheim WEBSITE_TOKEN nodig (zie docs/PUBLICEREN.md).
+# - Bij een pull request dat het installatiebestand of deze workflow wijzigt, en met de hand: alleen bouwen, ter controle.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - installer/**
+      - .github/workflows/release.yml
+  workflow_dispatch:
+    inputs:
+      publiceren:
+        description: "Ook publiceren naar de website (alleen vanaf een versietag)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  WEBSITE: jeroengoudswaard/jeroengoudswaard.github.io
+
+jobs:
+  installatiebestand:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Versie bepalen
+        id: versie
+        shell: pwsh
+        run: |
+          $versie = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText }
+          if ($versie -notmatch '^\d+\.\d+\.\d+$') { throw "Ongeldige versie '$versie' (verwacht x.y.z)" }
+          "versie=$versie" >> $env:GITHUB_OUTPUT
+          Write-Host "Versie: $versie"
+
+      - name: Bouwen en testen (zonder UI-tests)
+        run: |
+          dotnet build --configuration Release
+          dotnet test --no-build --configuration Release --filter "Categorie!=UI"
+
+      - name: Publiceren (self-contained, win-x64)
+        run: dotnet publish src/Verenigd.App --configuration Release --runtime win-x64 --self-contained -p:Version=${{ steps.versie.outputs.versie }} --output artifacts/publish
+
+      - name: Installatiebestand bouwen (WiX)
+        shell: pwsh
+        run: |
+          dotnet build installer/Verenigd.Installer.wixproj --configuration Release "-p:Versie=${{ steps.versie.outputs.versie }}" "-p:PublicatieMap=$PWD\artifacts\publish"
+          $msi = Get-ChildItem installer/bin -Recurse -Filter Verenigd.msi | Select-Object -First 1
+          if (-not $msi) { throw 'Verenigd.msi niet gevonden' }
+          New-Item -ItemType Directory -Force artifacts/uitvoer/release | Out-Null
+          Copy-Item $msi.FullName "artifacts/uitvoer/release/Verenigd-${{ steps.versie.outputs.versie }}.msi"
+          Copy-Item $msi.FullName artifacts/uitvoer/release/Verenigd.msi
+          Get-ChildItem artifacts/uitvoer/release
+
+      # FlaUI heeft een bureaublad nodig; op een GitHub-runner is dat niet gegarandeerd. Lukt het niet, dan gaat de release
+      # door zonder nieuwe schermafbeeldingen van de desktop (de website houdt dan de vorige).
+      - name: Schermafbeeldingen desktop (demodatabase, licht en donker)
+        continue-on-error: true
+        shell: pwsh
+        env:
+          VERENIGD_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
+        run: dotnet test tests/Verenigd.App.Tests --no-build --configuration Release --filter "Categorie=Schermafbeeldingen" --blame-hang --blame-hang-timeout 4m
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installatiebestand
+          path: artifacts/uitvoer
+          if-no-files-found: error
+
+  webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bouwen voor GitHub Pages (/verenigd/app)
+        working-directory: webapp
+        env:
+          BASE_PATH: /verenigd/app
+          # Leeg zolang de Supabase-koppeling er niet is (besluit 254); daarna als repository-variabelen.
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run build
+          mkdir -p uitvoer && (cd build && zip -qr ../uitvoer/verenigd-web.zip .)
+
+      - name: Schermafbeeldingen webapp (verzonnen gegevens)
+        working-directory: webapp
+        run: SCHERMEN=$PWD/uitvoer/schermen npx playwright test tests/schermen.spec.ts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: webapp/uitvoer
+          if-no-files-found: error
+
+  publiceren:
+    needs: [installatiebestand, webapp]
+    if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: uit
+
+      - name: Release "verenigd" op de website bijwerken
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+          VERSIE: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          ls -R uit
+          notities="Verenigd ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit) en de webapp voor de leiding. Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
+          if gh release view verenigd --repo "$WEBSITE" > /dev/null 2>&1; then
+            gh release edit verenigd --repo "$WEBSITE" --title "Verenigd ${VERSIE#v} (bèta)" --notes "$notities"
+          else
+            gh release create verenigd --repo "$WEBSITE" --title "Verenigd ${VERSIE#v} (bèta)" --notes "$notities" --prerelease
+          fi
+          gh release upload verenigd --repo "$WEBSITE" --clobber \
+            uit/installatiebestand/release/*.msi uit/webapp/verenigd-web.zip
+
+      - name: Schermafbeeldingen in de website zetten
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${WEBSITE}.git" site
+          mkdir -p site/verenigd/screens
+          cp uit/webapp/schermen/*.png site/verenigd/screens/
+          if ls uit/installatiebestand/schermen/*.png > /dev/null 2>&1; then
+            cp uit/installatiebestand/schermen/*.png site/verenigd/screens/
+          else
+            echo "::warning::Geen schermafbeeldingen van de desktop (geen bureaublad op de runner?); de vorige blijven staan."
+          fi
+          cd site
+          git config user.name "verenigd-release"
+          git config user.email "verenigd-release@users.noreply.github.com"
+          git add verenigd/screens
+          if git diff --cached --quiet; then
+            echo "Schermafbeeldingen ongewijzigd."
+          else
+            git commit -m "Verenigd ${GITHUB_REF_NAME}: schermafbeeldingen"
+            git push
+          fi
+
+      - name: Website opnieuw publiceren (webapp uitpakken)
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: gh api "repos/${WEBSITE}/dispatches" -f event_type=app-released

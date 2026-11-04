@@ -1,5 +1,6 @@
 <script lang="ts">
   // Eenmalig: de authenticator-app koppelen (TOTP). Zonder MFA geeft de database niets (besluit 33).
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { supabase } from '#lib/supabase.ts';
@@ -12,11 +13,11 @@
 
   onMount(async () => {
     const { data: sessie } = await supabase.auth.getSession();
-    if (!sessie.session) return goto('/inloggen', { replaceState: true });
+    if (!sessie.session) return goto(pad('/inloggen'), { replaceState: true });
     // Een eerder half ingestelde koppeling eerst opruimen.
     const { data: factoren } = await supabase.auth.mfa.listFactors();
     for (const f of factoren?.all ?? []) if (f.status !== 'verified') await supabase.auth.mfa.unenroll({ factorId: f.id });
-    if (factoren?.totp.length) return goto('/mfa', { replaceState: true });
+    if (factoren?.totp.length) return goto(pad('/mfa'), { replaceState: true });
 
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Verenigd' });
     if (error || !data) {
@@ -36,7 +37,7 @@
       fout = 'De code klopt niet. Kijk of de tijd op uw telefoon goed staat en probeer de nieuwe code.';
       return;
     }
-    await goto('/', { replaceState: true });
+    await goto(pad('/'), { replaceState: true });
   }
 </script>
 

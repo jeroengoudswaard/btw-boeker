@@ -1,7 +1,7 @@
 {
   "name": "verenigd-webapp",
   "private": true,
-  "version": "0.14.1",
+  "version": "0.15.0",
   "type": "module",
   "imports": {
     "#lib/*": "./src/lib/*"
@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test && playwright test -c playwright.pages.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0"

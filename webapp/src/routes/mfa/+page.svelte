@@ -1,5 +1,7 @@
 <script lang="ts">
   // Stap 2 van 2: de code uit de authenticator-app (MFA verplicht, besluit 33).
+  import { pad } from '#lib/pad.ts';
+  import { isEigenPad } from '#lib/paden.ts';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
@@ -12,7 +14,7 @@
 
   onMount(async () => {
     const { data } = await supabase.auth.getSession();
-    if (!data.session) await goto('/inloggen', { replaceState: true });
+    if (!data.session) await goto(pad('/inloggen'), { replaceState: true });
     email = data.session?.user.email ?? '';
   });
 
@@ -24,7 +26,7 @@
     const factor = factoren?.totp[0];
     if (!factor) {
       bezig = false;
-      await goto('/mfa/instellen', { replaceState: true });
+      await goto(pad('/mfa/instellen'), { replaceState: true });
       return;
     }
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code: code.replace(/\D/g, '') });
@@ -35,12 +37,12 @@
       return;
     }
     const verder = page.url.searchParams.get('verder');
-    await goto(verder?.startsWith('/') ? verder : '/', { replaceState: true });
+    await goto(pad(isEigenPad(verder) ? verder : '/'), { replaceState: true });
   }
 
   async function ander() {
     await supabase.auth.signOut();
-    await goto('/inloggen', { replaceState: true });
+    await goto(pad('/inloggen'), { replaceState: true });
   }
 </script>
 

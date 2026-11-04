@@ -1,5 +1,6 @@
 <script lang="ts">
   // Wijzigen = een voorstel per veld (besluit 34); de oude waarde blijft staan tot de beheerder beslist.
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
@@ -9,7 +10,7 @@
   import { weergaveTelefoon } from '#lib/telefoon.ts';
   import { huidigeWaarde, voorstellenUit, type Veld } from '#lib/voorstellen.ts';
 
-  const lid = $derived(stand.leden.find((l) => l.id === page.params.id));
+  const lid = $derived(stand.leden.find((l) => l.id === page.url.searchParams.get('id')));
   let formulier: Partial<Record<Veld, string>> = $state({});
   let bezig = $state(false);
   let fout: string | null = $state(null);
@@ -37,7 +38,7 @@
     try {
       await dienIn(wijzigingen);
       await laad(true);
-      await goto('/voorstellen');
+      await goto(pad('/voorstellen'));
     } catch (x) {
       fout = x instanceof Error ? x.message : 'Versturen mislukt.';
     } finally {
@@ -84,7 +85,7 @@
       {/each}
       {#if fout}<p class="fout" role="alert">✕ {fout}</p>{/if}
       <div class="knoppen">
-        <a href={`/lid/${lid.id}`} class="knop neutraal">Annuleren</a>
+        <a href={pad(`/lid?id=${encodeURIComponent(lid.id)}`)} class="knop neutraal">Annuleren</a>
         <button class="knop hoofd" disabled={bezig || wijzigingen.length === 0}>
           {wijzigingen.length > 1 ? `${wijzigingen.length} voorstellen versturen` : 'Voorstel versturen'}
         </button>

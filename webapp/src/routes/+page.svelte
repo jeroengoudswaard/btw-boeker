@@ -1,5 +1,6 @@
 <script lang="ts">
   // Eerste scherm: de ledenlijst van de eigen speltak (besluit 224).
+  import { pad } from '#lib/pad.ts';
   import { onMount } from 'svelte';
   import Avatar from '#lib/onderdelen/Avatar.svelte';
   import GroteKop from '#lib/onderdelen/GroteKop.svelte';
@@ -59,7 +60,7 @@
     <h2 class="sectiekop">{groep.titel}</h2>
     <section class="kaart lijst" aria-label={groep.titel}>
       {#each groep.leden as lid (lid.id)}
-        <a href={`/lid/${lid.id}`} class="regel">
+        <a href={pad(`/lid?id=${encodeURIComponent(lid.id)}`)} class="regel">
           <Avatar groep={stand.speltak} tekst={initialen(lid)} />
           <span class="tekst">
             <span class="naam">{volledigeNaam(lid)}</span>

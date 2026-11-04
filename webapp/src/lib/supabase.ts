@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Alleen de publieke sleutel: alle afscherming zit in de beveiligingsregels van de database (besluit 33).
-const url = import.meta.env.VITE_SUPABASE_URL ?? 'http://localhost:54321';
-const sleutel = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? 'ontbreekt';
+const url = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321';
+/** Is de server ingericht? Zonder adres (bijv. de bèta op GitHub Pages, besluit 254) toont het inlogscherm dat. */
+export const serverIngericht = Boolean(import.meta.env.VITE_SUPABASE_URL);
+const sleutel = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'ontbreekt';
 
 export const supabase = createClient(url, sleutel, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },

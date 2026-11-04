@@ -1,0 +1,19 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <!--
+    Besluit 250: het installatiebestand (MSI) van Verenigd. Bevat de self-contained publicatie voor win-x64 (besluit 251).
+    Bouwen (alleen op Windows), vanuit de hoofdmap:
+      dotnet publish src/Verenigd.App -c Release -r win-x64 -self-contained -o artifacts/publish
+      dotnet build installer/Verenigd.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=../artifacts/publish
+    WiX 5 (MS-RL); bewust niet WiX 6, dat een onderhoudsbijdrage (OSMF) vraagt.
+  -->
+  <PropertyGroup>
+    <OutputName>Verenigd</OutputName>
+    <Platform>x64</Platform>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Versie Condition="'$(Versie)' == ''">0.0.0</Versie>
+    <PublicatieMap Condition="'$(PublicatieMap)' == ''">..\artifacts\publish</PublicatieMap>
+    <DefineConstants>Versie=$(Versie);PublicatieMap=$(PublicatieMap)</DefineConstants>
+    <SuppressValidation>false</SuppressValidation>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
