@@ -150,4 +150,7 @@ public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int Aa
 
     /// <summary>Een historisch jaar (besluit 122) is afgesloten maar kan niet worden heropend.</summary>
     public bool IsAfgesloten => !IsOpen && !IsHistorisch;
+
+    /// <summary>Een historisch boekjaar heeft geen echte journaalposten en kan niet als auditfile (besluit 258).</summary>
+    public bool KanAuditfile => !IsHistorisch;
 }

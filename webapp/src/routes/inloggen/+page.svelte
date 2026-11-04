@@ -2,6 +2,7 @@
   // Stap 1 van 2: e-mail en wachtwoord; daarna de code uit de authenticator-app (besluit 231).
   import { pad } from '#lib/pad.ts';
   import { goto } from '$app/navigation';
+  import { asset } from '$app/paths';
   import { routeVoor, serverIngericht, supabase, toegang } from '#lib/supabase.ts';
 
   let email = $state('');
@@ -37,7 +38,7 @@
 
 <main class="pagina inlog">
   <div class="kop">
-    <svg aria-hidden="true" width="64" height="64" viewBox="0 0 16 16"><rect x="0.5" y="0.5" width="15" height="15" rx="4" fill="#2E7D32"/><path d="M4.5 8.2l2.3 2.3 4.7-5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <img class="logo" src={asset('icoon-192.png')} alt="" width="64" height="64" />
     <h1>Verenigd</h1>
     <p>Voor de leiding: de leden en contactgegevens van uw speltak.</p>
   </div>
@@ -58,6 +59,7 @@
 <style>
   .inlog { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 32px; }
   .kop { min-height: 300px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 12px; padding-bottom: 32px; text-align: center; }
+  .logo { border-radius: 14px; }
   h1 { margin: 0; font-size: 32px; }
   .kop p { margin: 0; color: var(--zacht); max-width: 290px; }
   form { padding: 8px 0; }

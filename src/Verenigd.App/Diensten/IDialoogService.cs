@@ -58,6 +58,9 @@ public interface IDialoogService
 
     string? KiesXmlDoel(string voorgesteldeNaam);
 
+    /// <summary>Waar de auditfile (XAF) heen moet (besluit 197).</summary>
+    string? KiesXafDoel(string voorgesteldeNaam);
+
     /// <returns><c>true</c> als er een run definitief is gemaakt.</returns>
     bool ToonIncassoWizard(IncassoWizardViewModel wizard);
 

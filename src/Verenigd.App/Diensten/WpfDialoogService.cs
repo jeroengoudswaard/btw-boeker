@@ -92,6 +92,18 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
+    public string? KiesXafDoel(string voorgesteldeNaam)
+    {
+        var dialoog = new SaveFileDialog
+        {
+            Title = "Auditfile (XAF) opslaan",
+            Filter = "Auditfile Financieel (*.xaf)|*.xaf",
+            DefaultExt = ".xaf",
+            FileName = voorgesteldeNaam,
+        };
+        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
+    }
+
     public bool ToonIncassoWizard(IncassoWizardViewModel wizard) => ToonModaal(new IncassoWizardVenster(wizard));
 
     public string? KiesExcelBestand()

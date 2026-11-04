@@ -74,7 +74,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
-    [NotifyCanExecuteChangedFor(nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand), nameof(ExporteerXafCommand))]
     public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
 
     [ObservableProperty]
@@ -466,6 +466,11 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task ExporteerSjabloonAsync() =>
         GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerSjabloonCommand.ExecuteAsync(null) : Task.CompletedTask;
+
+    /// <summary>Bestand › Exporteren › Auditfile (XAF): het gekozen boekjaar van het tabblad Boekhouding (besluit 197).</summary>
+    [RelayCommand(CanExecute = nameof(KanAfdrukken))]
+    private Task ExporteerXafAsync() =>
+        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerXafCommand.ExecuteAsync(null) : Task.CompletedTask;
 
     /// <summary>Bestand › Afdrukken (Ctrl+P): het rapport of de grootboekkaart van het tabblad Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
