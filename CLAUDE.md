@@ -521,6 +521,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Besluit 249: keuzeblad bij Bellen, Bericht en E-mail met voogd 1, voogd 2 en het lid zelf (`contact.ts`, `contactopties`).
   - Tests (Linux): svelte-check 402 bestanden 0 fouten, Vitest 39/39, Playwright 4 geslaagd (plus de 2 schermafbeeldingen licht en donker, bekeken); .NET: nieuwe theorie `Groepskleur_is_gelijk_aan_die_in_de_webapp` (5 gevallen).
   - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`, en de .NET-suite (verwacht 1011/1011, App 271).
+  - **Windows-test (2026-11-04, Windows 11, commit `f8ef80c`, Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde; svelte-check 400 bestanden 0 fouten 0 waarschuwingen; Vitest 4.1.12 34/34 (2 bestanden, met `ontwerp.test.ts`); Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). `npm audit --omit=dev`: 0 (de 4 lage meldingen in ontwikkelpakketten blijven, zoals bij v0.13.1).
+    - .NET: `dotnet build` van de hele oplossing 0 fouten 0 waarschuwingen; `OnderdeelkleurenTests` 13/13 (met `Groepskleur_is_gelijk_aan_die_in_de_webapp`).
+    - **Volledige .NET-suite (2026-11-04, commit `d6740e3`): 1011/1011 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 260, Application 351, Architectuur 34, Infrastructure 95, App 271); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces. De instabiele Alt-test van v0.14.0 slaagde in beide runs (nog niet aangepast, dus blijft een aandachtspunt).
+    - Hiermee is de Windows-run voor v0.14.1 groen.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
