@@ -522,11 +522,13 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Webapp niet opnieuw getest: geen wijzigingen in `webapp/` sinds v0.13.1. De visuele controle doet de gebruiker.
     - **Aangepakt (2026-11-04, alleen testcode):** vóór `Keyboard.Type(ALT)` dezelfde focuscontrole als `Sneltoets` (`HeeftEigenFocus`), en de menubalk wordt gezocht met `ZoekMetDiagnose` (schermafbeelding en `Diagnose()` bij falen). De gebruiker gaf akkoord om te mergen.
 
-- **v0.14.1 Webapp in dezelfde stijl (besluiten 243 en 248): gereed** (2026-11-04), op een lokale branch `webapp-v0.14.1`; een eigen pull request na de merge van v0.14.0. Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Gemerged als PR #17 (2026-11-04, `86b14f9`), na de Windows-run en groene CI (akkoord van de gebruiker).
+
+- **v0.14.1 Webapp in dezelfde stijl (besluiten 243 en 248): gereed** (2026-11-04), op de branch `webapp-v0.14.1` (keuze A); eigen pull request na de merge van v0.14.0. Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
   - Palet, letterschaal, raster en rondingen 8 px gelijk aan de desktop; initialen in de groepskleur (zelfde berekening als `Onderdeelkleuren.VoorGroep`); onderbalk met onderdeelkleur; test `ontwerp.test.ts`.
   - Besluit 249: keuzeblad bij Bellen, Bericht en E-mail met voogd 1, voogd 2 en het lid zelf (`contact.ts`, `contactopties`).
   - Tests (Linux): svelte-check 402 bestanden 0 fouten, Vitest 39/39, Playwright 4 geslaagd (plus de 2 schermafbeeldingen licht en donker, bekeken); .NET: nieuwe theorie `Groepskleur_is_gelijk_aan_die_in_de_webapp` (5 gevallen).
-  - **Nog op Windows te doen:** in `webapp/` `npm ci`, `npm run check`, `npm test` en `npm run test:e2e`, en de .NET-suite (verwacht 1011/1011, App 271).
+  - **Nog op Windows te doen (na besluit 249):** in `webapp/` `npm ci`, `npm run check`, `npm test` (verwacht 39) en `npm run test:e2e`. De .NET-suite is na de run hieronder niet gewijzigd.
   - **Windows-test (2026-11-04, Windows 11, commit `f8ef80c`, Node 22.23.4, npm 10.9.9): webapp groen.** `npm ci` in orde; svelte-check 400 bestanden 0 fouten 0 waarschuwingen; Vitest 4.1.12 34/34 (2 bestanden, met `ontwerp.test.ts`); Playwright 4 geslaagd en 2 overgeslagen (schermafbeeldingen). `npm audit --omit=dev`: 0 (de 4 lage meldingen in ontwikkelpakketten blijven, zoals bij v0.13.1).
     - .NET: `dotnet build` van de hele oplossing 0 fouten 0 waarschuwingen; `OnderdeelkleurenTests` 13/13 (met `Groepskleur_is_gelijk_aan_die_in_de_webapp`).
     - **Volledige .NET-suite (2026-11-04, commit `d6740e3`): 1011/1011 in 2 opeenvolgende runs** (met `--blame-hang --blame-hang-timeout 4m`), inclusief alle FlaUI-UI-tests (Domain 260, Application 351, Architectuur 34, Infrastructure 95, App 271); build zonder waarschuwingen. Geen hang, na elke run geen ingedrukte toets, geen achtergebleven testproces. De instabiele Alt-test van v0.14.0 slaagde in beide runs (nog niet aangepast, dus blijft een aandachtspunt).
