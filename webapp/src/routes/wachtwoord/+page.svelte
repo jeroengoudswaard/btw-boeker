@@ -43,9 +43,9 @@
 </main>
 
 <style>
-  header { padding: clamp(48px, 12vh, 110px) 8px 14px; }
-  h1 { margin: 0; font-size: 30px; }
-  header p { margin: 6px 0 0; color: var(--zacht); }
-  form { padding: 6px 0; }
+  header { padding: clamp(48px, 12vh, 96px) 8px 16px; }
+  h1 { margin: 0; font-size: 32px; }
+  header p { margin: 8px 0 0; color: var(--zacht); }
+  form { padding: 8px 0; }
   .breed { width: 100%; margin-top: 16px; }
 </style>

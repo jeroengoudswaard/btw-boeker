@@ -52,11 +52,11 @@
 </main>
 
 <style>
-  .inlog { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 28px; }
+  .inlog { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 32px; }
   .kop { min-height: 300px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 12px; padding-bottom: 32px; text-align: center; }
-  h1 { margin: 0; font-size: 30px; }
+  h1 { margin: 0; font-size: 32px; }
   .kop p { margin: 0; color: var(--zacht); max-width: 290px; }
-  form { padding: 6px 0; }
+  form { padding: 8px 0; }
   .vul { flex: 1; min-height: 24px; }
   .link { background: none; border: 0; color: var(--accent-tekst); font-weight: 600; min-height: 44px; margin-bottom: 8px; cursor: pointer; }
   .fout, .melding { margin: 12px 0 0; }

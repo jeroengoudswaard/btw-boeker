@@ -39,5 +39,5 @@
 <style>
   .veldregel { font-size: 16px; }
   .zacht { color: var(--zacht); font-size: 14px; padding: 0 8px; }
-  .breed { width: 100%; margin-top: 10px; }
+  .breed { width: 100%; margin-top: 8px; }
 </style>

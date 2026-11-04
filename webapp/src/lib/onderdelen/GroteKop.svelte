@@ -24,14 +24,14 @@
 </header>
 
 <style>
-  header { padding: clamp(64px, 18vh, 140px) 8px 10px; position: relative; }
-  h1 { margin: 0; font-size: 34px; font-weight: 700; line-height: 1.15; }
-  p { margin: 6px 0 0; color: var(--zacht); }
+  header { padding: clamp(64px, 18vh, 96px) 8px 8px; position: relative; }
+  h1 { margin: 0; font-size: 32px; font-weight: 600; line-height: 1.15; }
+  p { margin: 8px 0 0; color: var(--zacht); }
   header .acties { position: absolute; top: 12px; right: 0; display: flex; gap: 4px; }
   .balk {
     position: fixed; inset: 0 0 auto 0; z-index: 10; height: 56px; padding: 0 16px; display: flex; align-items: center;
     justify-content: space-between; background: var(--achtergrond); border-bottom: 1px solid var(--rand);
-    font-weight: 700; font-size: 18px; transform: translateY(-100%); transition: transform 0.15s ease-out;
+    font-weight: 600; font-size: 16px; transform: translateY(-100%); transition: transform 0.15s ease-out;
   }
   .balk.zichtbaar { transform: none; }
   @media (prefers-reduced-motion: reduce) { .balk { transition: none; } }

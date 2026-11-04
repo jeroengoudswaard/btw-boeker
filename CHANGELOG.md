@@ -4,6 +4,15 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.14.1] - 2026-11-04: Webapp in dezelfde stijl (besluiten 243 en 248)
+
+### Gewijzigd
+- **Webapp:** dezelfde kleuren, letterschaal en maten als de desktop-app: grond, kaarten met een rand, vijf lettergroottes (32, 24, 16, 14, 12), afstanden op het raster en rondingen van 8 px.
+- **Initialen** in de kleur van de groep, precies dezelfde als in de desktop-app (zelfde berekening, met een test aan beide kanten).
+- **Menubalk onderin:** het actieve onderdeel in zijn eigen kleur (Leden koraal, Voorstellen groenblauw, Account grijs).
+- Test `ontwerp.test.ts` bewaakt lettergroottes, rondingen en afstanden in de webapp.
+- **Bellen, Bericht en E-mail** (besluit 249): het keuzeblad toont alle mogelijkheden: voogd 1, voogd 2 en het lid zelf, met mobiel en vast als aparte regels. Is er maar één mogelijkheid, dan gaat het direct. Een bericht gaat alleen naar mobiele nummers.
+
 ## [0.14.0] - 2026-11-03: Kleur en rust (besluiten 239–247)
 
 ### Gewijzigd

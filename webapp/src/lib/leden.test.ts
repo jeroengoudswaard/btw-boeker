@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normaliseerTelefoon, weergaveTelefoon } from './telefoon';
-import { groepeer, initialen, kleurVoor, volledigeNaam, leeftijd, type Lid } from './leden';
+import { groepeer, initialen, volledigeNaam, leeftijd, type Lid } from './leden';
 import { voorstellenUit, veldOmschrijving, VELDEN } from './voorstellen';
 
 // Dezelfde gevallen als TelefoonnummerTests in de desktop-app (besluit 32).
@@ -69,7 +69,6 @@ describe('leden', () => {
     const l = lid('Bram', 'Jong', false, { tussenvoegsel: 'de' });
     expect(volledigeNaam(l)).toBe('Bram de Jong');
     expect(initialen(l)).toBe('BJ');
-    expect(kleurVoor(l.id)).toBe(kleurVoor('Bram'));
     expect(leeftijd('2016-05-01', new Date('2026-10-31'))).toBe(10);
     expect(leeftijd('2016-11-01', new Date('2026-10-31'))).toBe(9);
     expect(leeftijd(null, new Date('2026-10-31'))).toBeNull();

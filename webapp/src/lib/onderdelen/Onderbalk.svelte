@@ -1,19 +1,21 @@
 <script lang="ts">
   // Menubalk onderin: Leden, Voorstellen, Account (besluit 222).
   import { page } from '$app/state';
+  import { PALET, tint } from '#lib/leden.ts';
   let { open = 0 }: { open?: number } = $props();
   const pad = $derived(page.url.pathname);
   const items = [
-    { href: '/', tekst: 'Leden', actief: (p: string) => p === '/' || p.startsWith('/lid') },
-    { href: '/voorstellen', tekst: 'Voorstellen', actief: (p: string) => p.startsWith('/voorstellen') },
-    { href: '/account', tekst: 'Account', actief: (p: string) => p.startsWith('/account') },
+    // Besluit 239: het actieve onderdeel in zijn eigen kleur (Leden koraal, Voorstellen groenblauw als de webapp, Account grijs).
+    { href: '/', tekst: 'Leden', kleur: PALET[0], actief: (p: string) => p === '/' || p.startsWith('/lid') },
+    { href: '/voorstellen', tekst: 'Voorstellen', kleur: PALET[5], actief: (p: string) => p.startsWith('/voorstellen') },
+    { href: '/account', tekst: 'Account', kleur: PALET[6], actief: (p: string) => p.startsWith('/account') },
   ];
 </script>
 
 <nav aria-label="Hoofdmenu">
   {#each items as item (item.href)}
     <a href={item.href} aria-current={item.actief(pad) ? 'page' : undefined} class:actief={item.actief(pad)}>
-      <span class="pictogram">
+      <span class="pictogram" style={item.actief(pad) ? `background:${tint(item.kleur)};color:${item.kleur.inkt}` : undefined}>
         {#if item.tekst === 'Leden'}
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 19c.8-3.4 3.3-5 6-5s5.2 1.6 6 5"/><path d="M16 5.5a3 3 0 010 5.5M18 14c1.6.7 2.6 2.4 3 5"/></svg>
         {:else if item.tekst === 'Voorstellen'}
@@ -34,11 +36,10 @@
     padding: 8px 12px calc(14px + env(safe-area-inset-bottom)); background: var(--achtergrond); border-top: 1px solid var(--rand);
   }
   a { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 72px; min-height: 48px; text-decoration: none; color: var(--zacht); font-size: 12px; }
-  a.actief { color: var(--tekst); font-weight: 700; }
-  .pictogram { position: relative; padding: 4px 18px; border-radius: 16px; display: grid; }
-  a.actief .pictogram { background: var(--accent-vlak); color: var(--accent-inkt); }
+  a.actief { color: var(--tekst); font-weight: 600; }
+  .pictogram { position: relative; padding: 4px 16px; border-radius: 14px; display: grid; }
   .teller {
-    position: absolute; top: -2px; right: 8px; min-width: 18px; height: 18px; border-radius: 9px; background: #d35400; color: #fff;
-    font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 4px;
+    position: absolute; top: -2px; right: 8px; min-width: 18px; height: 18px; border-radius: 10px; background: #d35400; color: #fff;
+    font-size: 12px; font-weight: 600; display: grid; place-items: center; padding: 0 4px;
   }
 </style>

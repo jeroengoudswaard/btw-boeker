@@ -55,13 +55,13 @@
 <Onderbalk open={openVoorstellen().length} />
 
 <style>
-  .tabs { display: flex; padding: 4px; border-radius: 24px; background: var(--veld); margin-bottom: 14px; }
-  .tabs button { flex: 1; min-height: 40px; border-radius: 20px; border: 0; background: transparent; color: var(--zacht); cursor: pointer; }
+  .tabs { display: flex; padding: 4px; border-radius: 8px; background: var(--veld); margin-bottom: 16px; }
+  .tabs button { flex: 1; min-height: 40px; border-radius: 8px; border: 0; background: transparent; color: var(--zacht); cursor: pointer; }
   .tabs button[aria-selected='true'] { background: var(--kaart); color: var(--tekst); font-weight: 600; }
-  .voorstel { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-  .rij { display: flex; align-items: center; gap: 10px; }
+  .voorstel { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .rij { display: flex; align-items: center; gap: 8px; }
   .lid { flex: 1; font-weight: 600; }
-  .status { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .status { padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; }
   .wacht { background: var(--let-op-vlak); color: var(--let-op-inkt); }
   .goed { background: var(--accent-vlak); color: var(--accent-inkt); }
   .af { background: var(--veld); color: var(--tekst); }
@@ -69,6 +69,6 @@
   s { color: var(--zacht); }
   .zacht { color: var(--zacht); font-size: 14px; }
   .klein { font-size: 12px; }
-  .leeg { padding: 20px; color: var(--zacht); }
+  .leeg { padding: 24px; color: var(--zacht); }
   .leeg p { margin: 0; }
 </style>

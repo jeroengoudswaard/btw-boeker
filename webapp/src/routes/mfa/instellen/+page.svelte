@@ -64,12 +64,12 @@
 </main>
 
 <style>
-  header { padding: clamp(48px, 10vh, 100px) 8px 14px; }
-  h1 { margin: 0; font-size: 28px; }
-  header p { margin: 6px 0 0; color: var(--zacht); }
+  header { padding: clamp(48px, 10vh, 96px) 8px 16px; }
+  h1 { margin: 0; font-size: 24px; }
+  header p { margin: 8px 0 0; color: var(--zacht); }
   .stappen { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  ol { align-self: stretch; margin: 0; padding-left: 22px; line-height: 1.6; }
-  img { background: #fff; border-radius: 12px; padding: 8px; }
+  ol { align-self: stretch; margin: 0; padding-left: 24px; line-height: 1.6; }
+  img { background: #fff; border-radius: 8px; padding: 8px; }
   code { overflow-wrap: anywhere; }
   form { align-self: stretch; }
   .breed { width: 100%; margin-top: 16px; }
