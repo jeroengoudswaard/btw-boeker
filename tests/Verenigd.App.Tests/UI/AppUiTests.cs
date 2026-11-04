@@ -475,9 +475,15 @@ public sealed class AppUiTests : IDisposable
         Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")));
         Bewaar(venster, "16-eenvoudig-zonder-menubalk");
 
-        venster.SetForeground();
+        // Zoals Sneltoets: Alt pas sturen als de toetsenbordfocus aantoonbaar in dit app-proces ligt (in 1 van 6 runs kwam hij
+        // anders niet aan); bij falen een schermafbeelding en Diagnose().
+        if (!Retry.WhileFalse(() => { venster.SetForeground(); return HeeftEigenFocus(); }, Wachttijd, TimeSpan.FromMilliseconds(500)).Result)
+        {
+            throw new Xunit.Sdk.XunitException("De app kreeg de voorgrond niet; Alt is niet verstuurd. " + Diagnose(venster));
+        }
+
         Keyboard.Type(VirtualKeyShort.ALT);
-        Assert.NotNull(Retry.WhileNull(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")), Wachttijd).Result);
+        ZoekMetDiagnose(venster, "Menubalk");
         Keyboard.Type(VirtualKeyShort.ESCAPE);
         Assert.True(Retry.WhileFalse(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")) is null, Wachttijd).Result,
             "De tijdelijke menubalk verdween niet na Escape.");

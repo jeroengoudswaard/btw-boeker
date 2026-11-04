@@ -519,6 +519,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Vermoedelijke oorzaak (niet bewezen): de Alt komt niet altijd bij het app-venster aan, omdat deze stap niet controleert dat de toetsenbordfocus in het app-proces ligt (zoals `VoerWachtwoordIn` en `Sneltoets` dat wel doen); in Eenvoudig is er geen zichtbare menubalk die de focus vasthoudt.
     - Gevraagd: vóór `Keyboard.Type(ALT)` dezelfde focuscontrole als in `Sneltoets` (systeembrede focus in dit app-proces), en bij falen `ZoekMetDiagnose`-achtig een schermafbeelding en `Diagnose()` bewaren. Daarna opnieuw 2 runs (verwacht 1006/1006).
     - Webapp niet opnieuw getest: geen wijzigingen in `webapp/` sinds v0.13.1. De visuele controle doet de gebruiker.
+    - **Aangepakt (2026-11-04, alleen testcode):** vóór `Keyboard.Type(ALT)` dezelfde focuscontrole als `Sneltoets` (`HeeftEigenFocus`), en de menubalk wordt gezocht met `ZoekMetDiagnose` (schermafbeelding en `Diagnose()` bij falen). De gebruiker gaf akkoord om te mergen.
 
 - **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
 
