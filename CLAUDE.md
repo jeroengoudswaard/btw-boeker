@@ -298,6 +298,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 260 | Webapp-icoon | Het inlogscherm van de webapp toont het echte app-icoon in plaats van een vereenvoudigd vinkje (keuze 1A, mee in v0.16.0); de pictogrammen voor installeren waren al het echte icoon |
 | 261 | Kleur geïnstalleerde webapp | `theme_color` in het manifest is het donkerblauw van het app-icoon (`#0B1F4B`) in plaats van groen |
 | 262 | GitHub Actions bijwerken | Per action de nieuwste hoofdversie die minstens 2 weken oud is (zoals besluit 238), nu allemaal op Node 24; setup-node zonder automatische cache |
+| 263 | Jaarrekening: bouwsteen | Een regel van de jaarrekeningindeling bundelt rubrieken (keuze 1A); een rubriek staat hooguit één keer per deel (activa, passiva, baten, lasten). Uitwerking van besluiten 69 en 151 |
+| 264 | Jaarrekening: kolommen | Werkelijk dit jaar, begroot en werkelijk vorig jaar (keuze 2A) |
+| 265 | Jaarrekening: reikwijdte | Staat van baten en lasten én balans; de balans zonder kolom begroot, met vorig jaar (keuze 3A) |
+| 266 | Jaarrekening: begroot bij de Stichting | Uit het meerjarenplan voor dat jaar (keuze 4A); bij de Vereniging uit de geldende begroting |
+| 267 | Jaarrekening: detail | Selectievakje *Rekeningen tonen*, standaard aan (keuze 5A) |
+| 268 | Jaarrekening: bestaande rapporten | Balans en Staat van baten en lasten blijven naast de jaarrekening bestaan (keuze 6A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -578,6 +584,16 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 - **v0.16.1 Kleine verbeteringen (besluiten 261 en 262): gebouwd** (2026-11-05). Kleur van de geïnstalleerde webapp, GitHub Actions op Node 24, de twee ViewModel-tests met een Windows-pad platformonafhankelijk. Websitepagina: XAF als functie en in de FAQ.
   - Tests: in de Linux-cloudsessie nu volledig groen: Domain 260, Application 360, Infrastructure 99, Architectuur 34, ViewModel 255/255; webapp svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 5.
   - Gemerged als PR #22 (2026-11-05, `fb65a32`), na groene CI (inclusief de release-workflow in controlestand). **Gepubliceerd** (2026-11-05): de gebruiker pushte de tag `v0.16.1`; release-run geslaagd, ook de publicatiestap met `download-artifact@v8`. `Verenigd.msi`, `Verenigd-0.16.1.msi` (71 MB) en `verenigd-web.zip` staan op de release `verenigd` van de website.
+- **v0.17.0 Jaarrekeningindeling (besluiten 263–268): gebouwd** (2026-11-05). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - `Jaarrekeningindeling` (Domain), `Jaarrekeningrekenaar` en `JaarrekeningDienst` (Application), migratie *Jaarrekening*, rapportkeuzes *Jaarrekening: balans* en *Jaarrekening: baten en lasten*, venster *Indeling bewerken…*, indeling mee in het sjabloonbestand.
+  - Uitwerkingen:
+    - De jaarrekening staat als twee rapportkeuzes in *Boekhouding › Rapporten*, niet als apart subtabblad.
+    - De editor is een lijst met per regel het deel, de soort, de tekst en de rubrieken, geen boom.
+    - Bij de balans bepaalt het saldo per jaar het deel (debet = activa), zoals in de bestaande balans; daarom mag een rubriek (bijv. *Vorderingen en schulden*) zowel bij de activa als bij de passiva staan.
+    - Niet-ingedeelde rekeningen staan onder *Niet ingedeeld* en tellen mee, zodat de totalen altijd kloppen.
+    - De ingebouwde standaardschema's hebben geen eigen indeling: de automatische (één regel per rubriek) is daar gelijk aan.
+  - Tests: .NET in de Linux-cloudsessie groen: Domain 260, Application 374, Infrastructure 100, Architectuur 35, ViewModel 260/260; de hele oplossing bouwt zonder waarschuwingen (ook `Verenigd.App.Tests` met `EnableWindowsTargeting`). Geen nieuwe FlaUI-test.
+  - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 279), en een visuele controle van de jaarrekening, het venster *Indeling bewerken* en de afdruk (licht en donker).
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy

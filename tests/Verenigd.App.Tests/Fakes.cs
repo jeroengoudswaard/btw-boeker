@@ -92,6 +92,17 @@ internal sealed class FakeDialoogService : IDialoogService
         return SjabloonDoel;
     }
 
+    public List<ViewModels.Boekhouding.JaarrekeningIndelingViewModel> Indelingen { get; } = [];
+
+    /// <summary>Wat het venster doet: standaard niets (annuleren).</summary>
+    public Func<ViewModels.Boekhouding.JaarrekeningIndelingViewModel, bool> IndelingActie { get; set; } = _ => false;
+
+    public bool ToonJaarrekeningIndeling(ViewModels.Boekhouding.JaarrekeningIndelingViewModel editor)
+    {
+        Indelingen.Add(editor);
+        return IndelingActie(editor);
+    }
+
     public bool ToonStandaardinrichting(ViewModels.Boekhouding.StandaardinrichtingViewModel wizard) =>
         Standaardinrichting is not null && Standaardinrichting(wizard).GetAwaiter().GetResult();
 
@@ -603,6 +614,7 @@ internal sealed class InMemoryBoekhoudingOpslag(InMemoryContributieOpslag? contr
             Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
             Begrotingen = [.. lijst.OfType<Domain.Financien.Begrotingen.Begroting>().OrderBy(b => b.Jaar).ThenBy(b => b.Versie)],
             Meerjarenplannen = [.. lijst.OfType<Domain.Financien.Begrotingen.Meerjarenplan>().OrderBy(p => p.Startjaar).ThenBy(p => p.Versie)],
+            Jaarrekeningindelingen = [.. lijst.OfType<Domain.Financien.Boekhouding.Jaarrekeningindeling>()],
         };
     }
 }

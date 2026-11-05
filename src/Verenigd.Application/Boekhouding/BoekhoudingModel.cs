@@ -56,6 +56,9 @@ public sealed record BoekhoudingStand(
     /// <summary>Alle versies van alle meerjarenplannen (besluiten 159–164); nooit onderdeel van het grootboek.</summary>
     public IReadOnlyList<Meerjarenplan> Meerjarenplannen { get; init; } = [];
 
+    /// <summary>Eigen indelingen van balans en baten en lasten (besluiten 263–268); zonder indeling geldt de automatische.</summary>
+    public IReadOnlyList<Jaarrekeningindeling> Jaarrekeningindelingen { get; init; } = [];
+
     public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
 
     public bool HeeftBijlage(Guid postId) => Bijlagen.Any(b => b.PostId == postId);

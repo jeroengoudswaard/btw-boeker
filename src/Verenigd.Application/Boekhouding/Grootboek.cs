@@ -126,6 +126,8 @@ public static class Grootboek
     private static IEnumerable<(Journaalpost Post, Journaalregel Regel)> Regels(BoekhoudingStand stand, Grootboekrekening rekening, int jaar) =>
         GeboektePosten(stand, jaar).SelectMany(p => p.Regels.Where(r => ZelfdeRekening(r.Rekening, rekening)).Select(r => (p, r)));
 
+    internal static bool ZelfdeRubriek(Rubriek? a, Rubriek? b) => a is not null && b is not null && (ReferenceEquals(a, b) || (a.Id != 0 && a.Id == b.Id));
+
     internal static bool ZelfdeRekening(Grootboekrekening a, Grootboekrekening b) => ReferenceEquals(a, b) || (a.Id != 0 && a.Id == b.Id);
 
     private static List<RubriekBedragen> PerRubriek(BoekhoudingStand stand, IEnumerable<(Grootboekrekening Rekening, Bedrag Bedrag)> bedragen) =>

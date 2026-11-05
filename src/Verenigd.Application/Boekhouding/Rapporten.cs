@@ -141,6 +141,62 @@ public static class Rapporten
         { IsLiggend = true };
     }
 
+    /// <summary>
+    /// Een jaarstuk volgens de eigen indeling (besluiten 263–268): werkelijk, begroot (alleen bij baten en lasten) en vorig
+    /// jaar, met of zonder de rekeningen onder elke regel. Altijd in Expert-termen (besluit 131).
+    /// </summary>
+    public static RapportTabel Jaarrekening(Jaarrekening jaarrekening, string administratie, bool metRekeningen)
+    {
+        ArgumentNullException.ThrowIfNull(jaarrekening);
+        var balans = jaarrekening.Rapport == Domain.Financien.Boekhouding.JaarrekeningRapport.Balans;
+        var begroot = jaarrekening.MetBegroting;
+        object?[] Cellen(string tekst, Bedrag werkelijk, Bedrag? begrootBedrag, Bedrag vorig, bool leeg = false) => leeg
+            ? begroot ? [tekst, null, null, null] : [tekst, null, null]
+            : begroot ? [tekst, werkelijk, begrootBedrag, vorig] : [tekst, werkelijk, vorig];
+
+        var rijen = new List<RapportRij>();
+        foreach (var deel in jaarrekening.Delen)
+        {
+            var naam = Domain.Financien.Boekhouding.Jaarrekeningindeling.Naam(deel.Afdeling);
+            rijen.Add(new RapportRij(Cellen(naam, Bedrag.Nul, null, Bedrag.Nul, leeg: true), true, false));
+            foreach (var regel in deel.Regels)
+            {
+                switch (regel.Soort)
+                {
+                    case Domain.Financien.Boekhouding.IndelingsregelSoort.Kop:
+                        rijen.Add(new RapportRij(Cellen(regel.Tekst, Bedrag.Nul, null, Bedrag.Nul, leeg: true), true, false));
+                        break;
+                    case Domain.Financien.Boekhouding.IndelingsregelSoort.Subtotaal:
+                        rijen.Add(new RapportRij(Cellen(regel.Tekst, regel.Werkelijk, regel.Begroot, regel.VorigJaar), false, true));
+                        break;
+                    default:
+                        rijen.Add(new RapportRij(Cellen((regel.IsNietIngedeeld ? "⚠ " : string.Empty) + regel.Tekst, regel.Werkelijk, regel.Begroot, regel.VorigJaar), false, false));
+                        if (metRekeningen)
+                        {
+                            rijen.AddRange(regel.Rekeningen.Select(r => new RapportRij(Cellen("      " + r.Rekening, r.Werkelijk, r.Begroot, r.VorigJaar), false, false)));
+                        }
+
+                        break;
+                }
+            }
+
+            rijen.Add(new RapportRij(Cellen($"Totaal {naam.ToLowerInvariant()}", deel.Werkelijk, deel.Begroot, deel.VorigJaar), false, true));
+        }
+
+        if (!balans)
+        {
+            rijen.Add(new RapportRij(Cellen("Resultaat (baten min lasten)", new Bedrag(jaarrekening.Resultaat(d => d.Werkelijk)),
+                begroot ? new Bedrag(jaarrekening.Resultaat(d => d.Begroot)) : null, new Bedrag(jaarrekening.Resultaat(d => d.VorigJaar))), false, true));
+        }
+
+        var jaar = jaarrekening.Jaar;
+        List<RapportKolom> kolommen = balans
+            ? [new("Omschrijving", false), new($"31-12-{Jaar(jaar)}", true), new($"31-12-{Jaar(jaar - 1)}", true)]
+            : [new("Omschrijving", false), new($"Werkelijk {Jaar(jaar)}", true), .. begroot ? [new RapportKolom($"Begroot {Jaar(jaar)}", true)] : Array.Empty<RapportKolom>(),
+                new($"Werkelijk {Jaar(jaar - 1)}", true)];
+        return new RapportTabel(balans ? $"Balans per 31-12-{Jaar(jaar)}" : $"Staat van baten en lasten {Jaar(jaar)}", administratie, kolommen, rijen);
+    }
+
     public static RapportTabel Kaart(Grootboekkaart kaart, string administratie)
     {
         ArgumentNullException.ThrowIfNull(kaart);
