@@ -594,6 +594,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - De ingebouwde standaardschema's hebben geen eigen indeling: de automatische (één regel per rubriek) is daar gelijk aan.
   - Tests: .NET in de Linux-cloudsessie groen: Domain 260, Application 374, Infrastructure 100, Architectuur 35, ViewModel 260/260; de hele oplossing bouwt zonder waarschuwingen (ook `Verenigd.App.Tests` met `EnableWindowsTargeting`). Geen nieuwe FlaUI-test.
   - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 279), en een visuele controle van de jaarrekening, het venster *Indeling bewerken* en de afdruk (licht en donker).
+  - Gemerged als PR #23 (2026-11-05, `8c73ba6`), na groene CI (akkoord van de gebruiker, vóór de Windows-run). Nog door de gebruiker te doen: de tag `v0.17.0` pushen, de Windows-run en de visuele controle.
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy
