@@ -9,7 +9,8 @@ namespace Verenigd.App.Tests;
 
 public sealed class ShellViewModelTests
 {
-    private const string Pad = @"C:\Data\verenigd.vdb";
+    // Platformonafhankelijk, zodat Path.GetFileName ook op Linux "verenigd.vdb" geeft (de tests draaien ook in de cloud).
+    private static readonly string Pad = Path.Combine(Path.GetTempPath(), "Data", "verenigd.vdb");
     private const string Wachtwoord = "geheim wachtwoord";
 
     private readonly FakeDatabaseBeheer _beheer = new();

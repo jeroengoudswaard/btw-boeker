@@ -29,9 +29,9 @@ jobs:
   installatiebestand:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -72,7 +72,7 @@ jobs:
           VERENIGD_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
         run: dotnet test tests/Verenigd.App.Tests --no-build --configuration Release --filter "Categorie=Schermafbeeldingen" --blame-hang --blame-hang-timeout 4m
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: installatiebestand
           path: artifacts/uitvoer
@@ -81,11 +81,13 @@ jobs:
   webapp:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+          # Geen automatische cache: er staat geen lockbestand in de hoofdmap, en de release-workflow heeft geheimen.
+          package-manager-cache: false
 
       - name: Bouwen voor GitHub Pages (/verenigd/app)
         working-directory: webapp
@@ -104,7 +106,7 @@ jobs:
         working-directory: webapp
         run: SCHERMEN=$PWD/uitvoer/schermen npx playwright test tests/schermen.spec.ts
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: webapp
           path: webapp/uitvoer
@@ -115,7 +117,7 @@ jobs:
     if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: uit
 

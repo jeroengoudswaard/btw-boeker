@@ -4,6 +4,15 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.16.1] - 2026-11-05: Kleine verbeteringen (besluiten 261 en 262)
+
+### Gewijzigd
+- **Webapp:** de balk van de geïnstalleerde app heeft het donkerblauw van het app-icoon (`theme_color` `#0B1F4B`, was groen) (besluit 261).
+- **GitHub Actions** bijgewerkt naar versies op Node 24 (besluit 262): checkout v7, setup-dotnet v5, setup-node v7, upload-artifact v7 en download-artifact v8. De waarschuwing over Node 20 bij elke run is daarmee weg. setup-node gebruikt geen automatische cache.
+
+### Opgelost
+- **Twee ViewModel-tests** (`ShellViewModelTests`) gebruikten een Windows-pad (`C:\Data\…`) en faalden daardoor in de Linux-cloudsessie; het pad is nu platformonafhankelijk, zodat de hele suite overal groen kan zijn.
+
 ## [0.16.0] - 2026-11-04: Auditfile (XAF) en webapp-icoon (besluiten 255–260)
 
 ### Toegevoegd
