@@ -504,6 +504,36 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }, null);
     }
 
+    /// <summary>
+    /// Bestand › Exporteren › Auditfile (XAF) en de knop bij Boekjaren: het gekozen boekjaar van deze administratie als
+    /// XAF 3.2, voor een accountant of een overstap naar een ander pakket (besluiten 197 en 255–259).
+    /// </summary>
+    [RelayCommand]
+    private Task ExporteerXafAsync(JaarRegel? regel)
+    {
+        if (_stand is not { IsIngericht: true } || Boekjaren.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        var jaar = regel?.Jaar ?? Jaar;
+        if (_dialogen.KiesXafDoel(XafDienst.Bestandsnaam(Administratienaam, jaar)) is not { } doel)
+        {
+            return Task.CompletedTask;
+        }
+
+        return VoerUitAsync(async () =>
+        {
+            var versie = typeof(BoekhoudingViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+            var resultaat = await new XafDienst(_sessie, _tijd).MaakAsync(Soort, jaar, versie);
+            await File.WriteAllBytesAsync(doel, resultaat.Inhoud);
+            Melding = resultaat.OvergeslagenConcepten == 0
+                ? $"✓ Auditfile {jaar} opgeslagen als {Path.GetFileName(doel)} ({resultaat.AantalPosten} geboekte posten)."
+                : $"⚠ Auditfile {jaar} opgeslagen als {Path.GetFileName(doel)} ({resultaat.AantalPosten} geboekte posten); "
+                    + $"{resultaat.OvergeslagenConcepten} conceptpost(en) niet meegenomen. Boek ze eerst als ze erbij horen.";
+        }, null);
+    }
+
     // ---- Journaal ---------------------------------------------------------------------------
 
     /// <summary>Ctrl+N binnen het tabblad (besluit 72).</summary>

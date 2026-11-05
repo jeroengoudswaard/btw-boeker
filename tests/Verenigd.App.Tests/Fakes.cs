@@ -103,6 +103,16 @@ internal sealed class FakeDialoogService : IDialoogService
 
     public string? KiesXmlDoel(string voorgesteldeNaam) => XmlDoel;
 
+    public string? XafDoel { get; set; }
+
+    public string? XafVoorstel { get; private set; }
+
+    public string? KiesXafDoel(string voorgesteldeNaam)
+    {
+        XafVoorstel = voorgesteldeNaam;
+        return XafDoel;
+    }
+
     public bool ToonIncassoWizard(ViewModels.Contributie.IncassoWizardViewModel wizard) =>
         IncassoWizard is not null && IncassoWizard(wizard).GetAwaiter().GetResult();
 

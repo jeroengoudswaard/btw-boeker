@@ -139,6 +139,9 @@
                     <MenuItem Header="_Rekeningschema als sjabloon..." Command="{Binding ExporteerSjabloonCommand}"
                               ToolTip="Alleen nummers, namen, rubrieken en rollen; om te delen met andere groepen"
                               AutomationProperties.AutomationId="Menu_ExporteerSjabloon" />
+                    <MenuItem Header="_Auditfile (XAF)..." Command="{Binding ExporteerXafCommand}"
+                              ToolTip="Het gekozen boekjaar van de boekhouding als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander pakket"
+                              AutomationProperties.AutomationId="Menu_ExporteerXaf" />
                 </MenuItem>
                 <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
                           AutomationProperties.AutomationId="Menu_NieuweIncassorun" />

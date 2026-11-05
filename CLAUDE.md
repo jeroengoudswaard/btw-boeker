@@ -290,6 +290,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 252 | Schermafbeeldingen website | Uit een demo-database met verzonnen gegevens, gemaakt door een script in licht en donker; nooit echte gegevens (keuze 3A) |
 | 253 | Codesigning | Voor de bèta geen certificaat; de pagina legt uit hoe je de melding "Onbekende uitgever" (SmartScreen) passeert (keuze 4A) |
 | 254 | Webapp op GitHub Pages (wijzigt besluit 227) | De webapp draait op jeroengoudswaard.github.io/verenigd/app/; beveiligingskoppen via `<meta>` (CSP), zonder frame-ancestors en Permissions-Policy (keuze 5A). De koppeling met Supabase volgt later. Websitepagina *Verenigd* in een nieuwe categorie *Boekhouden en administratie*, met bèta-melding en de opmerking dat het nu alleen voor scouting geschikt is |
+| 255 | XAF-export | Uitwerking van besluit 197: XML Auditfile Financieel 3.2, één bestand per administratie en boekjaar (keuze 4A), via *Bestand › Exporteren › Auditfile (XAF)…* en een knop per boekjaar bij Boekjaren. Gecontroleerd tegen het officiële XSD-schema; een ongeldig bestand wordt nooit geschreven. XAF importeren blijft buiten beeld |
+| 256 | Relaties in de XAF | Relaties mét IBAN én de betalers van de contributie (met IBAN) als debiteuren en crediteuren (keuze 2B+C). Een regel op een debiteurenrekening krijgt de relatie of betaler als de post bij één factuur of één betaler hoort; een incassorun (totaal op één regel) krijgt er geen |
+| 257 | Omschrijvingen in de XAF | Zoals geboekt, inclusief voornamen in contributieomschrijvingen (keuze 3A) |
+| 258 | Historisch boekjaar en XAF | Een historisch boekjaar (besluit 122) heeft geen echte journaalposten en kan niet als auditfile |
+| 259 | Concepten en XAF | Alleen geboekte posten; conceptposten blijven buiten het bestand, met een ⚠-melding hoeveel (keuze 5A). De openingsbalans staat apart in `openingBalance` |
+| 260 | Webapp-icoon | Het inlogscherm van de webapp toont het echte app-icoon in plaats van een vereenvoudigd vinkje (keuze 1A, mee in v0.16.0); de pictogrammen voor installeren waren al het echte icoon |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -561,7 +567,12 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - **Nog door de gebruiker te doen:** de MSI downloaden, installeren en starten (met de SmartScreen-stappen van de pagina); de branch `verenigd` in de websiterepository verwijderen (mocht niet vanuit de cloudsessie).
   - **Nog op Windows te draaien:** de volledige suite, 2 runs (verwacht 1013/1013, App 272), plus één keer de schermafbeeldingentest met `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN` (controleren of de PNG's goed zijn).
 
-- **Taken voor later:** XAF-export en -import (besluit 197), nog niet ingepland.
+- **v0.16.0 Auditfile (XAF) en webapp-icoon (besluiten 255–260): gebouwd** (2026-11-04). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - `XafSchrijver` (Application, puur, met ingebed XSD `XmlAuditfileFinancieel3.2.xsd`, afkomstig uit het MIT-pakket pyxaf) en `XafDienst` (haalt boekhouding, naam en betalers uit de database); menu *Bestand › Exporteren › Auditfile (XAF)…* en knop *Auditfile (XAF)…* per boekjaar; dialoog `KiesXafDoel`.
+  - Webapp: logo op het inlogscherm is `icoon-192.png` (via `asset()`), met een e2e-test.
+  - Tests: 1027 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 360 (nieuw: `XafSchrijverTests` 9), Infrastructure 99 (nieuw: `XafDienstTests` 3), Architectuur 34; ViewModel-tests 253/255 (de 2 Windows-padtests; nieuw: `XafExportViewModelTests` 2); `Verenigd.App.Tests` bouwt zonder waarschuwingen. Webapp: svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 5 en 2 overgeslagen.
+  - **Nog op Windows te doen:** de volledige suite, 2 runs (verwacht 1027/1027, App 274), en één keer een auditfile van de eigen administratie exporteren en (als dat kan) inlezen in een ander pakket of laten controleren door de accountant.
+- **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy
 

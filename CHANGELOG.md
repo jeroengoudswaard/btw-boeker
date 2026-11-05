@@ -4,7 +4,17 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.16.0] - 2026-11-04: Auditfile (XAF) en webapp-icoon (besluiten 255–260)
+
+### Toegevoegd
+- **Auditfile Financieel (XAF 3.2)** (besluiten 197 en 255–259): *Bestand › Exporteren › Auditfile (XAF)…* en een knop per boekjaar bij *Boekhouding › Boekjaren*. Eén bestand per administratie en boekjaar met:
+  - rekeningschema, dagboeken en perioden;
+  - de openingsbalans apart, en alle geboekte posten per dagboek;
+  - relaties en betalers van de contributie als debiteuren en crediteuren, met IBAN.
+  Conceptposten gaan niet mee (⚠-melding met het aantal); een historisch boekjaar kan niet. Elk bestand wordt gecontroleerd tegen het officiële schema van XAF 3.2.
+
 ### Gewijzigd
+- **Webapp:** het inlogscherm toont het echte app-icoon in plaats van een vereenvoudigd vinkje (besluit 260).
 - **Schermafbeeldingen voor de website:** de test maximaliseert het venster in plaats van het op 1280×800 te zetten. Op de GitHub-runner (scherm 1024×768) viel het venster anders rechts buiten beeld en onder de taakbalk.
 
 ## [0.15.0] - 2026-11-04: Publiceren (besluiten 250–254)

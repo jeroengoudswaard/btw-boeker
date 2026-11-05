@@ -30,3 +30,11 @@ test('heeft een Content-Security-Policy in de pagina', async ({ page }) => {
   expect(csp).toContain("default-src 'self'");
   expect(csp).toContain('https://*.supabase.co');
 });
+
+test('het inlogscherm toont het echte app-icoon', async ({ page }) => {
+  await page.goto('/verenigd/app/inloggen');
+  const logo = page.locator('main img.logo');
+  await expect(logo).toBeVisible();
+  expect(await logo.evaluate((img: HTMLImageElement) => new URL(img.src).pathname)).toBe('/verenigd/app/icoon-192.png');
+  expect(await logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(192);
+});
