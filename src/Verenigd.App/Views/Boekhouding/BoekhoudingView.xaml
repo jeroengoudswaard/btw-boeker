@@ -1020,6 +1020,17 @@
                             <TextBlock Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="16,0,0,0"
                                        Text="Alleen geboekte posten tellen mee." />
                         </StackPanel>
+                        <!-- Jaarrekening volgens de eigen indeling (besluiten 263–268) -->
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12"
+                                    Visibility="{Binding IsJaarrekening, Converter={StaticResource BoolNaarZichtbaar}}">
+                            <CheckBox Content="_Rekeningen tonen" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding RekeningenTonen}"
+                                      VerticalAlignment="Center" Margin="0,0,16,0" AutomationProperties.AutomationId="RekeningenTonen" />
+                            <Button Content="_Indeling bewerken…" Command="{Binding IndelingBewerkenCommand}" AutomationProperties.AutomationId="IndelingBewerken"
+                                    ToolTip="Kopjes, regels en subtotalen kiezen; het rekeningschema en de boekingen veranderen niet." />
+                        </StackPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding JaarrekeningMelding}" TextWrapping="Wrap" Margin="0,0,0,12"
+                                   Visibility="{Binding JaarrekeningMelding, Converter={StaticResource NietNullNaarZichtbaar}}"
+                                   AutomationProperties.AutomationId="JaarrekeningMelding" />
                         <FlowDocumentScrollViewer Document="{Binding Rapport, Converter={StaticResource RapportNaarDocument}}" VerticalScrollBarVisibility="Auto"
                                                   IsToolBarVisible="False" AutomationProperties.Name="Rapport" AutomationProperties.AutomationId="Rapport" />
                     </DockPanel>

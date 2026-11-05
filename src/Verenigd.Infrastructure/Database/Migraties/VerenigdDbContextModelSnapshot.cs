@@ -17,6 +17,21 @@ namespace Verenigd.Infrastructure.Database.Migraties
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
+            modelBuilder.Entity("IndelingsregelRubrieken", b =>
+                {
+                    b.Property<int>("RegelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RubriekId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("RegelId", "RubriekId");
+
+                    b.HasIndex("RubriekId");
+
+                    b.ToTable("IndelingsregelRubrieken");
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Administraties.Administratie", b =>
                 {
                     b.Property<int>("Id")
@@ -800,6 +815,56 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.HasIndex("Administratie", "Jaar");
 
                     b.ToTable("HistorischeRegels", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Indelingsregel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Afdeling")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("IndelingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Soort")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Tekst")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Volgorde")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IndelingId");
+
+                    b.ToTable("Indelingsregels", (string)null);
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Jaarrekeningindeling", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Administratie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rapport")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Administratie", "Rapport")
+                        .IsUnique();
+
+                    b.ToTable("Jaarrekeningindelingen", (string)null);
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>
@@ -1708,6 +1773,21 @@ namespace Verenigd.Infrastructure.Database.Migraties
                     b.ToTable("Startwizard", (string)null);
                 });
 
+            modelBuilder.Entity("IndelingsregelRubrieken", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Indelingsregel", null)
+                        .WithMany()
+                        .HasForeignKey("RegelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Rubriek", null)
+                        .WithMany()
+                        .HasForeignKey("RubriekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Verenigd.Domain.Financien.Bank.Bankafschrift", b =>
                 {
                     b.HasOne("Verenigd.Domain.Financien.Boekhouding.Dagboek", "Dagboek")
@@ -1855,6 +1935,15 @@ namespace Verenigd.Infrastructure.Database.Migraties
                         .IsRequired();
 
                     b.Navigation("Rekening");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Indelingsregel", b =>
+                {
+                    b.HasOne("Verenigd.Domain.Financien.Boekhouding.Jaarrekeningindeling", null)
+                        .WithMany("Regels")
+                        .HasForeignKey("IndelingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>
@@ -2024,6 +2113,11 @@ namespace Verenigd.Infrastructure.Database.Migraties
             modelBuilder.Entity("Verenigd.Domain.Financien.Begrotingen.Meerjarenpost", b =>
                 {
                     b.Navigation("Bedragen");
+                });
+
+            modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Jaarrekeningindeling", b =>
+                {
+                    b.Navigation("Regels");
                 });
 
             modelBuilder.Entity("Verenigd.Domain.Financien.Boekhouding.Journaalpost", b =>

@@ -15,6 +15,12 @@ public enum Rapportsoort
 
     /// <summary>Begroot tegenover werkelijk (fase 5a).</summary>
     Begroting,
+
+    /// <summary>De balans volgens de eigen jaarrekeningindeling (besluiten 263–268).</summary>
+    JaarrekeningBalans,
+
+    /// <summary>De staat van baten en lasten volgens de eigen jaarrekeningindeling.</summary>
+    JaarrekeningBatenLasten,
 }
 
 public sealed record Rapportkeuze(Rapportsoort Soort, string Naam);

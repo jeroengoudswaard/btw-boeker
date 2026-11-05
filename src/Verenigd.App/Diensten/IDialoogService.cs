@@ -91,6 +91,9 @@ public interface IDialoogService
     /// <returns><c>true</c> als de administratie is ingericht.</returns>
     bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard);
 
+    /// <returns><c>true</c> als de jaarrekeningindeling is opgeslagen (besluiten 263–268).</returns>
+    bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor);
+
     /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
     bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
 

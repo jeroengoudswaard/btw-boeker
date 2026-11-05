@@ -56,6 +56,7 @@ public sealed class VerenigdDbContext(DbContextOptions<VerenigdDbContext> option
     public DbSet<Domain.Financien.Bijlagen.Bijlage> Bijlagen => Set<Domain.Financien.Bijlagen.Bijlage>();
     public DbSet<Domain.Financien.Begrotingen.Begroting> Begrotingen => Set<Domain.Financien.Begrotingen.Begroting>();
     public DbSet<Domain.Financien.Begrotingen.Meerjarenplan> Meerjarenplannen => Set<Domain.Financien.Begrotingen.Meerjarenplan>();
+    public DbSet<Jaarrekeningindeling> Jaarrekeningindelingen => Set<Jaarrekeningindeling>();
     public DbSet<Domain.Financien.Bijlagen.BijlageInhoud> BijlageInhoud => Set<Domain.Financien.Bijlagen.BijlageInhoud>();
     internal DbSet<StartwizardRij> Startwizard => Set<StartwizardRij>();
     public DbSet<Domain.Communicatie.Emailsjabloon> Emailsjablonen => Set<Domain.Communicatie.Emailsjabloon>();

@@ -19,7 +19,11 @@ public sealed record SjabloonSpeltakken(string Rubriek, int Vanaf, int Stap, str
 /// </summary>
 public sealed record Rekeningsjabloon(
     string Naam, AdministratieSoort? Administratie, IReadOnlyList<SjabloonRubriek> Rubrieken, IReadOnlyList<SjabloonRekening> Rekeningen,
-    SjabloonSpeltakken? Speltakken = null);
+    SjabloonSpeltakken? Speltakken = null)
+{
+    /// <summary>Optioneel: de eigen jaarrekeningindeling (besluiten 116 en 263); leeg = de automatische indeling.</summary>
+    public IReadOnlyList<SjabloonIndelingsregel> Jaarrekening { get; init; } = [];
+}
 
 public static class Rekeningsjablonen
 {
@@ -75,7 +79,11 @@ public static class Rekeningsjablonen
             [.. (bestand.Rubrieken ?? []).Select(r => new SjabloonRubriek(r.Naam?.Trim() ?? string.Empty))],
             [.. (bestand.Rekeningen ?? []).Select(r => new SjabloonRekening(r.Nummer, r.Naam?.Trim() ?? string.Empty,
                 string.IsNullOrWhiteSpace(r.Rubriek) ? null : r.Rubriek.Trim(), r.Soort, r.Rol, r.Kant))],
-            bestand.Speltakken);
+            bestand.Speltakken)
+        {
+            Jaarrekening = [.. (bestand.Jaarrekening ?? []).Select(r => new SjabloonIndelingsregel(r.Rapport, r.Afdeling, r.Soort, r.Tekst?.Trim() ?? string.Empty,
+                [.. (r.Rubrieken ?? []).Select(n => n?.Trim() ?? string.Empty)]))],
+        };
         Controleer(sjabloon);
         return sjabloon;
     }
@@ -92,11 +100,18 @@ public static class Rekeningsjablonen
             Rubrieken = [.. sjabloon.Rubrieken.Select(r => new BestandRubriek { Naam = r.Naam })],
             Rekeningen = [.. sjabloon.Rekeningen.Select(r => new BestandRekening { Nummer = r.Nummer, Naam = r.Naam, Rubriek = r.Rubriek, Soort = r.Soort, Rol = r.Rol, Kant = r.Kant })],
             Speltakken = sjabloon.Speltakken,
+            Jaarrekening = sjabloon.Jaarrekening.Count == 0 ? null : [.. sjabloon.Jaarrekening.Select(r => new BestandIndelingsregel
+            {
+                Rapport = r.Rapport, Afdeling = r.Afdeling, Soort = r.Soort, Tekst = r.Tekst, Rubrieken = r.Rubrieken.Count == 0 ? null : [.. r.Rubrieken],
+            })],
         };
         return JsonSerializer.Serialize(bestand, Opties) + Environment.NewLine;
     }
 
-    /// <summary>Het rekeningschema van een ingerichte administratie als sjabloon (alleen actieve rekeningen, zonder bedragen).</summary>
+    /// <summary>
+    /// Het rekeningschema van een ingerichte administratie als sjabloon (alleen actieve rekeningen, zonder bedragen), met de
+    /// eigen jaarrekeningindeling voor zover die naar meegenomen rubrieken verwijst.
+    /// </summary>
     public static Rekeningsjabloon UitStand(BoekhoudingStand stand, string naam)
     {
         ArgumentNullException.ThrowIfNull(stand);
@@ -106,7 +121,12 @@ public static class Rekeningsjablonen
             [.. rubrieken.Select(r => new SjabloonRubriek(r.Naam))],
             [.. rekeningen
                 .OrderBy(r => r.Rubriek is null ? int.MaxValue : rubrieken.FindIndex(g => g.Id == r.Rubriek.Id)).ThenBy(r => r.Nummer)
-                .Select(r => new SjabloonRekening(r.Nummer, r.Naam, r.Rubriek?.Naam, r.Soort, r.Rol, r.Soort == RekeningSoort.Resultaat ? r.Kant : null))]);
+                .Select(r => new SjabloonRekening(r.Nummer, r.Naam, r.Rubriek?.Naam, r.Soort, r.Rol, r.Soort == RekeningSoort.Resultaat ? r.Kant : null))])
+        {
+            Jaarrekening = [.. JaarrekeningDienst.NaarSjabloon(stand)
+                .Select(r => r with { Rubrieken = [.. r.Rubrieken.Where(n => rubrieken.Exists(g => g.Naam == n))] })
+                .Where(r => r.Soort != IndelingsregelSoort.Regel || r.Rubrieken.Count > 0)],
+        };
     }
 
     /// <summary>
@@ -202,6 +222,15 @@ public static class Rekeningsjablonen
             }
         }
 
+        foreach (var regel in sjabloon.Jaarrekening)
+        {
+            if (!Enum.IsDefined(regel.Rapport) || !Jaarrekeningindeling.Afdelingen(regel.Rapport).Contains(regel.Afdeling) || !Enum.IsDefined(regel.Soort)
+                || regel.Tekst.Length is 0 or > Indelingsregel.MaximaleTekstLengte || regel.Rubrieken.Any(n => !rubrieken.Contains(n)))
+            {
+                throw new InvalidOperationException($"De jaarrekeningregel \"{regel.Tekst}\" is ongeldig of verwijst naar een onbekende rubriek.");
+            }
+        }
+
         if (sjabloon.Speltakken is { } s
             && (s.Vanaf is < 1 or > 99999 || s.Stap < 1 || !s.Naam.Contains("{speltak}", StringComparison.Ordinal) || !rubrieken.Contains(s.Rubriek)))
         {
@@ -220,6 +249,16 @@ public static class Rekeningsjablonen
         public List<BestandRubriek>? Rubrieken { get; set; }
         public List<BestandRekening>? Rekeningen { get; set; }
         public SjabloonSpeltakken? Speltakken { get; set; }
+        public List<BestandIndelingsregel>? Jaarrekening { get; set; }
+    }
+
+    private sealed class BestandIndelingsregel
+    {
+        public JaarrekeningRapport Rapport { get; set; }
+        public JaarrekeningAfdeling Afdeling { get; set; }
+        public IndelingsregelSoort Soort { get; set; }
+        public string? Tekst { get; set; }
+        public List<string>? Rubrieken { get; set; }
     }
 
     private sealed class BestandRubriek

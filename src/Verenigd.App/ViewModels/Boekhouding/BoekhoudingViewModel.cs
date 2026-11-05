@@ -94,7 +94,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     public IReadOnlyList<Rapportkeuze> Rapportkeuzes =>
         [new(Rapportsoort.Saldibalans, Woorden["Saldibalans"]), new(Rapportsoort.Balans, Woorden["Balans"]), new(Rapportsoort.WinstEnVerlies, Woorden["WinstEnVerlies"]),
-            new(Rapportsoort.Begroting, Woorden["Rapport.Begroting"])];
+            new(Rapportsoort.Begroting, Woorden["Rapport.Begroting"]), new(Rapportsoort.JaarrekeningBalans, Woorden["Rapport.JaarrekeningBalans"]),
+            new(Rapportsoort.JaarrekeningBatenLasten, Woorden["Rapport.JaarrekeningBatenLasten"])];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLeeg))]
@@ -128,7 +129,19 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public partial string NieuweRubriekNaam { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsJaarrekening))]
     public partial Rapportsoort Rapportsoort { get; set; }
+
+    /// <summary>De jaarrekening volgens de eigen indeling (besluiten 263–268): dan zijn <i>Rekeningen tonen</i> en <i>Indeling bewerken</i> zichtbaar.</summary>
+    public bool IsJaarrekening => Rapportsoort is Rapportsoort.JaarrekeningBalans or Rapportsoort.JaarrekeningBatenLasten;
+
+    /// <summary>De rekeningen onder elke regel van de jaarrekening tonen (besluit 267); standaard aan.</summary>
+    [ObservableProperty]
+    public partial bool RekeningenTonen { get; set; } = true;
+
+    /// <summary>⚠ als er rekeningen met bedragen in geen regel van de indeling vallen.</summary>
+    [ObservableProperty]
+    public partial string? JaarrekeningMelding { get; private set; }
 
     [ObservableProperty]
     public partial RapportTabel? Rapport { get; private set; }
@@ -467,9 +480,11 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         StandaardinrichtingViewModel wizard;
+        Rekeningsjabloon gelezen;
         try
         {
-            wizard = new StandaardinrichtingViewModel(_dienst, Soort, sjabloon(), Vandaag.Year) { Bevestiging = _dialogen.Bevestig };
+            gelezen = sjabloon();
+            wizard = new StandaardinrichtingViewModel(_dienst, Soort, gelezen, Vandaag.Year) { Bevestiging = _dialogen.Bevestig };
         }
         catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
         {
@@ -484,6 +499,12 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         ShellLog.BoekhoudingOvergenomen(_logger, Soort.ToString(), wizard.AantalIngericht);
+        if (gelezen.Jaarrekening.Count > 0)
+        {
+            // De eigen jaarrekeningindeling uit het sjabloon (besluit 116), op naam van de rubrieken.
+            await VoerUitAsync(() => new JaarrekeningDienst(_sessie).PasSjabloonToeAsync(Soort, gelezen.Jaarrekening), "De jaarrekeningindeling uit het sjabloon kon niet worden overgenomen.");
+        }
+
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
     }
 
@@ -762,6 +783,8 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     partial void OnRapportsoortChanged(Rapportsoort value) => BerekenRapport();
 
+    partial void OnRekeningenTonenChanged(bool value) => BerekenRapport();
+
     partial void OnSubtabChanged(BoekhoudingSubtab value)
     {
         OnPropertyChanged(nameof(Afdruktabel));
@@ -843,14 +866,51 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     private void BerekenRapport()
     {
         using var meting = Meetpunt.Start(_logger, "Overzicht maken " + Rapportsoort);
+        JaarrekeningMelding = null;
         Rapport = _stand is null || !IsIngericht ? null : Rapportsoort switch
         {
+            Rapportsoort.JaarrekeningBalans => Jaarrekeningtabel(_stand, JaarrekeningRapport.Balans),
+            Rapportsoort.JaarrekeningBatenLasten => Jaarrekeningtabel(_stand, JaarrekeningRapport.BatenEnLasten),
             Rapportsoort.Balans => Rapporten.Balans(Grootboek.Balans(_stand, Jaar), Administratienaam),
             Rapportsoort.WinstEnVerlies => Rapporten.WinstEnVerlies(Grootboek.WinstEnVerlies(_stand, Jaar), Administratienaam),
             Rapportsoort.Begroting => Rapporten.Begroting(Application.Begrotingen.Begrotingsrekenaar.Overzicht(_stand, Jaar, Vandaag), Administratienaam),
             _ => Rapporten.Saldibalans(Grootboek.Saldibalans(_stand, Jaar), Administratienaam),
         };
         OnPropertyChanged(nameof(Afdruktabel));
+    }
+
+    private RapportTabel Jaarrekeningtabel(BoekhoudingStand stand, JaarrekeningRapport rapport)
+    {
+        var jaarrekening = Jaarrekeningrekenaar.Bereken(stand, rapport, Jaar);
+        if (jaarrekening.NietIngedeeld.Count > 0)
+        {
+            var aantal = jaarrekening.NietIngedeeld.Count;
+            JaarrekeningMelding = $"⚠ {aantal} {(aantal == 1 ? "rekening valt" : "rekeningen vallen")} in geen regel van de indeling: "
+                + string.Join(", ", jaarrekening.NietIngedeeld.Select(r => r.Nummer.ToString(CultureInfo.InvariantCulture)))
+                + ". Ze staan onder \"Niet ingedeeld\" en tellen mee in de totalen. Kies Indeling bewerken… om ze een plaats te geven.";
+        }
+
+        return Rapporten.Jaarrekening(jaarrekening, Administratienaam, RekeningenTonen);
+    }
+
+    /// <summary>Venster <i>Indeling bewerken</i> voor het gekozen jaarstuk (besluiten 263–268).</summary>
+    [RelayCommand]
+    private async Task IndelingBewerkenAsync()
+    {
+        if (_stand is not { IsIngericht: true } stand || !IsJaarrekening)
+        {
+            return;
+        }
+
+        var rapport = Rapportsoort == Rapportsoort.JaarrekeningBalans ? JaarrekeningRapport.Balans : JaarrekeningRapport.BatenEnLasten;
+        var editor = new JaarrekeningIndelingViewModel(new JaarrekeningDienst(_sessie), stand, rapport);
+        if (!_dialogen.ToonJaarrekeningIndeling(editor) || !editor.IsOpgeslagen)
+        {
+            return;
+        }
+
+        await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
+        Melding = "✓ De indeling is opgeslagen. De jaarrekening hieronder gebruikt hem al; afdrukken kan met Ctrl+P.";
     }
 
     /// <summary>Ctrl+P, via het standaard Windows-afdrukvenster (ook naar PDF).</summary>

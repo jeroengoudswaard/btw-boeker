@@ -164,6 +164,8 @@ internal sealed class WpfDialoogService : IDialoogService
 
     public bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard) => ToonModaal(new StandaardinrichtingVenster(wizard));
 
+    public bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor) => ToonModaal(new JaarrekeningIndelingVenster(editor));
+
     public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
 
     public bool ToonHistorieImport(HistorieImportViewModel wizard) => ToonModaal(new HistorieImportVenster(wizard));

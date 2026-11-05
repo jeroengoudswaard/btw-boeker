@@ -50,6 +50,8 @@ public static class Woordenlijst
         new("Lasten", "Lasten", "Uitgaven"),
         new("Kant", "Baten/lasten", "Inkomst/uitgave", "Of een potje inkomsten of uitgaven bevat; nodig voor de begroting."),
         new("Rapport.Begroting", "Begroting en werkelijk", "Verwacht en uitgegeven/ontvangen"),
+        new("Rapport.JaarrekeningBalans", "Jaarrekening: balans", "Jaarstuk: bezittingen en schulden"),
+        new("Rapport.JaarrekeningBatenLasten", "Jaarrekening: baten en lasten", "Jaarstuk: inkomsten en uitgaven"),
         new("Bijlage", "Bijlage", "Bon"),
         new("Bijlagen", "Bijlagen", "Bonnen", "Bonnen en facturen bij een boeking; ze worden versleuteld bewaard en gaan mee in de back-up."),
 

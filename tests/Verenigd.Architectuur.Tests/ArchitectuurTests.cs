@@ -460,7 +460,8 @@ public class ArchitectuurTests
     [Fact]
     public void Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
     {
-        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs", "Kerncijfers.cs"]; // Kerncijfers leest de begroting alleen, voor Start
+        // Kerncijfers (Start) en de jaarrekening (kolom begroot, besluit 266) lezen de begroting alleen.
+        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs", "Kerncijfers.cs", "Jaarrekeningrekenaar.cs"];
         var overtredingen = Directory
             .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
@@ -474,6 +475,27 @@ public class ArchitectuurTests
             .ToList();
 
         Assert.Empty(overtredingen);
+    }
+
+    /// <summary>
+    /// De jaarrekeningindeling is alleen weergave (besluiten 263–268): in de applicatielaag gebruiken alleen het model, de
+    /// rekenaar, de dienst, de rapporten en het sjabloonbestand haar; grootboek, jaarafsluiting, bank en boekingen niet.
+    /// </summary>
+    [Fact]
+    public void Jaarrekeningindeling_wordt_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
+    {
+        string[] toegestaan = ["BoekhoudingModel.cs", "Jaarrekeningrekenaar.cs", "JaarrekeningDienst.cs", "Rapporten.cs", "Rekeningsjablonen.cs"];
+        var overtredingen = Directory
+            .EnumerateFiles(Path.Combine(Repositorymap(), "src", "Verenigd.Application"), "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
+            .Where(f => File.ReadAllText(f) is var tekst
+                && (tekst.Contains("Jaarrekeningindeling", StringComparison.Ordinal) || tekst.Contains("Indelingsregel", StringComparison.Ordinal)))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.Empty(overtredingen);
+        Assert.DoesNotContain("Jaarrekening", File.ReadAllText(Path.Combine(Repositorymap(), "src", "Verenigd.Application", "Boekhouding", "Grootboek.cs")), StringComparison.Ordinal);
     }
 
     /// <summary>Elke tekst van de weergaven (besluit 127) die de XAML gebruikt, staat in de woordenlijst.</summary>

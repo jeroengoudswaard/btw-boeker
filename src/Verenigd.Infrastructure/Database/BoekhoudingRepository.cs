@@ -121,6 +121,8 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext,
             .Include(p => p.Posten).ThenInclude(p => p.Bedragen)
             .Where(p => p.Administratie == administratie).OrderBy(p => p.Startjaar).ThenBy(p => p.Versie)
             .AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
+        var indelingen = await context.Jaarrekeningindelingen.Include(i => i.Regels).ThenInclude(r => r.Rubrieken)
+            .Where(i => i.Administratie == administratie).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
             [.. posten.OrderBy(p => p.Datum).ThenBy(p => p.Volgnummer ?? int.MaxValue)])
         {
@@ -138,6 +140,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext,
             Bijlagen = bijlagen,
             Begrotingen = begrotingen,
             Meerjarenplannen = meerjarenplannen,
+            Jaarrekeningindelingen = indelingen,
         };
     }
 }

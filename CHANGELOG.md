@@ -4,6 +4,20 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.17.0] - 2026-11-05: Jaarrekeningindeling (besluiten 263–268)
+
+### Toegevoegd
+- **Jaarrekening volgens een eigen indeling** (besluiten 69, 151 en 263–268): in *Boekhouding › Rapporten* de keuzes *Jaarrekening: balans* en *Jaarrekening: baten en lasten*.
+  - Kolommen: werkelijk dit jaar, begroot (alleen bij baten en lasten) en werkelijk vorig jaar. Bij de Stichting komt begroot uit het meerjarenplan.
+  - *Rekeningen tonen* (standaard aan) zet de rekeningen onder elke regel.
+  - Een ⚠-melding noemt rekeningen die in geen regel vallen; ze staan onder *Niet ingedeeld* en tellen mee in de totalen.
+  - Afdrukken (Ctrl+P) en exporteren naar CSV en Excel zoals de andere rapporten.
+- **Venster *Indeling bewerken…***: per deel (activa en passiva, of baten en lasten) kopjes, regels met één of meer rubrieken en subtotalen; omhoog en omlaag (Alt+↑/↓), verwijderen (Delete) en *Eén regel per rubriek* om opnieuw te beginnen. Een rubriek die al bij een andere regel van hetzelfde deel staat, is grijs.
+- **Sjabloonbestand**: een geëxporteerd rekeningschema neemt de eigen indeling mee; bij inrichten met zo'n sjabloon wordt hij overgenomen.
+
+### Gewijzigd
+- De bestaande rapporten *Balans* en *Staat van baten en lasten* blijven ongewijzigd naast de jaarrekening (besluit 268). Zonder eigen indeling geeft de jaarrekening dezelfde indeling: één regel per rubriek.
+
 ## [0.16.1] - 2026-11-05: Kleine verbeteringen (besluiten 261 en 262)
 
 ### Gewijzigd

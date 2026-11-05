@@ -56,6 +56,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Bijlage> Bijlagen { get; } = [];
     public List<Begroting> Begrotingen { get; } = [];
     public List<Meerjarenplan> Meerjarenplannen { get; } = [];
+    public List<Jaarrekeningindeling> Jaarrekeningindelingen { get; } = [];
     public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
 
     /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
@@ -85,6 +86,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
         Begrotingen = Begrotingen.ToList(),
         Meerjarenplannen = Meerjarenplannen.ToList(),
+        Jaarrekeningindelingen = Jaarrekeningindelingen.ToList(),
         Incassoruns = Incassoruns(),
         Herincassos = Herincassos(),
     };
@@ -162,6 +164,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Bijlage bijlage: Bijlagen.Add(bijlage); break;
                 case Begroting begroting: Begrotingen.Add(MetId(begroting)); break;
                 case Meerjarenplan plan: Meerjarenplannen.Add(MetId(plan)); break;
+                case Jaarrekeningindeling indeling: Jaarrekeningindelingen.Add(MetId(indeling)); break;
                 case BijlageInhoud inhoud: Bijlageinhoud[inhoud.BijlageId] = inhoud.Gegevens; break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
