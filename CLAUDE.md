@@ -577,7 +577,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Gemerged als PR #21 (2026-11-05, `effbd0b`), na groene CI (akkoord van de gebruiker). De gebruiker pushte de tag `v0.16.0`.
 - **v0.16.1 Kleine verbeteringen (besluiten 261 en 262): gebouwd** (2026-11-05). Kleur van de geïnstalleerde webapp, GitHub Actions op Node 24, de twee ViewModel-tests met een Windows-pad platformonafhankelijk. Websitepagina: XAF als functie en in de FAQ.
   - Tests: in de Linux-cloudsessie nu volledig groen: Domain 260, Application 360, Infrastructure 99, Architectuur 34, ViewModel 255/255; webapp svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 5.
-  - Gemerged als PR #22 (2026-11-05, `fb65a32`), na groene CI (inclusief de release-workflow in controlestand). Nog door de gebruiker te doen: de tag `v0.16.1` pushen; daarmee wordt ook `download-artifact@v8` in de publicatiestap getest.
+  - Gemerged als PR #22 (2026-11-05, `fb65a32`), na groene CI (inclusief de release-workflow in controlestand). **Gepubliceerd** (2026-11-05): de gebruiker pushte de tag `v0.16.1`; release-run geslaagd, ook de publicatiestap met `download-artifact@v8`. `Verenigd.msi`, `Verenigd-0.16.1.msi` (71 MB) en `verenigd-web.zip` staan op de release `verenigd` van de website.
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy
