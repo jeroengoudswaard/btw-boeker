@@ -92,7 +92,7 @@ public sealed class ShellNavigatieTests
         Assert.False(meer.IsUitgeklapt);
         var pagina = shell.GeselecteerdTabblad;
 
-        shell.GeselecteerdeNavigatie = meer; // uitklappen, zonder van pagina te wisselen
+        shell.MeerWisselenCommand.Execute(meer); // uitklappen, zonder van pagina te wisselen
 
         Assert.True(meer.IsUitgeklapt);
         Assert.Same(pagina, shell.GeselecteerdTabblad);
@@ -101,8 +101,48 @@ public sealed class ShellNavigatieTests
         Assert.Equal(["Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren"],
             shell.Navigatie.Where(n => n.IsDiep && n.Module == ModuleSoort.Boekhouding).Select(n => n.Sleutel.Split('.')[1]));
 
-        shell.GeselecteerdeNavigatie = meer; // weer inklappen
+        shell.MeerWisselenCommand.Execute(meer); // weer inklappen
         Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Rekeningschema");
+    }
+
+    [Fact]
+    public async Task Meer_selecteren_klapt_niet_om_en_de_selectie_gaat_terug_naar_de_pagina()
+    {
+        var shell = await OpenAsync();
+        await Kies(shell, "Contributie");
+        var pagina = shell.GeselecteerdTabblad;
+        var meer = Item(shell, "Contributie.Meer");
+
+        // Besluit 273: WPF selecteert soms twee keer (bij focus en door de actie zelf); pijltjes mogen niets omklappen.
+        foreach (var _ in Enumerable.Range(0, 2))
+        {
+            shell.GeselecteerdeNavigatie = meer;
+
+            Assert.False(meer.IsUitgeklapt);
+            Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Betalers");
+            Assert.Same(pagina, shell.GeselecteerdTabblad);
+            Assert.Same(Item(shell, "Contributie.Leden"), shell.GeselecteerdeNavigatie);
+        }
+    }
+
+    [Fact]
+    public async Task Meer_wisselen_klapt_precies_een_keer_om_en_negeert_een_andere_regel()
+    {
+        var shell = await OpenAsync();
+        await Kies(shell, "Contributie");
+        var meer = Item(shell, "Contributie.Meer");
+
+        shell.MeerWisselenCommand.Execute(Item(shell, "Contributie.Runs")); // geen Meer…-regel
+        Assert.False(meer.IsUitgeklapt);
+
+        shell.MeerWisselenCommand.Execute(meer);
+        Assert.True(meer.IsUitgeklapt);
+        Assert.Same(Item(shell, "Contributie.Leden"), shell.GeselecteerdeNavigatie);
+        Item(shell, "Contributie.Betalers");
+
+        shell.MeerWisselenCommand.Execute(meer);
+        Assert.False(meer.IsUitgeklapt);
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Betalers");
     }
 
     [Fact]
@@ -225,7 +265,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         shell.GeselecteerdeNavigatie = Item(shell, "Contributie");
-        shell.GeselecteerdeNavigatie = Item(shell, "Contributie.Meer");
+        shell.MeerWisselenCommand.Execute(Item(shell, "Contributie.Meer"));
         shell.GeselecteerdeNavigatie = Item(shell, "Contributie.Tarieven");
         Assert.Equal(ContributieSubtab.Tarieven, Assert.IsType<ContributieViewModel>(shell.GeselecteerdTabblad).Subtab);
 

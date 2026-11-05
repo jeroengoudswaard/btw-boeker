@@ -119,17 +119,30 @@ public sealed partial class ShellViewModel
         BouwModuleMenu();
     }
 
+    /// <summary>Besluit 273: klapt <i>Meer…</i> om; alleen op een bewuste actie (klik, Enter of Spatie).</summary>
+    [RelayCommand]
+    private void MeerWisselen(NavigatieItem? item)
+    {
+        if (item is not { IsMeer: true })
+        {
+            return;
+        }
+
+        if (!_meerOpen.Remove(item.Module))
+        {
+            _meerOpen.Add(item.Module);
+        }
+
+        BouwNavigatie();
+    }
+
     private void Navigeer(NavigatieItem item)
     {
         if (item.IsMeer)
         {
-            // Besluit 269: Meer… klapt alleen in of uit; de pagina blijft staan.
-            if (!_meerOpen.Remove(item.Module))
-            {
-                _meerOpen.Add(item.Module);
-            }
-
-            BouwNavigatie();
+            // Besluit 273: selecteren klapt niet om. WPF selecteert soms twee keer (bij focus en door de actie zelf), en
+            // met de pijltjes kom je hier alleen langs. De selectie gaat terug naar de pagina die open is.
+            SynchroniseerNavigatie();
             return;
         }
 

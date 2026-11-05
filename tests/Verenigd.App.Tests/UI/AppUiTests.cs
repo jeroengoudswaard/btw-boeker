@@ -237,7 +237,7 @@ public sealed class AppUiTests : IDisposable
             Zoek(venster, $"Nav_Contributie.{onderdeel}"); // besluit 181: onderdelen in de navigatiebalk
         }
 
-        Kies(venster, "Nav_Contributie.Meer"); // besluit 269: Betalers en Tarieven onder Meer…; Openstaand pas als er iets openstaat
+        KlikOp(venster, "Nav_Contributie.Meer"); // besluit 269: Betalers en Tarieven onder Meer…; Openstaand pas als er iets openstaat
         Zoek(venster, "Nav_Contributie.Betalers");
         Zoek(venster, "Nav_Contributie.Tarieven");
 
@@ -250,6 +250,52 @@ public sealed class AppUiTests : IDisposable
         Bewaar(wizard, "09-incassowizard");
         Zoek(wizard, "IncassoAnnuleren").AsButton().Invoke();
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
+    }
+
+    [Fact(Timeout = Timeout)]
+    public async Task Meer_blijft_dicht_met_de_pijltjes_en_klapt_om_met_enter_en_spatie()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
+
+        var venster = Start();
+        VoerWachtwoordIn(venster);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
+        Zoek(venster, "ContributieTabblad");
+        var runs = Zoek(venster, "Nav_Contributie.Runs");
+        Assert.True(Retry.WhileFalse(
+            () =>
+            {
+                venster.SetForeground();
+                runs.Focus();
+                return HeeftEigenFocus("Nav_Contributie.Runs");
+            },
+            Wachttijd,
+            TimeSpan.FromMilliseconds(500)).Result, "Geen focus op de navigatieregel. " + Diagnose(venster));
+
+        // Besluit 273: met de pijltjes op Meer… komen klapt niets om.
+        TypOpRegel("Nav_Contributie.Runs", VirtualKeyShort.DOWN);
+        Assert.True(Retry.WhileFalse(() => HeeftEigenFocus("Nav_Contributie.Meer"), Wachttijd).Result, Diagnose(venster));
+        Thread.Sleep(400);
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Nav_Contributie.Betalers")));
+        Zoek(venster, "ContributieTabblad");
+
+        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.ENTER);
+        Zoek(venster, "Nav_Contributie.Betalers");
+        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.SPACE);
+        Assert.True(WachtTotWeg(venster, "Nav_Contributie.Betalers"), "Spatie klapte Meer… niet in.");
+
+        // Uitgeklapt zijn de onderdelen onder Meer… met de pijltjes te bereiken.
+        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.SPACE);
+        Zoek(venster, "Nav_Contributie.Betalers");
+        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.DOWN);
+        Assert.True(Retry.WhileFalse(() => Zoek(venster, "Nav_Contributie.Betalers").AsListBoxItem().IsSelected, Wachttijd).Result, Diagnose(venster));
 
         Sluit(venster);
     }
@@ -343,7 +389,7 @@ public sealed class AppUiTests : IDisposable
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}"); // besluit 178
         }
 
-        Kies(venster, "Nav_Boekhouding.Meer"); // besluit 269: inrichten onder Meer…
+        KlikOp(venster, "Nav_Boekhouding.Meer"); // besluit 269: inrichten onder Meer…
         foreach (var onderdeel in new[] { "Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren" })
         {
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}");
@@ -567,6 +613,23 @@ public sealed class AppUiTests : IDisposable
     }
 
     private static void Kies(AutomationElement venster, string automationId) => Zoek(venster, automationId).AsListBoxItem().Select();
+
+    /// <summary>Een echte muisklik. <i>Meer…</i> klapt alleen om op een bewuste actie, niet op een selectie (besluit 273).</summary>
+    private static void KlikOp(Window venster, string automationId)
+    {
+        venster.SetForeground();
+        Zoek(venster, automationId).Click();
+    }
+
+    /// <summary>Typt alleen als de focus op deze regel van dit app-proces ligt; zo komen de toetsen nooit in een ander venster.</summary>
+    private void TypOpRegel(string automationId, VirtualKeyShort toets)
+    {
+        Assert.True(Retry.WhileFalse(() => HeeftEigenFocus(automationId), Wachttijd).Result, $"Geen focus op {automationId}.");
+        Keyboard.Type(toets);
+    }
+
+    private static bool WachtTotWeg(AutomationElement venster, string automationId) =>
+        Retry.WhileFalse(() => venster.FindFirstDescendant(c => c.ByAutomationId(automationId)) is null, Wachttijd).Result;
 
     /// <summary>
     /// Typt het wachtwoord alleen als het wachtwoordveld van déze app de toetsenbordfocus heeft. Zonder voorgrond (Windows

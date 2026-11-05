@@ -24,6 +24,9 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Facturen** (besluit 271): de acties per status van de gekozen factuur: concept *Verwijderen*, definitief *Mailen…*, *PDF…* en *Creditfactuur…*, vervallen ook *Herinnering sturen…*.
 - Sneltoetsen, het Expert-menu en de lege schermen werken zoals voorheen.
 
+### Opgelost
+- ***Meer…* met het toetsenbord** (besluit 273): met de pijltjes op *Meer…* komen klapte hem open en meteen weer dicht, omdat de selectie omklapte en WPF twee keer selecteert. Daardoor waren de onderdelen eronder met de pijltjes niet te bereiken. Nu klapt *Meer…* alleen om met een klik, Enter of Spatie; de pijltjes lopen eroverheen.
+
 ### Afwijkingen van het ontwerpcanvas
 - Het filter bij Facturen blijft altijd zichtbaar: het staat standaard op *Open*, zodat betaalde facturen anders niet te vinden zijn.
 - De bankrekeningkeuze blijft een keuzelijst (verschijnt alleen bij meer dan één bankrekening) in plaats van een knoppengroep.

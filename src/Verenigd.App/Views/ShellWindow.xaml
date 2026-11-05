@@ -269,6 +269,7 @@
                     </ComboBox>
                 </StackPanel>
                 <ListBox x:Name="Navigatiebalk" ItemsSource="{Binding Navigatie}" SelectedItem="{Binding GeselecteerdeNavigatie}"
+                         PreviewMouseLeftButtonDown="Navigatiebalk_PreviewMouseLeftButtonDown" PreviewKeyDown="Navigatiebalk_PreviewKeyDown"
                          BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          AutomationProperties.Name="Navigatie" AutomationProperties.AutomationId="Navigatiebalk">
                     <ListBox.ItemContainerStyle>
@@ -278,7 +279,7 @@
                             <Setter Property="AutomationProperties.HelpText" Value="{Binding Teller, StringFormat='{}{0} te doen'}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsMeer}" Value="True">
-                                    <Setter Property="AutomationProperties.HelpText" Value="Onderdelen voor inrichting tonen of verbergen" />
+                                    <Setter Property="AutomationProperties.HelpText" Value="Onderdelen voor inrichting tonen of verbergen met Enter of Spatie" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

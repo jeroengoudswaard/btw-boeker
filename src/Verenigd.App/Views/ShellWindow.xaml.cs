@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels;
@@ -124,6 +125,27 @@ public partial class ShellWindow : Window
         }
 
         base.OnPreviewKeyDown(e);
+    }
+
+    /// <summary>Besluit 273: een klik op <i>Meer…</i> klapt om; hij selecteert de regel niet.</summary>
+    private void Navigatiebalk_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (ItemsControl.ContainerFromElement(Navigatiebalk, (DependencyObject)e.OriginalSource) is ListBoxItem { DataContext: NavigatieItem { IsMeer: true } meer } regel)
+        {
+            regel.Focus();
+            _viewModel.MeerWisselenCommand.Execute(meer);
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>Besluit 273: Enter en Spatie klappen <i>Meer…</i> om; de pijltjes lopen er alleen overheen.</summary>
+    private void Navigatiebalk_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.Enter or Key.Space && Keyboard.FocusedElement is ListBoxItem { DataContext: NavigatieItem { IsMeer: true } meer })
+        {
+            _viewModel.MeerWisselenCommand.Execute(meer);
+            e.Handled = true;
+        }
     }
 
     /// <summary>Verlaat de gebruiker het menu (Escape, klik elders of een keuze), dan verdwijnt de tijdelijke menubalk weer.</summary>
