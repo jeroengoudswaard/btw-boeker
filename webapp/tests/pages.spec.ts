@@ -21,6 +21,8 @@ test('manifest en pictogrammen staan onder het basispad', async ({ page, request
   expect(new URL(manifest).pathname).toBe('/verenigd/app/manifest.webmanifest');
   const inhoud = await (await request.get(manifest)).json();
   expect(inhoud.start_url).toBe('./');
+  // Besluit 261: de balk van de geïnstalleerde app in het donkerblauw van het app-icoon.
+  expect(inhoud.theme_color).toBe('#0B1F4B');
   expect((await request.get(`/verenigd/app/${inhoud.icons[0].src}`)).status()).toBe(200);
 });
 

@@ -296,6 +296,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 258 | Historisch boekjaar en XAF | Een historisch boekjaar (besluit 122) heeft geen echte journaalposten en kan niet als auditfile |
 | 259 | Concepten en XAF | Alleen geboekte posten; conceptposten blijven buiten het bestand, met een ⚠-melding hoeveel (keuze 5A). De openingsbalans staat apart in `openingBalance` |
 | 260 | Webapp-icoon | Het inlogscherm van de webapp toont het echte app-icoon in plaats van een vereenvoudigd vinkje (keuze 1A, mee in v0.16.0); de pictogrammen voor installeren waren al het echte icoon |
+| 261 | Kleur geïnstalleerde webapp | `theme_color` in het manifest is het donkerblauw van het app-icoon (`#0B1F4B`) in plaats van groen |
+| 262 | GitHub Actions bijwerken | Per action de nieuwste hoofdversie die minstens 2 weken oud is (zoals besluit 238), nu allemaal op Node 24; setup-node zonder automatische cache |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -572,6 +574,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Webapp: logo op het inlogscherm is `icoon-192.png` (via `asset()`), met een e2e-test.
   - Tests: 1027 .NET in totaal. In de Linux-cloudsessie groen: Domain 260, Application 360 (nieuw: `XafSchrijverTests` 9), Infrastructure 99 (nieuw: `XafDienstTests` 3), Architectuur 34; ViewModel-tests 253/255 (de 2 Windows-padtests; nieuw: `XafExportViewModelTests` 2); `Verenigd.App.Tests` bouwt zonder waarschuwingen. Webapp: svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 5 en 2 overgeslagen.
   - **Nog op Windows te doen:** de volledige suite, 2 runs (verwacht 1027/1027, App 274), en één keer een auditfile van de eigen administratie exporteren en (als dat kan) inlezen in een ander pakket of laten controleren door de accountant.
+  - Gemerged als PR #21 (2026-11-05, `effbd0b`), na groene CI (akkoord van de gebruiker). De gebruiker pushte de tag `v0.16.0`.
+- **v0.16.1 Kleine verbeteringen (besluiten 261 en 262): gebouwd** (2026-11-05). Kleur van de geïnstalleerde webapp, GitHub Actions op Node 24, de twee ViewModel-tests met een Windows-pad platformonafhankelijk. Websitepagina: XAF als functie en in de FAQ.
+  - Tests: in de Linux-cloudsessie nu volledig groen: Domain 260, Application 360, Infrastructure 99, Architectuur 34, ViewModel 255/255; webapp svelte-check 0 fouten, Vitest 44/44, Playwright 4 + 5.
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy

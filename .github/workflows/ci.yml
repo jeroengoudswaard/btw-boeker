@@ -9,9 +9,9 @@ jobs:
   bouwen-en-testen:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -27,7 +27,7 @@ jobs:
 
       - name: Testresultaten bewaren
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: testresultaten
           path: TestResults
@@ -45,11 +45,13 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+          # Geen automatische cache: er staat geen lockbestand in de hoofdmap, en de release-workflow heeft geheimen.
+          package-manager-cache: false
 
       - name: Beveiligingstests database en Edge Function
         working-directory: supabase/tests
