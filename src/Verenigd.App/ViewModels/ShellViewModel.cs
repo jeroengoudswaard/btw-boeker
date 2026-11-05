@@ -680,6 +680,11 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
         tab.EmailAanbieden = OpenEmailAsync;
+        if (tab is Webapp.WebappViewModel webappPagina)
+        {
+            webappPagina.PropertyChanged += WebappGewijzigd;
+        }
+
         Tabbladen.Add(tab);
         GeselecteerdTabblad = tab;
         switch (tab)
@@ -726,7 +731,14 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         var dienst = new Application.Webapp.WebappDienst(sessie, _boekhouding.Webapp, _tijd);
         try
         {
-            if (!(await dienst.LaadAsync()).IsGekoppeld)
+            var gekoppeld = (await dienst.LaadAsync()).IsGekoppeld;
+            if (ReferenceEquals(_sessie, sessie) && gekoppeld != _webappGekoppeld)
+            {
+                _webappGekoppeld = gekoppeld;
+                BouwNavigatie();
+            }
+
+            if (!gekoppeld)
             {
                 return;
             }
@@ -825,6 +837,16 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         BouwNavigatie();
     }
 
+    /// <summary>Besluit 269: met een koppeling verschijnen Voorstellen en Meer… in de navigatie, zonder alleen Koppelen.</summary>
+    private void WebappGewijzigd(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Webapp.WebappViewModel.IsGekoppeld) && sender is Webapp.WebappViewModel webapp && webapp.IsGekoppeld != _webappGekoppeld)
+        {
+            _webappGekoppeld = webapp.IsGekoppeld;
+            BouwNavigatie();
+        }
+    }
+
     private void ActiefTabbladGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -833,7 +855,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 OpslaanCommand.NotifyCanExecuteChanged();
                 break;
             case nameof(TabbladViewModel.Onderdeel):
-                SynchroniseerNavigatie();
+                // Een onderdeel onder Meer… (besluit 269) moet zichtbaar worden; anders alleen markeren.
+                BouwNavigatie();
                 break;
             case nameof(IPaginameldingen.Melding) when sender is IPaginameldingen { Melding: { Length: > 0 } melding }:
                 ZetStatus(Statussoort.Gelukt, melding);
@@ -1002,6 +1025,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _overzicht.Kaarten.Clear();
         await _sessie.DisposeAsync();
         _sessie = null;
+        _webappGekoppeld = false;
         DatabaseNaam = null;
         BouwModuleMenu();
         BouwNavigatie();

@@ -91,10 +91,12 @@ public sealed class LedenViewModelTests
     public async Task Uitgeschreven_leden_alleen_op_verzoek_zichtbaar()
     {
         var vm = await MaakAsync();
+        Assert.False(vm.HeeftUitgeschreven); // besluit 270: het vakje verschijnt pas als er uitgeschreven leden zijn
         _opslag.Stand.Personen.Single(p => p.Achternaam == "Bakker").Uitschrijven(Vandaag, DateTime.UtcNow);
         await vm.VernieuwCommand.ExecuteAsync(null);
 
         Assert.Equal(2, vm.Leden.Count);
+        Assert.True(vm.HeeftUitgeschreven);
 
         vm.ToonUitgeschreven = true;
         var cas = vm.Leden.Single(l => l.Achternaam == "Bakker");

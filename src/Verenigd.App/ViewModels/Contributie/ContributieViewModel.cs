@@ -434,10 +434,24 @@ public sealed partial class ContributieViewModel : TabbladViewModel, IPaginameld
         }
 
         Tarieven.Vervang(regels);
+        OnPropertyChanged(nameof(KanVorigJaarKopieren));
     }
+
+    /// <summary>Besluit 270: het filter verschijnt als teller, alleen als er leden met een waarschuwing zijn.</summary>
+    public int AantalWaarschuwingen => _alleLeden.Count(r => r.Waarschuwing is not null);
+
+    public string WaarschuwingenTekst => $"{AantalWaarschuwingen} met waarschuwing";
+
+    public bool IsWaarschuwingfilterZichtbaar => AantalWaarschuwingen > 0 || AlleenWaarschuwingen;
+
+    /// <summary>Besluit 270: kopiëren alleen als vorig jaar tarieven heeft.</summary>
+    public bool KanVorigJaarKopieren => _stand?.Tarieven.Any(t => t.Boekjaar == Boekjaar - 1) == true;
 
     private void PasLedenfilterToe()
     {
+        OnPropertyChanged(nameof(AantalWaarschuwingen));
+        OnPropertyChanged(nameof(WaarschuwingenTekst));
+        OnPropertyChanged(nameof(IsWaarschuwingfilterZichtbaar));
         var zoek = Zoektekst?.Trim() ?? string.Empty;
         Leden.Clear();
         foreach (var regel in _alleLeden.Where(r =>

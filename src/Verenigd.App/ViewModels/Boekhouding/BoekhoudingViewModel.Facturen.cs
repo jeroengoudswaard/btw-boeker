@@ -60,6 +60,7 @@ public sealed partial class BoekhoudingViewModel
         OnPropertyChanged(nameof(Factuuraantaltekst));
     }
 
+
     private void PasFactuurfilterToe(Guid? selectie)
     {
         var zichtbaar = _alleFacturen.Where(f => Factuurfilter switch

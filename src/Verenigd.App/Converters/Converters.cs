@@ -64,6 +64,16 @@ public sealed class GelijkAanNaarZichtbaarheidConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+/// <summary>Besluit 270: zichtbaar als een aantal groter is dan nul (een knop die alleen verschijnt als er iets te doen is).</summary>
+public sealed class GroterDanNulNaarZichtbaarheidConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is int aantal && aantal > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 /// <summary><c>true</c> wordt <c>false</c> en omgekeerd.</summary>
 public sealed class NietConverter : IValueConverter
 {

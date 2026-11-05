@@ -42,7 +42,10 @@
                         <TextBox x:Name="Zoekveld" Width="220" Margin="0,0,16,0" VerticalAlignment="Center"
                                  Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}" ToolTip="Naam of lidnummer (Ctrl+F)"
                                  AutomationProperties.Name="Zoeken op naam of lidnummer" />
-                        <CheckBox Content="Alleen met _waarschuwing" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding AlleenWaarschuwingen}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <!-- Besluit 270: het filter als teller, alleen als er waarschuwingen zijn. -->
+                        <ToggleButton Content="{Binding WaarschuwingenTekst}" IsChecked="{Binding AlleenWaarschuwingen}" VerticalAlignment="Center" Margin="0,0,16,0"
+                                      ToolTip="Alleen leden met een waarschuwing tonen" AutomationProperties.AutomationId="AlleenWaarschuwingen"
+                                      Visibility="{Binding IsWaarschuwingfilterZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
                         <Button Command="{Binding VoorstellenOvernemenCommand}" VerticalAlignment="Center" AutomationProperties.AutomationId="VoorstellenOvernemen">
                             <TextBlock><Run Text="Voorstellen _overnemen (" /><Run Text="{Binding AantalVoorstellen, Mode=OneWay}" /><Run Text=")" /></TextBlock>
                         </Button>
@@ -189,7 +192,8 @@
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
                         <Label Content="Boek_jaar" Target="{Binding ElementName=Jaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
                         <ComboBox x:Name="Jaarkeuze" ItemsSource="{Binding Boekjaren}" SelectedItem="{Binding Boekjaar}" MinWidth="100" Margin="0,0,16,0" />
-                        <Button Content="_Kopiëren van vorig jaar" Command="{Binding KopieerVorigJaarCommand}" />
+                        <Button Content="_Kopiëren van vorig jaar" Command="{Binding KopieerVorigJaarCommand}"
+                                Visibility="{Binding KanVorigJaarKopieren, Converter={StaticResource BoolNaarZichtbaar}}" />
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                Text="Het maandbedrag wordt elke maand geïncasseerd. Leiding en Vrijgesteld staan vast op € 0,00. De opbrengstrekening geldt voor alle jaren; zonder opbrengstrekening wordt een run niet geboekt." />
@@ -258,10 +262,10 @@
                                                     Command="{Binding DataContext.BoekRunCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}" Visibility="{Binding KanBoeken, Converter={StaticResource BoolNaarZichtbaar}}"
                                                     AutomationProperties.Name="{Binding Maand, StringFormat=Run {0} boeken}" />
-                                            <Button Content="Bestand opslaan..." Margin="0,0,8,0" IsEnabled="{Binding IsDefinitief}"
+                                            <Button Content="Bestand opslaan..." Margin="0,0,8,0" Visibility="{Binding IsDefinitief, Converter={StaticResource BoolNaarZichtbaar}}"
                                                     Command="{Binding DataContext.BestandOpslaanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}" />
-                                            <Button Content="Annuleren..." IsEnabled="{Binding IsDefinitief}"
+                                            <Button Content="Annuleren..." Visibility="{Binding KanAnnuleren, Converter={StaticResource BoolNaarZichtbaar}}"
                                                     Command="{Binding DataContext.AnnuleerRunCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}" />
                                         </StackPanel>
@@ -283,20 +287,32 @@
                             <Run Text="Totaal openstaand " /><Run Text="{Binding TotaalOpenstaand, Mode=OneWay}" FontWeight="SemiBold" />
                         </TextBlock>
                     </WrapPanel>
-                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Kaart}" Margin="0,12,0,0">
-                        <WrapPanel>
-                            <Button Content="Opnieuw incasseren in _volgende run" Command="{Binding HerincassoCommand}" Margin="0,0,24,0" VerticalAlignment="Center"
-                                    ToolTip="De gestorneerde post gaat mee in de volgende incassorun, met (herincasso) in de omschrijving"
-                                    AutomationProperties.AutomationId="Herincasso" />
-                            <Label Content="Kosten_rekening" Target="{Binding ElementName=Oninbaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
-                            <ComboBox x:Name="Oninbaarkeuze" ItemsSource="{Binding Kostenrekeningen}" SelectedItem="{Binding Oninbaarrekening}" Width="240"
-                                      IsTextSearchEnabled="True" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button Content="Afboeken als _oninbaar..." Command="{Binding OninbaarCommand}" VerticalAlignment="Center" Margin="0,0,24,0"
-                                    AutomationProperties.AutomationId="Oninbaar" />
-                            <Button Content="Bericht _mailen..." Command="{Binding MailStorneringCommand}" VerticalAlignment="Center"
-                                    ToolTip="Een e-mail over de stornering aan de voogden en leden onder deze betaler (E-mail › Opstellen)"
-                                    AutomationProperties.AutomationId="StorneringMailen" />
-                        </WrapPanel>
+                    <!-- Besluit 270: de acties alleen onder een gekozen post, en alleen als ze kunnen. -->
+                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Kaart}" Margin="0,12,0,0"
+                            Visibility="{Binding GeselecteerdeVordering, Converter={StaticResource NietNullNaarZichtbaar}}">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Button Content="Opnieuw incasseren in _volgende run" Command="{Binding HerincassoCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        ToolTip="De gestorneerde post gaat mee in de volgende incassorun, met (herincasso) in de omschrijving"
+                                        AutomationProperties.AutomationId="Herincasso"
+                                        Visibility="{Binding KanHerincassoNu, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                <Button Content="Bericht _mailen..." Command="{Binding MailStorneringCommand}" VerticalAlignment="Center" Margin="0,0,8,0"
+                                        ToolTip="Een e-mail over de stornering aan de voogden en leden onder deze betaler (E-mail › Opstellen)"
+                                        AutomationProperties.AutomationId="StorneringMailen"
+                                        Visibility="{Binding KanStorneringMailenNu, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                <Button Content="Afboeken als _oninbaar..." Command="{Binding OninbaarKiezenCommand}" VerticalAlignment="Center"
+                                        AutomationProperties.AutomationId="OninbaarKiezen"
+                                        Visibility="{Binding KanOninbaarNu, Converter={StaticResource BoolNaarZichtbaar}}" />
+                            </WrapPanel>
+                            <WrapPanel Margin="0,12,0,0" Visibility="{Binding IsOninbaarKeuzeOpen, Converter={StaticResource BoolNaarZichtbaar}}">
+                                <Label Content="Kosten_rekening" Target="{Binding ElementName=Oninbaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                                <ComboBox x:Name="Oninbaarkeuze" ItemsSource="{Binding Kostenrekeningen}" SelectedItem="{Binding Oninbaarrekening}" Width="240"
+                                          IsTextSearchEnabled="True" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <Button Content="_Afboeken..." Command="{Binding OninbaarCommand}" VerticalAlignment="Center" Margin="0,0,8,0"
+                                        AutomationProperties.AutomationId="Oninbaar" />
+                                <Button Content="Annuleren" Command="{Binding OninbaarAnnulerenCommand}" VerticalAlignment="Center" />
+                            </WrapPanel>
+                        </StackPanel>
                     </Border>
                     <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                Text="Een post is 'Verwacht' tot de bank de incasso uitkeert. Een betaling door de ouders lettert u af onder Boekhouding › Bank van de boekhouding." />

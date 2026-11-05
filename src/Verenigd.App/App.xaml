@@ -16,6 +16,7 @@
             <conv:OmgekeerdeBoolNaarZichtbaarheidConverter x:Key="OnwaarNaarZichtbaar" />
             <conv:GelijkAanParameterConverter x:Key="GelijkAan" />
             <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
+            <conv:GroterDanNulNaarZichtbaarheidConverter x:Key="GroterDanNulNaarZichtbaar" />
             <conv:NietConverter x:Key="Niet" />
             <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
             <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
@@ -70,6 +71,29 @@
             <Style x:Key="DialoogKnop" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="MinWidth" Value="120" />
                 <Setter Property="Margin" Value="8,0,0,0" />
+            </Style>
+            <!-- Besluit 270: een actie die pas nodig is als er iets te doen is, als rustige link in de accentkleur. -->
+            <Style x:Key="Linkknop" TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Padding" Value="0,4" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </ResourceDictionary>
     </Application.Resources>
