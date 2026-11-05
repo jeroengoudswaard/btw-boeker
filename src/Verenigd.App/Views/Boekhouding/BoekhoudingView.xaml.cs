@@ -14,6 +14,17 @@ public partial class BoekhoudingView : UserControl
 
     private BoekhoudingViewModel? ViewModel => DataContext as BoekhoudingViewModel;
 
+    /// <summary>Besluit 270: Excel en CSV samen onder één knop <i>Exporteren</i>.</summary>
+    private void Exporteren_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { ContextMenu: { } menu } knop)
+        {
+            menu.PlacementTarget = knop;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            menu.IsOpen = true;
+        }
+    }
+
     /// <summary>Alleen bestanden mogen worden neergezet (besluit 85).</summary>
     private void Bijlagen_DragOver(object sender, DragEventArgs e)
     {

@@ -23,8 +23,10 @@ public enum Statussoort
 /// </summary>
 public sealed partial class ShellViewModel
 {
+    private readonly HashSet<ModuleSoort> _meerOpen = [];
     private bool _synchroniseren;
     private bool _menubalkTijdelijk;
+    private bool _webappGekoppeld;
 
     /// <summary>De regels van de navigatiebalk; onderdelen alleen van de module die open is.</summary>
     public ObservableCollection<NavigatieItem> Navigatie { get; } = [];
@@ -119,6 +121,18 @@ public sealed partial class ShellViewModel
 
     private void Navigeer(NavigatieItem item)
     {
+        if (item.IsMeer)
+        {
+            // Besluit 269: Meer… klapt alleen in of uit; de pagina blijft staan.
+            if (!_meerOpen.Remove(item.Module))
+            {
+                _meerOpen.Add(item.Module);
+            }
+
+            BouwNavigatie();
+            return;
+        }
+
         using var meting = Meetpunt.Start(_logger, "Navigeren naar " + item.Sleutel);
         var administratie = GekozenAdministratie?.Soort;
         var definitie = ModuleCatalogus.Geef(item.Module);
@@ -142,6 +156,7 @@ public sealed partial class ShellViewModel
     private void BouwNavigatie()
     {
         var items = new List<NavigatieItem> { Module(ModuleSoort.Overzicht, "Start", "Start") };
+        var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten, GekozenAdministratie?.Soort) : new Dictionary<string, int>();
         if (IsDatabaseOpen)
         {
             var open = GeselecteerdTabblad?.Module.Soort;
@@ -152,7 +167,7 @@ public sealed partial class ShellViewModel
                 items.Add(Module(ModuleSoort.Contributie, "Contributie", "Contributie", heeftOnderdelen: true, uitgeklapt: open == ModuleSoort.Contributie));
                 if (open == ModuleSoort.Contributie)
                 {
-                    items.AddRange(Contributieonderdelen());
+                    items.AddRange(Contributieonderdelen(tellers));
                 }
             }
 
@@ -174,6 +189,11 @@ public sealed partial class ShellViewModel
             if (open == ModuleSoort.Webapp)
             {
                 items.AddRange(Webapponderdelen());
+            }
+
+            if (open != ModuleSoort.Boekhouding && open != ModuleSoort.Contributie && open != ModuleSoort.Webapp)
+            {
+                _meerOpen.Clear(); // een andere module: Meer… begint weer ingeklapt
             }
 
             items.Add(Module(ModuleSoort.Instellingen, "Instellingen", "Instellingen"));
@@ -236,7 +256,7 @@ public sealed partial class ShellViewModel
             null or OverzichtViewModel => Navigatie.FirstOrDefault(),
             BoekhoudingViewModel { Subtab: BoekhoudingSubtab.Begroting or BoekhoudingSubtab.Meerjarenplan } =>
                 Navigatie.FirstOrDefault(n => n.Module == ModuleSoort.Begroting),
-            _ => Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && n.Onderdeel == pagina.Onderdeel)
+            _ => Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsMeer && n.Onderdeel == pagina.Onderdeel)
                 ?? Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsSubitem),
         };
 
@@ -254,36 +274,40 @@ public sealed partial class ShellViewModel
         }
     }
 
-    private IEnumerable<NavigatieItem> Boekhoudingonderdelen()
+    private List<NavigatieItem> Boekhoudingonderdelen()
     {
         var woorden = _boekhouding.Woorden;
-        (BoekhoudingSubtab Subtab, string Titel)[] onderdelen =
+        return Onderdelen(ModuleSoort.Boekhouding, "Boekhouding",
         [
-            (BoekhoudingSubtab.Journaal, woorden["Tab.Journaal"]),
-            (BoekhoudingSubtab.Bank, woorden["Tab.Bank"]),
-            (BoekhoudingSubtab.Postvak, woorden["Tab.Postvak"]),
-            (BoekhoudingSubtab.Boekingsregels, woorden["Tab.Boekingsregels"]),
-            (BoekhoudingSubtab.Facturen, "Facturen"),
-            (BoekhoudingSubtab.Relaties, "Relaties"),
-            (BoekhoudingSubtab.Rekeningschema, woorden["Tab.Rekeningschema"]),
-            (BoekhoudingSubtab.Grootboekkaart, woorden["Tab.Grootboekkaart"]),
-            (BoekhoudingSubtab.Rapporten, woorden["Tab.Rapporten"]),
-            (BoekhoudingSubtab.Boekjaren, woorden["Tab.Boekjaren"]),
-        ];
-        return onderdelen.Select(o => new NavigatieItem($"Boekhouding.{o.Subtab}", Zonder_(o.Titel), string.Empty, ModuleSoort.Boekhouding, (int)o.Subtab));
+            ((int)BoekhoudingSubtab.Journaal, woorden["Tab.Journaal"]),
+            ((int)BoekhoudingSubtab.Bank, woorden["Tab.Bank"]),
+            ((int)BoekhoudingSubtab.Postvak, woorden["Tab.Postvak"]),
+            ((int)BoekhoudingSubtab.Facturen, "Facturen"),
+            ((int)BoekhoudingSubtab.Rapporten, woorden["Tab.Rapporten"]),
+        ],
+        [
+            ((int)BoekhoudingSubtab.Boekingsregels, woorden["Tab.Boekingsregels"]),
+            ((int)BoekhoudingSubtab.Relaties, "Relaties"),
+            ((int)BoekhoudingSubtab.Rekeningschema, woorden["Tab.Rekeningschema"]),
+            ((int)BoekhoudingSubtab.Grootboekkaart, woorden["Tab.Grootboekkaart"]),
+            ((int)BoekhoudingSubtab.Boekjaren, woorden["Tab.Boekjaren"]),
+        ], BoekhoudingSubtabNaam);
     }
 
-    private static IEnumerable<NavigatieItem> Contributieonderdelen()
+    /// <summary>Openstaand alleen als er iets openstaat of als het open is (besluit 269).</summary>
+    private List<NavigatieItem> Contributieonderdelen(IReadOnlyDictionary<string, int> tellers)
     {
-        (ContributieSubtab Subtab, string Titel)[] onderdelen =
-        [
-            (ContributieSubtab.Leden, "Leden & categorie"),
-            (ContributieSubtab.Betalers, "Betalers & machtigingen"),
-            (ContributieSubtab.Tarieven, "Tarieven"),
-            (ContributieSubtab.Runs, "Incassoruns"),
-            (ContributieSubtab.Openstaand, "Openstaand"),
-        ];
-        return onderdelen.Select(o => new NavigatieItem($"Contributie.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Contributie, (int)o.Subtab));
+        var openstaandZichtbaar = tellers.ContainsKey("Contributie.Openstaand")
+            || GeselecteerdTabblad is ContributieViewModel { Subtab: ContributieSubtab.Openstaand };
+        List<(int, string)> dagelijks = [((int)ContributieSubtab.Leden, "Leden & categorie"), ((int)ContributieSubtab.Runs, "Incassoruns")];
+        if (openstaandZichtbaar)
+        {
+            dagelijks.Add(((int)ContributieSubtab.Openstaand, "Openstaand"));
+        }
+
+        return Onderdelen(ModuleSoort.Contributie, "Contributie", dagelijks,
+            [((int)ContributieSubtab.Betalers, "Betalers & machtigingen"), ((int)ContributieSubtab.Tarieven, "Tarieven")],
+            o => ((ContributieSubtab)o).ToString());
     }
 
     private static IEnumerable<NavigatieItem> Emailonderdelen()
@@ -297,16 +321,45 @@ public sealed partial class ShellViewModel
         return onderdelen.Select(o => new NavigatieItem($"Email.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Email, (int)o.Subtab));
     }
 
-    private static IEnumerable<NavigatieItem> Webapponderdelen()
+    /// <summary>Zonder koppeling alleen <i>Koppelen</i>; daarna Voorstellen, met Leiding en Synchroniseren onder Meer… (besluit 269).</summary>
+    private List<NavigatieItem> Webapponderdelen()
     {
-        (Webapp.WebappSubtab Subtab, string Titel)[] onderdelen =
-        [
-            (Webapp.WebappSubtab.Voorstellen, "Voorstellen"),
-            (Webapp.WebappSubtab.Leiding, "Leiding"),
-            (Webapp.WebappSubtab.Synchroniseren, "Synchroniseren"),
-        ];
-        return onderdelen.Select(o => new NavigatieItem($"Webapp.{o.Subtab}", o.Titel, string.Empty, ModuleSoort.Webapp, (int)o.Subtab));
+        static string Naam(int o) => ((Webapp.WebappSubtab)o).ToString();
+        if (!_webappGekoppeld)
+        {
+            return [new NavigatieItem($"Webapp.{Naam((int)Webapp.WebappSubtab.Synchroniseren)}", "Koppelen", string.Empty, ModuleSoort.Webapp, (int)Webapp.WebappSubtab.Synchroniseren)];
+        }
+
+        return Onderdelen(ModuleSoort.Webapp, "Webapp", [((int)Webapp.WebappSubtab.Voorstellen, "Voorstellen")],
+            [((int)Webapp.WebappSubtab.Leiding, "Leiding"), ((int)Webapp.WebappSubtab.Synchroniseren, "Synchroniseren")], Naam);
     }
+
+    /// <summary>
+    /// De dagelijkse onderdelen, dan <i>Meer…</i> en, als die open is of de pagina daar staat, de onderdelen voor inrichting
+    /// (besluit 269).
+    /// </summary>
+    private List<NavigatieItem> Onderdelen(
+        ModuleSoort module, string sleutel, IEnumerable<(int Onderdeel, string Titel)> dagelijks, IEnumerable<(int Onderdeel, string Titel)> meer,
+        Func<int, string> naam)
+    {
+        var meerLijst = meer.ToList();
+        if (GeselecteerdTabblad is { } pagina && pagina.Module.Soort == module && pagina.Onderdeel is { } huidig && meerLijst.Exists(m => m.Onderdeel == huidig))
+        {
+            _meerOpen.Add(module);
+        }
+
+        var open = _meerOpen.Contains(module);
+        var items = dagelijks.Select(o => new NavigatieItem($"{sleutel}.{naam(o.Onderdeel)}", Zonder_(o.Titel), string.Empty, module, o.Onderdeel)).ToList();
+        items.Add(new NavigatieItem($"{sleutel}.Meer", "Meer…", string.Empty, module, null) { IsMeer = true, IsUitgeklapt = open, HeeftOnderdelen = true });
+        if (open)
+        {
+            items.AddRange(meerLijst.Select(o => new NavigatieItem($"{sleutel}.{naam(o.Onderdeel)}", Zonder_(o.Titel), string.Empty, module, o.Onderdeel) { IsDiep = true }));
+        }
+
+        return items;
+    }
+
+    private static string BoekhoudingSubtabNaam(int onderdeel) => ((BoekhoudingSubtab)onderdeel).ToString();
 
     private static NavigatieItem Module(ModuleSoort soort, string sleutel, string titel, bool heeftOnderdelen = false, bool uitgeklapt = false) =>
         new(sleutel, titel, ModuleCatalogus.Geef(soort).Pictogram, soort, null) { HeeftOnderdelen = heeftOnderdelen, IsUitgeklapt = uitgeklapt };
@@ -338,7 +391,7 @@ public sealed partial class ShellViewModel
             }
         }
 
-        PasTellersToe();
+        BouwNavigatie(); // tellers, en Openstaand verschijnt of verdwijnt (besluit 269)
     }
 
     /// <summary>Besluit 220: de aantallen bij de regels van de navigatiebalk.</summary>

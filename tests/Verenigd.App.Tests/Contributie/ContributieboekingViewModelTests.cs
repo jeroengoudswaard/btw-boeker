@@ -196,11 +196,17 @@ public sealed class ContributieboekingViewModelTests : IDisposable
         await StorneerAsync(_omgeving.Opslag.Runs.Single());
         await vm.VernieuwCommand.ExecuteAsync(null);
         vm.GeselecteerdeVordering = vm.Vorderingen.Single();
+        Assert.True(vm.KanOninbaarNu); // besluit 270: de acties verschijnen onder de gekozen post
+        Assert.True(vm.KanHerincassoNu);
+        Assert.False(vm.IsOninbaarKeuzeOpen);
+        vm.OninbaarKiezenCommand.Execute(null); // de kostenrekening kiest u pas na Afboeken als oninbaar…
+        Assert.True(vm.IsOninbaarKeuzeOpen);
         vm.Oninbaarrekening = vm.Kostenrekeningen.Single(r => r.Nummer == 4115);
         _omgeving.Dialogen.BevestigAntwoord = true;
 
         await vm.OninbaarCommand.ExecuteAsync(null);
 
+        Assert.False(vm.IsOninbaarKeuzeOpen);
         Assert.Empty(vm.Vorderingen); // alleen openstaand
         vm.AlleenOpenstaand = false;
         Assert.Equal("Afgeboekt", Assert.Single(vm.Vorderingen).Status);

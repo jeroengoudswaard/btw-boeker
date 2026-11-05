@@ -52,7 +52,7 @@
                                 <Border Style="{StaticResource Kaart}" Margin="0,0,0,8" AutomationProperties.Name="{Binding Lidnaam}">
                                     <DockPanel>
                                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Content="Goedkeuren" Margin="0,0,8,0" IsEnabled="{Binding KanGoedkeuren}"
+                                            <Button Content="Goedkeuren" Margin="0,0,8,0" Visibility="{Binding KanGoedkeuren, Converter={StaticResource BoolNaarZichtbaar}}"
                                                     Command="{Binding DataContext.GoedkeurenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
                                                     AutomationProperties.Name="{Binding Lidnaam, StringFormat='Goedkeuren voor {0}'}" />
                                             <Button Content="Afwijzen"

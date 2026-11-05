@@ -144,6 +144,9 @@ public sealed record FactuurRegel(Factuurstand Stand)
     public bool IsVervallen => Stand.IsVervallen;
     public bool IsConcept => !Stand.Factuur.IsDefinitief;
     public bool KanCrediteren => Stand.Factuur.IsDefinitief && !Stand.Factuur.IsCreditfactuur && !Stand.IsGecrediteerd;
+
+    /// <summary>Besluit 271: mailen kan bij een definitieve factuur, niet bij een creditfactuur.</summary>
+    public bool KanMailen => Stand.Factuur.IsDefinitief && !Stand.Factuur.IsCreditfactuur;
 }
 
 /// <summary>Eén regel van een conceptfactuur.</summary>

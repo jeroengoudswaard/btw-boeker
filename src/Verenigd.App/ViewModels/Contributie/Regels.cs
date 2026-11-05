@@ -203,6 +203,9 @@ public sealed record RunRegel(Incassorun Run, string? Postnummer = null, bool Is
     public int AantalPosten => Run.AantalPosten;
     public string Totaal => Run.Totaal.ToString();
     public bool IsDefinitief => Run.Status == IncassorunStatus.Definitief;
+
+    /// <summary>Besluit 60 en 270: annuleren alleen bij een definitieve run die de bank nog niet heeft uitgevoerd.</summary>
+    public bool KanAnnuleren => IsDefinitief && !IsOntvangen;
 }
 
 /// <summary>De opbrengstrekening van één contributiecategorie (besluit 63).</summary>

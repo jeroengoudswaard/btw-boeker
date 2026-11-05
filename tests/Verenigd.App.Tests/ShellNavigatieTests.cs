@@ -67,16 +67,67 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Webapp_heeft_de_onderdelen_voorstellen_leiding_en_synchroniseren()
+    public async Task Webapp_zonder_koppeling_toont_alleen_koppelen()
     {
         var shell = await OpenAsync();
 
         await Kies(shell, "Webapp");
 
         Assert.IsType<ViewModels.Webapp.WebappViewModel>(shell.GeselecteerdTabblad);
-        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Voorstellen");
-        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Leiding");
-        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Webapp.Synchroniseren");
+        Assert.Equal("Koppelen", Item(shell, "Webapp.Synchroniseren").Titel); // besluit 269: alleen wat nu nodig is
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel is "Webapp.Voorstellen" or "Webapp.Leiding" or "Webapp.Meer");
+    }
+
+    [Fact]
+    public async Task Boekhouding_toont_het_dagelijkse_werk_en_de_rest_onder_meer()
+    {
+        var shell = await OpenAsync();
+
+        await Kies(shell, "Boekhouding");
+
+        Assert.Equal(["Boekhouding.Journaal", "Boekhouding.Bank", "Boekhouding.Postvak", "Boekhouding.Facturen", "Boekhouding.Rapporten", "Boekhouding.Meer"],
+            shell.Navigatie.Where(n => n.Module == ModuleSoort.Boekhouding && n.IsSubitem).Select(n => n.Sleutel));
+        var meer = Item(shell, "Boekhouding.Meer");
+        Assert.True(meer.IsMeer);
+        Assert.False(meer.IsUitgeklapt);
+        var pagina = shell.GeselecteerdTabblad;
+
+        shell.GeselecteerdeNavigatie = meer; // uitklappen, zonder van pagina te wisselen
+
+        Assert.True(meer.IsUitgeklapt);
+        Assert.Same(pagina, shell.GeselecteerdTabblad);
+        Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
+        Assert.True(Item(shell, "Boekhouding.Rekeningschema").IsDiep);
+        Assert.Equal(["Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren"],
+            shell.Navigatie.Where(n => n.IsDiep && n.Module == ModuleSoort.Boekhouding).Select(n => n.Sleutel.Split('.')[1]));
+
+        shell.GeselecteerdeNavigatie = meer; // weer inklappen
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Rekeningschema");
+    }
+
+    [Fact]
+    public async Task Een_pagina_onder_meer_klapt_meer_vanzelf_uit()
+    {
+        var shell = await OpenAsync();
+        await Kies(shell, "Boekhouding");
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+
+        boekhouding.Subtab = BoekhoudingSubtab.Rekeningschema; // bijvoorbeeld via het menu
+
+        Assert.True(Item(shell, "Boekhouding.Meer").IsUitgeklapt);
+        Assert.Same(Item(shell, "Boekhouding.Rekeningschema"), shell.GeselecteerdeNavigatie);
+    }
+
+    [Fact]
+    public async Task Openstaand_verschijnt_alleen_als_er_iets_openstaat()
+    {
+        var shell = await OpenAsync();
+
+        await Kies(shell, "Contributie");
+
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Openstaand");
+        Assert.Equal(["Contributie.Leden", "Contributie.Runs", "Contributie.Meer"],
+            shell.Navigatie.Where(n => n.Module == ModuleSoort.Contributie && n.IsSubitem).Select(n => n.Sleutel));
     }
 
     [Fact]
@@ -174,6 +225,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         shell.GeselecteerdeNavigatie = Item(shell, "Contributie");
+        shell.GeselecteerdeNavigatie = Item(shell, "Contributie.Meer");
         shell.GeselecteerdeNavigatie = Item(shell, "Contributie.Tarieven");
         Assert.Equal(ContributieSubtab.Tarieven, Assert.IsType<ContributieViewModel>(shell.GeselecteerdTabblad).Subtab);
 

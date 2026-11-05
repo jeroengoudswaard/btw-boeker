@@ -232,10 +232,14 @@ public sealed class AppUiTests : IDisposable
 
         Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
         Zoek(venster, "ContributieTabblad");
-        foreach (var onderdeel in new[] { "Leden", "Betalers", "Tarieven", "Runs", "Openstaand" })
+        foreach (var onderdeel in new[] { "Leden", "Runs" })
         {
             Zoek(venster, $"Nav_Contributie.{onderdeel}"); // besluit 181: onderdelen in de navigatiebalk
         }
+
+        Kies(venster, "Nav_Contributie.Meer"); // besluit 269: Betalers en Tarieven onder Meer…; Openstaand pas als er iets openstaat
+        Zoek(venster, "Nav_Contributie.Betalers");
+        Zoek(venster, "Nav_Contributie.Tarieven");
 
         Bewaar(venster, "08-contributie");
         Kies(venster, "Nav_Contributie.Runs");
@@ -265,10 +269,8 @@ public sealed class AppUiTests : IDisposable
         Kies(venster, "Nav_Webapp"); // fase 7
         Zoek(venster, "WebappTabblad");
         Zoek(venster, "WebappNietGekoppeld");
-        foreach (var onderdeel in new[] { "Voorstellen", "Leiding", "Synchroniseren" })
-        {
-            Zoek(venster, $"Nav_Webapp.{onderdeel}");
-        }
+        // Besluit 269: zonder koppeling alleen Koppelen (het onderdeel Synchroniseren).
+        Assert.Equal("Koppelen", Zoek(venster, "Nav_Webapp.Synchroniseren").Name);
 
         // Zonder koppeling opent de pagina zelf op Synchroniseren; de test kiest het onderdeel ook expliciet.
         Kies(venster, "Nav_Webapp.Synchroniseren");
@@ -336,9 +338,15 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
-        foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Boekingsregels", "Facturen", "Relaties", "Rekeningschema", "Grootboekkaart", "Rapporten", "Boekjaren" })
+        foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Facturen", "Rapporten" })
         {
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}"); // besluit 178
+        }
+
+        Kies(venster, "Nav_Boekhouding.Meer"); // besluit 269: inrichten onder Meer…
+        foreach (var onderdeel in new[] { "Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren" })
+        {
+            Zoek(venster, $"Nav_Boekhouding.{onderdeel}");
         }
 
         Zoek(venster, "Nav_Begroting");

@@ -62,6 +62,9 @@ public sealed partial class LedenViewModel : TabbladViewModel, IPaginameldingen
     [ObservableProperty]
     public partial bool ToonUitgeschreven { get; set; }
 
+    /// <summary>Besluit 270: <i>Toon uitgeschreven</i> alleen als er uitgeschreven leden zijn.</summary>
+    public bool HeeftUitgeschreven => _alle.Any(r => r.IsUitgeschreven) || ToonUitgeschreven;
+
     [ObservableProperty]
     public partial LidRegel? GeselecteerdLid { get; set; }
 
@@ -192,6 +195,7 @@ public sealed partial class LedenViewModel : TabbladViewModel, IPaginameldingen
 
         GeselecteerdLid = geselecteerd is not null && Leden.Contains(geselecteerd) ? geselecteerd : null;
         OnPropertyChanged(nameof(Aantaltekst));
+        OnPropertyChanged(nameof(HeeftUitgeschreven));
 
         bool Voldoet(LidRegel regel) =>
             (ToonUitgeschreven || !regel.IsUitgeschreven)

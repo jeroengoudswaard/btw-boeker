@@ -38,7 +38,16 @@ public sealed partial class BoekhoudingViewModel
     public IReadOnlyList<Richting> Richtingen { get; } = Enum.GetValues<Richting>();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBankrekeningen))]
     public partial IReadOnlyList<Dagboek> Bankrekeningen { get; private set; } = [];
+
+    /// <summary>Besluit 269: de keuze van de bankrekening alleen als er meer dan één is.</summary>
+    public bool HeeftMeerdereBankrekeningen => Bankrekeningen.Count > 1;
+
+    /// <summary>Besluit 270: de knop toont hoeveel er te doen is.</summary>
+    public string ConceptenBoekenTekst => $"{Woorden["Knop.ConceptenBoeken"]} ({AantalConcept})";
+
+    public string RegelsToepassenTekst => $"Regels _toepassen ({AantalTeVerwerken})";
 
     [ObservableProperty]
     public partial Dagboek? GekozenBankrekening { get; set; }
@@ -59,9 +68,11 @@ public sealed partial class BoekhoudingViewModel
     public partial string ToewijsOmschrijving { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RegelsToepassenTekst))]
     public partial int AantalTeVerwerken { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
     public partial int AantalConcept { get; private set; }
 
     [ObservableProperty]

@@ -4,6 +4,33 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.18.0] - 2026-11-05: Alleen zichtbaar wat nu nodig is (besluiten 269–272)
+
+### Gewijzigd
+- **Navigatie** (besluit 269): per onderdeel alleen het dagelijkse werk; de inrichting staat onder een inklapbare regel *Meer…* (standaard ingeklapt).
+  - Boekhouding: Journaal, Bank, Postvak, Facturen en Rapporten; onder *Meer…* Boekingsregels, Relaties, Rekeningschema, Grootboekkaart en Boekjaren.
+  - Contributie: Leden en Runs, plus *Openstaand* alleen als er iets openstaat (of de pagina open is); onder *Meer…* Betalers en Tarieven.
+  - Webapp: zonder koppeling alleen *Koppelen*; gekoppeld Voorstellen, met Leiding en Synchroniseren onder *Meer…*.
+  - Opent u een pagina onder *Meer…* (bijv. via een startkaart of de laatste sessie), dan klapt *Meer…* vanzelf uit.
+- **Knoppen verbergen in plaats van uitschakelen** (besluit 270); een knop die blijft staan toont het aantal:
+  - Bank: *Concepten boeken (3)* is de hoofdactie zodra er concepten zijn, *Regels toepassen (2)* alleen bij te verwerken transacties; *Afschrift inlezen…* is een gewone knop.
+  - Journaal: filterknop *N zonder bon* alleen als er zulke posten zijn; bij een post zonder bijlagen een link *+ Bon toevoegen*.
+  - Werkbalk: jaarkeuze alleen bij meer dan één boekjaar; *Afdrukken* en *Exporteren ▾* (Excel of CSV) alleen bij Rapporten, Grootboekkaart, Begroting en Meerjarenplan.
+  - Rapporten: de ⚠-melding over conceptposten verschijnt alleen als er concepten zijn, met het aantal.
+  - Boekingsregels: de acties alleen bij een gekozen regel. Rekeningschema: rubriek toevoegen via een link *+ Rubriek*.
+  - Contributie › Openstaand: de knoppen alleen bij een gekozen post; *Afboeken als oninbaar…* vraagt de kostenrekening pas in de bevestiging (niet meer in de werkbalk). Runs: *Annuleren* alleen bij een definitieve, nog niet ontvangen run. Tarieven: *Kopiëren van vorig jaar* alleen als dat kan. Contributie › Leden: filter *Alleen waarschuwingen* alleen als er waarschuwingen zijn.
+  - Leden: *Ook uitgeschreven* alleen als er uitgeschreven leden zijn; de knop *Vernieuwen* is weg (F5 werkt nog).
+  - Webapp › Voorstellen: *Goedkeuren* alleen als het voorstel goed te keuren is.
+- **Facturen** (besluit 271): de acties per status van de gekozen factuur: concept *Verwijderen*, definitief *Mailen…*, *PDF…* en *Creditfactuur…*, vervallen ook *Herinnering sturen…*.
+- Sneltoetsen, het Expert-menu en de lege schermen werken zoals voorheen.
+
+### Afwijkingen van het ontwerpcanvas
+- Het filter bij Facturen blijft altijd zichtbaar: het staat standaard op *Open*, zodat betaalde facturen anders niet te vinden zijn.
+- De bankrekeningkeuze blijft een keuzelijst (verschijnt alleen bij meer dan één bankrekening) in plaats van een knoppengroep.
+- De factuuracties staan onder de lijst bij de gekozen factuur, niet in een aparte detailkaart.
+- Aantallen staan tussen haakjes achter de knoptekst (*Concepten boeken (3)*), zodat de toegangstoets en de woordenlijst gelijk blijven.
+- Dialoogknoppen die pas werken na geldige invoer (bijv. *Herstellen*, *Aanmaken*) blijven uitgeschakeld, zoals gebruikelijk in Windows.
+
 ## [0.17.0] - 2026-11-05: Jaarrekeningindeling (besluiten 263–268)
 
 ### Toegevoegd

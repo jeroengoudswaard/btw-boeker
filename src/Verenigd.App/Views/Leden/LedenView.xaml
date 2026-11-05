@@ -33,11 +33,9 @@
                       ItemsSource="{x:Static vm:LedenViewModel.Lidtypekeuzes}" DisplayMemberPath="Tekst"
                       SelectedItem="{Binding GekozenLidtype}"
                       AutomationProperties.Name="Lidtype" />
-            <CheckBox Content="_Toon uitgeschreven" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding ToonUitgeschreven}" VerticalAlignment="Center" Margin="0,0,16,0" />
-            <Button Command="{Binding VernieuwCommand}" ToolTip="Vernieuwen (F5)" AutomationProperties.Name="Vernieuwen"
-                    VerticalAlignment="Center" Margin="0,0,8,0">
-                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72C;" />
-            </Button>
+            <!-- Besluit 270: alleen als er uitgeschreven leden zijn; vernieuwen blijft F5. -->
+            <CheckBox Content="_Toon uitgeschreven" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding ToonUitgeschreven}" VerticalAlignment="Center" Margin="0,0,16,0"
+                      Visibility="{Binding HeeftUitgeschreven, Converter={StaticResource BoolNaarZichtbaar}}" />
             <Button Content="_Importeren uit SOL3..." VerticalAlignment="Center"
                     Command="{Binding DataContext.ImporteerSol3Command, RelativeSource={RelativeSource AncestorType=Window}}"
                     AutomationProperties.AutomationId="LedenImporteren" />

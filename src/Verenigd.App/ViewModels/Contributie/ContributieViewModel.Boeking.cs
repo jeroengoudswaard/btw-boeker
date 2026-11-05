@@ -37,7 +37,27 @@ public sealed partial class ContributieViewModel
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(HerincassoCommand), nameof(OninbaarCommand), nameof(MailStorneringCommand))]
+    [NotifyPropertyChangedFor(nameof(KanHerincassoNu), nameof(KanStorneringMailenNu), nameof(KanOninbaarNu))]
     public partial VorderingRegel? GeselecteerdeVordering { get; set; }
+
+    /// <summary>Besluit 270: de acties onder de gekozen post verschijnen alleen als ze kunnen.</summary>
+    public bool KanHerincassoNu => KanHerincasso();
+
+    public bool KanStorneringMailenNu => KanStorneringMailen();
+
+    public bool KanOninbaarNu => GeselecteerdeVordering is { IsOpen: true };
+
+    /// <summary>Na <i>Afboeken als oninbaar…</i>: kies de kostenrekening en bevestig (besluiten 101 en 270).</summary>
+    [ObservableProperty]
+    public partial bool IsOninbaarKeuzeOpen { get; set; }
+
+    [RelayCommand]
+    private void OninbaarKiezen() => IsOninbaarKeuzeOpen = true;
+
+    [RelayCommand]
+    private void OninbaarAnnuleren() => IsOninbaarKeuzeOpen = false;
+
+    partial void OnGeselecteerdeVorderingChanged(VorderingRegel? value) => IsOninbaarKeuzeOpen = false;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(OninbaarCommand))]
@@ -160,6 +180,7 @@ public sealed partial class ContributieViewModel
         {
             await _boeking.BoekOninbaarAsync(regel.Vordering, rekening.Id);
             Foutmelding = null;
+            IsOninbaarKeuzeOpen = false;
             await LaadAsync(Betaler?.Id);
         }
         catch (InvalidOperationException ex)

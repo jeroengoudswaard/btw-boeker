@@ -276,6 +276,11 @@
                             <Setter Property="AutomationProperties.AutomationId" Value="{Binding Sleutel, StringFormat=Nav_{0}}" />
                             <Setter Property="AutomationProperties.Name" Value="{Binding Titel}" />
                             <Setter Property="AutomationProperties.HelpText" Value="{Binding Teller, StringFormat='{}{0} te doen'}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMeer}" Value="True">
+                                    <Setter Property="AutomationProperties.HelpText" Value="Onderdelen voor inrichting tonen of verbergen" />
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
@@ -303,6 +308,12 @@
                                     <Setter TargetName="Tegel" Property="Background" Value="Transparent" />
                                     <Setter TargetName="Tegel" Property="Height" Value="24" />
                                     <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsDiep}" Value="True">
+                                    <Setter TargetName="Regel" Property="Margin" Value="48,0,0,0" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsMeer}" Value="True">
+                                    <Setter TargetName="Titeltekst" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HeeftOnderdelen}" Value="True">
                                     <Setter TargetName="Pijl" Property="Visibility" Value="Visible" />

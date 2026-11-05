@@ -288,7 +288,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 250 | Installatiebestand | Een MSI (WiX), gebouwd door GitHub Actions op Windows bij een versietag (`v*`); de MSI en de webappbuild gaan naar de release `verenigd` in de websiterepository (keuze 1A) |
 | 251 | .NET in de MSI | Self-contained win-x64: werkt direct op Windows 10/11 zonder losse .NET-installatie (keuze 2A) |
 | 252 | Schermafbeeldingen website | Uit een demo-database met verzonnen gegevens, gemaakt door een script in licht en donker; nooit echte gegevens (keuze 3A) |
-| 253 | Codesigning | Voor de bèta geen certificaat; de pagina legt uit hoe je de melding "Onbekende uitgever" (SmartScreen) passeert (keuze 4A) |
+| 253 | Codesigning | Voor de bèta geen certificaat; de pagina legt uit hoe je de melding "Onbekende uitgever" (SmartScreen) passeert (keuze 4A). Ontwerpcanvas: https://claude.ai/artifact/SZckvxzLU2KvVNWxBQz2bA (privé), goedgekeurd (1A) |
 | 254 | Webapp op GitHub Pages (wijzigt besluit 227) | De webapp draait op jeroengoudswaard.github.io/verenigd/app/; beveiligingskoppen via `<meta>` (CSP), zonder frame-ancestors en Permissions-Policy (keuze 5A). De koppeling met Supabase volgt later. Websitepagina *Verenigd* in een nieuwe categorie *Boekhouden en administratie*, met bèta-melding en de opmerking dat het nu alleen voor scouting geschikt is |
 | 255 | XAF-export | Uitwerking van besluit 197: XML Auditfile Financieel 3.2, één bestand per administratie en boekjaar (keuze 4A), via *Bestand › Exporteren › Auditfile (XAF)…* en een knop per boekjaar bij Boekjaren. Gecontroleerd tegen het officiële XSD-schema; een ongeldig bestand wordt nooit geschreven. XAF importeren blijft buiten beeld |
 | 256 | Relaties in de XAF | Relaties mét IBAN én de betalers van de contributie (met IBAN) als debiteuren en crediteuren (keuze 2B+C). Een regel op een debiteurenrekening krijgt de relatie of betaler als de post bij één factuur of één betaler hoort; een incassorun (totaal op één regel) krijgt er geen |
@@ -599,6 +599,11 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Tests: .NET in de Linux-cloudsessie groen: Domain 260, Application 374, Infrastructure 100, Architectuur 35, ViewModel 260/260; de hele oplossing bouwt zonder waarschuwingen (ook `Verenigd.App.Tests` met `EnableWindowsTargeting`). Geen nieuwe FlaUI-test.
   - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 279), en een visuele controle van de jaarrekening, het venster *Indeling bewerken* en de afdruk (licht en donker).
   - Gemerged als PR #23 (2026-11-05, `8c73ba6`), na groene CI (akkoord van de gebruiker, vóór de Windows-run). Nog door de gebruiker te doen: de tag `v0.17.0` pushen, de Windows-run en de visuele controle.
+- **v0.18.0 Alleen zichtbaar wat nu nodig is (besluiten 269–272): gebouwd** (2026-11-05). Ontwerpcanvas goedgekeurd (1A). Zie CHANGELOG.md en docs/ARCHITECTUUR.md.
+  - Navigatie met *Meer…* per onderdeel, *Openstaand* alleen met open posten, Webapp zonder koppeling alleen *Koppelen*; knoppen verborgen in plaats van uitgeschakeld, met aantallen; factuuracties per status; oninbaar met de rekeningkeuze in de bevestiging.
+  - Afwijkingen van het canvas: het factuurfilter blijft zichtbaar (standaard *Open*), de bankrekeningkeuze blijft een keuzelijst, de factuuracties staan onder de lijst, aantallen als "(N)", dialoogknoppen blijven uitgeschakeld tot de invoer klopt.
+  - Tests: .NET in de Linux-cloudsessie groen: Domain 260, Application 374, Infrastructure 100, Architectuur 35, ViewModel 268/268; de hele oplossing bouwt zonder waarschuwingen. De FlaUI-tests zijn aangepast (eerst *Meer…* uitklappen).
+  - **Nog op Windows te doen:** de volledige suite, 2 runs, met `--blame-hang --blame-hang-timeout 4m` (verwacht App 287), en een visuele controle in licht en donker van de navigatie (*Meer…*), Bank, Journaal, Facturen, Rapporten en Contributie › Openstaand.
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy

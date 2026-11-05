@@ -22,7 +22,13 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
     /// <summary>Het onderdeel binnen de module, of <c>null</c> voor de module zelf.</summary>
     public int? Onderdeel { get; } = onderdeel;
 
-    public bool IsSubitem => Onderdeel is not null;
+    public bool IsSubitem => Onderdeel is not null || IsMeer;
+
+    /// <summary>Besluit 269: de inklapbare regel <i>Meer…</i> met de onderdelen voor inrichting.</summary>
+    public bool IsMeer { get; init; }
+
+    /// <summary>Een onderdeel onder <i>Meer…</i>: één stap verder ingesprongen.</summary>
+    public bool IsDiep { get; init; }
 
     /// <summary>Voor een module met onderdelen: uitgeklapt of niet.</summary>
     [ObservableProperty]

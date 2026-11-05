@@ -86,7 +86,23 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public partial IReadOnlyList<Grootboekrekening> Rekeningkeuzes { get; private set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren))]
     public partial IReadOnlyList<int> Boekjaren { get; private set; } = [];
+
+    /// <summary>Besluit 269: de jaarkeuze alleen bij meer dan één boekjaar.</summary>
+    public bool HeeftMeerdereBoekjaren => Boekjaren.Count > 1;
+
+    /// <summary>Besluit 270: afdrukken en exporteren alleen waar er iets af te drukken is.</summary>
+    public bool HeeftUitvoer => Subtab is BoekhoudingSubtab.Rapporten or BoekhoudingSubtab.Grootboekkaart
+        or BoekhoudingSubtab.Begroting or BoekhoudingSubtab.Meerjarenplan;
+
+    /// <summary>Het aantal posten zonder bon in het gekozen jaar (besluiten 145 en 270); 0 = het filter is niet zichtbaar.</summary>
+    public int AantalZonderBon => _allePosten.Count(p => p.DatumWaarde.Year == Jaar && _zonderBon.Contains(p.Id));
+
+    public string ZonderBonTekst => $"{AantalZonderBon} zonder bon";
+
+    /// <summary>Het filter blijft zichtbaar zolang het aan staat, ook als de lijst leeg raakt.</summary>
+    public bool IsZonderBonZichtbaar => AantalZonderBon > 0 || AlleenZonderBon;
 
     public IReadOnlyList<RekeningSoort> Soorten { get; } = Enum.GetValues<RekeningSoort>();
 
@@ -127,6 +143,17 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     [ObservableProperty]
     public partial string NieuweRubriekNaam { get; set; } = string.Empty;
+
+    /// <summary>Besluit 270: het invoerveld voor een rubriek pas na een klik op <i>+ Rubriek</i>.</summary>
+    [ObservableProperty]
+    public partial bool IsRubriekinvoerOpen { get; set; }
+
+    /// <summary>Besluit 270: alleen als er concepten zijn een melding dat die niet meetellen (besluit 71).</summary>
+    [ObservableProperty]
+    public partial string? Conceptmelding { get; private set; }
+
+    [RelayCommand]
+    private void RubriekinvoerOpenen() => IsRubriekinvoerOpen = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsJaarrekening))]
@@ -373,6 +400,9 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         OnPropertyChanged(nameof(Aantaltekst));
+        OnPropertyChanged(nameof(AantalZonderBon));
+        OnPropertyChanged(nameof(ZonderBonTekst));
+        OnPropertyChanged(nameof(IsZonderBonZichtbaar));
     }
 
     // ---- Inrichten --------------------------------------------------------------------------
@@ -749,6 +779,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         {
             await _dienst.BewaarRubriekAsync(Soort, new RubriekInvoer(null, naam, Rubrieken.Select(r => r.Volgorde).DefaultIfEmpty(0).Max() + 10));
             NieuweRubriekNaam = string.Empty;
+            IsRubriekinvoerOpen = false;
             await LaadAsync(Editor?.Id);
         }, null);
     }
@@ -787,6 +818,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     partial void OnSubtabChanged(BoekhoudingSubtab value)
     {
+        OnPropertyChanged(nameof(HeeftUitvoer));
         OnPropertyChanged(nameof(Afdruktabel));
         OnPropertyChanged(nameof(Onderdeel));
         OnPropertyChanged(nameof(IsOpslaanHoofdactie));
@@ -867,6 +899,9 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     {
         using var meting = Meetpunt.Start(_logger, "Overzicht maken " + Rapportsoort);
         JaarrekeningMelding = null;
+        var concepten = _stand?.Posten.Count(p => !p.IsGeboekt && p.Datum.Year == Jaar) ?? 0;
+        Conceptmelding = concepten == 0 ? null
+            : $"⚠ {concepten} {(concepten == 1 ? "conceptpost telt" : "conceptposten tellen")} niet mee. Boek ze in het Journaal om ze in de rapporten te zien.";
         Rapport = _stand is null || !IsIngericht ? null : Rapportsoort switch
         {
             Rapportsoort.JaarrekeningBalans => Jaarrekeningtabel(_stand, JaarrekeningRapport.Balans),
