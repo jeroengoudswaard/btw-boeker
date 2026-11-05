@@ -304,6 +304,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 266 | Jaarrekening: begroot bij de Stichting | Uit het meerjarenplan voor dat jaar (keuze 4A); bij de Vereniging uit de geldende begroting |
 | 267 | Jaarrekening: detail | Selectievakje *Rekeningen tonen*, standaard aan (keuze 5A) |
 | 268 | Jaarrekening: bestaande rapporten | Balans en Staat van baten en lasten blijven naast de jaarrekening bestaan (keuze 6A) |
+| 269 | Alleen zichtbaar wat nu nodig is: navigatie | Per onderdeel de dagelijkse items zichtbaar; inrichting (Rekeningschema, Boekingsregels, Relaties, Grootboekkaart, Boekjaren; bij Contributie Tarieven en Betalers; bij Webapp Leiding en Synchroniseren) onder een inklapbare groep *Meer…*, standaard ingeklapt (keuze 1A) |
+| 270 | Alleen zichtbaar wat nu nodig is: knoppen | Overal verbergen in plaats van uitschakelen; een knop die blijft staan toont het aantal (bijv. *3 concepten boeken*). Sneltoetsen, het Expert-menu en lege schermen blijven altijd werken (keuze 2A) |
+| 271 | Alleen zichtbaar wat nu nodig is: facturen | Acties in het detail van de factuur, per status (concept, definitief, vervallen), niet in de werkbalk (keuze 3A) |
+| 272 | Alleen zichtbaar wat nu nodig is: aanpak | Eén versie v0.18.0, eerst mockups op een ontwerpcanvas (licht en donker) ter goedkeuring (keuze 4A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
