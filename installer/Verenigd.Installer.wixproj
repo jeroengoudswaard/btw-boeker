@@ -7,10 +7,11 @@
     WiX 5 (MS-RL); bewust niet WiX 6, dat een onderhoudsbijdrage (OSMF) vraagt.
   -->
   <PropertyGroup>
-    <OutputName>Verenigd</OutputName>
     <Platform>x64</Platform>
     <InstallerPlatform>x64</InstallerPlatform>
     <Versie Condition="'$(Versie)' == ''">0.0.0</Versie>
+    <!-- Besluit 274: het versienummer staat in de bestandsnaam. -->
+    <OutputName>Verenigd-$(Versie)</OutputName>
     <PublicatieMap Condition="'$(PublicatieMap)' == ''">..\artifacts\publish</PublicatieMap>
     <DefineConstants>Versie=$(Versie);PublicatieMap=$(PublicatieMap)</DefineConstants>
     <SuppressValidation>false</SuppressValidation>
