@@ -309,6 +309,10 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 271 | Alleen zichtbaar wat nu nodig is: facturen | Acties in het detail van de factuur, per status (concept, definitief, vervallen), niet in de werkbalk (keuze 3A) |
 | 272 | Alleen zichtbaar wat nu nodig is: aanpak | Eén versie v0.18.0, eerst mockups op een ontwerpcanvas (licht en donker) ter goedkeuring (keuze 4A) |
 | 273 | *Meer…* omklappen | Alleen op een bewuste actie: klik, Enter of Spatie (command `MeerWisselen`). Selecteren klapt niet om, zodat de pijltjes eroverheen lopen. Een schermlezer die alleen "selecteren" gebruikt kan *Meer…* zo niet openen; een eigen automation peer kan later als aparte stap (oplossing A, 2026-11-05) |
+| 274 | Naam van de MSI | Altijd met het versienummer: `Verenigd-<versie>.msi`, ook lokaal gebouwd. De vaste naam `Verenigd.msi` vervalt; de release-workflow verwijdert hem bij de volgende release. Oudere versies blijven op de release staan (keuze 1A, 2026-11-06) |
+| 275 | Versie op de website | De release-workflow zet het label op de startpagina en de downloadknop op de nieuwe versie; het label is de volledige versie (`v0.18.0`). Label of knop niet gevonden = de workflow faalt zichtbaar (keuze 2A) |
+| 276 | Opslaan met een halve boekingsregel | Ctrl+S bewaart wat klopt; de halve regel blijft met de invoer staan en de statusregel geeft een ⚠-melding. Bij *Boekingsregels* een melding zolang een nieuwe rekening niet is opgeslagen; geen automatisch opslaan, omdat het nummer van een opgeslagen rekening vastligt (keuzes 1A en 2A) |
+| 277 | Tellers en bankkeuze | Tellers en startkaarten worden na elke opslag in de database herberekend (`IDatabaseSessie.Gewijzigd`), samengevoegd tot één berekening. De teller in de navigatiebalk blijft het totaal van alle bankrekeningen; de keuzelijst toont het aantal per rekening (keuzes 1A en 2A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -617,6 +621,13 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
     - Lokale executable: `artifacts/publish/Verenigd.exe` (versie 0.18.0, self-contained win-x64; map 202 MB, niet in Git). De app start en reageert; op `CloseMainWindow` sloot hij niet binnen 3 seconden en is hij geforceerd gestopt (oorzaak niet onderzocht).
     - Gemerged als PR #24 (2026-11-05, `086f2f3`), na groene CI. **Gepubliceerd** (2026-11-05): tag `v0.18.0`, release-run `42106109026` geslaagd, ook de desktopschermafbeeldingen. `Verenigd.msi`, `Verenigd-0.18.0.msi` (71 MB) en `verenigd-web.zip` staan op de release `verenigd` van de website. Het versielabel op de startpagina van de website stond nog op v0.16 (is geen onderdeel van de release-workflow en wordt dus met de hand bijgewerkt); nu v0.18 (`959d280`). De downloadknop gebruikt een vaste link en hoeft niet mee.
     - Nog te doen: de visuele controles van v0.17.0 en v0.18.0, en de MSI zelf installeren en starten. Bekende beperking: een schermlezer die alleen "selecteren" gebruikt kan *Meer…* niet openen (besluit 273).
+- **Na v0.18.0 (2026-11-06, nog niet uitgebracht): besluiten 274–277.** Gemeld door de gebruiker tijdens het inrichten van de eigen administratie. Zie CHANGELOG.md, docs/ARCHITECTUUR.md en docs/PUBLICEREN.md.
+  - MSI als `Verenigd-<versie>.msi`, en de release-workflow werkt label en downloadknop op de website bij (`.github/scripts/website-bijwerken.sh`, met test in de CI). De website staat al op v0.18.0 met de knop naar `Verenigd-0.18.0.msi` (`f85e498`). De asset `Verenigd.msi` blijft staan tot de eerstvolgende release; de publicatiestap draait pas bij een echte tag en is dus nog niet echt uitgevoerd.
+  - Ctrl+S bewaart wat klopt naast een halve boekingsregel; die blijft staan met een ⚠-melding. Bij *Boekingsregels* een melding zolang een nieuwe rekening niet is opgeslagen.
+  - Tellers na elke opslag (`IDatabaseSessie.Gewijzigd`); de keuzelijst toont het aantal per bankrekening.
+  - Gevonden door de nieuwe end-to-end UI-test, niet door de tests met vervangers: het event had `Wijzigingen` als afzender in plaats van de sessie, waardoor de shell het negeerde. Opgelost, met een test op de afzender.
+  - **Windows-test (2026-11-06, op v0.18.0 plus deze wijzigingen): 1075/1075 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 260, Application 374, Architectuur 35, Infrastructure 101, App 305); build zonder waarschuwingen. Geen hang en geen achtergebleven testproces. De webapp- en Supabase-tests zijn lokaal niet gedraaid (geen wijziging daar).
+  - Bekende punten, niet gewijzigd: *Concepten boeken* toont het aantal van de gekozen rekening maar boekt alle bankrekeningen, en boeken kan alleen voor alles tegelijk, niet voor een selectie.
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy

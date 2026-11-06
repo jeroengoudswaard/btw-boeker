@@ -99,6 +99,32 @@ public sealed class BoekhoudingViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Concept_wordt_opgeslagen_naast_een_halve_boekingsregel()
+    {
+        var vm = await _omgeving.OpenIngerichtAsync();
+        vm.NieuweRegelCommand.Execute(null);
+        vm.Boekingsregels.Single().NaamBevat = "gemeente";
+        vm.NieuwePostCommand.Execute(null);
+        vm.Editor!.Omschrijving = "Naast de regel";
+        VulRegel(vm.Editor, 0, 4115, "10,00", "");
+
+        Assert.False(await vm.BewaarAsync()); // besluit 276: de regel is nog niet opgeslagen
+
+        Assert.Single(vm.Posten, p => p.Status == "Concept");
+        Assert.Equal("gemeente", vm.Boekingsregels.Single().NaamBevat);
+    }
+
+    [Fact]
+    public async Task Een_rekening_met_een_fout_blokkeert_het_opslaan_nog_steeds()
+    {
+        var vm = await _omgeving.OpenIngerichtAsync();
+        vm.NieuweRekeningCommand.Execute(null);
+        vm.Rekeningen.Single(r => r.IsNieuw).Nummertekst = "4220"; // zonder naam
+
+        Assert.False(vm.KanOpslaan);
+    }
+
+    [Fact]
     public async Task Concept_opslaan_met_ctrl_s_en_verwijderen_na_bevestiging()
     {
         var vm = await _omgeving.OpenIngerichtAsync();

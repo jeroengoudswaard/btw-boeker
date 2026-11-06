@@ -318,9 +318,23 @@
                             <!-- Besluit 269: de keuze alleen bij meer dan één bankrekening. -->
                             <Label Content="Bank_rekening" Target="{Binding ElementName=Bankkeuze}" VerticalAlignment="Center" Padding="0,0,8,0"
                                    Visibility="{Binding HeeftMeerdereBankrekeningen, Converter={StaticResource BoolNaarZichtbaar}}" />
-                            <ComboBox x:Name="Bankkeuze" ItemsSource="{Binding Bankrekeningen}" SelectedItem="{Binding GekozenBankrekening}" DisplayMemberPath="Naam"
+                            <ComboBox x:Name="Bankkeuze" ItemsSource="{Binding Bankrekeningen}" SelectedItem="{Binding GekozenBankrekening}"
                                       Width="240" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="Bankrekeningkeuze"
-                                      Visibility="{Binding HeeftMeerdereBankrekeningen, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                      Visibility="{Binding HeeftMeerdereBankrekeningen, Converter={StaticResource BoolNaarZichtbaar}}">
+                                <ComboBox.ItemTemplate>
+                                    <!-- Besluit 277: het aantal te verwerken achter de naam, zodat het totaal in de navigatiebalk te verklaren is. -->
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource BankkeuzeTekst}">
+                                                    <Binding />
+                                                    <Binding Path="DataContext.TeVerwerkenPerRekening" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                             <TextBlock Text="{Binding Banksaldotekst}" VerticalAlignment="Center" AutomationProperties.AutomationId="Banksaldo"
                                        AutomationProperties.LiveSetting="Polite" />
                         </WrapPanel>
@@ -555,6 +569,10 @@
                         </WrapPanel>
                         <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                    Text="De eerste passende regel in deze volgorde wint. Lege voorwaarden doen niet mee. Overboekingen tussen eigen rekeningen gaan altijd via Kruisposten. Opslaan met Ctrl+S." />
+                        <!-- Besluit 276: een nieuwe rekening staat pas na opslaan in de keuzelijst. -->
+                        <TextBlock DockPanel.Dock="Top" Text="{DynamicResource T.Melding.RekeningNietOpgeslagen}" TextWrapping="Wrap" Margin="0,0,0,12"
+                                   Visibility="{Binding HeeftOnopgeslagenNieuweRekeningen, Converter={StaticResource BoolNaarZichtbaar}}"
+                                   AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="RekeningNietOpgeslagen" />
                         <g:LeegScherm DockPanel.Dock="Top" Lijst="Boekingsregels" Titel="Nog geen boekingsregels" Tekst="Een regel deelt banktransacties automatisch in. Maak er een, of kies bij een transactie Regel maken van deze boeking." Knoptekst="Nieuwe regel" Opdracht="{Binding NieuweRegelCommand}"
                                        Visibility="{Binding Boekingsregels.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                         <DataGrid ItemsSource="{Binding Boekingsregels}" SelectedItem="{Binding GeselecteerdeRegel}" AutoGenerateColumns="False"

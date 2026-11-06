@@ -37,6 +37,15 @@ public interface IDatabaseSessie : IAsyncDisposable
 {
     string Pad { get; }
 
+    /// <summary>
+    /// Besluit 277: er is iets in de database opgeslagen, door welke opslag dan ook. Kan op elke thread komen en vlak na elkaar.
+    /// </summary>
+    event EventHandler? Gewijzigd
+    {
+        add { }
+        remove { }
+    }
+
     IAdministratieRepository Administraties { get; }
 
     ILedenRepository Leden { get; }

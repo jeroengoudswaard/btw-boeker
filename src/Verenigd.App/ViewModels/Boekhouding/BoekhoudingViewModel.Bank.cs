@@ -75,6 +75,10 @@ public sealed partial class BoekhoudingViewModel
     [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
     public partial int AantalConcept { get; private set; }
 
+    /// <summary>Besluit 277: per bankrekening (dagboek-Id) het aantal te verwerken; de keuzelijst toont het achter de naam.</summary>
+    [ObservableProperty]
+    public partial IReadOnlyDictionary<int, int> TeVerwerkenPerRekening { get; private set; } = new Dictionary<int, int>();
+
     [ObservableProperty]
     public partial string Banksaldotekst { get; private set; } = string.Empty;
 
@@ -273,6 +277,10 @@ public sealed partial class BoekhoudingViewModel
             })
             .ToList();
         AantalTeVerwerken = alle.Count(m => m.Statuswaarde == MutatieStatus.TeVerwerken);
+        TeVerwerkenPerRekening = _stand.Bankmutaties
+            .Where(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.TeVerwerken)
+            .GroupBy(m => m.Dagboek.Id)
+            .ToDictionary(g => g.Key, g => g.Count());
         AantalConcept = alle.Count(m => m.Statuswaarde == MutatieStatus.Concept);
         var zichtbaar = alle
             .Where(m => Bankfilter switch
@@ -369,6 +377,9 @@ public sealed partial class BoekhoudingViewModel
         }, null);
     }
 
+    /// <summary>Besluit 276: niet-opgeslagen regels die de lopende Ctrl+S overleven; alleen gevuld tijdens <see cref="BewaarAsync"/>.</summary>
+    private List<BoekingsregelRegel> _halveRegels = [];
+
     private void LaadRegels()
     {
         foreach (var regel in Boekingsregels)
@@ -376,16 +387,33 @@ public sealed partial class BoekhoudingViewModel
             regel.PropertyChanged -= RegelGewijzigd;
         }
 
-        var gekozen = GeselecteerdeRegel?.Id;
+        var gekozen = GeselecteerdeRegel;
         Boekingsregels.Clear();
         foreach (var regel in _stand!.Boekingsregels.OrderBy(r => r.Volgorde).ThenBy(r => r.Id))
         {
-            var rij = new BoekingsregelRegel(regel, Toewijsrekeningen.FirstOrDefault(r => r.Id == regel.Rekening.Id) ?? regel.Rekening);
-            rij.PropertyChanged += RegelGewijzigd;
-            Boekingsregels.Add(rij);
+            var rij = _halveRegels.Find(r => r.Id == regel.Id)
+                ?? new BoekingsregelRegel(regel, Toewijsrekeningen.FirstOrDefault(r => r.Id == regel.Rekening.Id) ?? regel.Rekening);
+            VoegGeladenRegelToe(rij);
         }
 
-        GeselecteerdeRegel = Boekingsregels.FirstOrDefault(r => r.Id == gekozen);
+        foreach (var nieuw in _halveRegels.Where(r => r.IsNieuw))
+        {
+            VoegGeladenRegelToe(nieuw);
+        }
+
+        GeselecteerdeRegel = Boekingsregels.FirstOrDefault(r => ReferenceEquals(r, gekozen) || (!r.IsNieuw && r.Id == gekozen?.Id));
+    }
+
+    private void VoegGeladenRegelToe(BoekingsregelRegel rij)
+    {
+        // Een behouden regel wijst nog naar een object uit de vorige stand; de keuzelijst toont alleen objecten uit zijn eigen lijst.
+        if (rij.GekozenRekening is { } rekening && Toewijsrekeningen.FirstOrDefault(r => r.Id == rekening.Id) is { } actueel)
+        {
+            rij.GekozenRekening = actueel;
+        }
+
+        rij.PropertyChanged += RegelGewijzigd;
+        Boekingsregels.Add(rij);
     }
 
     private void RegelGewijzigd(object? sender, PropertyChangedEventArgs e) => CommandsVernieuwen();
@@ -394,7 +422,7 @@ public sealed partial class BoekhoudingViewModel
 
     private async Task BewaarRegelsAsync()
     {
-        foreach (var regel in Boekingsregels.Where(r => r.IsGewijzigd).ToList())
+        foreach (var regel in Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is null).ToList())
         {
             await Bankdienst.BewaarRegelAsync(Soort, regel.Invoer);
         }

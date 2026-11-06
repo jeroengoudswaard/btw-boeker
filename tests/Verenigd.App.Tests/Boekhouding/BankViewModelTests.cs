@@ -126,6 +126,127 @@ public sealed class BankViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Per_bankrekening_het_aantal_te_verwerken_ook_van_de_andere_rekening()
+    {
+        var vm = await OpenMetImportAsync();
+        var betaal = vm.Bankrekeningen.Single(d => d.Code == "RABO");
+        var spaar = vm.Bankrekeningen.Single(d => d.Code != "RABO");
+        Assert.Equal(2, vm.TeVerwerkenPerRekening[betaal.Id]);
+        Assert.False(vm.TeVerwerkenPerRekening.ContainsKey(spaar.Id));
+
+        vm.GekozenBankrekening = spaar; // besluit 277: de keuze verandert de aantallen niet
+        Assert.Equal(2, vm.TeVerwerkenPerRekening[betaal.Id]);
+
+        vm.GekozenBankrekening = betaal;
+        vm.ToewijsRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 4115);
+        await vm.ToewijzenCommand.ExecuteAsync(null);
+        Assert.Equal(1, vm.TeVerwerkenPerRekening[betaal.Id]);
+    }
+
+    private static RekeningRegel VoegRekeningToe(BoekhoudingViewModel vm)
+    {
+        vm.NieuweRekeningCommand.Execute(null);
+        var rekening = vm.Rekeningen.Single(r => r.IsNieuw);
+        rekening.Nummertekst = "4220";
+        rekening.Naam = "Huur Terrein";
+        rekening.Soort = RekeningSoort.Resultaat;
+        return rekening;
+    }
+
+    [Fact]
+    public async Task Halve_regel_blokkeert_de_nieuwe_rekening_niet_en_blijft_staan()
+    {
+        var vm = await _omgeving.OpenMetBankrekeningenAsync();
+        vm.NieuweRegelCommand.Execute(null);
+        var halve = vm.Boekingsregels.Single();
+        halve.Naam = "Gemeente";
+        halve.NaamBevat = "gemeente";
+        VoegRekeningToe(vm);
+        Assert.True(vm.KanOpslaan); // besluit 276: was de vicieuze cirkel
+
+        Assert.False(await vm.BewaarAsync()); // de regel is nog niet opgeslagen, dus sluiten mag nog niet zomaar
+
+        var rekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 4220);
+        var behouden = vm.Boekingsregels.Single();
+        Assert.True(behouden.IsNieuw);
+        Assert.Equal("gemeente", behouden.NaamBevat);
+        Assert.Equal("Gemeente", behouden.Naam);
+        Assert.Same(behouden, vm.GeselecteerdeRegel);
+        Assert.Contains("1 boekingsregel nog niet", vm.Waarschuwing, StringComparison.Ordinal);
+        Assert.False(vm.KanOpslaan); // alleen de halve regel over: niets meer te bewaren
+
+        behouden.GekozenRekening = rekening;
+        Assert.True(vm.KanOpslaan);
+        Assert.True(await vm.BewaarAsync());
+        Assert.Null(vm.Waarschuwing);
+        Assert.Equal(4220, Assert.Single(vm.Boekingsregels, r => !r.IsNieuw).GekozenRekening!.Nummer);
+    }
+
+    [Fact]
+    public async Task Goede_regels_worden_opgeslagen_en_alleen_de_halve_blijft_over()
+    {
+        var vm = await _omgeving.OpenMetBankrekeningenAsync();
+        vm.NieuweRegelCommand.Execute(null);
+        var goede = vm.Boekingsregels.Single();
+        goede.NaamBevat = "energie";
+        goede.GekozenRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 4115);
+        vm.NieuweRegelCommand.Execute(null);
+        vm.Boekingsregels.Single(r => r.NaamBevat is null).NaamBevat = "gemeente";
+        vm.NieuweRegelCommand.Execute(null);
+        vm.Boekingsregels.Single(r => r.NaamBevat is null).NaamBevat = "welpen";
+
+        Assert.False(await vm.BewaarAsync());
+
+        Assert.Equal(["energie", "gemeente", "welpen"], vm.Boekingsregels.Select(r => r.NaamBevat));
+        Assert.Equal([false, true, true], vm.Boekingsregels.Select(r => r.IsNieuw));
+        Assert.Contains("2 boekingsregels nog niet", vm.Waarschuwing, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Ongeldige_wijziging_van_een_bestaande_regel_blijft_staan_en_de_rekening_blijft_gekozen()
+    {
+        var vm = await _omgeving.OpenMetBankrekeningenAsync();
+        vm.NieuweRegelCommand.Execute(null);
+        var regel = vm.Boekingsregels.Single();
+        regel.NaamBevat = "energie";
+        regel.GekozenRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 4115);
+        Assert.True(await vm.BewaarAsync());
+
+        var bestaand = vm.Boekingsregels.Single();
+        bestaand.NaamBevat = null; // geen voorwaarde meer: ongeldig
+        VoegRekeningToe(vm);
+        Assert.False(await vm.BewaarAsync());
+
+        var behouden = vm.Boekingsregels.Single();
+        Assert.False(behouden.IsNieuw);
+        Assert.Null(behouden.NaamBevat);
+        Assert.True(behouden.IsGewijzigd);
+        Assert.Contains(behouden.GekozenRekening!, vm.Toewijsrekeningen); // zelfde object als in de keuzelijst, anders blijft de keuze leeg
+        Assert.Contains(vm.Toewijsrekeningen, r => r.Nummer == 4220);
+    }
+
+    [Fact]
+    public async Task Bij_boekingsregels_staat_een_melding_zolang_een_nieuwe_rekening_niet_is_opgeslagen()
+    {
+        var vm = await _omgeving.OpenMetBankrekeningenAsync();
+        Assert.False(vm.HeeftOnopgeslagenNieuweRekeningen);
+
+        vm.NieuweRekeningCommand.Execute(null); // nog leeg: niets om op te slaan
+        Assert.False(vm.HeeftOnopgeslagenNieuweRekeningen);
+
+        var gemeld = false;
+        vm.PropertyChanged += (_, e) => gemeld |= e.PropertyName == nameof(BoekhoudingViewModel.HeeftOnopgeslagenNieuweRekeningen);
+        var rekening = vm.Rekeningen.Single(r => r.IsNieuw);
+        rekening.Nummertekst = "4220";
+        rekening.Naam = "Huur Terrein";
+        Assert.True(gemeld);
+        Assert.True(vm.HeeftOnopgeslagenNieuweRekeningen);
+
+        Assert.True(await vm.BewaarAsync());
+        Assert.False(vm.HeeftOnopgeslagenNieuweRekeningen);
+    }
+
+    [Fact]
     public async Task Nieuwe_post_biedt_geen_bankdagboek_aan()
     {
         var vm = await OpenMetImportAsync();

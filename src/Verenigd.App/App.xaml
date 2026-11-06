@@ -18,6 +18,7 @@
             <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
             <conv:GroterDanNulNaarZichtbaarheidConverter x:Key="GroterDanNulNaarZichtbaar" />
             <conv:NietConverter x:Key="Niet" />
+            <conv:BankkeuzeTekstConverter x:Key="BankkeuzeTekst" />
             <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
             <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
             <conv:HoofdactieStijlConverter x:Key="HoofdactieStijl" />

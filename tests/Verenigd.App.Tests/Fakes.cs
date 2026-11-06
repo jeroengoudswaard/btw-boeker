@@ -273,6 +273,9 @@ internal sealed class FakeSessie(
     public Verenigd.Application.Webapp.IWebappOpslag Webapp { get; init; } = new InMemoryWebappOpslag();
     public List<string> Backups { get; } = [];
     public bool Gesloten { get; private set; }
+    public event EventHandler? Gewijzigd;
+    public bool HeeftLuisteraar => Gewijzigd is not null;
+    public void MeldWijziging() => Gewijzigd?.Invoke(this, EventArgs.Empty);
 
     public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
     {

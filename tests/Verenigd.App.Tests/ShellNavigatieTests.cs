@@ -334,6 +334,107 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
+    public async Task Statusregel_toont_een_waarschuwing_als_een_halve_boekingsregel_niet_is_opgeslagen()
+    {
+        var shell = await OpenAsync();
+        await Kies(shell, "Boekhouding");
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
+        boekhouding.NieuweRegelCommand.Execute(null);
+        boekhouding.NieuweRekeningCommand.Execute(null);
+        var rekening = boekhouding.Rekeningen.Single(r => r.IsNieuw);
+        rekening.Nummertekst = "4220";
+        rekening.Naam = "Huur Terrein";
+
+        await shell.OpslaanCommand.ExecuteAsync(null);
+
+        Assert.Equal(Statussoort.Waarschuwing, shell.Statussoort); // besluit 276, niet "Opgeslagen."
+        Assert.Equal("⚠", shell.Statusteken);
+        Assert.Equal(boekhouding.Waarschuwing, shell.Statusmelding);
+        Assert.Contains("1 boekingsregel nog niet", shell.Statusmelding, StringComparison.Ordinal);
+    }
+
+    private static async Task Wacht(Func<bool> voorwaarde)
+    {
+        for (var i = 0; i < 100 && !voorwaarde(); i++)
+        {
+            await Task.Delay(50);
+        }
+
+        Assert.True(voorwaarde());
+    }
+
+    private static async Task<BoekhoudingViewModel> OpenLegeBoekhoudingMetRekening(ShellViewModel shell)
+    {
+        await Kies(shell, "Boekhouding");
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
+        boekhouding.NieuweRekeningCommand.Execute(null);
+        var rekening = boekhouding.Rekeningen.Single(r => r.IsNieuw);
+        rekening.Nummertekst = "4115";
+        rekening.Naam = "Energie";
+        Assert.True(await boekhouding.BewaarAsync());
+        return boekhouding;
+    }
+
+    [Fact]
+    public async Task Tellers_volgen_een_opslag_zonder_eerst_naar_start_te_gaan()
+    {
+        var shell = await OpenAsync();
+        var boekhouding = await OpenLegeBoekhoudingMetRekening(shell);
+        Assert.Null(Item(shell, "Boekhouding.Journaal").Teller);
+
+        boekhouding.NieuwePostCommand.Execute(null);
+        boekhouding.Editor!.Omschrijving = "Concept";
+        if (boekhouding.Editor.Regels.Count == 0)
+        {
+            boekhouding.Editor.NieuweRegelCommand.Execute(null);
+        }
+
+        boekhouding.Editor.Regels[0].GekozenRekening = boekhouding.Editor.Rekeningen.Single(r => r.Nummer == 4115);
+        boekhouding.Editor.Regels[0].Debettekst = "10,00";
+        Assert.True(await boekhouding.BewaarAsync());
+
+        _beheer.LaatsteSessie!.MeldWijziging(); // besluit 277: de echte sessie doet dit bij elke opslag
+
+        await Wacht(() => Item(shell, "Boekhouding.Journaal").Teller == 1);
+        Assert.Equal(1, Item(shell, "Boekhouding").Teller);
+        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad); // de pagina blijft staan
+    }
+
+    [Fact]
+    public async Task Meerdere_opslagen_kort_na_elkaar_geven_een_herberekening()
+    {
+        var shell = await OpenAsync();
+        await OpenLegeBoekhoudingMetRekening(shell);
+        var opslag = (InMemoryBoekhoudingOpslag)_beheer.LaatsteSessie!.Boekhouding;
+        await Task.Delay(800); // lopende vernieuwingen na het openen laten uitlopen
+        opslag.KeerGeladen = 0;
+
+        foreach (var _ in Enumerable.Range(0, 5))
+        {
+            _beheer.LaatsteSessie.MeldWijziging();
+            await Task.Delay(20);
+        }
+
+        await Wacht(() => opslag.KeerGeladen > 0);
+        await Task.Delay(800);
+        Assert.Equal(2, opslag.KeerGeladen); // één keer per administratie, en het laden zelf meldt geen wijziging
+    }
+
+    [Fact]
+    public async Task Na_sluiten_luistert_de_app_niet_meer_naar_de_sessie()
+    {
+        var shell = await OpenAsync();
+        var sessie = _beheer.LaatsteSessie!;
+        Assert.True(sessie.HeeftLuisteraar);
+
+        await shell.SluitDatabaseCommand.ExecuteAsync(null);
+
+        Assert.False(sessie.HeeftLuisteraar);
+    }
+
+    [Fact]
     public async Task Menubalk_in_eenvoudig_alleen_tijdelijk_via_alt()
     {
         var shell = await OpenAsync();

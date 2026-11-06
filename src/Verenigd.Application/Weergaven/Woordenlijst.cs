@@ -103,6 +103,10 @@ public static class Woordenlijst
         new("Melding.Tegenboeking", "Tegenboeking {0} is geboekt.", "Correctieboeking {0} is gemaakt; de oorspronkelijke boeking is teruggedraaid."),
         new("Melding.Geboekt", "geboekt", "definitief gemaakt"),
         new("Melding.GeenBankconcepten", "Er zijn geen bankconcepten om te boeken.", "Er zijn geen voorlopige banktransacties om definitief te maken."),
+        new("Boekingsregel.Enkelvoud", "boekingsregel", "regel voor automatisch indelen"),
+        new("Boekingsregel.Meervoud", "boekingsregels", "regels voor automatisch indelen"),
+        new("Melding.RegelsNietOpgeslagen", "Opgeslagen; {0} nog niet: zie Let op bij Boekingsregels.", "Opgeslagen; {0} nog niet: zie Let op bij Automatisch indelen."),
+        new("Melding.RekeningNietOpgeslagen", "⚠ Er zijn niet-opgeslagen rekeningen. Sla op (Ctrl+S) om ze hier te kunnen kiezen.", "⚠ Er zijn niet-opgeslagen potjes. Sla op (Ctrl+S) om ze hier te kunnen kiezen."),
     ];
 
     private static readonly Dictionary<string, Term> PerSleutel = Termen.ToDictionary(t => t.Sleutel, StringComparer.Ordinal);

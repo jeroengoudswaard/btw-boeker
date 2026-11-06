@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.App.Converters;
 
@@ -169,4 +170,24 @@ public sealed class PaletkleurExtension : System.Windows.Markup.MarkupExtension
         brush.Freeze();
         return brush;
     }
+}
+
+/// <summary>Besluit 277: de naam van een bankrekening met het aantal te verwerken: <c>Betaalrekening (228)</c>.</summary>
+public sealed class BankkeuzeTekstConverter : IMultiValueConverter
+{
+    public object Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        if (values[0] is not Dagboek dagboek)
+        {
+            return string.Empty;
+        }
+
+        return values[1] is IReadOnlyDictionary<int, int> aantallen && aantallen.TryGetValue(dagboek.Id, out var aantal) && aantal > 0
+            ? string.Create(culture, $"{dagboek.Naam} ({aantal})")
+            : dagboek.Naam;
+    }
+
+    public object[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
 }

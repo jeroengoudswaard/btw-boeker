@@ -67,6 +67,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext,
 
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         await transactie.CommitAsync(annulering).ConfigureAwait(false);
+        context.Wijzigingen?.Verhoog(); // pas nu zichtbaar voor andere verbindingen (besluit 277)
         return resultaat.Uitkomst();
     }
 
