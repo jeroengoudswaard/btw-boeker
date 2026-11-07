@@ -45,7 +45,7 @@ public sealed partial class BoekhoudingViewModel
     public bool HeeftMeerdereBankrekeningen => Bankrekeningen.Count > 1;
 
     /// <summary>Besluit 270: de knop toont hoeveel er te doen is.</summary>
-    public string ConceptenBoekenTekst => $"{Woorden["Knop.ConceptenBoeken"]} ({AantalConcept})";
+    public string ConceptenBoekenTekst => $"{Woorden["Knop.ConceptenBoeken"]} ({AantalConceptAlleRekeningen})";
 
     public string RegelsToepassenTekst => $"Regels _toepassen ({AantalTeVerwerken})";
 
@@ -72,8 +72,12 @@ public sealed partial class BoekhoudingViewModel
     public partial int AantalTeVerwerken { get; private set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
     public partial int AantalConcept { get; private set; }
+
+    /// <summary>Besluit 278: <i>Concepten boeken</i> boekt alle bankrekeningen, dus de knop toont dit aantal en niet dat van de gekozen.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
+    public partial int AantalConceptAlleRekeningen { get; private set; }
 
     /// <summary>Besluit 277: per bankrekening (dagboek-Id) het aantal te verwerken; de keuzelijst toont het achter de naam.</summary>
     [ObservableProperty]
@@ -282,6 +286,7 @@ public sealed partial class BoekhoudingViewModel
             .GroupBy(m => m.Dagboek.Id)
             .ToDictionary(g => g.Key, g => g.Count());
         AantalConcept = alle.Count(m => m.Statuswaarde == MutatieStatus.Concept);
+        AantalConceptAlleRekeningen = _stand.Bankmutaties.Count(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.Concept); // zelfde telling als ConceptenBoekenAsync
         var zichtbaar = alle
             .Where(m => Bankfilter switch
             {

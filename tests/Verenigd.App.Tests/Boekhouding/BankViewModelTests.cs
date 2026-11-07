@@ -69,10 +69,19 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(2, vm.AantalConcept);
         Assert.Equal("Welpen ouder", vm.GeselecteerdeMutatie?.Tegenpartij); // door naar de volgende
 
+        // Besluit 278: de knop boekt alle bankrekeningen en toont dus ook dat aantal, ongeacht de gekozen rekening.
+        Assert.Equal(3, vm.AantalConceptAlleRekeningen);
+        Assert.EndsWith("(3)", vm.ConceptenBoekenTekst, StringComparison.Ordinal);
+        vm.GekozenBankrekening = vm.Bankrekeningen.Single(d => d.Code != "RABO");
+        Assert.Equal(1, vm.AantalConcept);
+        Assert.EndsWith("(3)", vm.ConceptenBoekenTekst, StringComparison.Ordinal);
+        vm.GekozenBankrekening = vm.Bankrekeningen.Single(d => d.Code == "RABO");
+
         _omgeving.Dialogen.BevestigAntwoord = true;
         await vm.ConceptenBoekenCommand.ExecuteAsync(null);
 
         Assert.Equal(0, vm.AantalConcept);
+        Assert.Equal(0, vm.AantalConceptAlleRekeningen);
         Assert.Equal("3 posten geboekt.", vm.Melding); // ook de overboeking aan de kant van de spaarrekening
         Assert.Contains(vm.Posten, p => p.Nummer == "RABO-2026-0001");
     }

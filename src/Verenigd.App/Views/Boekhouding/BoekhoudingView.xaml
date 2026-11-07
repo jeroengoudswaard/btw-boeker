@@ -343,7 +343,7 @@
                             <Button Content="{Binding ConceptenBoekenTekst}" Command="{Binding ConceptenBoekenCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
                                     Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                                     ToolTip="Ctrl+B" AutomationProperties.AutomationId="ConceptenBoeken"
-                                    Visibility="{Binding AantalConcept, Converter={StaticResource GroterDanNulNaarZichtbaar}}" />
+                                    Visibility="{Binding AantalConceptAlleRekeningen, Converter={StaticResource GroterDanNulNaarZichtbaar}}" />
                             <Button Content="{Binding RegelsToepassenTekst}" Command="{Binding PasRegelsToeCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
                                     ContentTemplate="{StaticResource Toegangstekst}" ToolTip="De boekingsregels opnieuw toepassen op de werkvoorraad"
                                     AutomationProperties.AutomationId="RegelsToepassen"

@@ -313,6 +313,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 275 | Versie op de website | De release-workflow zet het label op de startpagina en de downloadknop op de nieuwe versie; het label is de volledige versie (`v0.18.0`). Label of knop niet gevonden = de workflow faalt zichtbaar (keuze 2A) |
 | 276 | Opslaan met een halve boekingsregel | Ctrl+S bewaart wat klopt; de halve regel blijft met de invoer staan en de statusregel geeft een ⚠-melding. Bij *Boekingsregels* een melding zolang een nieuwe rekening niet is opgeslagen; geen automatisch opslaan, omdat het nummer van een opgeslagen rekening vastligt (keuzes 1A en 2A) |
 | 277 | Tellers en bankkeuze | Tellers en startkaarten worden na elke opslag in de database herberekend (`IDatabaseSessie.Gewijzigd`), samengevoegd tot één berekening. De teller in de navigatiebalk blijft het totaal van alle bankrekeningen; de keuzelijst toont het aantal per rekening (keuzes 1A en 2A) |
+| 278 | *Concepten boeken* | De knop toont het aantal van alle bankrekeningen, want hij boekt ze ook allemaal. Geen selectie van posten en geen boeken per rekening (keuze 2A, 2026-11-07). Uitbrengen als v0.18.1 (keuze 1A) |
 
 ## Stand van zaken (bijwerken na elke sessie)
 
@@ -627,7 +628,9 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
   - Tellers na elke opslag (`IDatabaseSessie.Gewijzigd`); de keuzelijst toont het aantal per bankrekening.
   - Gevonden door de nieuwe end-to-end UI-test, niet door de tests met vervangers: het event had `Wijzigingen` als afzender in plaats van de sessie, waardoor de shell het negeerde. Opgelost, met een test op de afzender.
   - **Windows-test (2026-11-06, op v0.18.0 plus deze wijzigingen): 1075/1075 geslaagd in 2 opeenvolgende runs**, met `--blame-hang --blame-hang-timeout 4m`, inclusief alle FlaUI-UI-tests (Domain 260, Application 374, Architectuur 35, Infrastructure 101, App 305); build zonder waarschuwingen. Geen hang en geen achtergebleven testproces. De webapp- en Supabase-tests zijn lokaal niet gedraaid (geen wijziging daar).
-  - Bekende punten, niet gewijzigd: *Concepten boeken* toont het aantal van de gekozen rekening maar boekt alle bankrekeningen, en boeken kan alleen voor alles tegelijk, niet voor een selectie.
+  - PR #25 met groene CI, inclusief de MSI-bouw (`Verenigd-0.18.0.msi`).
+  - Daarna besluit 278 (*Concepten boeken* toont het totaal) en versie 0.18.1 (keuze 1A, 2026-11-07). Boeken kan alleen voor alles tegelijk, niet voor een selectie.
+  - **Windows-test v0.18.1 (2026-11-07): run 1 1074/1075, run 2 1075/1075**, inclusief alle FlaUI-UI-tests; build zonder waarschuwingen. Gefaald in run 1: de snelheidstest `VerbindingTests.Een_nieuwe_database_aanmaken_blijft_onder_het_budget` (3094 ms, budget 2500 ms). Die is op deze pc al onbetrouwbaar vóór deze wijzigingen: op v0.18.0 2 van 8 keer te traag (2530 en 4315 ms), met de wijzigingen 8 van 8 geslaagd. Nog te doen: het budget of de meting van die test robuuster maken (bijv. beste van drie).
 - **Taken voor later:** XAF importeren (besluit 197), nog niet ingepland.
 
 ## Privacy
