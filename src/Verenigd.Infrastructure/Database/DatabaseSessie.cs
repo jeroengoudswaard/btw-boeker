@@ -21,6 +21,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
     {
         Pad = pad;
         _databasesleutel = databasesleutel;
+        _wijzigingen.Gewijzigd += (_, e) => Gewijzigd?.Invoke(this, e); // met de sessie als afzender
         Administraties = new AdministratieRepository(MaakContext);
         Leden = new LedenRepository(MaakContext);
         LedenImport = new LedenImportOpslag(MaakContext);
@@ -32,6 +33,8 @@ internal sealed class DatabaseSessie : IDatabaseSessie
     }
 
     public string Pad { get; }
+
+    public event EventHandler? Gewijzigd;
 
     public IAdministratieRepository Administraties { get; }
 

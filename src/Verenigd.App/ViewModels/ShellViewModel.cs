@@ -861,6 +861,9 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             case nameof(IPaginameldingen.Melding) when sender is IPaginameldingen { Melding: { Length: > 0 } melding }:
                 ZetStatus(Statussoort.Gelukt, melding);
                 break;
+            case nameof(IPaginameldingen.Waarschuwing) when sender is IPaginameldingen { Waarschuwing: { Length: > 0 } waarschuwing }:
+                ZetStatus(Statussoort.Waarschuwing, waarschuwing);
+                break;
             case nameof(IPaginameldingen.Foutmelding) when sender is IPaginameldingen { Foutmelding: { Length: > 0 } fout }:
                 ZetStatus(Statussoort.Fout, fout);
                 break;
@@ -936,6 +939,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     private async Task NaOpenenAsync(IDatabaseSessie sessie, bool herstelPagina)
     {
         _sessie = sessie;
+        _uiContext = SynchronizationContext.Current;
+        sessie.Gewijzigd += SessieGewijzigd;
         foreach (var administratie in await sessie.Administraties.HaalAlleAsync())
         {
             var vm = new AdministratieViewModel(administratie);
@@ -1023,6 +1028,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         Administraties.Clear();
         KiesAdministratieZonderWisselen(null);
         _overzicht.Kaarten.Clear();
+        _sessie.Gewijzigd -= SessieGewijzigd;
         await _sessie.DisposeAsync();
         _sessie = null;
         _webappGekoppeld = false;

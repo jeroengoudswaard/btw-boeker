@@ -4,6 +4,18 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.18.1] - 2026-11-07: Opslaan, tellers en MSI met versienummer (besluiten 274–278)
+
+### Opgelost
+- **Nieuwe rekening met een halve boekingsregel ernaast** (besluit 276): een half ingevulde boekingsregel blokkeerde Ctrl+S voor alles, ook voor de nieuwe rekening die de regel nodig had. Nu wordt opgeslagen wat klopt; de halve regel blijft staan met uw invoer, en de statusregel meldt *⚠ Opgeslagen; 1 boekingsregel nog niet*. Bij *Boekingsregels* staat een melding zolang een nieuwe rekening nog niet is opgeslagen.
+- **Tellers in de navigatiebalk** (besluit 277): ze werden alleen bijgewerkt bij Start, een andere administratie of het openen van de database. Nu na elke opslag, op elke pagina; een reeks opslagen geeft één herberekening.
+
+### Gewijzigd
+- **Keuzelijst bankrekening** (besluit 277): het aantal te verwerken staat achter de naam, bijvoorbeeld *Bankrekening 2371 (228)*. De teller in de navigatiebalk blijft het totaal van alle rekeningen.
+- ***Concepten boeken*** (besluit 278): de knop toont het aantal concepten van alle bankrekeningen, want dat boekt hij ook; hij stond op het aantal van de gekozen rekening. De knop verschijnt ook als alleen de andere rekening concepten heeft.
+- **Installatiebestand** (besluit 274): het versienummer staat in de bestandsnaam (`Verenigd-0.19.0.msi`). De vaste naam `Verenigd.msi` verdwijnt bij de volgende release van de website.
+- **Release-workflow** (besluit 275): zet het versielabel op de startpagina en de downloadknop van de website automatisch op de nieuwe versie, en faalt zichtbaar als ze niet te vinden zijn.
+
 ## [0.18.0] - 2026-11-05: Alleen zichtbaar wat nu nodig is (besluiten 269–272)
 
 ### Gewijzigd

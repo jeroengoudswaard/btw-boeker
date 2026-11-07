@@ -56,6 +56,41 @@ public sealed class MomentopnameTests : IDisposable
     }
 
     [Fact]
+    public async Task Elke_opslag_geeft_een_seintje_en_laden_niet()
+    {
+        var pad = _map.Bestand("seintje.vdb");
+        await Testdatabase.MaakAsync(pad, 5);
+        await using var sessie = await Testdatabase.OpenAsync(pad);
+        var aantal = 0;
+        object? afzender = null;
+        sessie.Gewijzigd += (s, _) =>
+        {
+            afzender = s;
+            Interlocked.Increment(ref aantal);
+        }; // besluit 277
+
+        var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+        await sessie.Leden.HaalAlleAsync();
+        Assert.Equal(0, Volatile.Read(ref aantal));
+
+        var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);
+        vereniging.WijzigNaam("Scouting Proef");
+        await sessie.Administraties.BewaarAsync(vereniging);
+        Assert.True(Volatile.Read(ref aantal) > 0);
+        Assert.Same(sessie, afzender); // de shell herkent zo zijn eigen sessie
+
+        Volatile.Write(ref aantal, 0);
+        var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
+        var memoriaal = stand.Dagboeken.Single(d => d.Code == "MEM");
+        await dienst.BoekAsync(AdministratieSoort.Vereniging, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Seintje",
+        [
+            new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4210).Id, null, new Bedrag(500), Bedrag.Nul),
+            new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, null, Bedrag.Nul, new Bedrag(500)),
+        ]));
+        Assert.True(Volatile.Read(ref aantal) > 0);
+    }
+
+    [Fact]
     public async Task Een_nieuwe_sessie_begint_zonder_momentopname()
     {
         var pad = _map.Bestand("sessies.vdb");

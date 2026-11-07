@@ -219,6 +219,12 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public partial string? Melding { get; private set; }
 
     [ObservableProperty]
+    public partial string? Waarschuwing { get; private set; }
+
+    /// <summary>Besluit 276: alleen opgeslagen rekeningen staan in de keuzelijsten; de pagina Boekingsregels meldt dat.</summary>
+    public bool HeeftOnopgeslagenNieuweRekeningen => Rekeningen.Any(r => r.IsNieuw && r.IsGewijzigd);
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(KanOpslaan))]
     public partial bool IsBezig { get; private set; }
 
@@ -228,11 +234,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public override bool HeeftOnopgeslagenWijzigingen =>
         Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
 
+    /// <summary>Besluit 276: een halve boekingsregel blokkeert de rest niet; hij blijft staan tot hij klopt.</summary>
+    private bool HeeftBewaarbareWijzigingen =>
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || FacturenGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
+
     public override bool KanOpslaan =>
-        HeeftOnopgeslagenWijzigingen && !IsBezig
+        HeeftBewaarbareWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && Boekingsregels.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
         && FacturenGeldig
         && BegrotingGeldig
         && MeerjarenplanGeldig;
@@ -253,7 +262,10 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     private string Administratienaam => Administratie!.Naam;
 
-    /// <summary>Ctrl+S: het concept en gewijzigde rekeningen opslaan.</summary>
+    /// <summary>
+    /// Ctrl+S: het concept en gewijzigde rekeningen opslaan. Onwaar als er iets niet is opgeslagen, zoals een halve boekingsregel
+    /// (besluit 276): zo kan de pagina niet ongemerkt worden gesloten.
+    /// </summary>
     public override async Task<bool> BewaarAsync()
     {
         if (!KanOpslaan)
@@ -261,6 +273,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             return !HeeftOnopgeslagenWijzigingen;
         }
 
+        Waarschuwing = null;
         IsBezig = true;
         try
         {
@@ -280,13 +293,22 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             }
 
             Foutmelding = null;
+            _halveRegels = [.. Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is not null)];
+            var aantalHalf = _halveRegels.Count;
             await LaadAsync(selectie);
             if (factuur is not null)
             {
                 PasFactuurfilterToe(factuur);
             }
 
-            return true;
+            if (aantalHalf == 0)
+            {
+                return true;
+            }
+
+            Waarschuwing = string.Format(CultureInfo.CurrentCulture, Woorden["Melding.RegelsNietOpgeslagen"],
+                Woorden.Aantal(aantalHalf, "Boekingsregel.Enkelvoud", "Boekingsregel.Meervoud"));
+            return false;
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
         {
@@ -295,6 +317,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
         finally
         {
+            _halveRegels = [];
             IsBezig = false;
             CommandsVernieuwen();
         }
@@ -1080,6 +1103,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     {
         OnPropertyChanged(nameof(HeeftOnopgeslagenWijzigingen));
         OnPropertyChanged(nameof(KanOpslaan));
+        OnPropertyChanged(nameof(HeeftOnopgeslagenNieuweRekeningen));
         OpslaanCommand.NotifyCanExecuteChanged();
         BoekenCommand.NotifyCanExecuteChanged();
         VerwijderConceptCommand.NotifyCanExecuteChanged();

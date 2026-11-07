@@ -31,6 +31,7 @@ internal sealed class LedenImportOpslag(Func<VerenigdDbContext> maakContext) : I
 
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         await transactie.CommitAsync(annulering).ConfigureAwait(false);
+        context.Wijzigingen?.Verhoog(); // pas nu zichtbaar voor andere verbindingen (besluit 277)
     }
 
     private static async Task<ImportStand> LaadAsync(QueryTrackingBehavior gedrag, VerenigdDbContext context, CancellationToken annulering)

@@ -53,6 +53,9 @@ jobs:
           # Geen automatische cache: er staat geen lockbestand in de hoofdmap, en de release-workflow heeft geheimen.
           package-manager-cache: false
 
+      - name: Script voor de website testen (versielabel en downloadknop)
+        run: bash .github/scripts/website-bijwerken.test.sh
+
       - name: Beveiligingstests database en Edge Function
         working-directory: supabase/tests
         env:

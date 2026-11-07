@@ -6,10 +6,15 @@ using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
+using Verenigd.Application.Bank;
+using Verenigd.Application.Tests.Bank;
 using Verenigd.Application.Bijlagen;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
+using Verenigd.Domain.Administraties;
+using Verenigd.Domain.Financien.Bank;
+using Verenigd.Domain.Financien.Boekhouding;
 using Verenigd.Infrastructure.Database;
 using Verenigd.Infrastructure.Instellingen;
 using Verenigd.Infrastructure.Pdf;
@@ -250,6 +255,92 @@ public sealed class AppUiTests : IDisposable
         Bewaar(wizard, "09-incassowizard");
         Zoek(wizard, "IncassoAnnuleren").AsButton().Invoke();
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+
+        Sluit(venster);
+    }
+
+    /// <summary>
+    /// Besluit 277, op een echte database: de teller volgt het regels toepassen zonder eerst naar Start te gaan, en de keuzelijst
+    /// verklaart het verschil met het aantal van de gekozen rekening.
+    /// </summary>
+    [Fact(Timeout = Timeout)]
+    public async Task Tellers_en_bankkeuze_volgen_het_regels_toepassen()
+    {
+        var db = Path.Combine(_datamap, "verenigd.vdb");
+        var beheer = new DatabaseBeheer();
+        await beheer.MaakAanAsync(db, Wachtwoord);
+        await using (var sessie = await beheer.OpenAsync(db, Wachtwoord))
+        {
+            const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+            var boekhouding = new BoekhoudingDienst(sessie, TimeProvider.System);
+            var bank = new BankDienst(sessie, TimeProvider.System);
+            await boekhouding.RichtInAsync(Ver);
+            if ((await boekhouding.LaadAsync(Ver)).Boekjaar(2026) is null)
+            {
+                await boekhouding.OpenBoekjaarAsync(Ver, 2026);
+            }
+
+            foreach (var (nummer, naam, soort) in new[] { (1100, "Betaal", RekeningSoort.Balans), (1110, "Spaar", RekeningSoort.Balans), (4115, "Energie", RekeningSoort.Resultaat) })
+            {
+                await boekhouding.BewaarRekeningAsync(Ver, new RekeningInvoer(null, nummer, naam, null, soort, RekeningRol.Geen, true));
+            }
+
+            static CamtBestand Bestand(string iban, params VbTransactie[] t) =>
+                Camt053Lezer.Lees(CamtVoorbeeld.Stroom(CamtVoorbeeld.Xml(iban, "08", new VbAfschrift(new DateOnly(2026, 3, 2), 0, t))));
+
+            var stand = await boekhouding.LaadAsync(Ver);
+            CamtBestand[] bestanden =
+            [
+                Bestand(CamtVoorbeeld.Betaal,
+                    new VbTransactie(-4500, "ICDT", "ESCT", "520", Ref: "E1", Naam: "Energie BV"),
+                    new VbTransactie(-1000, "ICDT", "ESCT", "520", Ref: "W1", Naam: "Waterbedrijf", NtryRef: "2")),
+                Bestand(CamtVoorbeeld.Spaar, new VbTransactie(500, Ref: "R1", Naam: "Rente")),
+            ];
+            await bank.ImporteerAsync(Ver, BankimportPlanner.Plan(stand, bestanden), new Dictionary<string, NieuweBankrekening>
+            {
+                [CamtVoorbeeld.Betaal] = new(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, "RABO", "Betaalrekening"),
+                [CamtVoorbeeld.Spaar] = new(stand.Rekeningen.Single(r => r.Nummer == 1110).Id, "RSPA", "Spaarrekening"),
+            });
+            await bank.BewaarRegelAsync(Ver, new BoekingsregelInvoer(
+                null, "Energie", stand.Rekeningen.Single(r => r.Nummer == 4115).Id, new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true));
+        }
+
+        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
+            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
+        var venster = Start();
+        VoerWachtwoordIn(venster);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+
+        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Zoek(venster, "BoekhoudingTabblad");
+        Kies(venster, "Nav_Boekhouding.Bank");
+
+        bool TellerIs(string sleutel, string tekst) =>
+            venster.FindFirstDescendant(c => c.ByAutomationId(sleutel))?.Properties.HelpText.ValueOrDefault == tekst;
+        bool KeuzeToont(string tekst)
+        {
+            // UI Automation toont de regels pas als de lijst open is.
+            var keuze = Zoek(venster, "Bankrekeningkeuze").AsComboBox();
+            keuze.Expand();
+            try
+            {
+                return keuze.FindAllDescendants().Any(e => e.Properties.Name.ValueOrDefault == tekst);
+            }
+            finally
+            {
+                keuze.Collapse();
+            }
+        }
+
+        Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Bank", "3 te doen"), Wachttijd).Result, "De teller begint niet op 3.");
+        Assert.True(Retry.WhileFalse(() => KeuzeToont("Betaalrekening (2)"), Wachttijd).Result, "De keuzelijst toont niet 'Betaalrekening (2)'.");
+        Assert.True(KeuzeToont("Spaarrekening (1)"), "De keuzelijst toont niet 'Spaarrekening (1)'.");
+        Zoek(venster, "RegelsToepassen").AsButton().Invoke();
+
+        Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Bank", "2 te doen"), Wachttijd).Result, "De teller van Bank liep niet mee.");
+        Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Journaal", "1 te doen"), Wachttijd).Result, "Journaal kreeg geen teller voor het concept.");
+        Assert.True(Retry.WhileFalse(() => KeuzeToont("Betaalrekening (1)"), Wachttijd).Result, "De keuzelijst liep niet mee.");
+        Zoek(venster, "BoekhoudingTabblad"); // de pagina blijft staan
 
         Sluit(venster);
     }

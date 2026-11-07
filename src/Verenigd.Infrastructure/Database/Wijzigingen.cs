@@ -10,5 +10,12 @@ internal sealed class Wijzigingen
 
     public long Versie => Interlocked.Read(ref _versie);
 
-    public void Verhoog() => Interlocked.Increment(ref _versie);
+    /// <summary>Besluit 277: na elke verhoging; op de thread van het opslaan.</summary>
+    public event EventHandler? Gewijzigd;
+
+    public void Verhoog()
+    {
+        Interlocked.Increment(ref _versie);
+        Gewijzigd?.Invoke(this, EventArgs.Empty);
+    }
 }

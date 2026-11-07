@@ -466,3 +466,10 @@ Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀�
 - Nieuwe stijl `Linkknop` (App.xaml) voor tekstlinks als *+ Bon toevoegen* en *+ Rubriek*.
 - Tests: `ShellNavigatieTests` (navigatie en *Meer…*), `Boekhouding/ZichtbaarheidTests`, aanvullingen in `ContributieboekingViewModelTests` (oninbaar in twee stappen) en `LedenViewModelTests`; de FlaUI-tests klappen *Meer…* met een echte muisklik uit voordat ze een item onder *Meer…* kiezen, en `Meer_blijft_dicht_met_de_pijltjes_en_klapt_om_met_enter_en_spatie` controleert het toetsenbord.
 
+## Opslaan en tellers (besluiten 276 en 277)
+
+- `BoekhoudingViewModel.BewaarAsync` slaat op wat klopt. Een gewijzigde boekingsregel met een `Fout` blijft achter via `_halveRegels`: `LaadRegels` zet die rijen terug en koppelt hun rekening aan het object uit de nieuwe `Toewijsrekeningen`, anders blijft de keuzelijst leeg. `BewaarAsync` geeft dan `false`, zodat een pagina met een halve regel niet ongemerkt sluit, en zet `Waarschuwing` (`IPaginameldingen`: ⚠ in de statusregel). Andere fouten (rekening, post, factuur, begroting) blokkeren nog wel alles.
+- `Wijzigingen` geeft bij elke verhoging het event `Gewijzigd`, naar buiten als `IDatabaseSessie.Gewijzigd` (standaard een lege implementatie, zodat testvervangers het niet hoeven te hebben). De drie opslagen met een transactie verhogen ook na de commit: wie vlak ervoor las, zou anders de oude stand met de nieuwste versie bewaren.
+- `ShellViewModel.SessieGewijzigd` komt op een willekeurige thread binnen en gaat via de `SynchronizationContext` naar de UI-thread. `VernieuwNaWijzigingAsync` wacht tot het 400 ms stil is en herberekent dan de startkaarten en tellers; `_kaartenRonde` zorgt dat de nieuwste berekening wint. Laden geeft geen seintje, dus er ontstaat geen lus.
+- De teller in de navigatiebalk telt alle bankrekeningen; `TeVerwerkenPerRekening` en `BankkeuzeTekstConverter` tonen het aantal per rekening in de keuzelijst.
+

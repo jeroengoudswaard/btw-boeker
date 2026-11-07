@@ -5,11 +5,14 @@ using Verenigd.Application.Modules;
 namespace Verenigd.App.ViewModels;
 
 /// <summary>
-/// Meldingen van een pagina voor de statusregel (besluit 168): <see cref="Melding"/> krijgt ✓, <see cref="Foutmelding"/> ✕.
+/// Meldingen van een pagina voor de statusregel (besluit 168): <see cref="Melding"/> krijgt ✓, <see cref="Waarschuwing"/> ⚠,
+/// <see cref="Foutmelding"/> ✕.
 /// </summary>
 public interface IPaginameldingen
 {
     string? Melding => null;
+
+    string? Waarschuwing => null;
 
     string? Foutmelding => null;
 }

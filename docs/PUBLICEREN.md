@@ -34,10 +34,9 @@ Het token komt nooit in Git en staat alleen in de geheimen van GitHub.
    Op GitHub kan het ook: **Releases › Draft a new release › Choose a tag** `v0.15.0` (*Create new tag on publish*).
 3. Volg de workflow onder **Actions › Release**. Na ±15 minuten staat de MSI op de release `verenigd` van de website, en de website wordt opnieuw gepubliceerd.
 
-De vaste downloadlink is altijd:
-`https://github.com/jeroengoudswaard/jeroengoudswaard.github.io/releases/download/verenigd/Verenigd.msi`
+De MSI heeft het versienummer in de naam (`Verenigd-0.19.0.msi`, besluit 274). De workflow zet het versielabel op de startpagina en de downloadknop van de website op de nieuwe versie (besluit 275, `.github/scripts/website-bijwerken.sh`), dus dat hoeft niet met de hand. Vindt het script het label of de knop niet, bijvoorbeeld na een herontwerp van de site, dan faalt de workflow zichtbaar.
 
-Daarnaast staat er een kopie met het versienummer (`Verenigd-0.15.0.msi`).
+Oudere versies blijven op de release staan, zodat u kunt teruggaan.
 
 ## Wat niet automatisch gaat
 
@@ -60,4 +59,4 @@ dotnet publish src/Verenigd.App -c Release -r win-x64 --self-contained -o artifa
 dotnet build installer/Verenigd.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=%CD%\artifacts\publish
 ```
 
-De MSI staat daarna in `installer/bin/x64/Release/`.
+De MSI staat daarna als `Verenigd-0.15.0.msi` in `installer/bin/x64/Release/`.

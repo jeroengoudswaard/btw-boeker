@@ -56,11 +56,11 @@ jobs:
         shell: pwsh
         run: |
           dotnet build installer/Verenigd.Installer.wixproj --configuration Release "-p:Versie=${{ steps.versie.outputs.versie }}" "-p:PublicatieMap=$PWD\artifacts\publish"
-          $msi = Get-ChildItem installer/bin -Recurse -Filter Verenigd.msi | Select-Object -First 1
-          if (-not $msi) { throw 'Verenigd.msi niet gevonden' }
+          $naam = "Verenigd-${{ steps.versie.outputs.versie }}.msi"
+          $msi = Get-ChildItem installer/bin -Recurse -Filter $naam | Select-Object -First 1
+          if (-not $msi) { throw "$naam niet gevonden" }
           New-Item -ItemType Directory -Force artifacts/uitvoer/release | Out-Null
-          Copy-Item $msi.FullName "artifacts/uitvoer/release/Verenigd-${{ steps.versie.outputs.versie }}.msi"
-          Copy-Item $msi.FullName artifacts/uitvoer/release/Verenigd.msi
+          Copy-Item $msi.FullName artifacts/uitvoer/release/
           Get-ChildItem artifacts/uitvoer/release
 
       # FlaUI heeft een bureaublad nodig; op een GitHub-runner is dat niet gegarandeerd. Lukt het niet, dan gaat de release
@@ -117,6 +117,10 @@ jobs:
     if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
+        with:
+          path: bron
+
       - uses: actions/download-artifact@v8
         with:
           path: uit
@@ -137,7 +141,7 @@ jobs:
           gh release upload verenigd --repo "$WEBSITE" --clobber \
             uit/installatiebestand/release/*.msi uit/webapp/verenigd-web.zip
 
-      - name: Schermafbeeldingen in de website zetten
+      - name: Versie en schermafbeeldingen in de website zetten
         env:
           GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
         run: |
@@ -150,15 +154,27 @@ jobs:
           else
             echo "::warning::Geen schermafbeeldingen van de desktop (geen bureaublad op de runner?); de vorige blijven staan."
           fi
+          # Besluiten 274 en 275: het versielabel en de downloadknop; faalt zichtbaar als ze niet meer te vinden zijn.
+          bash bron/.github/scripts/website-bijwerken.sh site "${GITHUB_REF_NAME#v}"
           cd site
           git config user.name "verenigd-release"
           git config user.email "verenigd-release@users.noreply.github.com"
-          git add verenigd/screens
+          git add verenigd/screens index.html verenigd/index.html
           if git diff --cached --quiet; then
-            echo "Schermafbeeldingen ongewijzigd."
+            echo "Website ongewijzigd."
           else
-            git commit -m "Verenigd ${GITHUB_REF_NAME}: schermafbeeldingen"
+            git commit -m "Verenigd ${GITHUB_REF_NAME}: versie en schermafbeeldingen"
             git push
+          fi
+
+      # Besluit 274: er is alleen nog een bestand met het versienummer. Pas na de push: de knop wijst dan al naar de nieuwe naam.
+      - name: Oude vaste link Verenigd.msi opruimen
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view verenigd --repo "$WEBSITE" --json assets --jq '.assets[].name' | grep -qx 'Verenigd.msi'; then
+            gh release delete-asset verenigd Verenigd.msi --repo "$WEBSITE" --yes
           fi
 
       - name: Website opnieuw publiceren (webapp uitpakken)

@@ -385,12 +385,19 @@ public sealed partial class ShellViewModel
     // ---- Startkaarten (besluit 183) ----------------------------------------------------------
 
     private IReadOnlyList<Startkaart> _kaarten = [];
+    private int _kaartenRonde;
 
     private async Task VernieuwStartkaartenAsync()
     {
         using var meting = Meetpunt.Start(_logger, "Startpagina (kaarten, kerncijfers, tellers)");
         var vandaag = DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
+        var ronde = ++_kaartenRonde;
         var gegevens = _sessie is null ? null : await Startkaarten.LaadAsync(_sessie, vandaag);
+        if (ronde != _kaartenRonde)
+        {
+            return; // een latere ronde is onderweg; die heeft de nieuwste stand
+        }
+
         _kaarten = gegevens?.Kaarten ?? [];
         _overzicht.Kaarten.Vervang(_kaarten);
 
@@ -405,6 +412,45 @@ public sealed partial class ShellViewModel
         }
 
         BouwNavigatie(); // tellers, en Openstaand verschijnt of verdwijnt (besluit 269)
+    }
+
+    // ---- Tellers bijwerken na een opslag (besluit 277) ------------------------------------------
+
+    private static readonly TimeSpan TellerWachttijd = TimeSpan.FromMilliseconds(400);
+    private SynchronizationContext? _uiContext;
+    private int _tellerOproep;
+
+    /// <summary>Kan op elke thread komen: het opslaan zelf loopt buiten de UI-thread.</summary>
+    private void SessieGewijzigd(object? sender, EventArgs e)
+    {
+        if (_uiContext is { } ui)
+        {
+            ui.Post(_ => _ = VernieuwNaWijzigingAsync(sender), null);
+        }
+        else
+        {
+            _ = VernieuwNaWijzigingAsync(sender);
+        }
+    }
+
+    /// <summary>Wacht tot het even stil is, zodat een reeks opslagen (regels toepassen, boeken) één herberekening geeft.</summary>
+    private async Task VernieuwNaWijzigingAsync(object? sessie)
+    {
+        var oproep = Interlocked.Increment(ref _tellerOproep);
+        await Task.Delay(TellerWachttijd);
+        if (oproep != Volatile.Read(ref _tellerOproep) || !ReferenceEquals(sessie, _sessie))
+        {
+            return;
+        }
+
+        try
+        {
+            await VernieuwStartkaartenAsync();
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or System.Data.Common.DbException)
+        {
+            ShellLog.Mislukt(_logger, ex, "Tellers bijwerken"); // de tellers lopen dan achter; de pagina werkt gewoon door
+        }
     }
 
     /// <summary>Besluit 220: de aantallen bij de regels van de navigatiebalk.</summary>

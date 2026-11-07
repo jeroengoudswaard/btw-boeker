@@ -150,6 +150,7 @@ internal sealed class ContributieRepository(Func<VerenigdDbContext> maakContext)
         context.Incassoruns.Add(maakRun(stand));
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         await transactie.CommitAsync(annulering).ConfigureAwait(false);
+        context.Wijzigingen?.Verhoog(); // pas nu zichtbaar voor andere verbindingen (besluit 277)
     }
 
     public async Task LegBestandVastAsync(Guid runId, string hash, CancellationToken annulering = default)
