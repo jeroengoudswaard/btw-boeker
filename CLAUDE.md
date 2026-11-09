@@ -65,7 +65,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 ## Planning
 
-1. **Hernoemen** van Verenigd naar BtwBoeker: uitgevoerd (2026-11-09). Nog te doen: bouwen en volledige testsuite draaien (in de cloudsessie is NuGet geblokkeerd, dus op Windows).
+1. **Hernoemen** van Verenigd naar BtwBoeker: uitgevoerd (2026-11-09). De eerste build op Windows is mislukt; zie de foutregistratie hieronder. Daarna de fouten oplossen en de volledige testsuite draaien.
 2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Eerst een ontwerp ter goedkeuring.
 3. **Btw-integratie**, test-first: btw-code en prestatiedatum op journaalregels, opslag en migratie, btw-rekeningen en automatische boekingsregels, invoer in de posteditor, maandrapport en export.
 4. Documentatie (README, CHANGELOG, installatie) en validatie op Windows.
@@ -74,7 +74,11 @@ Nog open vragen voor stap 2 en 3: welk rekeningschema (voorstel van circa 25 rek
 
 ## Stand van zaken (bijwerken na elke sessie)
 
-- **Stap 1 (hernoemen): uitgevoerd, nog niet gebouwd of getest.** 273 bestanden aangepast; de naamtest `ProductnaamTests` is geschreven maar nog niet gedraaid. Er is niets gecommit.
+- **Stap 1 (hernoemen): uitgevoerd; build faalt nog.** 273 bestanden aangepast; `ProductnaamTests` is geschreven maar nog niet gedraaid.
+- **Build na hernoemen (2026-11-09, branch `hernoemen-btwboeker`):** `dotnet build BtwBoeker.slnx` eindigt met 0 waarschuwingen en 57 compilefouten. De fouten zitten in `BtwBoeker.Infrastructure.Tests` en `BtwBoeker.App.Tests`; de overige projecten bouwen.
+  - Zichtbare hoofdoorzaak: `BTW-Boeker.Tests.Gedeeld` wordt als C#-namespace gebruikt, maar het koppelteken is daar ongeldig. Dit staat in `tests/BtwBoeker.Infrastructure.Tests/Bijlagen/Testpdf.cs`, en in de imports van `BijlageOpslagTests.cs`, `tests/BtwBoeker.App.Tests/UI/AppUiTests.cs` en `BijlageVoorbeeldTests.cs`.
+  - `tests/BtwBoeker.App.Tests/PadenTests.cs` bevat ook de methode-identifier `Standaardpaden_zijn_gescheiden_van_BTW-Boeker`; het koppelteken is ongeldig in een C#-identifier en veroorzaakt meerdere vervolgdiagnoses.
+  - De 57 meldingen omvatten syntaxisfouten en compiler-cascadefouten uit deze ongeldige namen; dit zijn niet noodzakelijk 57 afzonderlijke oorzaken. De volledige testsuite is nog niet uitgevoerd.
 - **Ontwikkelomgeving:** .NET SDK 10, Visual Studio of VS Code; de gebruiker draait Windows-tests zelf.
 - **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`.
 - De historie van Verenigd (besluiten 1–278) staat in de repository van Verenigd en in `CHANGELOG.md`.
