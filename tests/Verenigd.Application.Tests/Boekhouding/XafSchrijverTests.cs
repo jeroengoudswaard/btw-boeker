@@ -2,8 +2,6 @@ using System.Xml.Linq;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Boekhouding;
-using Verenigd.Domain.Financien.Debiteuren;
-using Verenigd.Domain.Financien.Facturen;
 using Verenigd.Domain.Financien.Relaties;
 
 namespace Verenigd.Application.Tests.Boekhouding;
@@ -14,8 +12,8 @@ public class XafSchrijverTests
     private static readonly XNamespace X = "http://www.auditfiles.nl/XAF/3.2";
     private static readonly DateOnly Vandaag = new(2026, 11, 4);
 
-    private static XafResultaat Schrijf(BoekhoudingTestdata data, int jaar = 2026, IReadOnlyList<Betaler>? betalers = null) =>
-        XafSchrijver.Schrijf(new XafInvoer(data.Stand, jaar, "Scouting De Voorbeeldgroep", betalers ?? [], Vandaag, "0.16.0"));
+    private static XafResultaat Schrijf(BoekhoudingTestdata data, int jaar = 2026) =>
+        XafSchrijver.Schrijf(new XafInvoer(data.Stand, jaar, "BTW-Boeker voorbeeld", Vandaag, "0.1.0"));
 
     private static XElement Lees(XafResultaat resultaat) => XDocument.Parse(System.Text.Encoding.UTF8.GetString(resultaat.Inhoud)).Root!;
 
@@ -36,9 +34,9 @@ public class XafSchrijverTests
         Assert.Equal("2026-12-31", Tekst(kop, "endDate"));
         Assert.Equal("EUR", Tekst(kop, "curCode"));
         Assert.Equal("2026-11-04", Tekst(kop, "dateCreated"));
-        Assert.Equal("Verenigd", Tekst(kop, "softwareDesc"));
-        Assert.Equal("0.16.0", Tekst(kop, "softwareVersion"));
-        Assert.Equal("Scouting De Voorbeeldgroep", Tekst(Lees(resultaat).Element(X + "company")!, "companyName"));
+        Assert.Equal("BTW-Boeker", Tekst(kop, "softwareDesc"));
+        Assert.Equal("0.1.0", Tekst(kop, "softwareVersion"));
+        Assert.Equal("BTW-Boeker voorbeeld", Tekst(Lees(resultaat).Element(X + "company")!, "companyName"));
     }
 
     [Fact]
@@ -47,7 +45,7 @@ public class XafSchrijverTests
         var data = new BoekhoudingTestdata();
         data.Boekjaren.Add(new Boekjaar(BoekhoudingTestdata.Ver, 2027));
         data.Geboekt(new DateOnly(2026, 3, 5), "Energie maart", (data.Energie, 4500, 0), (data.Bank, 0, 4500));
-        data.Geboekt(new DateOnly(2026, 4, 1), "Contributie", (data.Bank, 12000, 0), (data.Welpen, 0, 12000));
+        data.Geboekt(new DateOnly(2026, 4, 1), "Verhuur", (data.Bank, 12000, 0), (data.Welpen, 0, 12000));
         data.Geboekt(new DateOnly(2027, 1, 3), "Volgend jaar", (data.Energie, 100, 0), (data.Bank, 0, 100));
         var concept = new Journaalpost(BoekhoudingTestdata.Ver, data.Memoriaal, new DateOnly(2026, 5, 1), "Nog niet geboekt");
         concept.Wijzig(data.Memoriaal, concept.Datum, concept.Omschrijving,
@@ -63,7 +61,7 @@ public class XafSchrijverTests
         Assert.Equal("165.00", Tekst(transacties, "totalDebit"));
         Assert.Equal("165.00", Tekst(transacties, "totalCredit"));
         var omschrijvingen = transacties.Descendants(X + "transaction").Select(t => Tekst(t, "desc")).ToList();
-        Assert.Equal(["Energie maart", "Contributie"], omschrijvingen);
+        Assert.Equal(["Energie maart", "Verhuur"], omschrijvingen);
         var maart = transacties.Descendants(X + "transaction").First();
         Assert.Equal("3", Tekst(maart, "periodNumber"));
         Assert.Equal("2026-03-05", Tekst(maart, "trDt"));
@@ -125,7 +123,7 @@ public class XafSchrijverTests
     }
 
     [Fact]
-    public void Relaties_en_betalers_met_iban_als_debiteuren_en_crediteuren()
+    public void Relaties_met_iban_worden_meegenomen()
     {
         var data = new BoekhoudingTestdata();
         var huurder = new Relatie(new RelatieGegevens("Huurder BV", "J. Jansen", "Dorpsstraat 1", "1234 AB", "Ergens", "huur@example.org", "0612345678",
@@ -133,13 +131,11 @@ public class XafSchrijverTests
         var leverancier = new Relatie(new RelatieGegevens("Bouwmarkt", null, null, null, null, null, null, null, IsDebiteur: false, IsCrediteur: true, null));
         var beide = new Relatie(new RelatieGegevens("Buurvereniging", null, null, null, null, null, null, null, IsDebiteur: true, IsCrediteur: true, null));
         data.Relaties.AddRange([huurder, leverancier, beide]);
-        var betaler = new Betaler(Iban.Maak("NL91ABNA0417164301"), "P. de Vries");
-
-        var resultaat = Schrijf(data, betalers: [betaler]);
+        var resultaat = Schrijf(data);
 
         Assert.Empty(XafSchrijver.Valideer(resultaat.Inhoud));
         var relaties = Lees(resultaat).Element(X + "company")!.Element(X + "customersSuppliers")!.Elements(X + "customerSupplier").ToList();
-        Assert.Equal(4, relaties.Count);
+        Assert.Equal(3, relaties.Count);
         var r = relaties.Single(e => Tekst(e, "custSupName") == "Huurder BV");
         Assert.Equal("C", Tekst(r, "custSupTp"));
         Assert.Equal("J. Jansen", Tekst(r, "contact"));
@@ -148,41 +144,7 @@ public class XafSchrijverTests
         Assert.Equal("NL91ABNA0417164300", Tekst(r.Element(X + "bankAccount")!, "bankAccNr"));
         Assert.Equal("S", Tekst(relaties.Single(e => Tekst(e, "custSupName") == "Bouwmarkt"), "custSupTp"));
         Assert.Equal("B", Tekst(relaties.Single(e => Tekst(e, "custSupName") == "Buurvereniging"), "custSupTp"));
-        var b = relaties.Single(e => Tekst(e, "custSupName") == "P. de Vries");
-        Assert.Equal("C", Tekst(b, "custSupTp"));
-        Assert.Equal("NL91ABNA0417164301", Tekst(b.Element(X + "bankAccount")!, "bankAccNr"));
         Assert.All(relaties, e => Assert.True(Tekst(e, "custSupID").Length <= 35));
-    }
-
-    [Fact]
-    public void Regels_op_debiteuren_krijgen_de_relatie_of_betaler_van_de_post()
-    {
-        var data = new BoekhoudingTestdata();
-        data.Bankdagboek("BNK", "NL91ABNA0417164300");
-        var debiteuren = data.Rekening(1310, "Debiteuren overig", RekeningSoort.Balans, null);
-        var contributie = data.Rekening(1300, "Debiteuren contributie", RekeningSoort.Balans, null);
-        var verhuur = data.Rekening(8400, "Verhuur", RekeningSoort.Resultaat, null);
-        var huurder = new Relatie(new RelatieGegevens("Huurder BV", null, null, null, null, null, null, null, true, false, null));
-        data.Relaties.Add(huurder);
-        var factuurpost = data.Geboekt(new DateOnly(2026, 6, 1), "Factuur V2026-001", (debiteuren, 30000, 0), (verhuur, 0, 30000));
-        var factuur = new Verkoopfactuur(BoekhoudingTestdata.Ver, huurder, new DateOnly(2026, 6, 1), 14);
-        factuur.Wijzig(huurder, factuur.Factuurdatum, 14, [new FactuurregelInvoer("Huur", 1, new Bedrag(30000), verhuur)]);
-        factuur.MaakDefinitief(1, huurder, factuurpost.Id);
-        data.Verkoopfacturen.Add(factuur);
-        var betaler = new Betaler(Iban.Maak("NL91ABNA0417164301"), "P. de Vries");
-        var storno = data.Geboekt(new DateOnly(2026, 7, 2), "Stornering", (contributie, 1500, 0), (data.Bank, 0, 1500));
-        data.Debiteurmutaties.Add(new Debiteurmutatie(BoekhoudingTestdata.Ver, "R1-1", betaler.Id, null, DebiteurmutatieSoort.Stornering,
-            storno.Datum, 1500, storno.Id, "AM04"));
-
-        var resultaat = Schrijf(data, betalers: [betaler]);
-
-        Assert.Empty(XafSchrijver.Valideer(resultaat.Inhoud));
-        var regels = Lees(resultaat).Descendants(X + "trLine").ToList();
-        string? Relatie(string rekening) => regels.Single(l => Tekst(l, "accID") == rekening).Element(X + "custSupID")?.Value;
-        Assert.Equal(XafSchrijver.RelatieId(huurder.Id), Relatie("1310"));
-        Assert.Null(Relatie("8400"));
-        Assert.Equal(XafSchrijver.BetalerId(betaler.Id), Relatie("1300"));
-        Assert.Null(Relatie("1100"));
     }
 
     [Fact]

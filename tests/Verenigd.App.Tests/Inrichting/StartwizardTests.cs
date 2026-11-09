@@ -1,13 +1,10 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.ViewModels.Inrichting;
 using Verenigd.Application.Inrichting;
 using Verenigd.Application.Instellingen;
 using Verenigd.Domain.Administraties;
-using Verenigd.Domain.Financien;
-using Verenigd.Domain.Leden;
 
 namespace Verenigd.App.Tests.Inrichting;
 
@@ -77,8 +74,8 @@ public sealed class StartwizardTests
             var vereniging = w.Namen.Single(n => n.Soort == AdministratieSoort.Vereniging);
             vereniging.Naam = "Scouting Voorbeeld";
             await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Leden, w.Huidig);
-            Assert.Equal("●", w.Stappen.Single(s => s.Stap == Startstap.Leden).Teken);
+            Assert.Equal(Startstap.Boekhouding, w.Huidig);
+            Assert.Equal("●", w.Stappen.Single(s => s.Stap == Startstap.Boekhouding).Teken);
 
             await w.LaterVerderCommand.ExecuteAsync(null);
             Assert.True(w.IsGesloten);
@@ -89,7 +86,7 @@ public sealed class StartwizardTests
 
         Assert.True(shell.IsDatabaseOpen);
         Assert.Equal("Scouting Voorbeeld", shell.Administraties.Single(a => a.Soort == AdministratieSoort.Vereniging).Naam);
-        Assert.Equal(new Startwizardvoortgang(Startstap.Leden, false), _beheer.Startwizard.Voortgang);
+        Assert.Equal(new Startwizardvoortgang(Startstap.Boekhouding, false), _beheer.Startwizard.Voortgang);
         Assert.Empty(_dialogen.Bevestigingsvragen); // geen vraag om verder te gaan terwijl de wizard openstaat
     }
 
@@ -134,7 +131,7 @@ public sealed class StartwizardTests
 
             w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Klaar));
 
-            Assert.Contains(w.Klaarregels, r => r.Tekst.Contains("leden", StringComparison.OrdinalIgnoreCase) && !r.IsKlaar);
+            Assert.Contains(w.Klaarregels, r => r.Tekst.Contains("boekhouding", StringComparison.OrdinalIgnoreCase) && !r.IsKlaar);
             Assert.False(w.VolgendeCommand.CanExecute(null));
             await w.VoltooienCommand.ExecuteAsync(null);
             Assert.True(w.IsGesloten);
@@ -188,62 +185,4 @@ public sealed class StartwizardTests
         Assert.Equal(AdministratieSoort.Stichting, Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad).Administratie?.Soort);
     }
 
-    [Fact]
-    public async Task Incassogegevens_worden_bij_volgende_opgeslagen_en_fouten_houden_de_stap_vast()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        _dialogen.Startwizard = async w =>
-        {
-            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Contributie));
-            var incasso = w.Incasso!;
-            incasso.IncassantId = "ongeldig";
-            incasso.Naam = "Scouting Voorbeeld";
-            incasso.Iban = "NL91ABNA0417164300";
-
-            await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Contributie, w.Huidig);
-            Assert.NotNull(w.Foutmelding);
-
-            incasso.IncassantId = "DE98ZZZ09999999999";
-            await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Klaar, w.Huidig);
-            Assert.Null(w.Foutmelding);
-            Assert.True(w.Status.IncassoIngesteld);
-        };
-
-        await shell.StartwizardCommand.ExecuteAsync(null);
-
-        Assert.NotNull(_beheer.Contributie.Instellingen);
-    }
-
-    /// <summary>Besluit 245: de tarieven vult u in de wizard zelf in; Volgende bewaart ze en de wizard blijft open.</summary>
-    [Fact]
-    public async Task Tarieven_worden_in_de_wizard_ingevuld_en_bij_volgende_bewaard()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        _beheer.Leden.VoegGroepToe(new Groep("Welpen", GroepSoort.Speltak));
-        _dialogen.Startwizard = async w =>
-        {
-            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Contributie));
-            await w.LaadTarievenCommand.ExecuteAsync(null);
-            var welpen = w.Tarieven.Single(t => t.Categorie == "Jeugdlid Welpen");
-            Assert.False(w.Tarieven.Single(t => t.Categorie == "Leiding").IsBewerkbaar);
-
-            welpen.Bedragtekst = "12,5o";
-            await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Contributie, w.Huidig);
-            Assert.NotNull(w.Foutmelding);
-
-            welpen.Bedragtekst = "12,50";
-            await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Klaar, w.Huidig);
-            Assert.False(w.IsGesloten);
-        };
-
-        await shell.StartwizardCommand.ExecuteAsync(null);
-
-        var tarief = Assert.Single(_beheer.Contributie.Tarieven);
-        Assert.Equal(new Bedrag(1250), tarief.Maandbedrag);
-        Assert.Equal("Jeugdlid Welpen", tarief.Categorie.Naam);
-    }
 }

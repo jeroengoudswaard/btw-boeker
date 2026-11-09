@@ -70,7 +70,7 @@ public sealed class MomentopnameTests : IDisposable
         }; // besluit 277
 
         var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
-        await sessie.Leden.HaalAlleAsync();
+        await sessie.Administraties.HaalAlleAsync();
         Assert.Equal(0, Volatile.Read(ref aantal));
 
         var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);

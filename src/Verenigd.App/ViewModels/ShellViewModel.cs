@@ -6,13 +6,9 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels.Boekhouding;
-using Verenigd.App.ViewModels.Contributie;
-using Verenigd.App.ViewModels.Email;
 using Verenigd.App.ViewModels.Inrichting;
-using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
-using Verenigd.Application.Import;
 using Verenigd.Application.Inrichting;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Modules;
@@ -81,7 +77,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel), nameof(HeeftLaatsteDatabase), nameof(LaatsteDatabaseNaam), nameof(LaatsteDatabaseMap))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerSol3Command), nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(ImporteerHistorieCommand), nameof(NieuweIncassorunCommand))]
+        nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(ImporteerHistorieCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -140,9 +136,9 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     /// <summary>Windows-conventie: "Document - Applicatie".</summary>
     public string Venstertitel => (DatabaseNaam, ActieveAdministratieNaam) switch
     {
-        (null, _) => "Verenigd",
-        (var db, null) => $"{db} - Verenigd",
-        (var db, var adm) => $"{adm} - {db} - Verenigd",
+        (null, _) => "BTW-Boeker",
+        (var db, null) => $"{db} - BTW-Boeker",
+        (var db, var adm) => $"{adm} - {db} - BTW-Boeker",
     };
 
     public async Task InitialiseerAsync()
@@ -276,92 +272,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    /// <summary>Bestand › Importeren › SOL3-leden. Na een geslaagde import wordt het tabblad Leden getoond en vernieuwd.</summary>
-    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task ImporteerSol3Async()
-    {
-        if (_sessie is null)
-        {
-            return;
-        }
-
-        var bekend = (await _sessie.Leden.HaalAlleAsync()).Select(p => p.Id).ToHashSet();
-        var wizard = new ImportWizardViewModel(new Sol3ImportDienst(_sessie, _tijd), _dialogen);
-        if (!_dialogen.ToonImportWizard(wizard))
-        {
-            return;
-        }
-
-        if (wizard.Resultaat is { } resultaat)
-        {
-            ShellLog.Sol3Geimporteerd(_logger, resultaat.Nieuw, resultaat.Gewijzigd, resultaat.Uitgeschreven);
-            ZetStatus(Statussoort.Gelukt, string.Create(
-                CultureInfo.CurrentCulture,
-                $"Import voltooid: {resultaat.Nieuw} nieuw, {resultaat.Gewijzigd} gewijzigd, {resultaat.Uitgeschreven} uitgeschreven."));
-        }
-
-        var verzoek = new ModuleVerzoek(ModuleSoort.Leden, null);
-        if (Tabbladen.OfType<LedenViewModel>().FirstOrDefault() is { } leden)
-        {
-            GeselecteerdTabblad = leden;
-            await leden.VernieuwCommand.ExecuteAsync(null);
-        }
-        else
-        {
-            OpenModule(verzoek);
-            if (GeselecteerdTabblad is LedenViewModel nieuw && nieuw.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-        }
-
-        await BiedWelkomstmailAanAsync(bekend);
-    }
-
-    /// <summary>Besluit 205: na een import met nieuwe leden een welkomstmail aanbieden.</summary>
-    private async Task BiedWelkomstmailAanAsync(HashSet<Guid> bekend)
-    {
-        var nieuw = (await _sessie!.Leden.HaalAlleAsync()).Where(p => !bekend.Contains(p.Id) && !p.IsUitgeschreven).ToList();
-        var vraag = nieuw.Count == 1 ? "Er is 1 nieuw lid." : $"Er zijn {nieuw.Count} nieuwe leden.";
-        if (nieuw.Count == 0 || !_dialogen.Bevestig("Welkomstmail", $"{vraag} Wilt u een welkomstmail opstellen?"))
-        {
-            return;
-        }
-
-        var vandaag = DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
-        await OpenEmailAsync(new EmailVoorstel(Domain.Communicatie.Emailsoort.Welkom,
-            Application.Email.Ontvangers.VoorLeden(nieuw, Application.Email.Ontvangerkeuze.Standaard, vandaag, Verenigingsnaam),
-            nieuw.Count == 1 ? "Welkomstmail voor 1 nieuw lid" : $"Welkomstmail voor {nieuw.Count} nieuwe leden"));
-    }
-
-    /// <summary>De naam in {vereniging} van een e-mail: de naam van de administratie die verstuurt.</summary>
-    private string Administratienaam(AdministratieSoort soort) =>
-        Administraties.FirstOrDefault(a => a.Soort == soort)?.Naam ?? (soort == AdministratieSoort.Stichting ? "de stichting" : "de vereniging");
-
-    private string Verenigingsnaam => Administratienaam(AdministratieSoort.Vereniging);
-
-    /// <summary>Opent E-mail › Opstellen met een bericht dat een andere pagina heeft voorbereid.</summary>
-    private async Task OpenEmailAsync(EmailVoorstel voorstel)
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Email, null);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
-
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is EmailViewModel email)
-        {
-            if (email.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            email.BereidVoor(voorstel);
-            BouwNavigatie();
-        }
-    }
-
     /// <summary>
     /// Bestand › Importeren › Boekhouding uit Excel (besluit 62): opent Boekhouding voor de administratie van het actieve
     /// tabblad, anders de Vereniging (besluit 17), en start de importwizard.
@@ -479,28 +389,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     private bool KanAfdrukken() => GeselecteerdTabblad is BoekhoudingViewModel;
 
-    /// <summary>Bestand › Nieuwe incassorun: opent Contributie · Vereniging en start de wizard.</summary>
-    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task NieuweIncassorunAsync()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
-
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is ContributieViewModel contributie)
-        {
-            if (contributie.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            await contributie.NieuweRunCommand.ExecuteAsync(null);
-        }
-    }
-
     [RelayCommand]
     private async Task HerstelBackupAsync()
     {
@@ -566,8 +454,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     Task IStartwizardRegie.NieuweDatabaseAsync() => NieuweDatabaseCommand.ExecuteAsync(null);
 
     Task IStartwizardRegie.OpenDatabaseAsync() => OpenDatabaseCommand.ExecuteAsync(null);
-
-    Task IStartwizardRegie.ImporteerLedenAsync() => ImporteerSol3Command.ExecuteAsync(null);
 
     Task IStartwizardRegie.RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze) =>
         InBoekhoudingAsync(administratie, boekhouding => keuze switch
@@ -666,99 +552,20 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         var administratie = Administraties.FirstOrDefault(a => a.Soort == verzoek.Administratie);
         TabbladViewModel tab = verzoek.Module switch
         {
-            ModuleSoort.Instellingen => new InstellingenViewModel(
-                _sessie!.Administraties, Administraties, new IncassoInstellingenViewModel(_sessie.Contributie, _tijd),
-                [.. Administraties.Select(a => new FactuurInstellingenViewModel(new Application.Facturen.FactuurDienst(_sessie, _tijd), _dialogen, a.Soort, a.Naam))],
-                [.. Administraties.Select(a => new EmailInstellingenViewModel(
-                    new Application.Email.EmailDienst(_sessie, _boekhouding.Email, _tijd), _boekhouding.Google, _dialogen, a.Soort, a.Naam))],
-                new GroepenInstellingenViewModel(_sessie.Leden)),
-            ModuleSoort.Contributie => new ContributieViewModel(_sessie!, _dialogen, _tijd, administratie!, _logger),
-            ModuleSoort.Leden => new LedenViewModel(_sessie!.Leden, _tijd),
+            ModuleSoort.Instellingen => new InstellingenViewModel(_sessie!.Administraties, Administraties),
             ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
-            ModuleSoort.Email => new EmailViewModel(_sessie!, _dialogen, _tijd, _boekhouding, Administratienaam),
-            ModuleSoort.Webapp => new Webapp.WebappViewModel(_sessie!, _dialogen, _tijd, _boekhouding.Webapp),
             _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
         };
-        tab.EmailAanbieden = OpenEmailAsync;
-        if (tab is Webapp.WebappViewModel webappPagina)
-        {
-            webappPagina.PropertyChanged += WebappGewijzigd;
-        }
 
         Tabbladen.Add(tab);
         GeselecteerdTabblad = tab;
         switch (tab)
         {
-            case LedenViewModel leden:
-                leden.VernieuwCommand.Execute(null);
-                break;
-            case ContributieViewModel contributie:
-                contributie.VernieuwCommand.Execute(null);
-                break;
             case BoekhoudingViewModel boekhouding:
                 boekhouding.VernieuwCommand.Execute(null);
                 break;
             case InstellingenViewModel instellingen:
-                instellingen.Incasso?.LaadCommand.Execute(null);
-                foreach (var facturen in instellingen.Facturen)
-                {
-                    facturen.LaadCommand.Execute(null);
-                }
-
-                foreach (var email in instellingen.Emailkoppelingen)
-                {
-                    email.LaadCommand.Execute(null);
-                }
-
-                instellingen.Groepen?.LaadCommand.Execute(null);
-
                 break;
-            case EmailViewModel email:
-                email.VernieuwCommand.Execute(null);
-                break;
-            case Webapp.WebappViewModel webapp:
-                webapp.VernieuwCommand.Execute(null);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Besluit 232: bij het openen van de database automatisch synchroniseren met de webapp, als de beheerder is ingelogd.
-    /// Zonder internet of bij een gepauzeerd project alleen een waarschuwing in de statusregel; de rest van de app werkt gewoon.
-    /// </summary>
-    private async Task SynchroniseerWebappAsync(IDatabaseSessie sessie)
-    {
-        var dienst = new Application.Webapp.WebappDienst(sessie, _boekhouding.Webapp, _tijd);
-        try
-        {
-            var gekoppeld = (await dienst.LaadAsync()).IsGekoppeld;
-            if (ReferenceEquals(_sessie, sessie) && gekoppeld != _webappGekoppeld)
-            {
-                _webappGekoppeld = gekoppeld;
-                BouwNavigatie();
-            }
-
-            if (!gekoppeld)
-            {
-                return;
-            }
-
-            var resultaat = await dienst.SynchroniseerAsync();
-            if (ReferenceEquals(_sessie, sessie))
-            {
-                ZetStatus(Statussoort.Gelukt, $"Webapp gesynchroniseerd: {resultaat.Leden} leden, {resultaat.OpenVoorstellen} voorstellen open.");
-            }
-        }
-        catch (Application.Webapp.WebappException ex)
-        {
-            if (ReferenceEquals(_sessie, sessie))
-            {
-                ZetStatus(Statussoort.Waarschuwing, "Webapp: " + ex.Message);
-            }
-        }
-        catch (ObjectDisposedException)
-        {
-            // De database is intussen gesloten.
         }
     }
 
@@ -803,7 +610,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     }
 
 
-    /// <summary>Ctrl+Tab: de volgende regel in de navigatiebalk.</summary>
+    /// <summary>Ctrl+Tab: de volgende pagina; een gesloten modulekop opent de standaardpagina van die module.</summary>
     [RelayCommand]
     private void VolgendePagina() => SelecteerRelatief(+1);
 
@@ -813,13 +620,22 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     private void SelecteerRelatief(int stap)
     {
-        if (Navigatie.Count == 0)
+        var actieveModule = GeselecteerdTabblad?.Module.Soort;
+        var paginas = Navigatie
+            .Where(n => !n.IsMeer && (!n.HeeftOnderdelen || n.Module != actieveModule))
+            .ToList();
+        if (paginas.Count == 0)
         {
             return;
         }
 
-        var index = GeselecteerdeNavigatie is null ? 0 : Navigatie.IndexOf(GeselecteerdeNavigatie);
-        GeselecteerdeNavigatie = Navigatie[((index + stap) % Navigatie.Count + Navigatie.Count) % Navigatie.Count];
+        var index = GeselecteerdeNavigatie is null ? 0 : paginas.IndexOf(GeselecteerdeNavigatie);
+        if (index < 0)
+        {
+            index = 0;
+        }
+
+        GeselecteerdeNavigatie = paginas[((index + stap) % paginas.Count + paginas.Count) % paginas.Count];
     }
 
     partial void OnGeselecteerdTabbladChanged(TabbladViewModel? oldValue, TabbladViewModel? newValue)
@@ -835,16 +651,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
 
         BouwNavigatie();
-    }
-
-    /// <summary>Besluit 269: met een koppeling verschijnen Voorstellen en Meer… in de navigatie, zonder alleen Koppelen.</summary>
-    private void WebappGewijzigd(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(Webapp.WebappViewModel.IsGekoppeld) && sender is Webapp.WebappViewModel webapp && webapp.IsGekoppeld != _webappGekoppeld)
-        {
-            _webappGekoppeld = webapp.IsGekoppeld;
-            BouwNavigatie();
-        }
     }
 
     private void ActiefTabbladGewijzigd(object? sender, PropertyChangedEventArgs e)
@@ -972,8 +778,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
         ZetStatus(Statussoort.Info, "Gereed");
         ShellLog.DatabaseGeopend(_logger, DatabaseNaam);
-        _ = SynchroniseerWebappAsync(sessie);
-
         // Besluit 170: was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
         if (!_startwizardActief && await sessie.Startwizard.LaadAsync() is { KanHervatten: true, Stap: { } stap }
             && _dialogen.Bevestig("Startwizard", $"De startwizard is nog niet afgerond; u was gebleven bij de stap '{Stapnaam(stap)}'. Wilt u daar verder gaan?"))
@@ -1031,7 +835,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _sessie.Gewijzigd -= SessieGewijzigd;
         await _sessie.DisposeAsync();
         _sessie = null;
-        _webappGekoppeld = false;
         DatabaseNaam = null;
         BouwModuleMenu();
         BouwNavigatie();

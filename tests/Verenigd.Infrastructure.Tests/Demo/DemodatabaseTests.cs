@@ -23,19 +23,15 @@ public sealed class DemodatabaseTests : IDisposable
     }
 
     [Fact]
-    public async Task Bevat_verzonnen_leden_een_ingerichte_boekhouding_en_eigen_namen()
+    public async Task Bevat_een_ingerichte_boekhouding_en_eigen_namen()
     {
         var pad = Path.Combine(_map, "demo.vdb");
-        await Demodatabase.MaakAsync(pad, _map, new DateTimeOffset(2026, 11, 4, 12, 0, 0, TimeSpan.Zero));
+        await Demodatabase.MaakAsync(pad, new DateTimeOffset(2026, 11, 4, 12, 0, 0, TimeSpan.Zero));
 
         await using var sessie = await Demodatabase.OpenAsync(pad);
         var administraties = await sessie.Administraties.HaalAlleAsync();
         Assert.Contains(administraties, a => a.Naam == Demodatabase.NaamVereniging);
         Assert.Contains(administraties, a => a.Naam == Demodatabase.NaamStichting);
-
-        var leden = await sessie.Leden.HaalAlleAsync();
-        Assert.Equal(Demodatabase.Leden.Count, leden.Count);
-        Assert.All(leden, l => Assert.EndsWith("@example.org", l.Email ?? "x@example.org", StringComparison.Ordinal));
 
         var stand = await new BoekhoudingDienst(sessie, TimeProvider.System).LaadAsync(AdministratieSoort.Vereniging);
         Assert.True(stand.IsIngericht);

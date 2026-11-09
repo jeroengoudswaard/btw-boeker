@@ -14,8 +14,6 @@ public static class Navigatietellers
         [Startkaartsoort.Bank] = "Boekhouding.Bank",
         [Startkaartsoort.Concepten] = "Boekhouding.Journaal",
         [Startkaartsoort.Postvak] = "Boekhouding.Postvak",
-        [Startkaartsoort.VervallenFacturen] = "Boekhouding.Facturen",
-        [Startkaartsoort.Storneringen] = "Contributie.Openstaand",
     };
 
     public static IReadOnlyDictionary<string, int> Bepaal(IEnumerable<Startkaart> kaarten, AdministratieSoort? administratie)

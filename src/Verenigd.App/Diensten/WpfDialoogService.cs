@@ -1,12 +1,8 @@
 using System.Windows;
 using Microsoft.Win32;
 using Verenigd.App.ViewModels.Boekhouding;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.App.Views.Boekhouding;
-using Verenigd.App.ViewModels.Leden;
-using Verenigd.App.Views.Contributie;
 using Verenigd.App.Views.Dialogen;
-using Verenigd.App.Views.Leden;
 using Verenigd.Application.Beveiliging;
 
 namespace Verenigd.App.Diensten;
@@ -14,8 +10,8 @@ namespace Verenigd.App.Diensten;
 /// <summary>Windows-standaarddialogen (bestandskiezers, MessageBox) en de eigen wachtwoordvensters.</summary>
 internal sealed class WpfDialoogService : IDialoogService
 {
-    private const string DatabaseFilter = "Verenigd-database (*.vdb)|*.vdb";
-    private const string BackupFilter = "Verenigd-back-up (*.vbak)|*.vbak";
+    private const string DatabaseFilter = "BTW-Boeker-database (*.btwdb)|*.btwdb";
+    private const string BackupFilter = "BTW-Boeker-back-up (*.btwbackup)|*.btwbackup";
     private const string CsvFilter = "CSV-bestand (*.csv)|*.csv|Alle bestanden (*.*)|*.*";
 
     /// <summary>Het actieve venster (bijvoorbeeld de startwizard), anders het hoofdvenster.</summary>
@@ -28,8 +24,8 @@ internal sealed class WpfDialoogService : IDialoogService
         {
             Title = titel,
             Filter = DatabaseFilter,
-            DefaultExt = ".vdb",
-            FileName = "verenigd.vdb",
+            DefaultExt = ".btwdb",
+            FileName = "btw-boeker.btwdb",
             OverwritePrompt = false, // Bestaande databases worden nooit overschreven; de applicatie meldt dit zelf.
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
         };
@@ -48,7 +44,7 @@ internal sealed class WpfDialoogService : IDialoogService
         {
             Title = "Back-up maken",
             Filter = BackupFilter,
-            DefaultExt = ".vbak",
+            DefaultExt = ".btwbackup",
             FileName = voorgesteldeNaam,
         };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
@@ -60,35 +56,9 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
-    public IReadOnlyList<string> KiesImportbestanden()
-    {
-        var dialoog = new OpenFileDialog
-        {
-            Title = "SOL3-exports kiezen",
-            Filter = CsvFilter,
-            Multiselect = true,
-            CheckFileExists = true,
-        };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileNames : [];
-    }
-
     public string? KiesCsvDoel(string voorgesteldeNaam)
     {
         var dialoog = new SaveFileDialog { Title = "Opslaan als", Filter = CsvFilter, DefaultExt = ".csv", FileName = voorgesteldeNaam };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
-    }
-
-    public bool ToonImportWizard(ImportWizardViewModel wizard) => ToonModaal(new ImportWizardVenster(wizard));
-
-    public string? KiesXmlDoel(string voorgesteldeNaam)
-    {
-        var dialoog = new SaveFileDialog
-        {
-            Title = "Incassobestand opslaan",
-            Filter = "SEPA-incassobestand (*.xml)|*.xml",
-            DefaultExt = ".xml",
-            FileName = voorgesteldeNaam,
-        };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
@@ -103,8 +73,6 @@ internal sealed class WpfDialoogService : IDialoogService
         };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
-
-    public bool ToonIncassoWizard(IncassoWizardViewModel wizard) => ToonModaal(new IncassoWizardVenster(wizard));
 
     public string? KiesExcelBestand()
     {
@@ -129,27 +97,9 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
-    public string? KiesPdfDoel(string voorgesteldeNaam)
-    {
-        var dialoog = new SaveFileDialog { Title = "Factuur opslaan als PDF", Filter = "PDF-document (*.pdf)|*.pdf", DefaultExt = ".pdf", FileName = voorgesteldeNaam };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
-    }
-
-    public string? KiesAfbeelding()
-    {
-        var dialoog = new OpenFileDialog { Title = "Logo kiezen", Filter = "Afbeelding (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg", CheckFileExists = true };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
-    }
-
     public string? KiesSjabloonbestand()
     {
         var dialoog = new OpenFileDialog { Title = "Rekeningschema-sjabloon kiezen", Filter = "Sjabloon Verenigd (*.vsjabloon)|*.vsjabloon", CheckFileExists = true };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
-    }
-
-    public string? KiesClientbestand()
-    {
-        var dialoog = new OpenFileDialog { Title = "Clientbestand van Google Cloud kiezen", Filter = "Clientbestand (*.json)|*.json", CheckFileExists = true };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
@@ -220,7 +170,7 @@ internal sealed class WpfDialoogService : IDialoogService
     public void ToonHerstelsleutel(Herstelsleutel herstelsleutel) => ToonModaal(new HerstelsleutelVenster(herstelsleutel));
 
     public OpslaanKeuze VraagOmOpslaan(string documentnaam) =>
-        Toon($"Wilt u de wijzigingen in '{documentnaam}' opslaan?", "Verenigd", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning) switch
+        Toon($"Wilt u de wijzigingen in '{documentnaam}' opslaan?", "BTW-Boeker", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning) switch
         {
             MessageBoxResult.Yes => OpslaanKeuze.Opslaan,
             MessageBoxResult.No => OpslaanKeuze.NietOpslaan,

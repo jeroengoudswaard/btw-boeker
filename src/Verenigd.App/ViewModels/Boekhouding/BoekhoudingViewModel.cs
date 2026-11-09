@@ -232,17 +232,17 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || FacturenGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || RelatiesGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
 
     /// <summary>Besluit 276: een halve boekingsregel blokkeert de rest niet; hij blijft staan tot hij klopt.</summary>
     private bool HeeftBewaarbareWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || FacturenGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || RelatiesGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftBewaarbareWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && FacturenGeldig
+        && RelatiesGeldig
         && BegrotingGeldig
         && MeerjarenplanGeldig;
 
@@ -285,7 +285,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             await BewaarRegelsAsync();
             await BewaarBegrotingAsync();
             await BewaarMeerjarenplanAsync();
-            var factuur = await BewaarFacturenAsync();
+            await BewaarRelatiesAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
             {
@@ -296,11 +296,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             _halveRegels = [.. Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is not null)];
             var aantalHalf = _halveRegels.Count;
             await LaadAsync(selectie);
-            if (factuur is not null)
-            {
-                PasFactuurfilterToe(factuur);
-            }
-
             if (aantalHalf == 0)
             {
                 return true;
@@ -389,7 +384,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         BerekenRapport();
         BerekenKaart();
         LaadBank();
-        LaadFacturen(null);
+        LaadRelaties();
         LaadBijlagen();
         LaadBegroting(GekozenBegrotingsversie?.Id);
         LaadMeerjarenplan(GekozenMeerjarenversie?.Id);
@@ -683,7 +678,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
         var datum = Vandaag.Year == post.DatumWaarde.Year ? Vandaag : post.DatumWaarde;
         if (!_dialogen.Bevestig("Tegenboeken",
-                $"Wilt u post {post.Nummer} tegenboeken op {Contributie.Weergave.Datum(datum)}? Er wordt een geboekte post met omgekeerde bedragen gemaakt."))
+                $"Wilt u post {post.Nummer} tegenboeken op {Weergave.Datum(datum)}? Er wordt een geboekte post met omgekeerde bedragen gemaakt."))
         {
             return;
         }
@@ -1111,7 +1106,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         SluitBoekjaarCommand.NotifyCanExecuteChanged();
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
         BankCommandsVernieuwen();
-        FactuurCommandsVernieuwen();
         BijlageCommandsVernieuwen();
         BegrotingCommandsVernieuwen();
         MeerjarenCommandsVernieuwen();

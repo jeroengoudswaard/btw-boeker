@@ -4,8 +4,6 @@ using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Begrotingen;
 using Verenigd.Domain.Financien.Bijlagen;
-using Verenigd.Domain.Financien.Debiteuren;
-using Verenigd.Domain.Financien.Facturen;
 using Verenigd.Domain.Financien.Relaties;
 using Verenigd.Domain.Financien.Boekhouding;
 
@@ -27,13 +25,13 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
 
         var vermogen = Rubriek("Vermogen");
         var kasbank = Rubriek("Kas Bank");
+        var baten = Rubriek("Contributie");
         var kosten = Rubriek("Terreinkosten");
-        var contributie = Rubriek("Contributie");
         Reserve = Rekening(600, "Algemene reserve", RekeningSoort.Balans, vermogen, RekeningRol.Reserve);
         Kas = Rekening(1000, "Kas", RekeningSoort.Balans, kasbank, RekeningRol.Kas);
         Bank = Rekening(1100, "Bank", RekeningSoort.Balans, kasbank);
         Energie = Rekening(4115, "Energie", RekeningSoort.Resultaat, kosten);
-        Welpen = Rekening(8020, "Contributie Welpen", RekeningSoort.Resultaat, contributie);
+        Welpen = Rekening(8020, "Opbrengsten", RekeningSoort.Resultaat, baten);
         Memoriaal = Dagboek(new Dagboek(Ver, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null));
         Kasboek = Dagboek(new Dagboek(Ver, DagboekSoort.Kas, "KAS", "Kas", Kas));
         Boekjaren.Add(new Boekjaar(Ver, 2026));
@@ -47,10 +45,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Bankafschrift> Bankafschriften { get; } = [];
     public List<Bankmutatie> Bankmutaties { get; } = [];
     public List<Boekingsregel> Boekingsregels { get; } = [];
-    public List<Debiteurmutatie> Debiteurmutaties { get; } = [];
     public List<Relatie> Relaties { get; } = [];
-    public List<Verkoopfactuur> Verkoopfacturen { get; } = [];
-    public Factuurinstellingen? Factuurinstellingen { get; set; }
     public List<HistorischeRegel> HistorischeRegels { get; } = [];
     public List<HistorischTotaal> HistorischeTotalen { get; } = [];
     public List<Bijlage> Bijlagen { get; } = [];
@@ -58,11 +53,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Meerjarenplan> Meerjarenplannen { get; } = [];
     public List<Jaarrekeningindeling> Jaarrekeningindelingen { get; } = [];
     public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
-
-    /// <summary>De runs en herincasso's van de contributiekant (in tests gedeeld met <c>IncassoTestdata</c>).</summary>
-    public Func<IReadOnlyList<Incassorun>> Incassoruns { get; set; } = () => [];
-
-    public Func<IReadOnlyList<Herincasso>> Herincassos { get; set; } = () => [];
 
     public Grootboekrekening Reserve { get; } = null!;
     public Grootboekrekening Kas { get; } = null!;
@@ -77,18 +67,13 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Bankafschriften = Bankafschriften.ToList(),
         Bankmutaties = Bankmutaties.ToList(),
         Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
-        Debiteurmutaties = Debiteurmutaties.ToList(),
         Relaties = Relaties.ToList(),
-        Verkoopfacturen = Verkoopfacturen.ToList(),
-        Factuurinstellingen = Factuurinstellingen,
         HistorischeRegels = HistorischeRegels.ToList(),
         HistorischeTotalen = HistorischeTotalen.ToList(),
         Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
         Begrotingen = Begrotingen.ToList(),
         Meerjarenplannen = Meerjarenplannen.ToList(),
         Jaarrekeningindelingen = Jaarrekeningindelingen.ToList(),
-        Incassoruns = Incassoruns(),
-        Herincassos = Herincassos(),
     };
 
     /// <summary>Een bankdagboek op <see cref="Bank"/> (of een andere rekening) voor een eigen IBAN.</summary>
@@ -136,8 +121,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
             {
                 case Journaalpost post: Posten.Remove(post); break;
                 case Boekingsregel regel: Boekingsregels.Remove(regel); break;
-                case Debiteurmutatie mutatie: Debiteurmutaties.Remove(mutatie); break;
-                case Verkoopfactuur factuur: Verkoopfacturen.Remove(factuur); break;
                 case Bijlage bijlage: Bijlagen.Remove(bijlage); Bijlageinhoud.Remove(bijlage.Id); break;
                 default: throw new NotSupportedException(item.GetType().Name);
             }
@@ -155,10 +138,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Bankafschrift a: Bankafschriften.Add(MetId(a)); break;
                 case Bankmutatie m: Bankmutaties.Add(m); break;
                 case Boekingsregel r: Boekingsregels.Add(MetId(r)); break;
-                case Debiteurmutatie d: Debiteurmutaties.Add(d); break;
                 case Relatie relatie: Relaties.Add(relatie); break;
-                case Verkoopfactuur factuur: Verkoopfacturen.Add(factuur); break;
-                case Factuurinstellingen instellingen: Factuurinstellingen = MetId(instellingen); break;
                 case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
                 case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
                 case Bijlage bijlage: Bijlagen.Add(bijlage); break;

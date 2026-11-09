@@ -14,15 +14,14 @@ public class ModuleCatalogusTests
     }
 
     [Fact]
-    public void Sneltoetsnummers_zijn_uniek_en_lopen_van_1_tot_6()
+    public void Sneltoetsnummers_zijn_uniek_en_lopen_van_1_tot_2()
     {
         var nummers = ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null).Select(m => m.Sneltoetsnummer!.Value).ToList();
 
-        Assert.Equal([1, 2, 3, 4, 5, 6], nummers.Order());
+        Assert.Equal([1, 2], nummers.Order());
     }
 
     [Theory]
-    [InlineData(ModuleSoort.Contributie)]
     [InlineData(ModuleSoort.Boekhouding)]
     [InlineData(ModuleSoort.Begroting)]
     public void Financiele_modules_horen_bij_een_administratie(ModuleSoort soort)
@@ -32,19 +31,10 @@ public class ModuleCatalogusTests
 
     [Theory]
     [InlineData(ModuleSoort.Overzicht)]
-    [InlineData(ModuleSoort.Leden)]
-    [InlineData(ModuleSoort.Email)]
     [InlineData(ModuleSoort.Instellingen)]
-    [InlineData(ModuleSoort.Webapp)]
     public void Gedeelde_modules_horen_niet_bij_een_administratie(ModuleSoort soort)
     {
         Assert.False(ModuleCatalogus.Geef(soort).PerAdministratie);
-    }
-
-    [Fact]
-    public void Contributie_is_alleen_voor_de_vereniging()
-    {
-        Assert.Equal(Domain.Administraties.AdministratieSoort.Vereniging, ModuleCatalogus.Geef(ModuleSoort.Contributie).AlleenVoor);
     }
 
     [Theory]

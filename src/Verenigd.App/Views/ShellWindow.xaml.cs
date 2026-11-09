@@ -170,8 +170,8 @@ public partial class ShellWindow : Window
         var versie = typeof(ShellWindow).Assembly.GetName().Version?.ToString(3);
         MessageBox.Show(
             this,
-            $"Verenigd {versie}\n\nLeden-, contributie- en financiële administratie voor de scoutingvereniging en -stichting.",
-            "Over Verenigd",
+            $"BTW-Boeker {versie}\n\nLokale administratie voor boekhouding en btw.",
+            "Over BTW-Boeker",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }

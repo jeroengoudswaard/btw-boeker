@@ -10,7 +10,6 @@ using Verenigd.Application.Bank;
 using Verenigd.Application.Tests.Bank;
 using Verenigd.Application.Bijlagen;
 using Verenigd.Application.Boekhouding;
-using Verenigd.Application.Import;
 using Verenigd.Application.Instellingen;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien.Bank;
@@ -20,7 +19,6 @@ using Verenigd.Infrastructure.Instellingen;
 using Verenigd.Infrastructure.Pdf;
 using Verenigd.Infrastructure.Tests.Demo;
 using Verenigd.Tests.Gedeeld;
-using static Verenigd.Application.Tests.Import.Sol3Voorbeeld;
 using FlauiApplicatie = FlaUI.Core.Application;
 
 namespace Verenigd.App.Tests.UI;
@@ -73,13 +71,13 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
-    public async Task Start_zonder_database_toont_startpagina_menubalk_en_uitgeschakelde_modules()
+    public async Task Start_zonder_database_toont_startpagina_en_menubalk()
     {
         await Task.Yield();
         BewaarInstellingen(new GebruikersInstellingen { StartwizardGetoond = true }); // geen automatische startwizard
         var venster = Start();
 
-        Assert.Equal("Verenigd", venster.Title);
+        Assert.Equal("BTW-Boeker", venster.Title);
         foreach (var menu in new[] { "Bestand", "Bewerken", "Beeld", "Modules", "Extra", "Help" })
         {
             Zoek(venster, $"Menu_{menu}");
@@ -90,13 +88,6 @@ public sealed class AppUiTests : IDisposable
         Zoek(venster, "StartBackup");
         Bewaar(venster, "01-startpagina");
 
-        Zoek(venster, "Menu_Modules").AsMenuItem().Expand();
-        var leden = Zoek(venster, "Menu_Leden");
-        Assert.False(leden.IsEnabled);
-        Keyboard.Type(VirtualKeyShort.ESCAPE); // submenu dicht
-        Keyboard.Type(VirtualKeyShort.ESCAPE); // menumodus uit
-
-        // Dichtklappen via UI Automation: na Expand() heeft het menu niet altijd de toetsenbordfocus, dus Escape is onbetrouwbaar.
         var bestand = Zoek(venster, "Menu_Bestand").AsMenuItem();
         bestand.Expand();
         var importeren = Zoek(venster, "Menu_Importeren").AsMenuItem();
@@ -121,23 +112,16 @@ public sealed class AppUiTests : IDisposable
 
         VoerWachtwoordIn(venster); // het wachtwoordvenster verschijnt automatisch voor de laatst gebruikte database
 
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
-        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, Diagnose(venster));
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, Diagnose(venster));
         Zoek(venster, "AdministratieBand");
         Bewaar(venster, "03-boekhouding-vereniging");
 
         Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
         Zoek(venster, "InstellingenOpslaan");
-        foreach (var tab in new[] { "SubtabAdministraties", "SubtabIncasso", "SubtabFacturen", "SubtabEmail", "SubtabGroepen" })
-        {
-            Zoek(venster, tab); // besluit 219: een tab per onderdeel
-        }
-
-        Zoek(venster, "SubtabEmail").AsTabItem().Select();
-        Zoek(venster, "ClientbestandInlezenVereniging");
         Bewaar(venster, "04-instellingen");
 
         Sluit(venster);
@@ -163,98 +147,7 @@ public sealed class AppUiTests : IDisposable
 
         Zoek(venster, "VensterMaximaliseren").AsButton().Invoke();
         Assert.True(Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Normal, Wachttijd).Result);
-        Assert.Equal("Verenigd", venster.Title);
-
-        Sluit(venster);
-    }
-
-    [Fact(Timeout = Timeout)]
-    public async Task Geimporteerde_leden_staan_in_tabblad_leden_en_wizard_opent_via_menu()
-    {
-        var db = Path.Combine(_datamap, "verenigd.vdb");
-        var beheer = new DatabaseBeheer();
-        await beheer.MaakAanAsync(db, Wachtwoord);
-        await using (var sessie = await beheer.OpenAsync(db, Wachtwoord))
-        {
-            string Schrijf(string naam, byte[] inhoud)
-            {
-                var pad = Path.Combine(_datamap, naam);
-                File.WriteAllBytes(pad, inhoud);
-                return pad;
-            }
-
-            var dienst = new Sol3ImportDienst(sessie, TimeProvider.System);
-            var analyse = await dienst.AnalyseerAsync(new Dictionary<Sol3Export, string>
-            {
-                [Sol3Export.LedenBasis] = Schrijf("1.csv", Csv(KopLeden, Lid("100000001"), Lid("100000002", voornaam: "Bo"))),
-                [Sol3Export.Huishouden] = Schrijf("2.csv", Csv(KopHuishouden, Huishouden("100000001"), Huishouden("100000002"))),
-                [Sol3Export.Voogden] = Schrijf("3.csv", Csv(KopVoogden, Voogden("100000001"))),
-                [Sol3Export.Functies] = Schrijf("4.csv", Csv(KopFuncties, Functie("100000001"), Functie("100000002"))),
-            });
-            await dienst.VoerUitAsync(analyse, ImportKeuzes.Standaard(analyse.Voorstel));
-        }
-
-        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
-            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
-
-        var venster = Start();
-        VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
-
-        Sneltoets(venster, VirtualKeyShort.KEY_2); // Leden
-        Zoek(venster, "Ledenlijst");
-        Assert.True(
-            Retry.WhileFalse(() => Zoek(venster, "LedenAantal").Name == "2 van 2 personen", Wachttijd).Result,
-            Zoek(venster, "LedenAantal").Name);
-        Bewaar(venster, "06-leden");
-
-        Zoek(venster, "LedenImporteren").AsButton().Invoke();
-        var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        Assert.Equal("SOL3-import", wizard.Title);
-        Assert.False(Zoek(wizard, "WizardVolgende").IsEnabled); // nog geen bestanden gekozen
-        var uitleg = Zoek(wizard, "WizardSol3Uitleg"); // besluit 185
-        uitleg.Patterns.ExpandCollapse.Pattern.Expand();
-        Assert.NotNull(Retry.WhileNull(() => uitleg.FindFirstDescendant(c => c.ByName("Kolomnamen kopiëren van Export 4 · Functies")), Wachttijd).Result);
-        uitleg.Patterns.ExpandCollapse.Pattern.Collapse();
-        Bewaar(wizard, "07-importwizard");
-        Zoek(wizard, "WizardAnnuleren").AsButton().Invoke();
-        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
-
-        Sluit(venster);
-    }
-
-    [Fact(Timeout = Timeout)]
-    public async Task Contributie_toont_subtabbladen_en_incassowizard()
-    {
-        var db = Path.Combine(_datamap, "verenigd.vdb");
-        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
-        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
-            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
-
-        var venster = Start();
-        VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
-
-        Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
-        Zoek(venster, "ContributieTabblad");
-        foreach (var onderdeel in new[] { "Leden", "Runs" })
-        {
-            Zoek(venster, $"Nav_Contributie.{onderdeel}"); // besluit 181: onderdelen in de navigatiebalk
-        }
-
-        KlikOp(venster, "Nav_Contributie.Meer"); // besluit 269: Betalers en Tarieven onder Meer…; Openstaand pas als er iets openstaat
-        Zoek(venster, "Nav_Contributie.Betalers");
-        Zoek(venster, "Nav_Contributie.Tarieven");
-
-        Bewaar(venster, "08-contributie");
-        Kies(venster, "Nav_Contributie.Runs");
-        Zoek(venster, "NieuweIncassorun").AsButton().Invoke();
-        var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result!;
-        Assert.Equal("Nieuwe incassorun", wizard.Title);
-        Zoek(wizard, "IncassoMaand");
-        Bewaar(wizard, "09-incassowizard");
-        Zoek(wizard, "IncassoAnnuleren").AsButton().Invoke();
-        Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
+        Assert.Equal("BTW-Boeker", venster.Title);
 
         Sluit(venster);
     }
@@ -309,9 +202,9 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
         Kies(venster, "Nav_Boekhouding.Bank");
 
@@ -346,7 +239,7 @@ public sealed class AppUiTests : IDisposable
     }
 
     [Fact(Timeout = Timeout)]
-    public async Task Meer_blijft_dicht_met_de_pijltjes_en_klapt_om_met_enter_en_spatie()
+    public async Task Meer_boekhouding_blijft_dicht_met_de_pijltjes_en_klapt_om_met_enter_en_spatie()
     {
         var db = Path.Combine(_datamap, "verenigd.vdb");
         await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
@@ -355,96 +248,36 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_3); // Contributie (Vereniging)
-        Zoek(venster, "ContributieTabblad");
-        var runs = Zoek(venster, "Nav_Contributie.Runs");
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Zoek(venster, "BoekhoudingTabblad");
+        var rapporten = Zoek(venster, "Nav_Boekhouding.Rapporten");
         Assert.True(Retry.WhileFalse(
             () =>
             {
                 venster.SetForeground();
-                runs.Focus();
-                return HeeftEigenFocus("Nav_Contributie.Runs");
+                rapporten.Focus();
+                return HeeftEigenFocus("Nav_Boekhouding.Rapporten");
             },
             Wachttijd,
             TimeSpan.FromMilliseconds(500)).Result, "Geen focus op de navigatieregel. " + Diagnose(venster));
 
-        // Besluit 273: met de pijltjes op Meer… komen klapt niets om.
-        TypOpRegel("Nav_Contributie.Runs", VirtualKeyShort.DOWN);
-        Assert.True(Retry.WhileFalse(() => HeeftEigenFocus("Nav_Contributie.Meer"), Wachttijd).Result, Diagnose(venster));
+        TypOpRegel("Nav_Boekhouding.Rapporten", VirtualKeyShort.DOWN);
+        Assert.True(Retry.WhileFalse(() => HeeftEigenFocus("Nav_Boekhouding.Meer"), Wachttijd).Result, Diagnose(venster));
         Thread.Sleep(400);
-        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Nav_Contributie.Betalers")));
-        Zoek(venster, "ContributieTabblad");
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Nav_Boekhouding.Boekingsregels")));
+        Zoek(venster, "BoekhoudingTabblad");
 
-        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.ENTER);
-        Zoek(venster, "Nav_Contributie.Betalers");
-        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.SPACE);
-        Assert.True(WachtTotWeg(venster, "Nav_Contributie.Betalers"), "Spatie klapte Meer… niet in.");
+        TypOpRegel("Nav_Boekhouding.Meer", VirtualKeyShort.ENTER);
+        Zoek(venster, "Nav_Boekhouding.Boekingsregels");
+        TypOpRegel("Nav_Boekhouding.Meer", VirtualKeyShort.SPACE);
+        Assert.True(WachtTotWeg(venster, "Nav_Boekhouding.Boekingsregels"), "Spatie klapte Meer… niet in.");
 
-        // Uitgeklapt zijn de onderdelen onder Meer… met de pijltjes te bereiken.
-        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.SPACE);
-        Zoek(venster, "Nav_Contributie.Betalers");
-        TypOpRegel("Nav_Contributie.Meer", VirtualKeyShort.DOWN);
-        Assert.True(Retry.WhileFalse(() => Zoek(venster, "Nav_Contributie.Betalers").AsListBoxItem().IsSelected, Wachttijd).Result, Diagnose(venster));
-
-        Sluit(venster);
-    }
-
-    [Fact(Timeout = Timeout)]
-    public async Task Webapp_toont_onderdelen_en_zonder_koppeling_het_inloggen()
-    {
-        var db = Path.Combine(_datamap, "verenigd.vdb");
-        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
-        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
-            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
-
-        var venster = Start();
-        VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
-
-        Kies(venster, "Nav_Webapp"); // fase 7
-        Zoek(venster, "WebappTabblad");
-        Zoek(venster, "WebappNietGekoppeld");
-        // Besluit 269: zonder koppeling alleen Koppelen (het onderdeel Synchroniseren).
-        Assert.Equal("Koppelen", Zoek(venster, "Nav_Webapp.Synchroniseren").Name);
-
-        // Zonder koppeling opent de pagina zelf op Synchroniseren; de test kiest het onderdeel ook expliciet.
-        Kies(venster, "Nav_Webapp.Synchroniseren");
-        ZoekMetDiagnose(venster, "WebappProject", "WebappFout");
-        Assert.False(ZoekMetDiagnose(venster, "WebappInloggenKnop", "WebappFout").IsEnabled); // nog geen project, wachtwoord en code
-        Bewaar(venster, "18-webapp");
-
-        Sluit(venster);
-    }
-
-    [Fact(Timeout = Timeout)]
-    public async Task Email_toont_onderdelen_koppelmelding_en_standaardsjablonen()
-    {
-        var db = Path.Combine(_datamap, "verenigd.vdb");
-        await new DatabaseBeheer().MaakAanAsync(db, Wachtwoord);
-        new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json"))
-            .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db });
-
-        var venster = Start();
-        VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
-
-        Sneltoets(venster, VirtualKeyShort.KEY_6); // E-mail
-        Zoek(venster, "EmailTabblad");
-        Zoek(venster, "EmailNietGekoppeld"); // nog geen koppeling met Gmail
-        Assert.False(Zoek(venster, "EmailVersturen").IsEnabled);
-        foreach (var onderdeel in new[] { "Opstellen", "Verzonden", "Sjablonen" })
-        {
-            Zoek(venster, $"Nav_Email.{onderdeel}");
-        }
-
-        Bewaar(venster, "15-email");
-        Kies(venster, "Nav_Email.Sjablonen");
-        var sjablonen = Zoek(venster, "EmailSjablonen").AsListBox();
-        Assert.True(Retry.WhileFalse(() => sjablonen.Items.Length >= 6, Wachttijd).Result);
-        sjablonen.Items[0].Select();
-        Zoek(venster, "Invulvelden");
+        TypOpRegel("Nav_Boekhouding.Meer", VirtualKeyShort.SPACE);
+        Zoek(venster, "Nav_Boekhouding.Boekingsregels");
+        TypOpRegel("Nav_Boekhouding.Meer", VirtualKeyShort.DOWN);
+        Assert.True(Retry.WhileFalse(() => Zoek(venster, "Nav_Boekhouding.Boekingsregels").AsListBoxItem().IsSelected, Wachttijd).Result, Diagnose(venster));
 
         Sluit(venster);
     }
@@ -459,9 +292,9 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
         Zoek(venster, "OvernemenUitExcel");
         Zoek(venster, "SjabloonInlezen");
@@ -475,7 +308,7 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.ModalWindows.Length == 0, Wachttijd).Result);
         Zoek(venster, "LeegBeginnen").AsButton().Invoke();
 
-        foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Facturen", "Rapporten" })
+        foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Rapporten" })
         {
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}"); // besluit 178
         }
@@ -500,10 +333,6 @@ public sealed class AppUiTests : IDisposable
         Kies(venster, "Nav_Boekhouding.Relaties");
         Zoek(venster, "NieuweRelatie").AsButton().Invoke();
         Zoek(venster, "RelatieNaam");
-        Kies(venster, "Nav_Boekhouding.Facturen");
-        Zoek(venster, "NieuweFactuur").AsButton().Invoke();
-        Zoek(venster, "FactuurEditor");
-        Bewaar(venster, "14-boekhouding-factuur");
         Kies(venster, "Nav_Boekhouding.Rapporten");
         Zoek(venster, "Rapport");
         Bewaar(venster, "12-boekhouding-rapport");
@@ -538,9 +367,9 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_4); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         var posten = Zoek(venster, "Journaalposten").AsGrid();
         Assert.True(Retry.WhileFalse(() => posten.RowCount == 1, Wachttijd).Result, "De post staat niet in het Journaal.");
         posten.Rows[0].Select();
@@ -582,7 +411,7 @@ public sealed class AppUiTests : IDisposable
 
         var wizard = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result
             ?? throw new Xunit.Sdk.XunitException("De startwizard verscheen niet. " + Diagnose(venster));
-        Assert.Equal("Verenigd instellen", wizard.Title);
+        Assert.Equal("BTW-Boeker instellen", wizard.Title);
         Zoek(wizard, "StapWelkom");
         Bewaar(wizard, "06-startwizard-welkom");
 
@@ -613,7 +442,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - Verenigd", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - verenigd.vdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Zoek(venster, "Administratiewisselaar");
         Zoek(venster, "Startkaarten");
@@ -655,7 +484,7 @@ public sealed class AppUiTests : IDisposable
 
         Directory.CreateDirectory(uitvoer);
         var db = Path.Combine(_datamap, "voorbeeldgroep.vdb");
-        await Demodatabase.MaakAsync(db, _datamap, DateTimeOffset.Now);
+        await Demodatabase.MaakAsync(db, DateTimeOffset.Now);
 
         foreach (var (thema, naam) in new[] { (Thema.Licht, "licht"), (Thema.Donker, "donker") })
         {
@@ -663,15 +492,12 @@ public sealed class AppUiTests : IDisposable
             var venster = Start();
             VoerWachtwoordIn(venster, Demodatabase.Wachtwoord);
             Assert.True(
-                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - voorbeeldgroep.vdb - Verenigd", Wachttijd).Result,
+                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - voorbeeldgroep.vdb - BTW-Boeker", Wachttijd).Result,
                 venster.Title);
             ZetVenstergrootte(venster);
 
             Zoek(venster, "Startkaarten");
             Schermafbeelding(venster, uitvoer, $"start-{naam}");
-            Kies(venster, "Nav_Leden");
-            Zoek(venster, "Ledenlijst");
-            Schermafbeelding(venster, uitvoer, $"leden-{naam}");
             Kies(venster, "Nav_Boekhouding");
             Zoek(venster, "Journaalposten");
             Schermafbeelding(venster, uitvoer, $"boekhouding-{naam}");
@@ -775,7 +601,7 @@ public sealed class AppUiTests : IDisposable
     private Window Start()
     {
         var info = new ProcessStartInfo(ExePad()) { UseShellExecute = false };
-        info.Environment["VERENIGD_DATAMAP"] = _datamap;
+        info.Environment["BTW_BOEKER_DATAMAP"] = _datamap;
         _app = FlauiApplicatie.Launch(info);
         var venster = _app.GetMainWindow(_automation, Wachttijd);
         Assert.NotNull(venster);
@@ -853,6 +679,9 @@ public sealed class AppUiTests : IDisposable
     private void Sluit(Window venster)
     {
         EindigMenumodus(venster);
+        Assert.True(
+            Retry.WhileFalse(() => { venster.SetForeground(); return HeeftEigenFocus(); }, Wachttijd, TimeSpan.FromMilliseconds(500)).Result,
+            "De app kreeg de voorgrond niet; sluiten is afgebroken. " + Diagnose(venster));
         var voorSluiten = Diagnose(venster);
         venster.Close();
         if (!Retry.WhileFalse(() => _app!.HasExited, Wachttijd).Result)
@@ -884,8 +713,8 @@ public sealed class AppUiTests : IDisposable
         var testmap = new DirectoryInfo(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar));
         var configuratie = testmap.Parent!.Name;
         var root = testmap.Parent.Parent!.Parent!.Parent!.Parent!.FullName;
-        var pad = Path.Combine(root, "src", "Verenigd.App", "bin", configuratie, testmap.Name, "Verenigd.exe");
-        Assert.True(File.Exists(pad), $"Verenigd.exe niet gevonden op {pad}. Bouw eerst de oplossing.");
+        var pad = Path.Combine(root, "src", "Verenigd.App", "bin", configuratie, testmap.Name, "BTW-Boeker.exe");
+        Assert.True(File.Exists(pad), $"BTW-Boeker.exe niet gevonden op {pad}. Bouw eerst de oplossing.");
         return pad;
     }
 }

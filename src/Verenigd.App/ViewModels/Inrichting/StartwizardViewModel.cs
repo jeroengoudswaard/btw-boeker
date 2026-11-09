@@ -1,7 +1,6 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Database;
 using Verenigd.Application.Inrichting;
 using Verenigd.Domain.Administraties;
@@ -30,8 +29,6 @@ public interface IStartwizardRegie
     Task NieuweDatabaseAsync();
 
     Task OpenDatabaseAsync();
-
-    Task ImporteerLedenAsync();
 
     Task RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze);
 
@@ -66,8 +63,8 @@ public sealed record KlaarRegel(bool IsKlaar, string Tekst)
 }
 
 /// <summary>
-/// De startwizard (besluiten 169–175): Welkom → Database → Vereniging en Stichting → Leden → Boekhouding → Bank →
-/// Contributie → Klaar. Elke stap is over te slaan; het ✓ volgt uit de gegevens zelf; <i>Later verder</i> bewaart de stap
+/// De startwizard: Welkom → Database → Administraties → Boekhouding → Bank → Klaar. Elke stap is over te slaan;
+/// het ✓ volgt uit de gegevens zelf; <i>Later verder</i> bewaart de stap
 /// in de database.
 /// </summary>
 public sealed partial class StartwizardViewModel : ObservableObject
@@ -84,11 +81,9 @@ public sealed partial class StartwizardViewModel : ObservableObject
         [
             new(Startstap.Welkom, "Welkom"),
             new(Startstap.Database, "Database"),
-            new(Startstap.Administraties, "Vereniging"),
-            new(Startstap.Leden, "Leden"),
+            new(Startstap.Administraties, "Administraties"),
             new(Startstap.Boekhouding, "Boekhouding"),
             new(Startstap.Bank, "Bank"),
-            new(Startstap.Contributie, "Contributie"),
             new(Startstap.Klaar, "Klaar"),
         ];
         Huidig = begin;
@@ -115,10 +110,6 @@ public sealed partial class StartwizardViewModel : ObservableObject
     /// <summary>Naam en accentkleur per administratie (stap Vereniging), dezelfde regels als Extra › Instellingen.</summary>
     [ObservableProperty]
     public partial IReadOnlyList<AdministratieInstellingRegel> Namen { get; private set; } = [];
-
-    /// <summary>Incassogegevens van de Vereniging (stap Contributie), dezelfde regels als Instellingen › Incasso.</summary>
-    [ObservableProperty]
-    public partial IncassoInstellingenViewModel? Incasso { get; private set; }
 
     [ObservableProperty]
     public partial AdministratieSoort BoekhoudingVoor { get; set; } = AdministratieSoort.Vereniging;
@@ -152,16 +143,11 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public IReadOnlyList<KlaarRegel> Klaarregels =>
     [
         new(Status.DatabaseOpen, Status.DatabaseOpen ? "De database is aangemaakt of geopend." : "Er is nog geen database: kies Bestand › Nieuwe database."),
-        new(Status.NamenIngevuld, Status.NamenIngevuld ? "De Vereniging heeft een eigen naam en kleur." : "De Vereniging heet nog 'Vereniging': wijzig dit bij Extra › Instellingen."),
-        new(Status.HeeftLeden, Status.HeeftLeden ? "De leden zijn ingelezen." : "Nog geen leden: kies Bestand › Importeren › SOL3-leden."),
+        new(Status.NamenIngevuld, Status.NamenIngevuld ? "De administraties hebben een eigen naam en kleur." : "Pas de namen aan bij Instellingen."),
         new(Status.BoekhoudingVereniging, Status.BoekhoudingVereniging ? "De boekhouding van de Vereniging is ingericht." : "De boekhouding van de Vereniging is nog leeg: open Modules › Boekhouding."),
         new(Status.BankVereniging, Status.BankVereniging ? "Een bankrekening van de Vereniging is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
         .. (Status.BoekhoudingStichting ? [new KlaarRegel(true, "De boekhouding van de Stichting is ingericht.")] : Array.Empty<KlaarRegel>()),
         .. (Status.BankStichting ? [new KlaarRegel(true, "Een bankrekening van de Stichting is gekoppeld.")] : Array.Empty<KlaarRegel>()),
-        new(Status.IncassoIngesteld, Status.IncassoIngesteld ? "De incassogegevens zijn ingevuld." : "Nog geen incassogegevens: kies Extra › Instellingen › Incasso."),
-        new(Status.TarievenIngevuld, Status.TarievenIngevuld
-            ? string.Create(CultureInfo.CurrentCulture, $"De tarieven van {Jaar} zijn ingevuld.")
-            : string.Create(CultureInfo.CurrentCulture, $"Nog geen tarieven voor {Jaar}: vul ze hieronder in.")),
     ];
 
     /// <summary>Laadt de status en de gegevens van de stappen.</summary>
@@ -249,33 +235,10 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private Task OpenDatabaseAsync() => NaDatabaseAsync(_regie.OpenDatabaseAsync);
 
     [RelayCommand]
-    private Task LedenInlezenAsync() => VoerUitAsync(_regie.ImporteerLedenAsync);
-
-    [RelayCommand]
     private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(BoekhoudingVoor, keuze));
 
     [RelayCommand]
     private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(BankVoor));
-
-    /// <summary>Besluit 245: de tarieven van dit jaar per categorie, in de stap Contributie zelf.</summary>
-    public Verzameling<TariefRegel> Tarieven { get; } = [];
-
-    [RelayCommand]
-    private async Task LaadTarievenAsync()
-    {
-        if (_regie.Sessie is not { } sessie)
-        {
-            Tarieven.Vervang([]);
-            return;
-        }
-
-        var speltakken = (await sessie.Leden.HaalGroepenAsync()).Where(g => g.Soort == Domain.Leden.GroepSoort.Speltak).Select(g => g.Naam);
-        await new Application.Incasso.IncassoDienst(sessie, _tijd).ZorgVoorStandaardcategorieenAsync(speltakken);
-        var stand = await sessie.Contributie.LaadAsync();
-        Tarieven.Vervang(stand.Categorieen
-            .OrderBy(c => c.Soort).ThenBy(c => c.Naam, StringComparer.CurrentCulture)
-            .Select(c => new TariefRegel(c, stand.Tarieven.FirstOrDefault(t => t.Boekjaar == Jaar && t.Categorie.Id == c.Id))));
-    }
 
     private async Task NaDatabaseAsync(Func<Task> actie)
     {
@@ -321,60 +284,18 @@ public sealed partial class StartwizardViewModel : ObservableObject
             }
         }
 
-        if (Huidig == Startstap.Contributie && _regie.Sessie is { } contributieSessie)
-        {
-            if (Tarieven.FirstOrDefault(t => t.Fout is not null) is { } tariefFout)
-            {
-                Foutmelding = $"{tariefFout.Categorie}: {tariefFout.Fout}";
-                return false;
-            }
-
-            var bedragen = Tarieven.Where(t => t.IsGewijzigd && t.Bedrag is not null).ToDictionary(t => t.CategorieId, t => t.Bedrag!.Value);
-            if (bedragen.Count > 0)
-            {
-                await contributieSessie.Contributie.BewaarTarievenAsync(Jaar, bedragen);
-                await LaadTarievenAsync();
-            }
-        }
-
-        if (Huidig == Startstap.Contributie && Incasso is { IsGewijzigd: true } incasso)
-        {
-            if (incasso.Fout is { } fout)
-            {
-                Foutmelding = fout;
-                return false;
-            }
-
-            try
-            {
-                await incasso.BewaarAsync();
-            }
-            catch (ArgumentException ex)
-            {
-                Foutmelding = ex.Message;
-                return false;
-            }
-        }
-
         await VernieuwAsync();
         return true;
     }
 
     private async Task VernieuwAsync(bool gegevensOpnieuw = false)
     {
-        Status = await Inrichtingsstatus.BepaalAsync(_regie.Sessie, Jaar);
+        Status = await Inrichtingsstatus.BepaalAsync(_regie.Sessie);
         var sessie = _regie.Sessie;
         if (gegevensOpnieuw || !ReferenceEquals(sessie, _geladenSessie))
         {
             _geladenSessie = sessie;
             Namen = sessie is null ? [] : [.. _regie.Administraties.Select(a => new AdministratieInstellingRegel(a))];
-            Incasso = sessie is null ? null : new IncassoInstellingenViewModel(sessie.Contributie, _tijd);
-            if (Incasso is not null)
-            {
-                await Incasso.LaadCommand.ExecuteAsync(null);
-            }
-
-            await LaadTarievenAsync();
         }
 
         MarkeerStappen();

@@ -175,7 +175,7 @@ public sealed partial class BoekhoudingViewModel
     {
         if (bon.IsGewijzigd)
         {
-            await Bijlagedienst.WijzigGegevensAsync(Soort, bon.Id, Contributie.Weergave.AlsDatum(bon.Datum), bon.Bedrag);
+            await Bijlagedienst.WijzigGegevensAsync(Soort, bon.Id, Weergave.AlsDatum(bon.Datum), bon.Bedrag);
         }
     }
 

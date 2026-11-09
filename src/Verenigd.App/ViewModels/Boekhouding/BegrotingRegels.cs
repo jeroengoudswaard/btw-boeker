@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Begrotingen;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Begrotingen;

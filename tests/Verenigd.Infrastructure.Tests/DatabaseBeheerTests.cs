@@ -1,7 +1,10 @@
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Data.Sqlite;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Database;
 using Verenigd.Domain.Administraties;
+using Verenigd.Infrastructure.Beveiliging;
 using Verenigd.Infrastructure.Database;
 
 namespace Verenigd.Infrastructure.Tests;
@@ -24,6 +27,49 @@ public sealed class DatabaseBeheerTests : IDisposable
         Assert.NotNull(herstel);
         Assert.True(File.Exists(DbPad));
         Assert.True(File.Exists(DatabaseBeheer.SleutelPad(DbPad)));
+    }
+
+    [Fact]
+    public async Task Nieuwe_database_krijgt_de_identificatie_van_BTW_Boeker()
+    {
+        await _beheer.MaakAanAsync(DbPad, Wachtwoord);
+        var sleutel = SleutelKluis.OntsluitMetWachtwoord(Sleutelbestand.Lees(DatabaseBeheer.SleutelPad(DbPad)), Wachtwoord);
+        try
+        {
+            await using var verbinding = new SqliteConnection(DatabaseBeheer.Verbindingstekst(DbPad, sleutel));
+            await verbinding.OpenAsync();
+            await using var opdracht = verbinding.CreateCommand();
+            opdracht.CommandText = "PRAGMA application_id";
+
+            Assert.Equal(DatabaseBeheer.BtwBoekerApplicatieId, Convert.ToInt32(await opdracht.ExecuteScalarAsync(), System.Globalization.CultureInfo.InvariantCulture));
+        }
+        finally
+        {
+            DatabaseBeheer.LeegPool(DbPad, sleutel);
+            CryptographicOperations.ZeroMemory(sleutel);
+        }
+    }
+
+    [Fact]
+    public async Task Openen_weigert_een_database_zonder_BTW_Boeker_identificatie()
+    {
+        await _beheer.MaakAanAsync(DbPad, Wachtwoord);
+        var sleutel = SleutelKluis.OntsluitMetWachtwoord(Sleutelbestand.Lees(DatabaseBeheer.SleutelPad(DbPad)), Wachtwoord);
+        try
+        {
+            await using var verbinding = new SqliteConnection(DatabaseBeheer.Verbindingstekst(DbPad, sleutel));
+            await verbinding.OpenAsync();
+            await using var opdracht = verbinding.CreateCommand();
+            opdracht.CommandText = "PRAGMA application_id = 0";
+            await opdracht.ExecuteNonQueryAsync();
+        }
+        finally
+        {
+            DatabaseBeheer.LeegPool(DbPad, sleutel);
+            CryptographicOperations.ZeroMemory(sleutel);
+        }
+
+        await Assert.ThrowsAsync<DatabaseBestandException>(() => _beheer.OpenAsync(DbPad, Wachtwoord));
     }
 
     [Fact]

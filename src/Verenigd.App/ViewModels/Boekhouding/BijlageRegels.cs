@@ -2,7 +2,6 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Verenigd.App.Diensten;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bijlagen;
 using Verenigd.Domain.Financien.Boekhouding;

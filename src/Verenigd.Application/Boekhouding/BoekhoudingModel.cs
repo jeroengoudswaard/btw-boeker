@@ -3,8 +3,6 @@ using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Begrotingen;
 using Verenigd.Domain.Financien.Bijlagen;
-using Verenigd.Domain.Financien.Debiteuren;
-using Verenigd.Domain.Financien.Facturen;
 using Verenigd.Domain.Financien.Relaties;
 using Verenigd.Domain.Financien.Boekhouding;
 
@@ -26,21 +24,8 @@ public sealed record BoekhoudingStand(
     /// <summary>In volgorde: de eerste passende regel wint.</summary>
     public IReadOnlyList<Boekingsregel> Boekingsregels { get; init; } = [];
 
-    /// <summary>Mutaties op contributievorderingen (stap 4c-1).</summary>
-    public IReadOnlyList<Debiteurmutatie> Debiteurmutaties { get; init; } = [];
-
-    /// <summary>De incassoruns (alleen-lezen), om bankontvangsten en storneringen te herkennen.</summary>
-    public IReadOnlyList<Incassorun> Incassoruns { get; init; } = [];
-
-    /// <summary>Aangevraagde herincasso's (alleen-lezen).</summary>
-    public IReadOnlyList<Herincasso> Herincassos { get; init; } = [];
-
     /// <summary>Alle relaties; gedeeld door beide administraties (besluit 105).</summary>
     public IReadOnlyList<Relatie> Relaties { get; init; } = [];
-
-    public IReadOnlyList<Verkoopfactuur> Verkoopfacturen { get; init; } = [];
-
-    public Factuurinstellingen? Factuurinstellingen { get; init; }
 
     /// <summary>De regels van de T-rekeningen uit Excel (besluit 122); nooit onderdeel van het grootboek.</summary>
     public IReadOnlyList<HistorischeRegel> HistorischeRegels { get; init; } = [];

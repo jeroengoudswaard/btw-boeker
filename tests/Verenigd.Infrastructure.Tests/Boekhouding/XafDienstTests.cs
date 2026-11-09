@@ -1,6 +1,5 @@
 using System.Text;
 using Verenigd.Application.Boekhouding;
-using Verenigd.Application.Incasso;
 using Verenigd.Domain.Administraties;
 using Verenigd.Infrastructure.Tests.Demo;
 
@@ -26,21 +25,20 @@ public sealed class XafDienstTests : IDisposable
     }
 
     [Fact]
-    public async Task Maakt_een_geldige_auditfile_van_de_demodatabase_met_betalers()
+    public async Task Maakt_een_geldige_auditfile_van_de_demodatabase()
     {
         var pad = Path.Combine(_map, "demo.vdb");
-        await Demodatabase.MaakAsync(pad, _map, Nu);
+        await Demodatabase.MaakAsync(pad, Nu);
         await using var sessie = await Demodatabase.OpenAsync(pad);
-        await sessie.Contributie.BewaarBetalerAsync(new BetalerInvoer(null, "NL91ABNA0417164300", "P. de Vries", null, null, null, []));
 
-        var resultaat = await new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Vereniging, 2026, "0.16.0");
+        var resultaat = await new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Vereniging, 2026, "0.1.0");
 
         Assert.Empty(XafSchrijver.Valideer(resultaat.Inhoud));
         Assert.True(resultaat.AantalPosten >= 20);
         Assert.Equal(1, resultaat.OvergeslagenConcepten);
         var xml = Encoding.UTF8.GetString(resultaat.Inhoud);
         Assert.Contains(Demodatabase.NaamVereniging, xml, StringComparison.Ordinal);
-        Assert.Contains("<bankAccNr>NL91ABNA0417164300</bankAccNr>", xml, StringComparison.Ordinal);
+        Assert.DoesNotContain("<bankAccNr>", xml, StringComparison.Ordinal);
         Assert.Contains("<dateCreated>2026-11-04</dateCreated>", xml, StringComparison.Ordinal);
     }
 
@@ -48,11 +46,11 @@ public sealed class XafDienstTests : IDisposable
     public async Task Een_administratie_zonder_dat_boekjaar_geeft_een_duidelijke_melding()
     {
         var pad = Path.Combine(_map, "demo.vdb");
-        await Demodatabase.MaakAsync(pad, _map, Nu);
+        await Demodatabase.MaakAsync(pad, Nu);
         await using var sessie = await Demodatabase.OpenAsync(pad);
 
         var fout = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Stichting, 2026, "0.16.0"));
+            () => new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Stichting, 2026, "0.1.0"));
         Assert.Contains("2026", fout.Message, StringComparison.Ordinal);
     }
 

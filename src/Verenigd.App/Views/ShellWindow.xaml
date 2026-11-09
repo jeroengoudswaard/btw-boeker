@@ -1,19 +1,10 @@
 ﻿<Window x:Class="Verenigd.App.Views.ShellWindow"
-        Icon="/Assets/Verenigd.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Verenigd.App.ViewModels"
         xmlns:views="clr-namespace:Verenigd.App.Views"
-        xmlns:ledenvm="clr-namespace:Verenigd.App.ViewModels.Leden"
-        xmlns:leden="clr-namespace:Verenigd.App.Views.Leden"
-        xmlns:contributievm="clr-namespace:Verenigd.App.ViewModels.Contributie"
-        xmlns:contributie="clr-namespace:Verenigd.App.Views.Contributie"
-        xmlns:emailvm="clr-namespace:Verenigd.App.ViewModels.Email"
-        xmlns:webappvm="clr-namespace:Verenigd.App.ViewModels.Webapp"
-        xmlns:webapp="clr-namespace:Verenigd.App.Views.Webapp"
-        xmlns:email="clr-namespace:Verenigd.App.Views.Email"
         xmlns:boekhoudingvm="clr-namespace:Verenigd.App.ViewModels.Boekhouding"
         xmlns:boekhouding="clr-namespace:Verenigd.App.Views.Boekhouding"
         xmlns:inst="clr-namespace:Verenigd.Application.Instellingen;assembly=Verenigd.Application"
@@ -41,20 +32,8 @@
         <DataTemplate DataType="{x:Type vm:InstellingenViewModel}">
             <views:InstellingenView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type ledenvm:LedenViewModel}">
-            <leden:LedenView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type contributievm:ContributieViewModel}">
-            <contributie:ContributieView />
-        </DataTemplate>
         <DataTemplate DataType="{x:Type boekhoudingvm:BoekhoudingViewModel}">
             <boekhouding:BoekhoudingView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type emailvm:EmailViewModel}">
-            <email:EmailView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type webappvm:WebappViewModel}">
-            <webapp:WebappView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
@@ -102,7 +81,7 @@
                 <Button Style="{StaticResource Sluitknop}" Content="&#xE8BB;" Click="Afsluiten_Click" ToolTip="Sluiten"
                         AutomationProperties.Name="Sluiten" AutomationProperties.AutomationId="VensterSluiten" />
             </StackPanel>
-            <Image Source="/Assets/Verenigd.ico" Width="16" Height="16" Margin="16,0,8,0" VerticalAlignment="Center" AutomationProperties.Name="Verenigd" />
+            <TextBlock Text="BTW" Margin="16,0,8,0" VerticalAlignment="Center" FontWeight="SemiBold" AutomationProperties.Name="BTW-Boeker" />
             <TextBlock Text="{Binding Venstertitel}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </DockPanel>
@@ -118,14 +97,12 @@
                 <MenuItem Header="_Sluiten" Command="{Binding SluitDatabaseCommand}" />
                 <Separator />
                 <MenuItem Header="Start_wizard..." Command="{Binding StartwizardCommand}"
-                          ToolTip="Stap voor stap de administratie inrichten: database, leden, boekhouding, bank en contributie"
+                  ToolTip="Stap voor stap de database, administraties, boekhouding en bank inrichten"
                           AutomationProperties.AutomationId="Menu_Startwizard" />
                 <Separator />
                 <MenuItem Header="Op_slaan" InputGestureText="Ctrl+S" Command="{Binding OpslaanCommand}" />
                 <Separator />
                 <MenuItem Header="_Importeren" AutomationProperties.AutomationId="Menu_Importeren">
-                    <MenuItem Header="SOL3-_leden..." Command="{Binding ImporteerSol3Command}"
-                              AutomationProperties.AutomationId="Menu_ImporteerSol3" />
                     <MenuItem Header="_Boekhouding uit Excel..." Command="{Binding ImporteerBoekhoudingCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                     <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
@@ -143,8 +120,6 @@
                               ToolTip="Het gekozen boekjaar van de boekhouding als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander pakket"
                               AutomationProperties.AutomationId="Menu_ExporteerXaf" />
                 </MenuItem>
-                <MenuItem Header="Nieuwe in_cassorun..." Command="{Binding NieuweIncassorunCommand}"
-                          AutomationProperties.AutomationId="Menu_NieuweIncassorun" />
                 <Separator />
                 <MenuItem Header="_Afdrukken..." InputGestureText="Ctrl+P" Command="{Binding AfdrukkenCommand}"
                           AutomationProperties.AutomationId="Menu_Afdrukken" />

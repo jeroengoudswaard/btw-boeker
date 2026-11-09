@@ -1,6 +1,5 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Bank;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
@@ -38,37 +37,6 @@ public sealed record MutatieRegel(Bankmutatie Mutatie, MutatieStatus Statuswaard
         MutatieStatus.Concept => "Concept",
         _ => "Geboekt",
     };
-}
-
-/// <summary>Een open contributiepost om een ontvangst mee af te letteren.</summary>
-/// <summary>Een open contributiepost of een open verkoopfactuur waarmee een ontvangst kan worden afgeletterd.</summary>
-public sealed partial class AfletterKeuze : ObservableObject
-{
-    public AfletterKeuze(Application.Debiteuren.Vorderingstand stand)
-    {
-        Vordering = stand.Vordering;
-        Saldo = stand.Saldo;
-        Tekst = $"{stand.Post.Rekeninghouder} · {stand.Run.Maand} · {new Bedrag(stand.Saldo)}"
-            + (stand.Redentekst is { } reden ? $" · {reden}" : string.Empty);
-    }
-
-    public AfletterKeuze(Application.Facturen.Factuurstand stand)
-    {
-        Vordering = stand.Factuur.Nummer!;
-        Saldo = stand.Saldo;
-        FactuurId = stand.Factuur.Id;
-        Tekst = $"{stand.Factuur.Nummer} · {stand.Relatie?.Naam} · {new Bedrag(stand.Saldo)}";
-    }
-
-    public string Vordering { get; }
-    public long Saldo { get; }
-    public string Tekst { get; }
-
-    /// <summary>Gevuld bij een verkoopfactuur; leeg bij contributie.</summary>
-    public Guid? FactuurId { get; }
-
-    [ObservableProperty]
-    public partial bool IsGekozen { get; set; }
 }
 
 public sealed record TransactiecodeKeuze(string Code, string Naam)

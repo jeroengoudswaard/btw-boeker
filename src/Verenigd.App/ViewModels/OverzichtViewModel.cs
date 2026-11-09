@@ -38,12 +38,6 @@ public sealed class OverzichtViewModel(ShellViewModel shell)
             .Select(b => new Kerncijferregel(b.Naam, b.Saldo.ToString(),
                 b.Datum is { } datum ? $"afschrift van {datum.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture)}" : "volgens het grootboek"))
             .ToList();
-        if (cijfers.OpenstaandeContributie is { } open)
-        {
-            regels.Add(new Kerncijferregel("Openstaande contributie", open.ToString(),
-                cijfers.Storneringen == 1 ? "1 stornering" : $"{cijfers.Storneringen} storneringen"));
-        }
-
         regels.Add(new Kerncijferregel(string.Create(CultureInfo.InvariantCulture, $"Resultaat {jaar} t/m vandaag"), cijfers.Resultaat.ToString(),
             cijfers.BegrootNaarRato is { } rato ? $"begroot naar rato {rato}" : "geen vastgestelde begroting"));
         return regels;

@@ -21,13 +21,13 @@ public sealed class StartwizardOpslagTests : IDisposable
         {
             Assert.Equal(Startwizardvoortgang.Nieuw, await sessie.Startwizard.LaadAsync());
             await sessie.Startwizard.BewaarAsync(new Startwizardvoortgang(Startstap.Bank, IsAfgerond: false));
-            await sessie.Startwizard.BewaarAsync(new Startwizardvoortgang(Startstap.Contributie, IsAfgerond: false)); // overschrijft
+            await sessie.Startwizard.BewaarAsync(new Startwizardvoortgang(Startstap.Boekhouding, IsAfgerond: false)); // overschrijft
         }
 
         await using (var sessie = await _beheer.OpenAsync(pad, Wachtwoord))
         {
             var voortgang = await sessie.Startwizard.LaadAsync();
-            Assert.Equal(new Startwizardvoortgang(Startstap.Contributie, false), voortgang);
+            Assert.Equal(new Startwizardvoortgang(Startstap.Boekhouding, false), voortgang);
             Assert.True(voortgang.KanHervatten);
 
             await sessie.Startwizard.BewaarAsync(new Startwizardvoortgang(null, IsAfgerond: true));

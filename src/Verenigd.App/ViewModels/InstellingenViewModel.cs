@@ -1,8 +1,6 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Verenigd.App.ViewModels.Contributie;
-using Verenigd.App.ViewModels.Email;
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -14,32 +12,10 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 {
     private readonly IAdministratieRepository _repository;
 
-    public InstellingenViewModel(
-        IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties, IncassoInstellingenViewModel? incasso = null,
-        IReadOnlyList<Boekhouding.FactuurInstellingenViewModel>? facturen = null, IReadOnlyList<EmailInstellingenViewModel>? email = null,
-        Leden.GroepenInstellingenViewModel? groepen = null)
+    public InstellingenViewModel(IAdministratieRepository repository, IEnumerable<AdministratieViewModel> administraties)
         : base(ModuleCatalogus.Geef(ModuleSoort.Instellingen), administratie: null)
     {
         _repository = repository;
-        Incasso = incasso;
-        if (incasso is not null)
-        {
-            incasso.PropertyChanged += RegelGewijzigd;
-        }
-
-        Facturen = facturen ?? [];
-        Emailkoppelingen = email ?? [];
-        Groepen = groepen;
-        if (groepen is not null)
-        {
-            groepen.PropertyChanged += RegelGewijzigd;
-        }
-
-        foreach (var blok in Blokken)
-        {
-            blok.PropertyChanged += RegelGewijzigd;
-        }
-
         OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
         Regels = administraties.Select(a => new AdministratieInstellingRegel(a)).ToList();
         foreach (var regel in Regels)
@@ -50,32 +26,14 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
 
     public IReadOnlyList<AdministratieInstellingRegel> Regels { get; }
 
-    /// <summary>Incassogegevens van de Vereniging (fase 3).</summary>
-    public IncassoInstellingenViewModel? Incasso { get; }
-
-    /// <summary>Gegevens op de verkoopfactuur, per administratie (besluit 209).</summary>
-    public IReadOnlyList<Boekhouding.FactuurInstellingenViewModel> Facturen { get; }
-
-    /// <summary>Afzender en koppeling met Gmail, per administratie (besluit 211).</summary>
-    public IReadOnlyList<EmailInstellingenViewModel> Emailkoppelingen { get; }
-
-    /// <summary>De groepsindeling (besluit 215).</summary>
-    public Leden.GroepenInstellingenViewModel? Groepen { get; }
-
-    private IEnumerable<ObservableObject> Blokken => Facturen.Cast<ObservableObject>().Concat(Emailkoppelingen);
-
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
     public IAsyncRelayCommand OpslaanCommand { get; }
 
-    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd) || Incasso?.IsGewijzigd == true || Facturen.Any(f => f.IsGewijzigd)
-        || Emailkoppelingen.Any(e => e.IsGewijzigd) || Groepen?.IsGewijzigd == true;
+    public override bool HeeftOnopgeslagenWijzigingen => Regels.Any(r => r.IsGewijzigd);
 
-    public override bool KanOpslaan =>
-        HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null) && (Incasso is not { IsGewijzigd: true } || Incasso.Fout is null)
-        && Facturen.All(f => !f.IsGewijzigd || f.Fout is null)
-        && Emailkoppelingen.All(e => !e.IsGewijzigd || e.Fout is null);
+    public override bool KanOpslaan => HeeftOnopgeslagenWijzigingen && Regels.All(r => r.Fout is null);
 
     public override async Task<bool> BewaarAsync()
     {
@@ -89,50 +47,6 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
             await regel.BewaarAsync(_repository);
         }
 
-        if (Incasso is { IsGewijzigd: true })
-        {
-            try
-            {
-                await Incasso.BewaarAsync();
-            }
-            catch (ArgumentException ex)
-            {
-                Foutmelding = ex.Message;
-                return false;
-            }
-        }
-
-        foreach (var facturen in Facturen.Where(f => f.IsGewijzigd))
-        {
-            try
-            {
-                await facturen.BewaarAsync();
-            }
-            catch (ArgumentException ex)
-            {
-                Foutmelding = ex.Message;
-                return false;
-            }
-        }
-
-        foreach (var email in Emailkoppelingen.Where(e => e.IsGewijzigd))
-        {
-            try
-            {
-                await email.BewaarAsync();
-            }
-            catch (ArgumentException ex)
-            {
-                Foutmelding = ex.Message;
-                return false;
-            }
-        }
-
-        if (Groepen is { IsGewijzigd: true })
-        {
-            await Groepen.BewaarAsync();
-        }
-
         Foutmelding = null;
         return true;
     }
@@ -142,21 +56,6 @@ public sealed partial class InstellingenViewModel : TabbladViewModel, IPaginamel
         foreach (var regel in Regels)
         {
             regel.PropertyChanged -= RegelGewijzigd;
-        }
-
-        if (Incasso is not null)
-        {
-            Incasso.PropertyChanged -= RegelGewijzigd;
-        }
-
-        foreach (var blok in Blokken)
-        {
-            blok.PropertyChanged -= RegelGewijzigd;
-        }
-
-        if (Groepen is not null)
-        {
-            Groepen.PropertyChanged -= RegelGewijzigd;
         }
 
         base.Opruimen();

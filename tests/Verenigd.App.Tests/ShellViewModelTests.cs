@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels;
+using Verenigd.App.ViewModels.Boekhouding;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -45,7 +46,7 @@ public sealed class ShellViewModelTests
         var tab = Assert.Single(shell.Tabbladen);
         Assert.Equal(ModuleSoort.Overzicht, tab.Module.Soort);
         Assert.False(shell.IsDatabaseOpen);
-        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Leden, null)));
+        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Boekhouding, null)));
     }
 
     [Fact]
@@ -194,31 +195,6 @@ public sealed class ShellViewModelTests
     // ---- Tabbladen -------------------------------------------------------------------------
 
     [Fact]
-    public async Task Module_openen_voegt_tabblad_toe_en_selecteert_het()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
-
-        Assert.Equal(2, shell.Tabbladen.Count);
-        Assert.Equal(ModuleSoort.Leden, shell.GeselecteerdTabblad!.Module.Soort);
-    }
-
-    [Fact]
-    public async Task Al_geopende_module_springt_naar_bestaand_tabblad()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
-        var leden = shell.GeselecteerdTabblad;
-        shell.GeselecteerdTabblad = shell.Tabbladen[0];
-
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
-
-        Assert.Equal(2, shell.Tabbladen.Count);
-        Assert.Same(leden, shell.GeselecteerdTabblad);
-    }
-
-    [Fact]
     public async Task Zelfde_module_voor_beide_administraties_geeft_twee_herkenbare_tabbladen()
     {
         var shell = await MaakShellMetOpenDatabase();
@@ -246,7 +222,7 @@ public sealed class ShellViewModelTests
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
 
-        shell.OpenModuleViaSneltoetsCommand.Execute("5"); // bij de Stichting: het meerjarenplan (besluit 163)
+        shell.OpenModuleViaSneltoetsCommand.Execute("2"); // bij de Stichting: het meerjarenplan
 
         var boekhouding = Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
@@ -271,61 +247,9 @@ public sealed class ShellViewModelTests
     {
         var shell = await MaakShellMetOpenDatabase();
 
-        shell.OpenModuleViaSneltoetsCommand.Execute("4"); // Boekhouding
+        shell.OpenModuleViaSneltoetsCommand.Execute("1"); // Boekhouding
 
         Assert.Equal(AdministratieSoort.Vereniging, shell.GeselecteerdTabblad!.Administratie!.Soort);
-    }
-
-    [Fact]
-    public async Task Contributie_kan_niet_voor_de_stichting_geopend_worden()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Stichting)));
-        Assert.True(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging)));
-    }
-
-    [Fact]
-    public async Task Sneltoets_contributie_vanuit_stichting_opent_contributie_van_vereniging()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
-
-        shell.OpenModuleViaSneltoetsCommand.Execute("3");
-
-        Assert.Equal(ModuleSoort.Contributie, shell.GeselecteerdTabblad!.Module.Soort);
-        Assert.Equal(AdministratieSoort.Vereniging, shell.GeselecteerdTabblad.Administratie!.Soort);
-    }
-
-    [Fact]
-    public async Task Modulemenu_toont_contributie_zonder_keuze_en_boekhouding_met_keuze()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        var contributie = shell.ModuleMenu.Single(m => m.Titel == "Contributie");
-        var boekhouding = shell.ModuleMenu.Single(m => m.Titel == "Boekhouding");
-
-        Assert.Empty(contributie.Kinderen);
-        Assert.Equal(new ModuleVerzoek(ModuleSoort.Contributie, AdministratieSoort.Vereniging), contributie.Parameter);
-        Assert.Equal(2, boekhouding.Kinderen.Count);
-    }
-
-    [Fact]
-    public async Task Bewaarde_pagina_contributie_stichting_wordt_niet_hersteld()
-    {
-        _beheer.Voeg(Pad, Wachtwoord);
-        _instellingen.Instellingen = new GebruikersInstellingen
-        {
-            LaatsteDatabase = Pad,
-            LaatstePagina = new LaatstePagina(ModuleSoort.Contributie, AdministratieSoort.Stichting, null),
-        };
-        _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
-        var shell = MaakShell();
-
-        await shell.InitialiseerAsync();
-
-        Assert.Single(shell.Tabbladen);
-        Assert.Equal(AdministratieSoort.Stichting, shell.GekozenAdministratie!.Soort);
     }
 
     [Fact]
@@ -393,7 +317,6 @@ public sealed class ShellViewModelTests
     public async Task Laatste_pagina_wordt_bewaard_bij_sluiten_en_hersteld_bij_openen()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
@@ -412,13 +335,13 @@ public sealed class ShellViewModelTests
     public async Task Afsluiten_bewaart_de_laatste_pagina_en_sluit_database()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Leden, null));
+        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
 
         var mag = await shell.MagAfsluitenAsync();
 
         Assert.True(mag);
         Assert.True(_beheer.LaatsteSessie!.Gesloten);
-        Assert.Equal(new LaatstePagina(ModuleSoort.Leden, null, null), _instellingen.Instellingen.LaatstePagina);
+        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging, (int)BoekhoudingSubtab.Journaal), _instellingen.Instellingen.LaatstePagina);
     }
 
     // ---- Thema, back-up en status ----------------------------------------------------------

@@ -10,8 +10,6 @@ public class OnderdeelkleurenTests
     private static readonly Kleur LichteGrond = new(0xFF, 0xFF, 0xFF);
     private static readonly Kleur DonkereGrond = new(0x20, 0x20, 0x20);
     private static readonly Kleur DonkereKaart = new(0x2B, 0x2B, 0x2B);
-    private static readonly string[] Speltakken = ["Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts", "Leiding"];
-
     [Fact]
     public void Elk_onderdeel_heeft_een_kleur_en_de_echte_onderdelen_verschillen()
     {
@@ -51,20 +49,7 @@ public class OnderdeelkleurenTests
             Assert.True(Enum.IsDefined(Onderdeelkleuren.OnderdeelVan(soort)));
         }
 
-        Assert.Equal(ModuleSoort.Contributie, Onderdeelkleuren.OnderdeelVan(Verenigd.Application.Inrichting.Startkaartsoort.Incassorun));
         Assert.Equal(ModuleSoort.Boekhouding, Onderdeelkleuren.OnderdeelVan(Verenigd.Application.Inrichting.Startkaartsoort.Bank));
-    }
-
-    /// <summary>Gekleurde initialen per groep, zoals in de webapp: dezelfde groep altijd dezelfde kleur.</summary>
-    [Fact]
-    public void Een_groep_heeft_altijd_dezelfde_kleur_uit_het_palet()
-    {
-        Assert.Equal(Onderdeelkleuren.VoorGroep("Welpen"), Onderdeelkleuren.VoorGroep("Welpen"));
-        Assert.Contains(Onderdeelkleuren.VoorGroep("Welpen"), Onderdeelkleuren.Palet);
-        Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(null));
-        Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.VoorGroep(""));
-        var kleuren = Speltakken.Select(Onderdeelkleuren.VoorGroep).Distinct().Count();
-        Assert.True(kleuren >= 4, $"Maar {kleuren} kleuren voor zes groepen");
     }
 
     [Theory]
@@ -76,16 +61,4 @@ public class OnderdeelkleurenTests
         Assert.Equal(verwacht, Onderdeelkleuren.Initialen(voornaam, achternaam));
     }
 
-    /// <summary>Besluit 243: dezelfde verwachtingen als src/lib/ontwerp.test.ts in de webapp, zodat beide dezelfde kleur geven.</summary>
-    [Theory]
-    [InlineData("Bevers", "Violet")]
-    [InlineData("Welpen", "Amber")]
-    [InlineData("Scouts", "Groenblauw")]
-    [InlineData("Explorers", "Koraal")]
-    [InlineData("Junioren", "Indigo")]
-    public void Groepskleur_is_gelijk_aan_die_in_de_webapp(string groep, string kleur)
-    {
-        var verwacht = (Kleur)typeof(Onderdeelkleuren).GetField(kleur)!.GetValue(null)!;
-        Assert.Equal(verwacht, Onderdeelkleuren.VoorGroep(groep));
-    }
 }

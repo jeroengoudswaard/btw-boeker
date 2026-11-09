@@ -10,8 +10,9 @@ namespace Verenigd.Infrastructure.Database;
 
 public sealed class DatabaseBeheer : IDatabaseBeheer
 {
-    internal const string BackupDatabaseNaam = "verenigd.vdb";
-    internal const string BackupSleutelNaam = "verenigd.vdb.sleutel";
+    internal const string BackupDatabaseNaam = "btw-boeker.btwdb";
+    internal const string BackupSleutelNaam = "btw-boeker.btwdb.sleutel";
+    internal const int BtwBoekerApplicatieId = 0x42545742;
     private const int SqliteNotADatabase = 26;
 
     public static string SleutelPad(string databasePad) => databasePad + ".sleutel";
@@ -33,6 +34,17 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
             Sleutelbestand.Schrijf(SleutelPad(pad), envelop);
             await using var context = MaakContext(pad, databasesleutel);
             await context.Database.MigrateAsync(annulering).ConfigureAwait(false);
+            await context.Database.OpenConnectionAsync(annulering).ConfigureAwait(false);
+            try
+            {
+                await using var opdracht = context.Database.GetDbConnection().CreateCommand();
+                opdracht.CommandText = $"PRAGMA application_id = {BtwBoekerApplicatieId}";
+                await opdracht.ExecuteNonQueryAsync(annulering).ConfigureAwait(false);
+            }
+            finally
+            {
+                await context.Database.CloseConnectionAsync().ConfigureAwait(false);
+            }
         }
         catch
         {
@@ -80,7 +92,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
             var sleutel = zip.GetEntry(BackupSleutelNaam);
             if (database is null || sleutel is null)
             {
-                throw new DatabaseBestandException("Dit bestand is geen geldige Verenigd-back-up.");
+                throw new DatabaseBestandException("Dit bestand is geen geldige BTW-Boeker-back-up.");
             }
 
             await database.ExtractToFileAsync(doelPad, overwrite: false, annulering).ConfigureAwait(false);
@@ -88,7 +100,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         }
         catch (InvalidDataException ex)
         {
-            throw new DatabaseBestandException("Dit bestand is geen geldige Verenigd-back-up.", ex);
+            throw new DatabaseBestandException("Dit bestand is geen geldige BTW-Boeker-back-up.", ex);
         }
     }
 
@@ -121,6 +133,26 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         try
         {
             await using var context = MaakContext(pad, databasesleutel);
+            await context.Database.OpenConnectionAsync(annulering).ConfigureAwait(false);
+            int applicatieId;
+            try
+            {
+                await using var opdracht = context.Database.GetDbConnection().CreateCommand();
+                opdracht.CommandText = "PRAGMA application_id";
+                applicatieId = Convert.ToInt32(await opdracht.ExecuteScalarAsync(annulering).ConfigureAwait(false), System.Globalization.CultureInfo.InvariantCulture);
+            }
+            finally
+            {
+                await context.Database.CloseConnectionAsync().ConfigureAwait(false);
+            }
+
+            if (applicatieId != BtwBoekerApplicatieId)
+            {
+                LeegPool(pad, databasesleutel);
+                CryptographicOperations.ZeroMemory(databasesleutel);
+                throw new DatabaseBestandException("Dit is geen BTW-Boeker-database. Verenigd-databases kunnen niet in BTW-Boeker worden geopend.");
+            }
+
             await context.Database.MigrateAsync(annulering).ConfigureAwait(false);
         }
         catch (SqliteException ex) when (ex.SqliteErrorCode == SqliteNotADatabase)

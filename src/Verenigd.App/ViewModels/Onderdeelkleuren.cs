@@ -26,19 +26,14 @@ public static class Onderdeelkleuren
 
     public static Kleur Voor(ModuleSoort module) => module switch
     {
-        ModuleSoort.Leden => Koraal,
-        ModuleSoort.Contributie => Amber,
         ModuleSoort.Boekhouding => Indigo,
         ModuleSoort.Begroting => Violet,
-        ModuleSoort.Email => Blauw,
-        ModuleSoort.Webapp => Groenblauw,
         _ => Grijs,
     };
 
     /// <summary>Het onderdeel waar een startkaart naartoe leidt, voor de kleur van het getal op de kaart.</summary>
     public static ModuleSoort OnderdeelVan(Startkaartsoort soort) => soort switch
     {
-        Startkaartsoort.Incassorun or Startkaartsoort.Storneringen => ModuleSoort.Contributie,
         Startkaartsoort.Inrichting => ModuleSoort.Overzicht,
         _ => ModuleSoort.Boekhouding,
     };

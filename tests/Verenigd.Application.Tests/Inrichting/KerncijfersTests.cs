@@ -7,7 +7,7 @@ using Verenigd.Domain.Financien.Boekhouding;
 
 namespace Verenigd.Application.Tests.Inrichting;
 
-/// <summary>Besluit 217: kerncijfers op Start per administratie.</summary>
+/// <summary>Kerncijfers op Start per administratie.</summary>
 public sealed class KerncijfersTests
 {
     private static readonly DateOnly Vandaag = new(2026, 11, 3);
@@ -37,18 +37,15 @@ public sealed class KerncijfersTests
         Assert.Null(bank.Datum); // nog geen afschrift ingelezen: het saldo volgens het grootboek
         Assert.Equal(-2500, cijfers.Resultaat.Centen); // een tekort
         Assert.Null(cijfers.BegrootNaarRato); // geen vastgestelde begroting
-        Assert.Equal(Bedrag.Nul, cijfers.OpenstaandeContributie);
-        Assert.Equal(0, cijfers.Storneringen);
     }
 
     [Fact]
-    public void De_stichting_heeft_geen_contributie()
+    public void Een_niet_inggerichte_administratie_heeft_geen_boekhouding()
     {
         var stand = new BoekhoudingStand(AdministratieSoort.Stichting, [], [], [], [], []);
 
         var cijfers = Kerncijfers.Bepaal(stand, Vandaag);
 
-        Assert.Null(cijfers.OpenstaandeContributie);
         Assert.Empty(cijfers.Bankrekeningen);
         Assert.False(cijfers.HeeftBoekhouding);
     }

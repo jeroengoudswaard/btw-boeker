@@ -1,5 +1,4 @@
 using ClosedXML.Excel;
-using Microsoft.Data.Sqlite;
 using Verenigd.Application.Begrotingen;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Database;
@@ -11,10 +10,10 @@ using Verenigd.Infrastructure.Excel;
 
 namespace Verenigd.Infrastructure.Tests.Begrotingen;
 
-/// <summary>Begroting en baten/lasten in de echte, versleutelde database (besluiten 149 en 152). Bedragen zijn verzonnen.</summary>
+/// <summary>Begroting en baten/lasten in de echte, versleutelde database. Bedragen zijn fictief.</summary>
 public sealed class BegrotingOpslagTests : IAsyncLifetime, IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "fictief wachtwoord";
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
@@ -82,45 +81,4 @@ public sealed class BegrotingOpslagTests : IAsyncLifetime, IDisposable
         Assert.Same(eerste, Begrotingsrekenaar.Geldend(stand, 2027)); // de herziening is nog een concept
     }
 
-    [Fact]
-    public void Migratie_stelt_de_kant_voor_uit_het_saldo_zonder_afsluitpost_anders_op_nummer()
-    {
-        using var db = new SqliteConnection("Data Source=:memory:");
-        db.Open();
-        Voer(db, """
-            CREATE TABLE "Grootboekrekeningen" ("Id" INTEGER PRIMARY KEY, "Nummer" INTEGER, "Soort" INTEGER, "Kant" INTEGER NOT NULL DEFAULT 0);
-            CREATE TABLE "Journaalposten" ("Id" TEXT PRIMARY KEY, "Soort" INTEGER);
-            CREATE TABLE "Journaalregels" ("Id" INTEGER PRIMARY KEY, "PostId" TEXT, "RekeningId" INTEGER, "Debet" INTEGER, "Credit" INTEGER);
-            CREATE TABLE "HistorischeTotalen" ("Id" INTEGER PRIMARY KEY, "RekeningId" INTEGER, "Debet" INTEGER, "Credit" INTEGER);
-            INSERT INTO "Grootboekrekeningen" VALUES (1, 1100, 1, 0), (2, 4900, 2, 0), (3, 8020, 2, 0), (4, 4115, 2, 0), (5, 8500, 2, 0), (6, 4300, 2, 0);
-            INSERT INTO "Journaalposten" VALUES ('gewoon', 1), ('afsluiting', 3);
-            -- 4900: per saldo credit (baten); de afsluitpost draait dat om, maar telt niet mee
-            INSERT INTO "Journaalregels" VALUES (1, 'gewoon', 2, 0, 25000), (2, 'afsluiting', 2, 25000, 0);
-            -- 8020: per saldo debet in de historie (lasten), ondanks het nummer
-            INSERT INTO "HistorischeTotalen" VALUES (1, 3, 1000, 0);
-            """);
-
-        Voer(db, Infrastructure.Database.Migraties.MigratieSql.KantVoorstellen);
-
-        Assert.Equal(0L, Kant(db, 1)); // balans
-        Assert.Equal(1L, Kant(db, 2)); // baten uit saldo
-        Assert.Equal(2L, Kant(db, 3)); // lasten uit de historie
-        Assert.Equal(2L, Kant(db, 4)); // geen saldo, < 8000: lasten
-        Assert.Equal(1L, Kant(db, 5)); // geen saldo, >= 8000: baten
-        Assert.Equal(2L, Kant(db, 6));
-    }
-
-    private static void Voer(SqliteConnection db, string sql)
-    {
-        using var opdracht = db.CreateCommand();
-        opdracht.CommandText = sql;
-        opdracht.ExecuteNonQuery();
-    }
-
-    private static long Kant(SqliteConnection db, int id)
-    {
-        using var opdracht = db.CreateCommand();
-        opdracht.CommandText = $"SELECT \"Kant\" FROM \"Grootboekrekeningen\" WHERE \"Id\" = {id}";
-        return (long)opdracht.ExecuteScalar()!;
-    }
 }

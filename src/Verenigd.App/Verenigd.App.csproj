@@ -5,10 +5,11 @@
     <!-- Windows 10 versie 2004 of nieuwer: Windows.Data.Pdf voor het voorbeeld van PDF-bijlagen (besluit 135) -->
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>
-    <AssemblyName>Verenigd</AssemblyName>
+    <AssemblyName>BTW-Boeker</AssemblyName>
     <RootNamespace>Verenigd.App</RootNamespace>
-    <!-- App-icoon (16–256 px) voor programmabestand, taakbalk en titelbalken -->
-    <ApplicationIcon>Assets\Verenigd.ico</ApplicationIcon>
+    <Company>BTW-Boeker</Company>
+    <Product>BTW-Boeker</Product>
+    <Version>0.1.0</Version>
     <!-- WPF Fluent ThemeMode is nog als experimenteel gemarkeerd -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
@@ -20,9 +21,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.File" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Assets\Verenigd.ico" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Verenigd.App.Tests" />

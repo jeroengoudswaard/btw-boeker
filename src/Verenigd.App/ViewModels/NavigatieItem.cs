@@ -5,7 +5,7 @@ namespace Verenigd.App.ViewModels;
 
 /// <summary>
 /// Eén regel in de navigatiebalk (besluiten 168, 178 en 181): een module, of een onderdeel (subtabblad) van Boekhouding of
-/// Contributie. Onderdelen staan alleen in de lijst als hun module is uitgeklapt.
+/// Onderdelen staan alleen in de lijst als hun module is uitgeklapt.
 /// </summary>
 public sealed partial class NavigatieItem(string sleutel, string titel, string pictogram, ModuleSoort module, int? onderdeel) : ObservableObject
 {

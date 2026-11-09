@@ -1,13 +1,10 @@
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Beveiliging;
 using Verenigd.Application.Boekhouding;
-using Verenigd.Application.Import;
-using Verenigd.Application.Incasso;
-using Verenigd.Application.Leden;
 
 namespace Verenigd.Application.Database;
 
-/// <summary>Aanmaken, openen en herstellen van versleutelde Verenigd-databases.</summary>
+/// <summary>Aanmaken, openen en herstellen van versleutelde BTW-Boeker-databases.</summary>
 public interface IDatabaseBeheer
 {
     /// <summary>Staan zowel de database als het bijbehorende sleutelbestand op schijf?</summary>
@@ -48,22 +45,10 @@ public interface IDatabaseSessie : IAsyncDisposable
 
     IAdministratieRepository Administraties { get; }
 
-    ILedenRepository Leden { get; }
-
-    ILedenImportOpslag LedenImport { get; }
-
-    IContributieRepository Contributie { get; }
-
     IBoekhoudingRepository Boekhouding { get; }
 
     /// <summary>De voortgang van de startwizard (besluit 173).</summary>
     Inrichting.IStartwizardOpslag Startwizard { get; }
-
-    /// <summary>Sjablonen, logboek en instellingen van e-mail (fase 6).</summary>
-    Email.IEmailOpslag Email { get; }
-
-    /// <summary>Instellingen en koppeling van de webapp voor de leiding (fase 7).</summary>
-    Webapp.IWebappOpslag Webapp { get; }
 
     /// <summary>Schrijft een consistente, versleutelde back-up (database + sleutelbestand) naar één bestand.</summary>
     Task MaakBackupAsync(string doelPad, CancellationToken annulering = default);

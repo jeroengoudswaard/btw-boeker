@@ -1,6 +1,4 @@
 using Verenigd.App.ViewModels.Boekhouding;
-using Verenigd.App.ViewModels.Contributie;
-using Verenigd.App.ViewModels.Leden;
 using Verenigd.Application.Beveiliging;
 
 namespace Verenigd.App.Diensten;
@@ -48,21 +46,10 @@ public interface IDialoogService
 
     void ToonInformatie(string titel, string melding);
 
-    /// <summary>Eén of meer SOL3-exports (CSV) kiezen; leeg bij annuleren.</summary>
-    IReadOnlyList<string> KiesImportbestanden();
-
     string? KiesCsvDoel(string voorgesteldeNaam);
-
-    /// <returns><c>true</c> als de import is uitgevoerd.</returns>
-    bool ToonImportWizard(ImportWizardViewModel wizard);
-
-    string? KiesXmlDoel(string voorgesteldeNaam);
 
     /// <summary>Waar de auditfile (XAF) heen moet (besluit 197).</summary>
     string? KiesXafDoel(string voorgesteldeNaam);
-
-    /// <returns><c>true</c> als er een run definitief is gemaakt.</returns>
-    bool ToonIncassoWizard(IncassoWizardViewModel wizard);
 
     string? KiesExcelBestand();
 
@@ -74,19 +61,10 @@ public interface IDialoogService
 
     string? KiesXlsxDoel(string voorgesteldeNaam);
 
-    /// <summary>Waar een PDF-factuur wordt opgeslagen.</summary>
-    string? KiesPdfDoel(string voorgesteldeNaam);
-
-    /// <summary>Een logo (PNG of JPG) voor de facturen.</summary>
-    string? KiesAfbeelding();
-
     /// <summary>Een rekeningschema-sjabloon (.vsjabloon) om mee in te richten.</summary>
     string? KiesSjabloonbestand();
 
     string? KiesSjabloonDoel(string voorgesteldeNaam);
-
-    /// <summary>Het JSON-clientbestand van een OAuth-client (Desktop-app) uit Google Cloud (besluit 192).</summary>
-    string? KiesClientbestand();
 
     /// <returns><c>true</c> als de administratie is ingericht.</returns>
     bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard);

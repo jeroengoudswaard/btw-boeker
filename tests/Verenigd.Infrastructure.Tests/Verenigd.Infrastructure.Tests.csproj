@@ -21,8 +21,6 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Dezelfde synthetische SOL3-exports als in de Application-tests -->
-    <Compile Include="..\Verenigd.Application.Tests\Import\Sol3Voorbeeld.cs" Link="Leden\Sol3Voorbeeld.cs" />
     <!-- Dezelfde synthetische CAMT.053-bestanden als in de Application-tests -->
     <Compile Include="..\Verenigd.Application.Tests\Bank\CamtVoorbeeld.cs" Link="Bank\CamtVoorbeeld.cs" />
   </ItemGroup>

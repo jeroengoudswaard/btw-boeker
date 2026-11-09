@@ -3,8 +3,6 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Officieel ISO 20022-schema (inhoudelijk ongewijzigd), om elk incassobestand vóór het opslaan te valideren -->
-    <EmbeddedResource Include="Incasso\pain.008.001.08.xsd" LogicalName="pain.008.001.08.xsd" />
     <EmbeddedResource Include="Boekhouding\XmlAuditfileFinancieel3.2.xsd" LogicalName="XmlAuditfileFinancieel3.2.xsd" />
     <EmbeddedResource Include="Boekhouding\Sjablonen\*.json" LogicalName="sjabloon-%(Filename).json" />
   </ItemGroup>

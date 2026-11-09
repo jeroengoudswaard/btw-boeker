@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Verenigd.App.Diensten;
 using Verenigd.App.ViewModels;
 using Verenigd.App.ViewModels.Boekhouding;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Instellingen;
 using Verenigd.Application.Modules;
 using Verenigd.Domain.Administraties;
@@ -60,22 +59,10 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
 
-        Assert.Equal(["Start", "Leden", "Contributie", "Boekhouding", "Begroting", "Email", "Webapp", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
+        Assert.Equal(["Start", "Boekhouding", "Begroting", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
         Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
         Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
         Assert.IsType<OverzichtViewModel>(shell.GeselecteerdTabblad);
-    }
-
-    [Fact]
-    public async Task Webapp_zonder_koppeling_toont_alleen_koppelen()
-    {
-        var shell = await OpenAsync();
-
-        await Kies(shell, "Webapp");
-
-        Assert.IsType<ViewModels.Webapp.WebappViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal("Koppelen", Item(shell, "Webapp.Synchroniseren").Titel); // besluit 269: alleen wat nu nodig is
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel is "Webapp.Voorstellen" or "Webapp.Leiding" or "Webapp.Meer");
     }
 
     [Fact]
@@ -85,7 +72,7 @@ public sealed class ShellNavigatieTests
 
         await Kies(shell, "Boekhouding");
 
-        Assert.Equal(["Boekhouding.Journaal", "Boekhouding.Bank", "Boekhouding.Postvak", "Boekhouding.Facturen", "Boekhouding.Rapporten", "Boekhouding.Meer"],
+        Assert.Equal(["Boekhouding.Journaal", "Boekhouding.Bank", "Boekhouding.Postvak", "Boekhouding.Rapporten", "Boekhouding.Meer"],
             shell.Navigatie.Where(n => n.Module == ModuleSoort.Boekhouding && n.IsSubitem).Select(n => n.Sleutel));
         var meer = Item(shell, "Boekhouding.Meer");
         Assert.True(meer.IsMeer);
@@ -109,9 +96,9 @@ public sealed class ShellNavigatieTests
     public async Task Meer_selecteren_klapt_niet_om_en_de_selectie_gaat_terug_naar_de_pagina()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Contributie");
+        await Kies(shell, "Boekhouding");
         var pagina = shell.GeselecteerdTabblad;
-        var meer = Item(shell, "Contributie.Meer");
+        var meer = Item(shell, "Boekhouding.Meer");
 
         // Besluit 273: WPF selecteert soms twee keer (bij focus en door de actie zelf); pijltjes mogen niets omklappen.
         foreach (var _ in Enumerable.Range(0, 2))
@@ -119,9 +106,9 @@ public sealed class ShellNavigatieTests
             shell.GeselecteerdeNavigatie = meer;
 
             Assert.False(meer.IsUitgeklapt);
-            Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Betalers");
+            Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Boekingsregels");
             Assert.Same(pagina, shell.GeselecteerdTabblad);
-            Assert.Same(Item(shell, "Contributie.Leden"), shell.GeselecteerdeNavigatie);
+            Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         }
     }
 
@@ -129,20 +116,20 @@ public sealed class ShellNavigatieTests
     public async Task Meer_wisselen_klapt_precies_een_keer_om_en_negeert_een_andere_regel()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Contributie");
-        var meer = Item(shell, "Contributie.Meer");
+        await Kies(shell, "Boekhouding");
+        var meer = Item(shell, "Boekhouding.Meer");
 
-        shell.MeerWisselenCommand.Execute(Item(shell, "Contributie.Runs")); // geen Meer…-regel
+        shell.MeerWisselenCommand.Execute(Item(shell, "Boekhouding.Bank")); // geen Meer…-regel
         Assert.False(meer.IsUitgeklapt);
 
         shell.MeerWisselenCommand.Execute(meer);
         Assert.True(meer.IsUitgeklapt);
-        Assert.Same(Item(shell, "Contributie.Leden"), shell.GeselecteerdeNavigatie);
-        Item(shell, "Contributie.Betalers");
+        Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
+        Item(shell, "Boekhouding.Boekingsregels");
 
         shell.MeerWisselenCommand.Execute(meer);
         Assert.False(meer.IsUitgeklapt);
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Betalers");
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Boekingsregels");
     }
 
     [Fact]
@@ -156,18 +143,6 @@ public sealed class ShellNavigatieTests
 
         Assert.True(Item(shell, "Boekhouding.Meer").IsUitgeklapt);
         Assert.Same(Item(shell, "Boekhouding.Rekeningschema"), shell.GeselecteerdeNavigatie);
-    }
-
-    [Fact]
-    public async Task Openstaand_verschijnt_alleen_als_er_iets_openstaat()
-    {
-        var shell = await OpenAsync();
-
-        await Kies(shell, "Contributie");
-
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Openstaand");
-        Assert.Equal(["Contributie.Leden", "Contributie.Runs", "Contributie.Meer"],
-            shell.Navigatie.Where(n => n.Module == ModuleSoort.Contributie && n.IsSubitem).Select(n => n.Sleutel));
     }
 
     [Fact]
@@ -193,7 +168,7 @@ public sealed class ShellNavigatieTests
         await Kies(shell, "Boekhouding"); // uitklappen en naar het huidige onderdeel (Journaal)
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         Assert.True(Item(shell, "Boekhouding.Bank").IsSubitem);
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie.Tarieven"); // alleen de gekozen module is uitgeklapt
+        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Begroting"); // alleen de gekozen module is uitgeklapt
 
         await Kies(shell, "Boekhouding.Bank");
 
@@ -212,16 +187,13 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         var boekhouding = Item(shell, "Boekhouding");
-        var leden = Item(shell, "Leden");
-
         await Kies(shell, "Boekhouding");
 
         Assert.Same(boekhouding, Item(shell, "Boekhouding"));
-        Assert.Same(leden, Item(shell, "Leden"));
         Assert.True(boekhouding.IsUitgeklapt);
         Assert.Equal(Item(shell, "Boekhouding.Journaal"), shell.Navigatie[shell.Navigatie.IndexOf(boekhouding) + 1]);
 
-        await Kies(shell, "Leden");
+        await Kies(shell, "Instellingen");
         Assert.Same(boekhouding, Item(shell, "Boekhouding"));
         Assert.False(boekhouding.IsUitgeklapt);
         Assert.DoesNotContain(shell.Navigatie, n => n.IsSubitem);
@@ -239,40 +211,9 @@ public sealed class ShellNavigatieTests
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
         Assert.Equal(BoekhoudingSubtab.Bank, boekhouding.Subtab);
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Contributie"); // besluit 16
         Assert.Equal("Meerjarenplan", Item(shell, "Begroting").Titel); // besluit 163
         Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Begroting"); // de begroting staat als eigen item
         Assert.Equal("Scouting Stichting", shell.ActieveAdministratieNaam);
-    }
-
-    [Fact]
-    public async Task Email_heeft_de_onderdelen_opstellen_verzonden_en_sjablonen_en_blijft_bij_wisselen_staan()
-    {
-        var shell = await OpenAsync();
-        shell.GeselecteerdeNavigatie = Item(shell, "Email");
-        Assert.Contains(shell.Navigatie, n => n.Sleutel == "Email.Verzonden");
-
-        shell.GeselecteerdeNavigatie = Item(shell, "Email.Sjablonen");
-        var email = Assert.IsType<ViewModels.Email.EmailViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(ViewModels.Email.EmailSubtab.Sjablonen, email.Subtab);
-
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
-        Assert.Same(email, shell.GeselecteerdTabblad); // E-mail hoort niet bij één administratie
-    }
-
-    [Fact]
-    public async Task Wisselen_vanaf_een_pagina_die_de_andere_administratie_niet_heeft_gaat_naar_start()
-    {
-        var shell = await OpenAsync();
-        shell.GeselecteerdeNavigatie = Item(shell, "Contributie");
-        shell.MeerWisselenCommand.Execute(Item(shell, "Contributie.Meer"));
-        shell.GeselecteerdeNavigatie = Item(shell, "Contributie.Tarieven");
-        Assert.Equal(ContributieSubtab.Tarieven, Assert.IsType<ContributieViewModel>(shell.GeselecteerdTabblad).Subtab);
-
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
-
-        Assert.IsType<OverzichtViewModel>(shell.GeselecteerdTabblad);
-        Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
     }
 
     [Fact]
@@ -281,7 +222,7 @@ public sealed class ShellNavigatieTests
         var shell = await OpenAsync();
         shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
 
-        shell.OpenModuleViaSneltoetsCommand.Execute("4");
+        shell.OpenModuleViaSneltoetsCommand.Execute("1");
 
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
@@ -311,8 +252,9 @@ public sealed class ShellNavigatieTests
         var shell = await OpenAsync();
 
         shell.VolgendePaginaCommand.Execute(null);
-        Assert.Same(Item(shell, "Leden"), shell.GeselecteerdeNavigatie);
+        Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         shell.VorigePaginaCommand.Execute(null);
+        Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
         shell.VorigePaginaCommand.Execute(null);
         Assert.Same(shell.Navigatie[^1], shell.GeselecteerdeNavigatie);
     }

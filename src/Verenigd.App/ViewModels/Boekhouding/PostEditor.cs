@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Verenigd.App.ViewModels.Contributie;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Boekhouding;

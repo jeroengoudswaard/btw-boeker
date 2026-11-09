@@ -28,15 +28,6 @@ internal static partial class ShellLog
     [LoggerMessage(7, LogLevel.Information, "Back-up teruggezet naar {Bestand}")]
     public static partial void BackupTeruggezet(ILogger logger, string bestand);
 
-    [LoggerMessage(9, LogLevel.Information, "SOL3-import uitgevoerd: {Nieuw} nieuw, {Gewijzigd} gewijzigd, {Uitgeschreven} uitgeschreven")]
-    public static partial void Sol3Geimporteerd(ILogger logger, int nieuw, int gewijzigd, int uitgeschreven);
-
-    [LoggerMessage(10, LogLevel.Information, "Incassorun {Maand} definitief: {Aantal} posten, totaal {Totaal}")]
-    public static partial void IncassorunDefinitief(ILogger logger, string maand, int aantal, string totaal);
-
-    [LoggerMessage(11, LogLevel.Information, "Incassorun {Maand} geannuleerd")]
-    public static partial void IncassorunGeannuleerd(ILogger logger, string maand);
-
     [LoggerMessage(12, LogLevel.Information, "Boekhouding {Administratie} overgenomen uit Excel: {Aantal} rekeningen")]
     public static partial void BoekhoudingOvergenomen(ILogger logger, string administratie, int aantal);
 

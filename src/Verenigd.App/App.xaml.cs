@@ -17,9 +17,6 @@ namespace Verenigd.App;
 
 public partial class App : System.Windows.Application
 {
-    /// <summary>Eén HttpClient voor de webapp (fase 7), voor de hele levensduur van de app.</summary>
-    private static readonly System.Net.Http.HttpClient WebappHttp = new() { Timeout = TimeSpan.FromSeconds(30) };
-
     private IHost? _host;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -30,7 +27,7 @@ public partial class App : System.Windows.Application
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.File(
-                Path.Combine(Paden.Logmap, "verenigd-.log"),
+                Path.Combine(Paden.Logmap, "btw-boeker-.log"),
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 30,
                 formatProvider: System.Globalization.CultureInfo.InvariantCulture)
@@ -46,16 +43,15 @@ public partial class App : System.Windows.Application
         builder.Services.AddSingleton<IInstellingenOpslag>(_ => new JsonInstellingenOpslag(Paden.Instellingenbestand));
         builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
         builder.Services.AddSingleton<IThemaService, WpfThemaService>();
-        var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(), new Infrastructure.Pdf.FactuurPdfMaker(),
-            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer(), Verzender: new Infrastructure.Email.GmailVerzender(), Koppeling: new Infrastructure.Email.GoogleKoppeling(),
-            Server: new Infrastructure.Webapp.SupabaseServer(WebappHttp));
+        var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(),
+            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer());
         WoordenResources.Koppel(Resources, hulpmiddelen.Woorden);
         builder.Services.AddSingleton(hulpmiddelen);
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddSingleton<ShellWindow>();
         _host = builder.Build();
 
-        Log.Information("Verenigd {Versie} gestart", typeof(App).Assembly.GetName().Version);
+        Log.Information("BTW-Boeker {Versie} gestart", typeof(App).Assembly.GetName().Version);
         var venster = _host.Services.GetRequiredService<ShellWindow>();
         MainWindow = venster;
         venster.Show();
@@ -67,7 +63,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        Log.Information("Verenigd afgesloten");
+        Log.Information("BTW-Boeker afgesloten");
         _host?.Dispose();
         Log.CloseAndFlush();
         base.OnExit(e);
@@ -80,7 +76,7 @@ public partial class App : System.Windows.Application
             MainWindow,
             "Er is een onverwachte fout opgetreden. De details zijn vastgelegd in het logbestand (Help > Logbestanden openen).\n\n"
                 + e.Exception.Message,
-            "Verenigd",
+            "BTW-Boeker",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
         e.Handled = true;

@@ -93,21 +93,8 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext,
             .OrderBy(m => m.Boekdatum).ToListAsync(annulering).ConfigureAwait(false);
         var regels = await context.Boekingsregels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
             .OrderBy(r => r.Volgorde).ThenBy(r => r.Id).ToListAsync(annulering).ConfigureAwait(false);
-        var debiteurmutaties = await context.Debiteurmutaties.Where(m => m.Administratie == administratie)
-            .OrderBy(m => m.Datum).ToListAsync(annulering).ConfigureAwait(false);
-        // Contributie hoort alleen bij de Vereniging (besluit 16).
-        var runs = administratie == AdministratieSoort.Vereniging
-            ? await context.Incassoruns.Include(r => r.Posten).ThenInclude(p => p.Regels).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false)
-            : [];
-        var herincassos = administratie == AdministratieSoort.Vereniging
-            ? await context.Herincassos.ToListAsync(annulering).ConfigureAwait(false)
-            : [];
         // Relaties zijn gedeeld door beide administraties (besluit 105).
         var relaties = await context.Relaties.OrderBy(r => r.Naam).ToListAsync(annulering).ConfigureAwait(false);
-        var facturen = await context.Verkoopfacturen.Include(f => f.Regels).ThenInclude(r => r.Rekening)
-            .Where(f => f.Administratie == administratie).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
-        var factuurinstellingen = await context.Factuurinstellingen.SingleOrDefaultAsync(i => i.Administratie == administratie, annulering)
-            .ConfigureAwait(false);
         var historischeRegels = await context.HistorischeRegels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
             .OrderBy(r => r.Jaar).ThenBy(r => r.Datum).ThenBy(r => r.Volgorde).ToListAsync(annulering).ConfigureAwait(false);
         var historischeTotalen = await context.HistorischeTotalen.Include(t => t.Rekening).Where(t => t.Administratie == administratie)
@@ -130,12 +117,7 @@ internal sealed class BoekhoudingRepository(Func<VerenigdDbContext> maakContext,
             Bankafschriften = afschriften,
             Bankmutaties = mutaties,
             Boekingsregels = regels,
-            Debiteurmutaties = debiteurmutaties,
-            Incassoruns = runs,
-            Herincassos = herincassos,
             Relaties = relaties,
-            Verkoopfacturen = facturen,
-            Factuurinstellingen = factuurinstellingen,
             HistorischeRegels = historischeRegels,
             HistorischeTotalen = historischeTotalen,
             Bijlagen = bijlagen,

@@ -35,7 +35,7 @@ public static class Woordenlijst
         new("Post", "post", "boeking"),
         new("Posten", "posten", "boekingen"),
         new("Rekening", "Rekening", "Potje"),
-        new("Rubriek", "Rubriek", "Groep", "Een groep potjes, zoals Huisvesting of Contributie."),
+        new("Rubriek", "Rubriek", "Groep", "Een groep potjes, zoals Huisvesting of Onderhoud."),
         new("Debet", "Debet", "Debet", UitlegDebetCredit),
         new("Credit", "Credit", "Credit", UitlegDebetCredit),
         new("Uitgave", "Debet", "Uitgave"),

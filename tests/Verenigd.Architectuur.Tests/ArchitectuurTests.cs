@@ -1,15 +1,15 @@
 using System.Reflection;
-using Verenigd.Application.Import;
-using Verenigd.Domain.Leden;
+using Verenigd.Application.Boekhouding;
+using Verenigd.Domain.Financien.Boekhouding;
 using Verenigd.Infrastructure.Database;
 
 namespace Verenigd.Architectuur.Tests;
 
-/// <summary>Bewaakt de lagen (docs/ARCHITECTUUR.md) en de scheiding leden–financiën (besluiten 36 en 39).</summary>
+/// <summary>Bewaakt de lagen (docs/ARCHITECTUUR.md).</summary>
 public class ArchitectuurTests
 {
-    private static readonly Assembly Domain = typeof(Persoon).Assembly;
-    private static readonly Assembly Application = typeof(Sol3Inlezer).Assembly;
+    private static readonly Assembly Domain = typeof(Grootboekrekening).Assembly;
+    private static readonly Assembly Application = typeof(BoekhoudingDienst).Assembly;
     private static readonly Assembly Infrastructure = typeof(DatabaseBeheer).Assembly;
 
     private static IEnumerable<string> Verwijzingen(Assembly assembly) =>
@@ -45,15 +45,13 @@ public class ArchitectuurTests
     }
 
     [Fact]
-    public void App_icoon_bevat_alle_windows_formaten_en_is_ingesteld()
+    public void App_gebruikt_een_eigen_productidentiteit()
     {
         var map = Path.Combine(Repositorymap(), "src", "Verenigd.App");
-        var icoon = File.ReadAllBytes(Path.Combine(map, "Assets", "Verenigd.ico"));
-        Assert.Equal(1, BitConverter.ToUInt16(icoon, 2)); // type: icoon
-        var aantal = BitConverter.ToUInt16(icoon, 4);
-        var maten = Enumerable.Range(0, aantal).Select(i => icoon[6 + (16 * i)] == 0 ? 256 : icoon[6 + (16 * i)]).ToHashSet();
-        Assert.Superset(new HashSet<int> { 16, 24, 32, 48, 256 }, maten);
-        Assert.Contains("<ApplicationIcon>Assets\\Verenigd.ico</ApplicationIcon>", File.ReadAllText(Path.Combine(map, "Verenigd.App.csproj")), StringComparison.Ordinal);
+        var project = File.ReadAllText(Path.Combine(map, "Verenigd.App.csproj"));
+        Assert.Contains("<AssemblyName>BTW-Boeker</AssemblyName>", project, StringComparison.Ordinal);
+        Assert.Contains("<Product>BTW-Boeker</Product>", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("Verenigd.ico", project, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -68,83 +66,6 @@ public class ArchitectuurTests
             .Select(Path.GetFileName)
             .ToList();
         Assert.Empty(buiten);
-    }
-
-    [Theory]
-    [InlineData("Leden", "Financien")]
-    [InlineData("Financien", "Leden")]
-    public void Leden_en_financien_kennen_elkaar_niet(string kant, string andereKant)
-    {
-        var overtredingen = new List<string>();
-        foreach (var assembly in new[] { Domain, Application, Infrastructure })
-        {
-            foreach (var type in assembly.GetTypes().Where(t => InNamespace(t, kant)))
-            {
-                overtredingen.AddRange(GebruikteTypen(type)
-                    .Where(t => InNamespace(t, andereKant))
-                    .Select(t => $"{type.FullName} -> {t.FullName}"));
-            }
-        }
-
-        Assert.Empty(overtredingen.Distinct());
-    }
-
-    [Theory]
-    [InlineData("Leden", "Financien")]
-    [InlineData("Financien", "Leden")]
-    public void Broncode_van_leden_en_financien_kent_elkaar_niet(string kant, string andereKant)
-    {
-        var overtredingen = Directory
-            .EnumerateFiles(Path.Combine(Repositorymap(), "src"), "*.cs", SearchOption.AllDirectories)
-            .Where(f => f.Split(Path.DirectorySeparatorChar).Contains(kant))
-            .Where(f => File.ReadAllText(f).Contains("." + andereKant, StringComparison.Ordinal))
-            .Select(Path.GetFileName)
-            .ToList();
-
-        Assert.Empty(overtredingen);
-    }
-
-    private static bool InNamespace(Type type, string deel) =>
-        type.Namespace?.Split('.').Contains(deel, StringComparer.Ordinal) == true;
-
-    /// <summary>Typen in de signatuur: velden, eigenschappen, methoden, constructors en basistypen.</summary>
-    private static IEnumerable<Type> GebruikteTypen(Type type)
-    {
-        const BindingFlags alles = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
-        var typen = new List<Type>();
-        if (type.BaseType is { } basis)
-        {
-            typen.Add(basis);
-        }
-
-        typen.AddRange(type.GetInterfaces());
-        typen.AddRange(type.GetFields(alles).Select(f => f.FieldType));
-        typen.AddRange(type.GetProperties(alles).Select(p => p.PropertyType));
-        foreach (var methode in type.GetMethods(alles).Cast<MethodBase>().Concat(type.GetConstructors(alles)))
-        {
-            typen.AddRange(methode.GetParameters().Select(p => p.ParameterType));
-            if (methode is MethodInfo info)
-            {
-                typen.Add(info.ReturnType);
-            }
-
-            if (methode.GetMethodBody() is { } body)
-            {
-                typen.AddRange(body.LocalVariables.Select(v => v.LocalType));
-            }
-        }
-
-        return typen.SelectMany(Uitgepakt);
-    }
-
-    private static IEnumerable<Type> Uitgepakt(Type type)
-    {
-        if (type.HasElementType && type.GetElementType() is { } element)
-        {
-            return Uitgepakt(element);
-        }
-
-        return type.IsGenericType ? [type, .. type.GetGenericArguments().SelectMany(Uitgepakt)] : [type];
     }
 
     private static string Repositorymap()
@@ -408,14 +329,7 @@ public class ArchitectuurTests
     [InlineData("BoekhoudingView.xaml", "Mutaties")]
     [InlineData("BoekhoudingView.xaml", "Postvak")]
     [InlineData("BoekhoudingView.xaml", "Boekingsregels")]
-    [InlineData("BoekhoudingView.xaml", "Facturen")]
     [InlineData("BoekhoudingView.xaml", "Relaties")]
-    [InlineData("ContributieView.xaml", "Leden")]
-    [InlineData("ContributieView.xaml", "Betalers")]
-    [InlineData("ContributieView.xaml", "Runs")]
-    [InlineData("ContributieView.xaml", "Vorderingen")]
-    [InlineData("LedenView.xaml", "Leden")]
-    [InlineData("EmailView.xaml", "Logboek")]
     public void Hoofdlijst_heeft_een_leeg_scherm(string view, string lijst)
     {
         var tekst = File.ReadAllText(XamlBestanden().Single(b => Path.GetFileName(b) == view));

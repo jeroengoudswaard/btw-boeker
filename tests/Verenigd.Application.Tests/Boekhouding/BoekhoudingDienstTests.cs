@@ -1,9 +1,6 @@
 using Verenigd.Application.Administraties;
 using Verenigd.Application.Boekhouding;
 using Verenigd.Application.Database;
-using Verenigd.Application.Import;
-using Verenigd.Application.Incasso;
-using Verenigd.Application.Leden;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Boekhouding;
@@ -298,13 +295,8 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         public string Pad { get; } = Path.Combine(Path.GetTempPath(), "test.vdb");
         public List<string> Backups { get; } = [];
         public IAdministratieRepository Administraties => throw new NotSupportedException();
-        public ILedenRepository Leden => throw new NotSupportedException();
-        public ILedenImportOpslag LedenImport => throw new NotSupportedException();
-        public IContributieRepository Contributie => throw new NotSupportedException();
         public IBoekhoudingRepository Boekhouding { get; } = data;
         public Verenigd.Application.Inrichting.IStartwizardOpslag Startwizard => throw new NotSupportedException();
-        public Verenigd.Application.Email.IEmailOpslag Email => throw new NotSupportedException();
-        public Verenigd.Application.Webapp.IWebappOpslag Webapp => throw new NotSupportedException();
 
         public Task MaakBackupAsync(string doelPad, CancellationToken annulering = default)
         {

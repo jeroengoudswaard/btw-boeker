@@ -1,9 +1,7 @@
 using Verenigd.Application.Boekhouding;
-using Verenigd.Application.Incasso;
 using Verenigd.Application.Inrichting;
 using Verenigd.Application.Tests.Bijlagen;
 using Verenigd.Application.Tests.Boekhouding;
-using Verenigd.Application.Tests.Incasso;
 using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
@@ -17,15 +15,14 @@ public sealed class StartkaartenTests
 {
     private static readonly DateOnly Vandaag = new(2026, 11, 3);
     private static readonly DateTime Nu = new(2026, 11, 3, 10, 0, 0, DateTimeKind.Utc);
-    private static readonly IncassoStand GeenIncasso = new([], [], [], [], [], [], [], null);
-    private static readonly Inrichtingsstatus AllesKlaar = new(true, true, true, true, false, true, true, true);
+    private static readonly Inrichtingsstatus AllesKlaar = new(true, true, true, true, true, true);
 
     private static BoekhoudingStand Leeg(AdministratieSoort soort) => new(soort, [], [], [], [], []);
 
     [Fact]
     public void Niets_te_doen_geeft_geen_kaarten()
     {
-        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, new BoekhoudingTestdata().Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag);
+        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, new BoekhoudingTestdata().Stand, Leeg(AdministratieSoort.Stichting), Vandaag);
 
         Assert.Empty(kaarten);
     }
@@ -33,13 +30,13 @@ public sealed class StartkaartenTests
     [Fact]
     public void Inrichting_afmaken_toont_het_aantal_klare_stappen_tot_de_wizard_is_voltooid()
     {
-        var status = AllesKlaar with { HeeftLeden = false, BankVereniging = false };
+        var status = AllesKlaar with { NamenIngevuld = false, BankVereniging = false };
 
-        var kaart = Assert.Single(Startkaarten.Bepaal(status, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag));
+        var kaart = Assert.Single(Startkaarten.Bepaal(status, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), Vandaag));
 
         Assert.Equal(Startkaartsoort.Inrichting, kaart.Soort);
-        Assert.Equal("4 van 6 stappen klaar", kaart.Tekst);
-        Assert.Empty(Startkaarten.Bepaal(status, new Startwizardvoortgang(null, IsAfgerond: true), Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag));
+        Assert.Equal("2 van 6 stappen klaar", kaart.Tekst);
+        Assert.Empty(Startkaarten.Bepaal(status, new Startwizardvoortgang(null, IsAfgerond: true), Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), Vandaag));
     }
 
     [Fact]
@@ -57,7 +54,7 @@ public sealed class StartkaartenTests
         uitgave.Boek(1, Nu);
         data.Posten.Add(uitgave);
 
-        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag);
+        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), Vandaag);
 
         Assert.Equal(2, Kaart(kaarten, Startkaartsoort.Bank).Aantal);
         Assert.Equal(1, Kaart(kaarten, Startkaartsoort.Concepten).Aantal);
@@ -79,26 +76,13 @@ public sealed class StartkaartenTests
         data.Posten.Add(uitgave);
         var drempels = new Dictionary<AdministratieSoort, Bedrag> { [AdministratieSoort.Vereniging] = new(5000) };
 
-        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag, drempels);
+        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), Vandaag, drempels);
         Assert.DoesNotContain(kaarten, k => k.Soort == Startkaartsoort.ZonderBon); // € 25 ligt onder de drempel van € 50
 
         drempels[AdministratieSoort.Vereniging] = new(2000);
-        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag, drempels),
+        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Leeg(AdministratieSoort.Stichting), Vandaag, drempels),
             Startkaartsoort.ZonderBon);
         Assert.Contains("€ 20,00", kaart.Tekst, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void Incassorun_van_deze_maand_ontbreekt_alleen_als_de_incasso_is_ingesteld()
-    {
-        var incasso = new IncassoTestdata(); // ingesteld vanaf januari 2026, geen runs
-
-        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), incasso.Stand, Vandaag),
-            Startkaartsoort.Incassorun);
-
-        Assert.Equal("Incassorun november 2026 nog niet gemaakt", kaart.Titel);
-        Assert.DoesNotContain(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Vereniging), Leeg(AdministratieSoort.Stichting), GeenIncasso, Vandaag),
-            k => k.Soort == Startkaartsoort.Incassorun);
     }
 
     private static Startkaart Kaart(IEnumerable<Startkaart> kaarten, Startkaartsoort soort) => Assert.Single(kaarten, k => k.Soort == soort);

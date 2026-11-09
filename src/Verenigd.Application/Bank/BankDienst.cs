@@ -5,7 +5,6 @@ using Verenigd.Domain.Administraties;
 using Verenigd.Domain.Financien;
 using Verenigd.Domain.Financien.Bank;
 using Verenigd.Domain.Financien.Boekhouding;
-using Verenigd.Domain.Financien.Debiteuren;
 
 namespace Verenigd.Application.Bank;
 
@@ -106,7 +105,6 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 {
                     Bankmutaties = [.. naImport.Bankmutaties, .. mutaties],
                     Posten = [.. naImport.Posten, .. toevoegen.OfType<Journaalpost>()],
-                    Debiteurmutaties = [.. naImport.Debiteurmutaties, .. toevoegen.OfType<Debiteurmutatie>()],
                 };
                 if (MaakConcept(verwerkt, mutatie, toevoegen) is not null)
                 {
@@ -183,7 +181,6 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 var verwerkt = stand with
                 {
                     Posten = [.. stand.Posten, .. toevoegen.OfType<Journaalpost>()],
-                    Debiteurmutaties = [.. stand.Debiteurmutaties, .. toevoegen.OfType<Debiteurmutatie>()],
                 };
                 if (MaakConcept(verwerkt, mutatie, toevoegen) is not null)
                 {
@@ -260,7 +257,7 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return new BoekhoudingWijziging<bool>(true);
         }, annulering);
 
-    /// <summary>Herkent de transactie en voegt de conceptpost (en eventuele aflettering) toe aan <paramref name="toevoegen"/>.</summary>
+    /// <summary>Herkent de transactie en voegt de conceptpost toe aan <paramref name="toevoegen"/>.</summary>
     private static Journaalpost? MaakConcept(BoekhoudingStand stand, Bankmutatie mutatie, List<object> toevoegen)
     {
         if (Bankherkenning.Bepaal(stand, mutatie) is not { } herkenning)
@@ -271,8 +268,6 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
         var post = mutatie.MaakPost(herkenning.Rekening, herkenning.Omschrijving);
         mutatie.Koppel(post);
         toevoegen.Add(post);
-        toevoegen.AddRange(herkenning.Aflettering.Select(a => new Debiteurmutatie(
-            mutatie.Administratie, a.Vordering, a.BetalerId, a.IncassorunId, a.Soort, mutatie.Boekdatum, a.Saldo, post.Id, a.Reden)));
         return post;
     }
 

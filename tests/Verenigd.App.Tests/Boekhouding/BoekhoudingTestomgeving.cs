@@ -12,8 +12,8 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
 {
     public BoekhoudingTestomgeving()
     {
-        Sessie = new FakeSessie(Path.Combine(Path.GetTempPath(), "boekhouding-test.vdb"), new InMemoryAdministratieRepository(), new InMemoryLedenOpslag());
-        Hulpmiddelen = new BoekhoudingHulpmiddelen(Lezer, Schrijver, Afdruk, Pdf);
+        Sessie = new FakeSessie(Path.Combine(Path.GetTempPath(), "boekhouding-test.vdb"), new InMemoryAdministratieRepository());
+        Hulpmiddelen = new BoekhoudingHulpmiddelen(Lezer, Schrijver, Afdruk);
     }
 
     public FakeSessie Sessie { get; }
@@ -21,7 +21,6 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public FakeWerkbladLezer Lezer { get; } = new() { Blad = Voorblad() };
     public FakeSpreadsheetSchrijver Schrijver { get; } = new();
     public FakeAfdrukDienst Afdruk { get; } = new();
-    public FakeFactuurPdfMaker Pdf { get; } = new();
     public BoekhoudingHulpmiddelen Hulpmiddelen { get; }
     public VasteTijd Tijd { get; } = new(new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero));
     public InMemoryBoekhoudingOpslag Opslag => (InMemoryBoekhoudingOpslag)Sessie.Boekhouding;
