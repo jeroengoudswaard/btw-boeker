@@ -1,0 +1,84 @@
+﻿using System.Windows;
+using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using BtwBoeker.App.Diensten;
+using BtwBoeker.App.ViewModels;
+using BtwBoeker.App.Views;
+using BtwBoeker.Application.Database;
+using BtwBoeker.Application.Instellingen;
+using BtwBoeker.Infrastructure.Database;
+using BtwBoeker.Infrastructure.Excel;
+using BtwBoeker.Infrastructure.Instellingen;
+
+namespace BtwBoeker.App;
+
+public partial class App : System.Windows.Application
+{
+    private IHost? _host;
+
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        // Logging bevat bewust geen persoonsgegevens, IBAN's of volledige paden.
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(
+                Path.Combine(Paden.Logmap, "btw-boeker-.log"),
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 30,
+                formatProvider: System.Globalization.CultureInfo.InvariantCulture)
+            .CreateLogger();
+
+        DispatcherUnhandledException += OnverwachteFout;
+
+        var builder = Host.CreateApplicationBuilder();
+        builder.Logging.ClearProviders();
+        builder.Services.AddSerilog();
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton<IDatabaseBeheer, DatabaseBeheer>();
+        builder.Services.AddSingleton<IInstellingenOpslag>(_ => new JsonInstellingenOpslag(Paden.Instellingenbestand));
+        builder.Services.AddSingleton<IDialoogService, WpfDialoogService>();
+        builder.Services.AddSingleton<IThemaService, WpfThemaService>();
+        var hulpmiddelen = new BoekhoudingHulpmiddelen(new ClosedXmlWerkbladLezer(), new ClosedXmlSpreadsheetSchrijver(), new WpfAfdrukDienst(),
+            Tekstlezer: new Infrastructure.Pdf.PdfPigTekstLezer());
+        WoordenResources.Koppel(Resources, hulpmiddelen.Woorden);
+        builder.Services.AddSingleton(hulpmiddelen);
+        builder.Services.AddSingleton<ShellViewModel>();
+        builder.Services.AddSingleton<ShellWindow>();
+        _host = builder.Build();
+
+        Log.Information("BTW-Boeker {Versie} gestart", typeof(App).Assembly.GetName().Version);
+        var venster = _host.Services.GetRequiredService<ShellWindow>();
+        MainWindow = venster;
+        venster.Show();
+
+        // Eerst het hoofdvenster volledig tekenen; anders verliest het na een opstartdialoog de voorgrond.
+        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+        await _host.Services.GetRequiredService<ShellViewModel>().InitialiseerAsync();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        Log.Information("BTW-Boeker afgesloten");
+        _host?.Dispose();
+        Log.CloseAndFlush();
+        base.OnExit(e);
+    }
+
+    private void OnverwachteFout(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        Log.Error(e.Exception, "Onverwachte fout");
+        MessageBox.Show(
+            MainWindow,
+            "Er is een onverwachte fout opgetreden. De details zijn vastgelegd in het logbestand (Help > Logbestanden openen).\n\n"
+                + e.Exception.Message,
+            "BTW-Boeker",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+        e.Handled = true;
+    }
+}

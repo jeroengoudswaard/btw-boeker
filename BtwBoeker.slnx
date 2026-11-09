@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BtwBoeker.App/BtwBoeker.App.csproj" />
+    <Project Path="src/BtwBoeker.Application/BtwBoeker.Application.csproj" />
+    <Project Path="src/BtwBoeker.Domain/BtwBoeker.Domain.csproj" />
+    <Project Path="src/BtwBoeker.Infrastructure/BtwBoeker.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BtwBoeker.App.Tests/BtwBoeker.App.Tests.csproj" />
+    <Project Path="tests/BtwBoeker.Application.Tests/BtwBoeker.Application.Tests.csproj" />
+    <Project Path="tests/BtwBoeker.Architectuur.Tests/BtwBoeker.Architectuur.Tests.csproj" />
+    <Project Path="tests/BtwBoeker.Domain.Tests/BtwBoeker.Domain.Tests.csproj" />
+    <Project Path="tests/BtwBoeker.Infrastructure.Tests/BtwBoeker.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

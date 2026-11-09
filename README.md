@@ -1,4 +1,4 @@
-# Verenigd
+# BTW-Boeker
 
 Windows-desktopapplicatie voor de leden-, contributie- en financiële administratie van een scoutingvereniging en de bijbehorende stichting.
 
@@ -21,14 +21,14 @@ Windows-desktopapplicatie voor de leden-, contributie- en financiële administra
 ## Bouwen en starten
 
 ### Visual Studio
-1. Open `Verenigd.slnx`.
-2. Stel **Verenigd.App** in als opstartproject en druk op **F5**.
+1. Open `BtwBoeker.slnx`.
+2. Stel **BtwBoeker.App** in als opstartproject en druk op **F5**.
 3. Tests: menu **Test › Run All Tests** (Test Explorer).
 
 ### Command line
 ```powershell
 dotnet build                                   # bouwt alles; waarschuwingen gelden als fouten
-dotnet run --project src/Verenigd.App          # start de applicatie
+dotnet run --project src/BtwBoeker.App          # start de applicatie
 dotnet test --filter "Categorie!=UI"           # unit- en integratietests (snel, ook in CI)
 dotnet test --filter "Categorie=UI"            # UI-tests: start de echte app; muis en toetsenbord niet gebruiken
 ```
@@ -39,7 +39,7 @@ Typ of klik niet tijdens de UI-tests: FlaUI gebruikt het echte toetsenbord en de
 ### Database-migraties
 ```powershell
 dotnet tool restore
-dotnet ef migrations add <Naam> --project src/Verenigd.Infrastructure --output-dir Database/Migraties --namespace Verenigd.Infrastructure.Database.Migraties
+dotnet ef migrations add <Naam> --project src/BtwBoeker.Infrastructure --output-dir Database/Migraties --namespace BtwBoeker.Infrastructure.Database.Migraties
 ```
 Bestaande databases worden bij het openen automatisch bijgewerkt.
 
@@ -47,13 +47,13 @@ Bestaande databases worden bij het openen automatisch bijgewerkt.
 
 ```
 src/
-  Verenigd.Domain/          Domeinmodel en bedrijfsregels (geen dependencies)
-  Verenigd.Application/     Use cases en interfaces (database, instellingen, beveiliging)
-  Verenigd.Infrastructure/  EF Core + SQLite3MC (versleuteling), sleutelbeheer, JSON-instellingen
-  Verenigd.App/             WPF (Fluent-thema), MVVM met CommunityToolkit.Mvvm, Generic Host
+  BtwBoeker.Domain/          Domeinmodel en bedrijfsregels (geen dependencies)
+  BtwBoeker.Application/     Use cases en interfaces (database, instellingen, beveiliging)
+  BtwBoeker.Infrastructure/  EF Core + SQLite3MC (versleuteling), sleutelbeheer, JSON-instellingen
+  BtwBoeker.App/             WPF (Fluent-thema), MVVM met CommunityToolkit.Mvvm, Generic Host
 tests/
-  Verenigd.*.Tests/         xUnit-tests per laag; App.Tests bevat ook de FlaUI-UI-tests
-  Verenigd.Architectuur.Tests/  Bewaakt de lagen en de scheiding leden–financiën
+  BtwBoeker.*.Tests/         xUnit-tests per laag; App.Tests bevat ook de FlaUI-UI-tests
+  BtwBoeker.Architectuur.Tests/  Bewaakt de lagen en de scheiding leden–financiën
 docs/
   ARCHITECTUUR.md           Ontwerpkeuzes, beveiliging en teststrategie
 ```
@@ -62,15 +62,15 @@ docs/
 
 | Bestand | Inhoud |
 |---------|--------|
-| `*.vdb` | De database, volledig versleuteld (SQLite3 Multiple Ciphers, ChaCha20-Poly1305) |
-| `*.vdb.sleutel` | De ingepakte databasesleutel. **Hoort altijd naast de `.vdb`.** Zonder dit bestand is de database niet te openen |
-| `*.vbak` | Een back-up: database en sleutelbestand samen in één bestand, nog steeds versleuteld |
-| `%APPDATA%\Verenigd\instellingen.json` | Thema, laatst geopende database, open tabbladen |
-| `%LOCALAPPDATA%\Verenigd\logs\` | Logbestanden (30 dagen), zonder persoonsgegevens |
+| `*.btwdb` | De database, volledig versleuteld (SQLite3 Multiple Ciphers, ChaCha20-Poly1305) |
+| `*.btwdb.sleutel` | De ingepakte databasesleutel. **Hoort altijd naast de `.btwdb`.** Zonder dit bestand is de database niet te openen |
+| `*.btwbackup` | Een back-up: database en sleutelbestand samen in één bestand, nog steeds versleuteld |
+| `%APPDATA%\BTW-Boeker\instellingen.json` | Thema, laatst geopende database, open tabbladen |
+| `%LOCALAPPDATA%\BTW-Boeker\logs\` | Logbestanden (30 dagen), zonder persoonsgegevens |
 
 SOL3-exports zijn echte persoonsgegevens: bewaar ze in `privé/` of buiten de repository. Hetzelfde geldt voor de Excel-boekhouding die u eenmalig overneemt en voor bankafschriften (CAMT.053). De tests gebruiken alleen verzonnen gegevens.
 
-Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.vdb`, `*.vbak`, sleutelbestanden en de mappen `voorbeelden/` en `privé/`.
+Echte gegevens horen **nooit** in Git. `.gitignore` blokkeert `*.btwdb`, `*.btwbackup`, sleutelbestanden en de mappen `voorbeelden/` en `privé/`.
 
 ## Dependencies
 

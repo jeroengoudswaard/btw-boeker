@@ -3,9 +3,9 @@
 ## Lagen
 
 ```
-Verenigd.App  ──►  Verenigd.Application  ──►  Verenigd.Domain
+BtwBoeker.App  ──►  BtwBoeker.Application  ──►  BtwBoeker.Domain
      │                      ▲
-     └──►  Verenigd.Infrastructure ──┘
+     └──►  BtwBoeker.Infrastructure ──┘
 ```
 
 - **Domain**: entiteiten en waardeobjecten (`Administratie`, `Kleur`). Geen kennis van de database of de UI.
@@ -18,7 +18,7 @@ Verenigd.App  ──►  Verenigd.Application  ──►  Verenigd.Domain
 Hiervoor wordt *envelope encryption* gebruikt:
 
 1. Bij het aanmaken wordt een willekeurige **databasesleutel** van 256 bits gegenereerd. Daarmee versleutelt SQLite3MC het complete databasebestand.
-2. Deze sleutel wordt twee keer ingepakt met AES-256-GCM en opgeslagen in `<naam>.vdb.sleutel`:
+2. Deze sleutel wordt twee keer ingepakt met AES-256-GCM en opgeslagen in `<naam>.btwdb.sleutel`:
    - met een sleutel die met **PBKDF2-SHA256** (600.000 iteraties) van het **wachtwoord** is afgeleid;
    - met een sleutel die met **HKDF-SHA256** van de **herstelsleutel** (200 bits) is afgeleid.
 3. Voordelen:
@@ -27,7 +27,7 @@ Hiervoor wordt *envelope encryption* gebruikt:
    - Een verkeerd wachtwoord wordt betrouwbaar herkend via de GCM-authenticatietag.
 4. De databasesleutel staat alleen in het geheugen zolang de database open is, en wordt bij het sluiten gewist.
 
-Back-ups gebruiken de SQLite online-backup-API. Die levert een consistente kopie, ook terwijl de database open is. De kopie wordt samen met het sleutelbestand in één `.vbak`-bestand (zip) gezet en blijft versleuteld.
+Back-ups gebruiken de SQLite online-backup-API. Die levert een consistente kopie, ook terwijl de database open is. De kopie wordt samen met het sleutelbestand in één `.btwbackup`-bestand (zip) gezet en blijft versleuteld.
 
 ## Tabbladen en administraties
 
@@ -59,13 +59,13 @@ Er is één versleuteld databasebestand met gescheiden tabellen (besluit 39):
 |------|-----------------------------------|----------|
 | Leden | `*.Leden` | `Personen`, `Functies`, `Groepen`, `Voogden`, `Veldherkomst` |
 | Financiën | `*.Financien` | `Betalers`, `BetalerLeden` |
-| Gedeeld | `Verenigd.Domain.Gedeeld` | Alleen `Lidnummer` |
+| Gedeeld | `BtwBoeker.Domain.Gedeeld` | Alleen `Lidnummer` |
 
 - Er is **geen** foreign key tussen beide kanten. `BetalerLeden` koppelt een lidnummer aan een betaler (besluit 36).
-- `Verenigd.Architectuur.Tests` controleert dit op twee manieren: via de signaturen (reflectie) en via de broncode in de mappen `Leden` en `Financien`.
-- De enige plek die beide kanten tegelijk aanspreekt is de SOL3-import (`Verenigd.Application.Import`, `LedenImportOpslag`), want export 2 levert zowel adres- als IBAN-gegevens.
+- `BtwBoeker.Architectuur.Tests` controleert dit op twee manieren: via de signaturen (reflectie) en via de broncode in de mappen `Leden` en `Financien`.
+- De enige plek die beide kanten tegelijk aanspreekt is de SOL3-import (`BtwBoeker.Application.Import`, `LedenImportOpslag`), want export 2 levert zowel adres- als IBAN-gegevens.
 
-Elke persoon heeft een vaste `Guid`, een tijdstip `LaatstGewijzigdUtc` en per veld een herkomst (SOL3, Verenigd of Leiding). Dat is de basis voor de synchronisatie met de webapp (besluit 38).
+Elke persoon heeft een vaste `Guid`, een tijdstip `LaatstGewijzigdUtc` en per veld een herkomst (SOL3, BTW-Boeker of Leiding). Dat is de basis voor de synchronisatie met de webapp (besluit 38).
 
 ## SOL3-import
 
@@ -92,7 +92,7 @@ Elke persoon heeft een vaste `Guid`, een tijdstip `LaatstGewijzigdUtc` en per ve
 | Architectuur | Reflectie + broncode | Lagen, leden ↮ financiën |
 | App | ViewModel + FlaUI | Wizard (stappen, herkenning, uitschrijfkeuze, CSV-export), tabblad Leden (filters, notities, F5), menu-opdracht; UI-test: geïmporteerde leden in tabblad, wizard opent |
 
-Alle testgegevens zijn synthetisch (`tests/Verenigd.Application.Tests/Import/Sol3Voorbeeld.cs`, gedeeld via een gekoppeld bestand).
+Alle testgegevens zijn synthetisch (`tests/BtwBoeker.Application.Tests/Import/Sol3Voorbeeld.cs`, gedeeld via een gekoppeld bestand).
 
 ## Contributie en SEPA-incasso (fase 3)
 
@@ -113,12 +113,12 @@ IncassoStand (leden + financiën, alleen-lezen) ──► ContributieRekenaar �
   - Bij *Definitief maken* rekent de app binnen de transactie opnieuw. Wijkt de uitkomst af van wat de gebruiker heeft gecontroleerd, dan wordt er niets opgeslagen.
 - **Bestand.** pain.008.001.08 met CORE, RCUR, één `PmtInf`, en `NOTPROVIDED` als BIC.
   - De uitvoer is deterministisch: aanmaaktijd en kenmerken komen uit de run. De SHA-256-hash wordt bij de run opgeslagen, en opnieuw opslaan moet dezelfde hash opleveren.
-  - Het schema `src/Verenigd.Application/Incasso/pain.008.001.08.xsd` is het inhoudelijk ongewijzigde ISO 20022-schema (door ISO gegenereerd op 2019-02-14). Het komt uit het open-source pakket *sepaxml* (MIT) en is ingebed als resource.
+  - Het schema `src/BtwBoeker.Application/Incasso/pain.008.001.08.xsd` is het inhoudelijk ongewijzigde ISO 20022-schema (door ISO gegenereerd op 2019-02-14). Het komt uit het open-source pakket *sepaxml* (MIT) en is ingebed als resource.
 - **Tekens en datums.**
   - `SepaTekst` zet tekst om naar de SEPA-tekenset.
   - `Bankwerkdagen` volgt de TARGET-kalender, met de paasdatum berekend.
   - `Bedrag` rekent in hele centen en heeft een eigen notatie, die op elk systeem gelijk is.
-- **Voorbeeldbestand.** `tests/Verenigd.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld. Bijwerken na een bewuste wijziging: draai de test met `VERENIGD_VOORBEELDEN_BIJWERKEN=1` en controleer het verschil voordat u het commit.
+- **Voorbeeldbestand.** `tests/BtwBoeker.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld. Bijwerken na een bewuste wijziging: draai de test met `VERENIGD_VOORBEELDEN_BIJWERKEN=1` en controleer het verschil voordat u het commit.
 
 ## Grootboek (fase 4a)
 
@@ -247,21 +247,21 @@ IFactuurPdfMaker (Application) ◄── FactuurPdfMaker (Infrastructure: MigraD
 ## Toegankelijkheid van groepen (v0.4.6)
 
 - Een `Border` en de panels (`StackPanel`, `Grid`, `DockPanel` enz.) hebben in WPF geen automation peer. Een AutomationId of Name daarop is onzichtbaar voor schermlezers en voor FlaUI.
-- Gebruik voor een herkenbare groep (editorkaart, sectie) `tg:Groepskader` (Border), `tg:Groepspaneel` (StackPanel) of `tg:Groepsraster` (Grid) uit `Verenigd.App.Views.Toegankelijkheid`, met `AutomationProperties.Name`.
+- Gebruik voor een herkenbare groep (editorkaart, sectie) `tg:Groepskader` (Border), `tg:Groepspaneel` (StackPanel) of `tg:Groepsraster` (Grid) uit `BtwBoeker.App.Views.Toegankelijkheid`, met `AutomationProperties.Name`.
 - De architectuurtest `Xaml_zet_geen_AutomationId_op_een_element_zonder_automation_peer` bewaakt dit in alle XAML-bestanden.
 
 ## Standaardinrichting en sjablonen (besluiten 114–121)
 
 ```
 Sjablonen/vereniging.json, stichting.json (embedded resource) ─┐
-.vsjabloon van een andere groep ──────────────────────────────┴► Rekeningsjablonen.Lees (controles)
+.btwsjabloon van een andere groep ──────────────────────────────┴► Rekeningsjablonen.Lees (controles)
    ► Rekeningsjablonen.Rekeningen(sjabloon, speltakken) ► wizard (aan/uit, namen, beginsaldi)
    ► Rekeningsjablonen.Voorstel ► VoorbladVoorstel { Herkomst = "standaardinrichting", MetVerkoopboek }
    ► BoekhoudingDienst.ImporteerAsync (dezelfde route als de Excel-overname: back-up, rubrieken, rekeningen, dagboeken, boekjaar, openingsbalans)
-Ingerichte administratie ► Rekeningsjablonen.UitStand ► Schrijf ► .vsjabloon
+Ingerichte administratie ► Rekeningsjablonen.UitStand ► Schrijf ► .btwsjabloon
 ```
 
-- **Formaat.** JSON met `formaat: "verenigd-rekeningschema"` en `versie: 1`. Een nieuwere versie wordt geweigerd met de melding de app bij te werken. Daardoor kan fase 5 de begrotingsindeling toevoegen zonder oude bestanden te breken.
+- **Formaat.** JSON met `formaat: "btw-boeker-rekeningschema"` en `versie: 1`. Een nieuwere versie wordt geweigerd met de melding de app bij te werken. Daardoor kan fase 5 de begrotingsindeling toevoegen zonder oude bestanden te breken.
 - **Controles bij het lezen:**
   - Unieke nummers (1–99999), een naam per rekening en bestaande rubrieken.
   - Een rol alleen op een balansrekening, precies één reserverekening, en hooguit één kas- en één kruispostenrekening.
@@ -406,9 +406,9 @@ Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀�
 
 ## Sneller (v0.13.0, besluiten 234–237)
 
-- **Meten** (besluit 234): `Meetpunt` (App) schrijft "Duur {Handeling}: {ms}" naar het logbestand (`ShellLog.Duur`, zonder persoonsgegevens) bij aanmaken en openen van de database, de eerste pagina, Start, navigeren, wisselen van administratie, boekhouding laden en overzichten maken. `tests/Verenigd.Infrastructure.Tests/Prestaties`: `Testdatabase` (kunstmatig, 3000 geboekte posten) en `MetingTests` met ruime tijdsbudgetten (trait `Categorie=Prestaties`).
+- **Meten** (besluit 234): `Meetpunt` (App) schrijft "Duur {Handeling}: {ms}" naar het logbestand (`ShellLog.Duur`, zonder persoonsgegevens) bij aanmaken en openen van de database, de eerste pagina, Start, navigeren, wisselen van administratie, boekhouding laden en overzichten maken. `tests/BtwBoeker.Infrastructure.Tests/Prestaties`: `Testdatabase` (kunstmatig, 3000 geboekte posten) en `MetingTests` met ruime tijdsbudgetten (trait `Categorie=Prestaties`).
 - **Verbindingen hergebruiken** (besluit 236): `DatabaseBeheer.Verbindingstekst` zet pooling aan, zodat SQLite3MC de sleutel niet bij elke query opnieuw afleidt. `LeegPool` leegt de pool bij het sluiten van de sessie, aan het eind van *aanmaken* en bij een mislukte opening (bestand weer vrij); de back-upkopie gebruikt geen pool. Architectuurtest: verbindingen alleen via `DatabaseBeheer`/`DatabaseSessie`, en `DisposeAsync` leegt de pool.
-- **Momentopname van de boekhouding:** `BoekhoudingRepository.LaadAsync` bewaart per administratie de geladen stand en geeft die terug zolang de wijzigingsteller van de sessie (`Wijzigingen`) gelijk is. `VerenigdDbContext.SaveChanges(Async)` verhoogt de teller, ongeacht welke opslag schrijft; een bulkbewerking (`ExecuteDelete`/`ExecuteUpdate`/`ExecuteSql`) moet dat zelf doen (architectuurtest). Een stand uit `LaadAsync` is dus **gedeeld en alleen-lezen**: wijzigen gaat altijd via `PasToeAsync`, dat een eigen stand met tracking laadt.
+- **Momentopname van de boekhouding:** `BoekhoudingRepository.LaadAsync` bewaart per administratie de geladen stand en geeft die terug zolang de wijzigingsteller van de sessie (`Wijzigingen`) gelijk is. `BtwBoekerDbContext.SaveChanges(Async)` verhoogt de teller, ongeacht welke opslag schrijft; een bulkbewerking (`ExecuteDelete`/`ExecuteUpdate`/`ExecuteSql`) moet dat zelf doen (architectuurtest). Een stand uit `LaadAsync` is dus **gedeeld en alleen-lezen**: wijzigen gaat altijd via `PasToeAsync`, dat een eigen stand met tracking laadt.
 - **Minder laden op Start:** `Startkaarten.LaadAsync` laadt elke administratie één keer (`Startgegevens`) en de kerncijfers rekenen daarmee verder; de inrichtingsstatus telt leden met `ILedenRepository.TelAsync`.
 - **Lijsten in één keer:** `Verzameling<T>.Vervang` vervangt de inhoud van een lijst met één melding (Reset) in plaats van één per regel.
 
@@ -439,10 +439,10 @@ Desktop (leidend, versleuteld)  ── ledenkopie ──▶  Supabase (EU)  ◀�
 
 ## Publiceren (v0.15.0, besluiten 250–254)
 
-- **Installatiebestand:** `installer/Verenigd.Installer.wixproj` (WiX 5, MS-RL; bewust niet WiX 6 vanwege de onderhoudsbijdrage) met `Package.wxs`. Neemt alle bestanden uit de publicatiemap op (`<Files Include="…\**">`), per computer, vaste `UpgradeCode` met `MajorUpgrade`. Niet in `Verenigd.slnx`: alleen op Windows te bouwen.
-- **Release:** `.github/workflows/release.yml`. Jobs `installatiebestand` (Windows: bouwen, testen zonder UI, `dotnet publish -r win-x64 --self-contained`, MSI, schermafbeeldingen), `webapp` (Linux: build met `BASE_PATH=/verenigd/app`, zip, schermafbeeldingen) en `publiceren` (alleen bij een tag: release `verenigd` in de websiterepository bijwerken, schermafbeeldingen in `verenigd/screens/` committen, `repository_dispatch app-released`). Het geheim `WEBSITE_TOKEN` heeft alleen schrijfrechten op de websiterepository.
-- **Demodatabase:** `tests/Verenigd.Infrastructure.Tests/Demo/Demodatabase.cs`, gedeeld met de UI-tests. Alleen verzonnen namen en `example.org`-adressen; geen IBAN's. Alle posten in het jaar van "nu", zodat Start en de rapporten gevuld zijn.
-- **Webapp in een submap:** `paths.base` uit `BASE_PATH`; `#lib/pad.ts` (`pad`, `huidig`) koppelt de pure functies uit `#lib/paden.ts` aan `$app/paths`. `prerender = true` met `ssr = false`: elke route is een leeg HTML-bestand, de app start in de browser. `hooks.server.ts` draait alleen bij het bouwen en vult `__CSP_SERVER__` in app.html met de oorsprong van `VITE_SUPABASE_URL` (`#lib/csp.ts`). Tweede Playwright-configuratie `playwright.pages.config.ts` test de build onder `/verenigd/app` zonder server.
+- **Installatiebestand:** `installer/BtwBoeker.Installer.wixproj` (WiX 5, MS-RL; bewust niet WiX 6 vanwege de onderhoudsbijdrage) met `Package.wxs`. Neemt alle bestanden uit de publicatiemap op (`<Files Include="…\**">`), per computer, vaste `UpgradeCode` met `MajorUpgrade`. Niet in `BtwBoeker.slnx`: alleen op Windows te bouwen.
+- **Release:** `.github/workflows/release.yml`. Jobs `installatiebestand` (Windows: bouwen, testen zonder UI, `dotnet publish -r win-x64 --self-contained`, MSI, schermafbeeldingen), `webapp` (Linux: build met `BASE_PATH=/btw-boeker/app`, zip, schermafbeeldingen) en `publiceren` (alleen bij een tag: release `btw-boeker` in de websiterepository bijwerken, schermafbeeldingen in `btw-boeker/screens/` committen, `repository_dispatch app-released`). Het geheim `WEBSITE_TOKEN` heeft alleen schrijfrechten op de websiterepository.
+- **Demodatabase:** `tests/BtwBoeker.Infrastructure.Tests/Demo/Demodatabase.cs`, gedeeld met de UI-tests. Alleen verzonnen namen en `example.org`-adressen; geen IBAN's. Alle posten in het jaar van "nu", zodat Start en de rapporten gevuld zijn.
+- **Webapp in een submap:** `paths.base` uit `BASE_PATH`; `#lib/pad.ts` (`pad`, `huidig`) koppelt de pure functies uit `#lib/paden.ts` aan `$app/paths`. `prerender = true` met `ssr = false`: elke route is een leeg HTML-bestand, de app start in de browser. `hooks.server.ts` draait alleen bij het bouwen en vult `__CSP_SERVER__` in app.html met de oorsprong van `VITE_SUPABASE_URL` (`#lib/csp.ts`). Tweede Playwright-configuratie `playwright.pages.config.ts` test de build onder `/btw-boeker/app` zonder server.
 
 ## Auditfile (v0.16.0, besluiten 197 en 255–259)
 

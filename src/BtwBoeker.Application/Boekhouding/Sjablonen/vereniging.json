@@ -1,0 +1,215 @@
+{
+  "formaat": "btw-boeker-rekeningschema",
+  "versie": 1,
+  "naam": "Standaardschema Vereniging (scouting)",
+  "administratie": "Vereniging",
+  "rubrieken": [
+    {
+      "naam": "Vermogen"
+    },
+    {
+      "naam": "Liquide middelen"
+    },
+    {
+      "naam": "Vorderingen en schulden"
+    },
+    {
+      "naam": "Contributie"
+    },
+    {
+      "naam": "Overige baten"
+    },
+    {
+      "naam": "Afdrachten"
+    },
+    {
+      "naam": "Activiteiten"
+    },
+    {
+      "naam": "Huisvesting"
+    },
+    {
+      "naam": "Organisatie"
+    }
+  ],
+  "rekeningen": [
+    {
+      "nummer": 600,
+      "naam": "Algemene reserve",
+      "rubriek": "Vermogen",
+      "soort": "Balans",
+      "rol": "Reserve"
+    },
+    {
+      "nummer": 610,
+      "naam": "Bestemmingsreserve",
+      "rubriek": "Vermogen",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1000,
+      "naam": "Kas",
+      "rubriek": "Liquide middelen",
+      "soort": "Balans",
+      "rol": "Kas"
+    },
+    {
+      "nummer": 1100,
+      "naam": "Betaalrekening",
+      "rubriek": "Liquide middelen",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1150,
+      "naam": "Spaarrekening",
+      "rubriek": "Liquide middelen",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1298,
+      "naam": "Kruisposten",
+      "rubriek": "Liquide middelen",
+      "soort": "Balans",
+      "rol": "Kruisposten"
+    },
+    {
+      "nummer": 1300,
+      "naam": "Debiteuren contributie",
+      "rubriek": "Vorderingen en schulden",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1310,
+      "naam": "Debiteuren overig",
+      "rubriek": "Vorderingen en schulden",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1400,
+      "naam": "Vooruitbetaald en nog te ontvangen",
+      "rubriek": "Vorderingen en schulden",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1600,
+      "naam": "Crediteuren",
+      "rubriek": "Vorderingen en schulden",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 1700,
+      "naam": "Nog te betalen en vooruitontvangen",
+      "rubriek": "Vorderingen en schulden",
+      "soort": "Balans"
+    },
+    {
+      "nummer": 8400,
+      "naam": "Verhuur",
+      "rubriek": "Overige baten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 8500,
+      "naam": "Acties en sponsoring",
+      "rubriek": "Overige baten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 8600,
+      "naam": "Subsidies",
+      "rubriek": "Overige baten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 8700,
+      "naam": "Giften",
+      "rubriek": "Overige baten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 8900,
+      "naam": "Rente",
+      "rubriek": "Overige baten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4000,
+      "naam": "Afdracht Scouting Nederland",
+      "rubriek": "Afdrachten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4100,
+      "naam": "Opkomsten en programma",
+      "rubriek": "Activiteiten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4110,
+      "naam": "Kampen",
+      "rubriek": "Activiteiten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4120,
+      "naam": "Spelmateriaal",
+      "rubriek": "Activiteiten",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4200,
+      "naam": "Huur clubhuis",
+      "rubriek": "Huisvesting",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4210,
+      "naam": "Energie en water",
+      "rubriek": "Huisvesting",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4300,
+      "naam": "Verzekeringen",
+      "rubriek": "Organisatie",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4310,
+      "naam": "Bankkosten",
+      "rubriek": "Organisatie",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4320,
+      "naam": "Kantoor en ICT",
+      "rubriek": "Organisatie",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4330,
+      "naam": "Vrijwilligers en opleiding",
+      "rubriek": "Organisatie",
+      "soort": "Resultaat"
+    },
+    {
+      "nummer": 4390,
+      "naam": "Overige kosten",
+      "rubriek": "Organisatie",
+      "soort": "Resultaat"
+    }
+  ],
+  "speltakken": {
+    "rubriek": "Contributie",
+    "vanaf": 8010,
+    "stap": 10,
+    "naam": "Contributie {speltak}",
+    "standaard": [
+      "Bevers",
+      "Welpen",
+      "Scouts",
+      "Explorers",
+      "Roverscouts"
+    ]
+  }
+}

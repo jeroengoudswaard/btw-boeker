@@ -1,6 +1,6 @@
 # Een versie publiceren (besluiten 250–254)
 
-Een versie van Verenigd komt op de website via de workflow **Release** (`.github/workflows/release.yml`). Die bouwt op Windows het installatiebestand (MSI), bouwt de webapp voor GitHub Pages, maakt schermafbeeldingen met verzonnen gegevens en zet alles op https://jeroengoudswaard.github.io/verenigd/.
+Een versie van BTW-Boeker komt op de website via de workflow **Release** (`.github/workflows/release.yml`). Die bouwt op Windows het installatiebestand (MSI), bouwt de webapp voor GitHub Pages, maakt schermafbeeldingen met verzonnen gegevens en zet alles op https://jeroengoudswaard.github.io/btw-boeker/.
 
 ## Eenmalig: het token voor de website
 
@@ -8,12 +8,12 @@ De workflow schrijft in een andere repository (de website). Daarvoor is een toke
 
 1. Ga op GitHub naar **Settings › Developer settings › Personal access tokens › Fine-grained tokens** en klik op **Generate new token**.
 2. Vul in:
-   - **Token name:** `verenigd-release`
+   - **Token name:** `btw-boeker-release`
    - **Expiration:** bijvoorbeeld 1 jaar (zet een herinnering om hem te vernieuwen)
    - **Repository access:** *Only select repositories* › `jeroengoudswaard/jeroengoudswaard.github.io`
    - **Permissions › Repository permissions:** *Contents* = **Read and write** (nodig voor de release en de schermafbeeldingen). De rest blijft *No access*. *Metadata* = Read-only wordt automatisch gekozen.
 3. Klik op **Generate token** en kopieer het token. U ziet het maar één keer.
-4. Ga in de repository **verenigd** naar **Settings › Secrets and variables › Actions › New repository secret**:
+4. Ga in de repository **btw-boeker** naar **Settings › Secrets and variables › Actions › New repository secret**:
    - **Name:** `WEBSITE_TOKEN`
    - **Secret:** het gekopieerde token
 
@@ -32,9 +32,9 @@ Het token komt nooit in Git en staat alleen in de geheimen van GitHub.
    ```
 
    Op GitHub kan het ook: **Releases › Draft a new release › Choose a tag** `v0.15.0` (*Create new tag on publish*).
-3. Volg de workflow onder **Actions › Release**. Na ±15 minuten staat de MSI op de release `verenigd` van de website, en de website wordt opnieuw gepubliceerd.
+3. Volg de workflow onder **Actions › Release**. Na ±15 minuten staat de MSI op de release `btw-boeker` van de website, en de website wordt opnieuw gepubliceerd.
 
-De MSI heeft het versienummer in de naam (`Verenigd-0.19.0.msi`, besluit 274). De workflow zet het versielabel op de startpagina en de downloadknop van de website op de nieuwe versie (besluit 275, `.github/scripts/website-bijwerken.sh`), dus dat hoeft niet met de hand. Vindt het script het label of de knop niet, bijvoorbeeld na een herontwerp van de site, dan faalt de workflow zichtbaar.
+De MSI heeft het versienummer in de naam (`BtwBoeker-0.19.0.msi`, besluit 274). De workflow zet het versielabel op de startpagina en de downloadknop van de website op de nieuwe versie (besluit 275, `.github/scripts/website-bijwerken.sh`), dus dat hoeft niet met de hand. Vindt het script het label of de knop niet, bijvoorbeeld na een herontwerp van de site, dan faalt de workflow zichtbaar.
 
 Oudere versies blijven op de release staan, zodat u kunt teruggaan.
 
@@ -45,18 +45,18 @@ Oudere versies blijven op de release staan, zodat u kunt teruggaan.
   ```
   dotnet build -c Release
   $env:VERENIGD_WEBSITE_SCHERMAFBEELDINGEN = "$PWD\schermen"
-  dotnet test tests/Verenigd.App.Tests -c Release --no-build --filter "Categorie=Schermafbeeldingen"
+  dotnet test tests/BtwBoeker.App.Tests -c Release --no-build --filter "Categorie=Schermafbeeldingen"
   ```
 
-  Zet de PNG's daarna in `verenigd/screens/` van de websiterepository.
+  Zet de PNG's daarna in `btw-boeker/screens/` van de websiterepository.
 - **Codesigning:** de bèta is niet digitaal ondertekend (besluit 253). Windows SmartScreen meldt daarom "Onbekende uitgever"; de websitepagina legt uit hoe u verder gaat.
-- **De koppeling van de webapp met Supabase** (besluit 254) volgt later. Stel dan in de repository **verenigd** onder **Settings › Secrets and variables › Actions › Variables** de variabelen `SUPABASE_URL` en `SUPABASE_PUBLISHABLE_KEY` in (de publieke sleutel, nooit de `service_role`-sleutel). Voeg in Supabase onder **Authentication › URL Configuration** het adres `https://jeroengoudswaard.github.io/verenigd/app/` toe aan de toegestane adressen.
+- **De koppeling van de webapp met Supabase** (besluit 254) volgt later. Stel dan in de repository **btw-boeker** onder **Settings › Secrets and variables › Actions › Variables** de variabelen `SUPABASE_URL` en `SUPABASE_PUBLISHABLE_KEY` in (de publieke sleutel, nooit de `service_role`-sleutel). Voeg in Supabase onder **Authentication › URL Configuration** het adres `https://jeroengoudswaard.github.io/btw-boeker/app/` toe aan de toegestane adressen.
 
 ## Zelf de MSI bouwen (Windows)
 
 ```
-dotnet publish src/Verenigd.App -c Release -r win-x64 --self-contained -o artifacts/publish
-dotnet build installer/Verenigd.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=%CD%\artifacts\publish
+dotnet publish src/BtwBoeker.App -c Release -r win-x64 --self-contained -o artifacts/publish
+dotnet build installer/BtwBoeker.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=%CD%\artifacts\publish
 ```
 
-De MSI staat daarna als `Verenigd-0.15.0.msi` in `installer/bin/x64/Release/`.
+De MSI staat daarna als `BtwBoeker-0.15.0.msi` in `installer/bin/x64/Release/`.

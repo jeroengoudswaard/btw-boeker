@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Boekhouding\XmlAuditfileFinancieel3.2.xsd" LogicalName="XmlAuditfileFinancieel3.2.xsd" />
+    <EmbeddedResource Include="Boekhouding\Sjablonen\*.json" LogicalName="sjabloon-%(Filename).json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BtwBoeker.Domain\BtwBoeker.Domain.csproj" />
+  </ItemGroup>
+</Project>

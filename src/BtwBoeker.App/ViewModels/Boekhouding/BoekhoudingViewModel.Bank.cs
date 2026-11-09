@@ -1,0 +1,433 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using BtwBoeker.Application.Bank;
+using BtwBoeker.Domain.Financien;
+using BtwBoeker.Domain.Financien.Bank;
+using BtwBoeker.Domain.Financien.Boekhouding;
+
+namespace BtwBoeker.App.ViewModels.Boekhouding;
+
+/// <summary>Subtabbladen Bank en Boekingsregels (stap 4b, besluiten 74–82).</summary>
+public sealed partial class BoekhoudingViewModel
+{
+    private BankDienst? _bankdienst;
+    private bool _mutatieWordtGezet;
+
+    private BankDienst Bankdienst => _bankdienst ??= new BankDienst(_sessie, _tijd);
+
+    public Verzameling<MutatieRegel> Mutaties { get; } = [];
+
+    public ObservableCollection<BoekingsregelRegel> Boekingsregels { get; } = [];
+
+    public IReadOnlyList<MutatieFilterKeuze> Bankfilters { get; } =
+    [
+        new(MutatieFilter.TeVerwerken, "Te verwerken"), new(MutatieFilter.Concept, "Concept"), new(MutatieFilter.Geboekt, "Geboekt"), new(MutatieFilter.Alle, "Alle"),
+    ];
+
+    public IReadOnlyList<Richting> Richtingen { get; } = Enum.GetValues<Richting>();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBankrekeningen))]
+    public partial IReadOnlyList<Dagboek> Bankrekeningen { get; private set; } = [];
+
+    /// <summary>Besluit 269: de keuze van de bankrekening alleen als er meer dan één is.</summary>
+    public bool HeeftMeerdereBankrekeningen => Bankrekeningen.Count > 1;
+
+    /// <summary>Besluit 270: de knop toont hoeveel er te doen is.</summary>
+    public string ConceptenBoekenTekst => $"{Woorden["Knop.ConceptenBoeken"]} ({AantalConceptAlleRekeningen})";
+
+    public string RegelsToepassenTekst => $"Regels _toepassen ({AantalTeVerwerken})";
+
+    [ObservableProperty]
+    public partial Dagboek? GekozenBankrekening { get; set; }
+
+    [ObservableProperty]
+    public partial MutatieFilter Bankfilter { get; set; }
+
+    [ObservableProperty]
+    public partial MutatieRegel? GeselecteerdeMutatie { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<Grootboekrekening> Toewijsrekeningen { get; private set; } = [];
+
+    [ObservableProperty]
+    public partial Grootboekrekening? ToewijsRekening { get; set; }
+
+    [ObservableProperty]
+    public partial string ToewijsOmschrijving { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RegelsToepassenTekst))]
+    public partial int AantalTeVerwerken { get; private set; }
+
+    [ObservableProperty]
+    public partial int AantalConcept { get; private set; }
+
+    /// <summary>Besluit 278: <i>Concepten boeken</i> boekt alle bankrekeningen, dus de knop toont dit aantal en niet dat van de gekozen.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
+    public partial int AantalConceptAlleRekeningen { get; private set; }
+
+    /// <summary>Besluit 277: per bankrekening (dagboek-Id) het aantal te verwerken; de keuzelijst toont het achter de naam.</summary>
+    [ObservableProperty]
+    public partial IReadOnlyDictionary<int, int> TeVerwerkenPerRekening { get; private set; } = new Dictionary<int, int>();
+
+    [ObservableProperty]
+    public partial string Banksaldotekst { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsBankAangesloten { get; private set; } = true;
+
+    [ObservableProperty]
+    public partial bool HeeftBankrekeningen { get; private set; }
+
+    [ObservableProperty]
+    public partial BoekingsregelRegel? GeselecteerdeRegel { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<TransactiecodeKeuze> Transactiecodekeuzes { get; private set; } = [];
+
+    // ---- Inlezen -----------------------------------------------------------------------------
+
+    /// <summary>Bestand › Importeren › Bankafschrift (CAMT.053)…</summary>
+    [RelayCommand]
+    private async Task BankInlezenAsync()
+    {
+        if (_stand is null || !IsIngericht)
+        {
+            _dialogen.ToonInformatie("Bankafschrift inlezen", "Richt eerst de boekhouding in (overnemen uit Excel of leeg beginnen).");
+            return;
+        }
+
+        if (_dialogen.KiesCamtBestanden() is not { Count: > 0 } paden)
+        {
+            return;
+        }
+
+        var wizard = new BankImportViewModel(Bankdienst, _stand, Soort, paden);
+        _dialogen.ToonBankImport(wizard);
+        if (!wizard.IsKlaar || wizard.Resultaat is not { } resultaat)
+        {
+            return;
+        }
+
+        ShellLog.BankafschriftIngelezen(_logger, Soort.ToString(), resultaat.Nieuw, resultaat.Herkend, resultaat.Werkvoorraad);
+        await VoerUitAsync(async () =>
+        {
+            await LaadAsync(Editor?.Id);
+            Subtab = BoekhoudingSubtab.Bank;
+            Melding = wizard.Samenvatting;
+        }, "De boekhouding kon niet worden geladen.");
+    }
+
+    // ---- Werkvoorraad -------------------------------------------------------------------------
+
+    private bool KanToewijzen() => !IsBezig && GeselecteerdeMutatie is { IsTeVerwerken: true } && ToewijsRekening is not null;
+
+    [RelayCommand(CanExecute = nameof(KanToewijzen))]
+    private Task ToewijzenAsync()
+    {
+        var mutatie = GeselecteerdeMutatie!;
+        var rekening = ToewijsRekening!;
+        var volgende = Mutaties.SkipWhile(m => m.Id != mutatie.Id).Skip(1).FirstOrDefault()?.Id;
+        return VoerUitAsync(async () =>
+        {
+            await Bankdienst.WijsToeAsync(Soort, mutatie.Id, rekening.Id, string.IsNullOrWhiteSpace(ToewijsOmschrijving) ? null : ToewijsOmschrijving);
+            await LaadAsync(Editor?.Id);
+            KiesMutatie(volgende);
+        }, null);
+    }
+
+    /// <summary>Ctrl+B (besluit 82): alle concepten van de bankdagboeken boeken na controle.</summary>
+    [RelayCommand]
+    private async Task ConceptenBoekenAsync()
+    {
+        var aantal = _stand?.Bankmutaties.Count(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.Concept) ?? 0;
+        if (aantal == 0)
+        {
+            Melding = Woorden["Melding.GeenBankconcepten"];
+            return;
+        }
+
+        if (!_dialogen.Bevestig("Concepten boeken",
+                string.Create(CultureInfo.CurrentCulture, $"Wilt u {aantal} {(aantal == 1 ? "concept" : "concepten")} van de bank boeken? Een geboekte post kan alleen nog worden tegengeboekt.")))
+        {
+            return;
+        }
+
+        await VoerUitAsync(async () =>
+        {
+            var uitkomst = await Bankdienst.BoekConceptenAsync(Soort, null);
+            await LaadAsync(Editor?.Id);
+            Melding = $"{Woorden.Aantal(uitkomst.Aantal, "Post", "Posten")} {Woorden["Melding.Geboekt"]}.";
+            if (uitkomst.Fouten.Count > 0)
+            {
+                Foutmelding = string.Create(CultureInfo.CurrentCulture, $"{uitkomst.Fouten.Count} niet geboekt; bijvoorbeeld {uitkomst.Fouten[0]}");
+            }
+        }, null);
+    }
+
+    [RelayCommand]
+    private Task PasRegelsToeAsync() =>
+        VoerUitAsync(async () =>
+        {
+            var aantal = await Bankdienst.PasRegelsToeAsync(Soort);
+            await LaadAsync(Editor?.Id);
+            Melding = string.Create(CultureInfo.CurrentCulture, $"{aantal} {(aantal == 1 ? "transactie" : "transacties")} uit de werkvoorraad herkend.");
+        }, null);
+
+    /// <summary>"Regel maken van deze boeking": een nieuwe boekingsregel met tegen-IBAN en richting van de transactie.</summary>
+    [RelayCommand]
+    private void RegelMaken()
+    {
+        if (GeselecteerdeMutatie is not { } regel)
+        {
+            return;
+        }
+
+        var mutatie = regel.Mutatie;
+        var rekening = ToewijsRekening ?? Rekeningvan(mutatie);
+        var nieuw = new BoekingsregelRegel(null, rekening, BoekingsregelVoorwaarden.Van(mutatie))
+        {
+            Naam = mutatie.Tegennaam ?? mutatie.Code.Omschrijving,
+        };
+        VoegRegelToe(nieuw);
+    }
+
+    private Grootboekrekening? Rekeningvan(Bankmutatie mutatie)
+    {
+        var bank = mutatie.Dagboek.Rekening;
+        return mutatie.PostId is { } id && _stand?.Posten.FirstOrDefault(p => p.Id == id) is { } post
+            ? post.Regels.Select(r => r.Rekening).FirstOrDefault(r => bank is null || r.Id != bank.Id)
+            : null;
+    }
+
+    partial void OnGekozenBankrekeningChanged(Dagboek? value) => ToonMutaties(GeselecteerdeMutatie?.Id);
+
+    partial void OnBankfilterChanged(MutatieFilter value) => ToonMutaties(GeselecteerdeMutatie?.Id);
+
+    partial void OnGeselecteerdeMutatieChanged(MutatieRegel? value)
+    {
+        ToewijzenCommand.NotifyCanExecuteChanged();
+        if (_mutatieWordtGezet)
+        {
+            return;
+        }
+
+        ToewijsRekening = value is null ? null : Rekeningvan(value.Mutatie);
+        ToewijsOmschrijving = string.Empty;
+    }
+
+    partial void OnToewijsRekeningChanged(Grootboekrekening? value) => ToewijzenCommand.NotifyCanExecuteChanged();
+
+    private void LaadBank()
+    {
+        if (_stand is null)
+        {
+            return;
+        }
+
+        var gekozen = GekozenBankrekening?.Id;
+        Bankrekeningen = [.. _stand.Dagboeken.Where(d => d.Soort == DagboekSoort.Bank).OrderBy(d => d.Code, StringComparer.Ordinal)];
+        HeeftBankrekeningen = Bankrekeningen.Count > 0;
+        Toewijsrekeningen = [.. _stand.Rekeningen.Where(r => r.IsActief).OrderBy(r => r.Nummer)];
+        Transactiecodekeuzes = [.. _stand.Bankmutaties
+            .SelectMany(m => new[] { (Code: m.Code.Iso, m.Code.Omschrijving), (Code: m.Code.EigenSleutel, m.Code.Omschrijving) })
+            .Where(c => c.Code is not null)
+            .DistinctBy(c => c.Code)
+            .OrderBy(c => c.Code, StringComparer.Ordinal)
+            .Select(c => new TransactiecodeKeuze(c.Code!, c.Omschrijving))];
+        _mutatieWordtGezet = true;
+        try
+        {
+            GekozenBankrekening = Bankrekeningen.FirstOrDefault(d => d.Id == gekozen) ?? (Bankrekeningen.Count > 0 ? Bankrekeningen[0] : null);
+        }
+        finally
+        {
+            _mutatieWordtGezet = false;
+        }
+
+        ToonMutaties(GeselecteerdeMutatie?.Id);
+        LaadRegels();
+    }
+
+    private void ToonMutaties(Guid? selectie)
+    {
+        if (_stand is null)
+        {
+            return;
+        }
+
+        var dagboek = GekozenBankrekening;
+        var alle = _stand.Bankmutaties
+            .Where(m => dagboek is not null && (m.Dagboek.Id == dagboek.Id || ReferenceEquals(m.Dagboek, dagboek)))
+            .Select(m =>
+            {
+                var status = Bankoverzicht.Status(_stand, m);
+                var post = m.PostId is { } id ? _stand.Posten.FirstOrDefault(p => p.Id == id) : null;
+                return new MutatieRegel(m, status, post?.IsGeboekt == true ? post.Nummer : null);
+            })
+            .ToList();
+        AantalTeVerwerken = alle.Count(m => m.Statuswaarde == MutatieStatus.TeVerwerken);
+        TeVerwerkenPerRekening = _stand.Bankmutaties
+            .Where(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.TeVerwerken)
+            .GroupBy(m => m.Dagboek.Id)
+            .ToDictionary(g => g.Key, g => g.Count());
+        AantalConcept = alle.Count(m => m.Statuswaarde == MutatieStatus.Concept);
+        AantalConceptAlleRekeningen = _stand.Bankmutaties.Count(m => Bankoverzicht.Status(_stand, m) == MutatieStatus.Concept); // zelfde telling als ConceptenBoekenAsync
+        var zichtbaar = alle
+            .Where(m => Bankfilter switch
+            {
+                MutatieFilter.TeVerwerken => m.Statuswaarde == MutatieStatus.TeVerwerken,
+                MutatieFilter.Concept => m.Statuswaarde == MutatieStatus.Concept,
+                MutatieFilter.Geboekt => m.Statuswaarde == MutatieStatus.Geboekt,
+                _ => true,
+            })
+            .OrderBy(m => m.DatumWaarde).ThenBy(m => m.Mutatie.Sleutel, StringComparer.Ordinal);
+        Mutaties.Vervang(zichtbaar);
+
+        KiesMutatie(selectie);
+        if (dagboek is null)
+        {
+            Banksaldotekst = string.Empty;
+            IsBankAangesloten = true;
+            return;
+        }
+
+        var saldi = Bankoverzicht.Saldi(_stand, dagboek);
+        IsBankAangesloten = saldi.IsAangesloten;
+        Banksaldotekst = saldi.Bank is { } bank
+            ? $"Saldo bank {Weergave.Datum(saldi.Datum)} {new Bedrag(bank)} · grootboek (met concepten) {new Bedrag(saldi.MetConcepten)}"
+                + (saldi.IsAangesloten ? " ✓" : " — verschil " + new Bedrag(bank - saldi.MetConcepten))
+            : "Nog geen afschriften ingelezen.";
+    }
+
+    private void KiesMutatie(Guid? id)
+    {
+        GeselecteerdeMutatie = Mutaties.FirstOrDefault(m => m.Id == id) ?? Mutaties.FirstOrDefault();
+    }
+
+    // ---- Boekingsregels ----------------------------------------------------------------------
+
+    [RelayCommand]
+    private void NieuweRegel() => VoegRegelToe(new BoekingsregelRegel(null, null));
+
+    private void VoegRegelToe(BoekingsregelRegel regel)
+    {
+        regel.PropertyChanged += RegelGewijzigd;
+        Boekingsregels.Add(regel);
+        GeselecteerdeRegel = regel;
+        Subtab = BoekhoudingSubtab.Boekingsregels;
+        CommandsVernieuwen();
+    }
+
+    private bool KanRegelVerplaatsen() => !IsBezig && GeselecteerdeRegel is { IsNieuw: false } && !Boekingsregels.Any(r => r.IsGewijzigd);
+
+    /// <summary>Alt+↑.</summary>
+    [RelayCommand(CanExecute = nameof(KanRegelVerplaatsen))]
+    private Task RegelOmhoogAsync() => VerplaatsAsync(-1);
+
+    /// <summary>Alt+↓.</summary>
+    [RelayCommand(CanExecute = nameof(KanRegelVerplaatsen))]
+    private Task RegelOmlaagAsync() => VerplaatsAsync(1);
+
+    private Task VerplaatsAsync(int stap)
+    {
+        var id = GeselecteerdeRegel!.Id!.Value;
+        return VoerUitAsync(async () =>
+        {
+            await Bankdienst.VerplaatsRegelAsync(Soort, id, stap);
+            await LaadAsync(Editor?.Id);
+            GeselecteerdeRegel = Boekingsregels.FirstOrDefault(r => r.Id == id);
+        }, null);
+    }
+
+    [RelayCommand]
+    private async Task VerwijderRegelAsync()
+    {
+        if (GeselecteerdeRegel is not { } regel)
+        {
+            return;
+        }
+
+        if (regel.IsNieuw)
+        {
+            regel.PropertyChanged -= RegelGewijzigd;
+            Boekingsregels.Remove(regel);
+            CommandsVernieuwen();
+            return;
+        }
+
+        if (!_dialogen.Bevestig("Boekingsregel verwijderen", $"Wilt u de regel \"{regel.Naam}\" verwijderen? Al gemaakte posten blijven bestaan."))
+        {
+            return;
+        }
+
+        await VoerUitAsync(async () =>
+        {
+            await Bankdienst.VerwijderRegelAsync(Soort, regel.Id!.Value);
+            await LaadAsync(Editor?.Id);
+        }, null);
+    }
+
+    /// <summary>Besluit 276: niet-opgeslagen regels die de lopende Ctrl+S overleven; alleen gevuld tijdens <see cref="BewaarAsync"/>.</summary>
+    private List<BoekingsregelRegel> _halveRegels = [];
+
+    private void LaadRegels()
+    {
+        foreach (var regel in Boekingsregels)
+        {
+            regel.PropertyChanged -= RegelGewijzigd;
+        }
+
+        var gekozen = GeselecteerdeRegel;
+        Boekingsregels.Clear();
+        foreach (var regel in _stand!.Boekingsregels.OrderBy(r => r.Volgorde).ThenBy(r => r.Id))
+        {
+            var rij = _halveRegels.Find(r => r.Id == regel.Id)
+                ?? new BoekingsregelRegel(regel, Toewijsrekeningen.FirstOrDefault(r => r.Id == regel.Rekening.Id) ?? regel.Rekening);
+            VoegGeladenRegelToe(rij);
+        }
+
+        foreach (var nieuw in _halveRegels.Where(r => r.IsNieuw))
+        {
+            VoegGeladenRegelToe(nieuw);
+        }
+
+        GeselecteerdeRegel = Boekingsregels.FirstOrDefault(r => ReferenceEquals(r, gekozen) || (!r.IsNieuw && r.Id == gekozen?.Id));
+    }
+
+    private void VoegGeladenRegelToe(BoekingsregelRegel rij)
+    {
+        // Een behouden regel wijst nog naar een object uit de vorige stand; de keuzelijst toont alleen objecten uit zijn eigen lijst.
+        if (rij.GekozenRekening is { } rekening && Toewijsrekeningen.FirstOrDefault(r => r.Id == rekening.Id) is { } actueel)
+        {
+            rij.GekozenRekening = actueel;
+        }
+
+        rij.PropertyChanged += RegelGewijzigd;
+        Boekingsregels.Add(rij);
+    }
+
+    private void RegelGewijzigd(object? sender, PropertyChangedEventArgs e) => CommandsVernieuwen();
+
+    partial void OnGeselecteerdeRegelChanged(BoekingsregelRegel? value) => CommandsVernieuwen();
+
+    private async Task BewaarRegelsAsync()
+    {
+        foreach (var regel in Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is null).ToList())
+        {
+            await Bankdienst.BewaarRegelAsync(Soort, regel.Invoer);
+        }
+    }
+
+    private void BankCommandsVernieuwen()
+    {
+        ToewijzenCommand.NotifyCanExecuteChanged();
+        RegelOmhoogCommand.NotifyCanExecuteChanged();
+        RegelOmlaagCommand.NotifyCanExecuteChanged();
+    }
+}

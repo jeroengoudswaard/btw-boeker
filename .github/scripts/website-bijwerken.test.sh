@@ -29,9 +29,9 @@ faalt() { # omschrijving, site, versie
 }
 
 maak_site() { # map, regeleinde
-  mkdir -p "$1/verenigd"
-  printf '<h3>TraceLab <span class="tag">v0.1b · beta</span></h3>%b<h3>Verenigd <span class="tag">v0.16 · beta</span></h3>%b' "$2" "$2" > "$1/index.html"
-  printf '<a class="btn primary" href="https://github.com/x/x.github.io/releases/download/verenigd/Verenigd.msi">Download</a>%b<a class="btn" href="https://github.com/x/x.github.io/releases/tag/verenigd">Notes</a>%b' "$2" "$2" > "$1/verenigd/index.html"
+  mkdir -p "$1/btw-boeker"
+  printf '<h3>TraceLab <span class="tag">v0.1b · beta</span></h3>%b<h3>BTW-Boeker <span class="tag">v0.16 · beta</span></h3>%b' "$2" "$2" > "$1/index.html"
+  printf '<a class="btn primary" href="https://github.com/x/x.github.io/releases/download/btw-boeker/BtwBoeker.msi">Download</a>%b<a class="btn" href="https://github.com/x/x.github.io/releases/tag/btw-boeker">Notes</a>%b' "$2" "$2" > "$1/btw-boeker/index.html"
 }
 
 # Eerste keer: vaste link en kort label worden de volledige versie.
@@ -40,22 +40,22 @@ maak_site "$site" '\n'
 bash "$script" "$site" 0.19.0 || { echo "FOUT: eerste keer faalde"; fouten=$((fouten + 1)); }
 bevat "label" "$site/index.html" '<span class="tag">v0.19.0 · beta</span>'
 bevat "andere app ongewijzigd" "$site/index.html" 'TraceLab <span class="tag">v0.1b · beta</span>'
-bevat "downloadlink" "$site/verenigd/index.html" 'releases/download/verenigd/Verenigd-0.19.0.msi"'
-bevat_niet "oude link" "$site/verenigd/index.html" 'verenigd/Verenigd.msi'
-bevat "releaseinformatie ongewijzigd" "$site/verenigd/index.html" 'releases/tag/verenigd"'
+bevat "downloadlink" "$site/btw-boeker/index.html" 'releases/download/btw-boeker/BtwBoeker-0.19.0.msi"'
+bevat_niet "oude link" "$site/btw-boeker/index.html" 'btw-boeker/BtwBoeker.msi'
+bevat "releaseinformatie ongewijzigd" "$site/btw-boeker/index.html" 'releases/tag/btw-boeker"'
 
 # Volgende versie, ook een patch: de vorige versie wordt vervangen.
 bash "$script" "$site" 0.19.1 || { echo "FOUT: patchversie faalde"; fouten=$((fouten + 1)); }
 bevat "patch label" "$site/index.html" '<span class="tag">v0.19.1 · beta</span>'
-bevat "patch link" "$site/verenigd/index.html" 'Verenigd-0.19.1.msi"'
-bevat_niet "vorige link" "$site/verenigd/index.html" 'Verenigd-0.19.0.msi'
+bevat "patch link" "$site/btw-boeker/index.html" 'BtwBoeker-0.19.1.msi"'
+bevat_niet "vorige link" "$site/btw-boeker/index.html" 'BtwBoeker-0.19.0.msi'
 
 # Twee keer dezelfde versie verandert niets.
 cp "$site/index.html" "$map/label-voor"
-cp "$site/verenigd/index.html" "$map/link-voor"
+cp "$site/btw-boeker/index.html" "$map/link-voor"
 bash "$script" "$site" 0.19.1 || { echo "FOUT: tweede keer faalde"; fouten=$((fouten + 1)); }
 cmp -s "$site/index.html" "$map/label-voor" || { echo "FOUT: label veranderde bij dezelfde versie"; fouten=$((fouten + 1)); }
-cmp -s "$site/verenigd/index.html" "$map/link-voor" || { echo "FOUT: link veranderde bij dezelfde versie"; fouten=$((fouten + 1)); }
+cmp -s "$site/btw-boeker/index.html" "$map/link-voor" || { echo "FOUT: link veranderde bij dezelfde versie"; fouten=$((fouten + 1)); }
 
 # Regeleinden blijven zoals ze waren.
 site="$map/crlf"
@@ -71,11 +71,11 @@ site="$map/geen-label"
 maak_site "$site" '\n'
 printf '<h3>Iets anders</h3>\n' > "$site/index.html"
 faalt "geen label" "$site" 0.19.0
-bevat "link niet half gewijzigd" "$site/verenigd/index.html" 'verenigd/Verenigd.msi'
+bevat "link niet half gewijzigd" "$site/btw-boeker/index.html" 'btw-boeker/BtwBoeker.msi'
 
 site="$map/geen-knop"
 maak_site "$site" '\n'
-printf '<a href="elders">Download</a>\n' > "$site/verenigd/index.html"
+printf '<a href="elders">Download</a>\n' > "$site/btw-boeker/index.html"
 faalt "geen knop" "$site" 0.19.0
 bevat "label niet half gewijzigd" "$site/index.html" 'v0.16 · beta'
 

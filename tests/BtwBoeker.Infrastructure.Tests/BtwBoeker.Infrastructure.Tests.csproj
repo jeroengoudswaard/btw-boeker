@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Testnamen in het Nederlands met underscores zijn bewust -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BtwBoeker.Infrastructure\BtwBoeker.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Dezelfde synthetische CAMT.053-bestanden als in de Application-tests -->
+    <Compile Include="..\BtwBoeker.Application.Tests\Bank\CamtVoorbeeld.cs" Link="Bank\CamtVoorbeeld.cs" />
+  </ItemGroup>
+</Project>

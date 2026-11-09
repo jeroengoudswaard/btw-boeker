@@ -1,0 +1,16 @@
+<UserControl x:Class="BtwBoeker.App.Views.Gedeeld.LeegScherm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Wortel">
+    <!-- Besluit 168: een lege lijst krijgt uitleg en één knop. -->
+    <Border Style="{StaticResource Kaart}" MaxWidth="520" HorizontalAlignment="Left" Margin="0,0,0,12"
+            AutomationProperties.Name="{Binding Titel, ElementName=Wortel}">
+        <StackPanel>
+            <TextBlock Text="{Binding Titel, ElementName=Wortel}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Tekst, ElementName=Wortel}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
+            <Button Content="{Binding Knoptekst, ElementName=Wortel}" Command="{Binding Opdracht, ElementName=Wortel}" HorizontalAlignment="Left" Margin="0,12,0,0"
+                    Visibility="{Binding Opdracht, ElementName=Wortel, Converter={StaticResource NietNullNaarZichtbaar}}"
+                    AutomationProperties.AutomationId="{Binding Lijst, ElementName=Wortel, StringFormat=Leeg_{0}}" />
+        </StackPanel>
+    </Border>
+</UserControl>
