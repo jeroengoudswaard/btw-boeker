@@ -18,7 +18,7 @@ using BtwBoeker.Infrastructure.Database;
 using BtwBoeker.Infrastructure.Instellingen;
 using BtwBoeker.Infrastructure.Pdf;
 using BtwBoeker.Infrastructure.Tests.Demo;
-using BTW-Boeker.Tests.Gedeeld;
+using BtwBoeker.Tests.Gedeeld;
 using FlauiApplicatie = FlaUI.Core.Application;
 
 namespace BtwBoeker.App.Tests.UI;

@@ -97,6 +97,25 @@ public class ProductnaamTests
     }
 
     [Fact]
+    public void Namespaces_en_methodenamen_bevatten_geen_koppelteken_uit_de_productnaam()
+    {
+        var wortel = Opslagplaats();
+        var gevonden = Gecontroleerd()
+            .Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(p => File.ReadAllLines(Path.Combine(wortel, p))
+                .Select((regel, i) => (Pad: p, Nummer: i + 1, Regel: regel.Trim())))
+            .Where(r => (r.Regel.StartsWith("namespace ", StringComparison.Ordinal)
+                    || r.Regel.StartsWith("using ", StringComparison.Ordinal)
+                    || r.Regel.StartsWith("public void ", StringComparison.Ordinal)
+                    || r.Regel.StartsWith("public async Task ", StringComparison.Ordinal))
+                && r.Regel.Contains("BTW-Boeker", StringComparison.Ordinal))
+            .Select(r => $"{r.Pad}:{r.Nummer}")
+            .ToList();
+
+        Assert.Empty(gevonden);
+    }
+
+    [Fact]
     public void Broncode_gebruikt_geen_extensies_van_het_oude_product()
     {
         var wortel = Opslagplaats();

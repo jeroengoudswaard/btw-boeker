@@ -1,5 +1,5 @@
 using BtwBoeker.App.Diensten;
-using BTW-Boeker.Tests.Gedeeld;
+using BtwBoeker.Tests.Gedeeld;
 
 namespace BtwBoeker.App.Tests.UI;
 

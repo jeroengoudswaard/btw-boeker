@@ -10,7 +10,7 @@ using BtwBoeker.Infrastructure.Database;
 using BtwBoeker.Infrastructure.Excel;
 using BtwBoeker.Infrastructure.Pdf;
 
-using BTW-Boeker.Tests.Gedeeld;
+using BtwBoeker.Tests.Gedeeld;
 
 namespace BtwBoeker.Infrastructure.Tests.Bijlagen;
 

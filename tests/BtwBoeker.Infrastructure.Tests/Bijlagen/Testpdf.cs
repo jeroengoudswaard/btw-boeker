@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace BTW-Boeker.Tests.Gedeeld;
+namespace BtwBoeker.Tests.Gedeeld;
 
 /// <summary>Maakt kleine, verzonnen PDF-bestanden voor tests (gedeeld met de Windows-tests van de app).</summary>
 public static class Testpdf

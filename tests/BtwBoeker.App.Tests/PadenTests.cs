@@ -25,7 +25,7 @@ public sealed class PadenTests
     }
 
     [Fact]
-    public void Standaardpaden_zijn_gescheiden_van_BTW-Boeker()
+    public void Standaardpaden_staan_in_de_eigen_btwboeker_map()
     {
         var eerder = Environment.GetEnvironmentVariable(DataMapOmgeving);
         try
@@ -38,8 +38,6 @@ public sealed class PadenTests
             Assert.Equal(
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BTW-Boeker", "logs"),
                 Paden.Logmap);
-            Assert.DoesNotContain("BTW-Boeker", Paden.Instellingenbestand, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain("BTW-Boeker", Paden.Logmap, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {

@@ -31,7 +31,7 @@
         <Shortcut Id="SnelkoppelingStartmenu"
                   Name="BTW-Boeker"
                   Description="Leden, contributie en boekhouding"
-                  Target="[INSTALLFOLDER]BtwBoeker.exe"
+                  Target="[INSTALLFOLDER]BTW-Boeker.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="BtwBoeker.ico" />
         <RegistryValue Root="HKCU" Key="Software\BtwBoeker" Name="Snelkoppeling" Type="integer" Value="1" KeyPath="yes" />
