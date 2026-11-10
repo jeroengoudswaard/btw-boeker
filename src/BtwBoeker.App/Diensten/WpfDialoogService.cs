@@ -74,12 +74,6 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
-    public string? KiesExcelBestand()
-    {
-        var dialoog = new OpenFileDialog { Title = "Boekhouding (Excel) kiezen", Filter = "Excel-werkmap (*.xlsx)|*.xlsx", CheckFileExists = true };
-        return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
-    }
-
     public IReadOnlyList<string>? KiesCamtBestanden()
     {
         var dialoog = new OpenFileDialog
@@ -115,10 +109,6 @@ internal sealed class WpfDialoogService : IDialoogService
     public bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard) => ToonModaal(new StandaardinrichtingVenster(wizard));
 
     public bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor) => ToonModaal(new JaarrekeningIndelingVenster(editor));
-
-    public bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard) => ToonModaal(new BoekhoudingImportVenster(wizard));
-
-    public bool ToonHistorieImport(HistorieImportViewModel wizard) => ToonModaal(new HistorieImportVenster(wizard));
 
     public void ToonStartwizard(ViewModels.Inrichting.StartwizardViewModel wizard) => ToonModaal(new Views.Inrichting.StartwizardVenster(wizard));
 

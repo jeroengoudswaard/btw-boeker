@@ -7,8 +7,8 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.Application.Boekhouding;
 
 /// <summary>
-/// Boekhouding per administratie: posten (concept, boeken, tegenboeken), rekeningschema, jaarafsluiting en de eenmalige
-/// overname uit Excel. Ingrijpende stappen (import, afsluiten) beginnen met een back-up.
+/// Boekhouding per administratie: posten (concept, boeken, tegenboeken), rekeningschema, jaarafsluiting en het eenmalig
+/// inrichten. Ingrijpende stappen (inrichten, afsluiten) beginnen met een back-up.
 /// </summary>
 public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
 {
@@ -44,7 +44,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         {
             if (stand.Boekjaar(jaar) is not null)
             {
-                throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} bestaat al.");
+                throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} bestaat al.");
             }
 
             var wijziging = new BoekhoudingWijziging<bool>(true);
@@ -202,7 +202,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
     {
         var vooraf = await Repository.LaadAsync(administratie, annulering).ConfigureAwait(false);
         ControleerAfsluiten(vooraf, jaar);
-        await sessie.MaakBackupAsync(BackupPad("afsluiting-" + administratie.ToString().ToLowerInvariant() + "-" + VoorbladInlezer.Jaar(jaar)), annulering)
+        await sessie.MaakBackupAsync(BackupPad("afsluiting-" + administratie.ToString().ToLowerInvariant() + "-" + Jaartekst(jaar)), annulering)
             .ConfigureAwait(false);
 
         return await Repository.PasToeAsync(administratie, stand =>
@@ -217,11 +217,11 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             var toegevoegdePosten = new List<Journaalpost>();
             if (saldi.Count > 0)
             {
-                var afsluiting = new Journaalpost(administratie, memoriaal, new DateOnly(jaar, 12, 31), $"Afsluiting boekjaar {VoorbladInlezer.Jaar(jaar)}", PostSoort.Afsluiting);
+                var afsluiting = new Journaalpost(administratie, memoriaal, new DateOnly(jaar, 12, 31), $"Afsluiting boekjaar {Jaartekst(jaar)}", PostSoort.Afsluiting);
                 var regels = saldi.Select(s => new RegelInvoer(s.Rekening, null, s.Saldo < 0 ? new Bedrag(-s.Saldo) : Bedrag.Nul, s.Saldo > 0 ? new Bedrag(s.Saldo) : Bedrag.Nul)).ToList();
                 if (resultaat != 0)
                 {
-                    regels.Add(new RegelInvoer(reserve, "Resultaat " + VoorbladInlezer.Jaar(jaar), resultaat < 0 ? new Bedrag(-resultaat) : Bedrag.Nul, resultaat > 0 ? new Bedrag(resultaat) : Bedrag.Nul));
+                    regels.Add(new RegelInvoer(reserve, "Resultaat " + Jaartekst(jaar), resultaat < 0 ? new Bedrag(-resultaat) : Bedrag.Nul, resultaat > 0 ? new Bedrag(resultaat) : Bedrag.Nul));
                 }
 
                 afsluiting.Wijzig(memoriaal, afsluiting.Datum, afsluiting.Omschrijving, regels);
@@ -240,7 +240,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             var balans = Grootboek.Saldibalans(naAfsluiting, jaar).Regels.Where(r => r.Rekening.Soort == RekeningSoort.Balans && r.Saldo != 0).ToList();
             if (balans.Count > 0)
             {
-                var opening = new Journaalpost(administratie, memoriaal, new DateOnly(jaar + 1, 1, 1), $"Openingsbalans {VoorbladInlezer.Jaar(jaar + 1)}", PostSoort.Openingsbalans);
+                var opening = new Journaalpost(administratie, memoriaal, new DateOnly(jaar + 1, 1, 1), $"Openingsbalans {Jaartekst(jaar + 1)}", PostSoort.Openingsbalans);
                 opening.Wijzig(memoriaal, opening.Datum, opening.Omschrijving,
                     balans.Select(b => new RegelInvoer(b.Rekening, null, b.Saldo > 0 ? new Bedrag(b.Saldo) : Bedrag.Nul, b.Saldo < 0 ? new Bedrag(-b.Saldo) : Bedrag.Nul)));
                 opening.Boek(VolgendNummer(naAfsluiting, opening), NuUtc);
@@ -255,15 +255,15 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
     public Task HeropenBoekjaarAsync(AdministratieSoort administratie, int jaar, CancellationToken annulering = default) =>
         Repository.PasToeAsync(administratie, stand =>
         {
-            var boekjaar = stand.Boekjaar(jaar) ?? throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} bestaat niet.");
+            var boekjaar = stand.Boekjaar(jaar) ?? throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} bestaat niet.");
             if (boekjaar.IsOpen)
             {
-                throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} is niet afgesloten.");
+                throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} is niet afgesloten.");
             }
 
             if (stand.Boekjaar(jaar + 1) is { IsOpen: false })
             {
-                throw new InvalidOperationException($"Heropen eerst boekjaar {VoorbladInlezer.Jaar(jaar + 1)}.");
+                throw new InvalidOperationException($"Heropen eerst boekjaar {Jaartekst(jaar + 1)}.");
             }
 
             var wijziging = new BoekhoudingWijziging<bool>(true);
@@ -274,12 +274,13 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         }, annulering);
 
     /// <summary>
-    /// Eenmalige overname uit Excel (besluit 62); alleen in een lege administratie. Een verschil in de beginbalans wordt
-    /// geweigerd, tenzij de gebruiker bewust <paramref name="verschil"/> kiest (besluit 73).
+    /// Richt een lege administratie in volgens een voorstel (sjabloon of, in stap 2b, een XAF-bestand): rubrieken,
+    /// rekeningen, dagboeken, het beginjaar en de openingsbalans. Een verschil in de beginbalans wordt geweigerd, tenzij
+    /// de gebruiker bewust <paramref name="verschil"/> kiest.
     /// </summary>
     /// <exception cref="InvalidOperationException">Al ingericht, of niet in evenwicht zonder (geldige) verschilrekening.</exception>
     public async Task ImporteerAsync(
-        AdministratieSoort administratie, VoorbladVoorstel voorstel, VerschilKeuze? verschil = null, CancellationToken annulering = default)
+        AdministratieSoort administratie, Inrichtvoorstel voorstel, VerschilKeuze? verschil = null, CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(voorstel);
         if (!voorstel.IsInEvenwicht && verschil is null)
@@ -296,7 +297,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         var vooraf = await Repository.LaadAsync(administratie, annulering).ConfigureAwait(false);
         if (vooraf.IsIngericht || vooraf.Posten.Count > 0)
         {
-            throw new InvalidOperationException("Deze administratie heeft al een rekeningschema; de overname kan maar één keer.");
+            throw new InvalidOperationException("Deze administratie heeft al een rekeningschema; inrichten kan maar één keer.");
         }
 
         await sessie.MaakBackupAsync(BackupPad("boekhouding-import"), annulering).ConfigureAwait(false);
@@ -316,7 +317,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 wijziging.Toevoegen.Add(rubriek);
             }
 
-            var rekeningen = new List<(VoorbladRekening Bron, Grootboekrekening Rekening)>();
+            var rekeningen = new List<(Inrichtrekening Bron, Grootboekrekening Rekening)>();
             foreach (var bron in voorstel.Rekeningen.Where(r => !r.Overslaan))
             {
                 var rekening = new Grootboekrekening(administratie, bron.Nummer, bron.Naam, bron.Soort,
@@ -367,7 +368,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             if (saldi.Count > 0)
             {
                 var opening = new Journaalpost(administratie, memoriaal, new DateOnly(voorstel.Beginjaar, 1, 1),
-                    $"Openingsbalans {VoorbladInlezer.Jaar(voorstel.Beginjaar)} ({voorstel.Herkomst})", PostSoort.Openingsbalans);
+                    $"Openingsbalans {Jaartekst(voorstel.Beginjaar)} ({voorstel.Herkomst})", PostSoort.Openingsbalans);
                 var regels = saldi.Select(s =>
                 {
                     var saldo = s.Bron.Debet.Centen - s.Bron.Credit.Centen;
@@ -388,6 +389,8 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return wijziging;
         }, annulering).ConfigureAwait(false);
     }
+
+    private static string Jaartekst(int jaar) => jaar.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private static (Journaalpost Post, bool Nieuw) MaakOfWijzig(BoekhoudingStand stand, AdministratieSoort administratie, PostInvoer invoer)
     {
@@ -446,21 +449,21 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         var jaar = stand.Boekjaar(datum.Year);
         if (jaar is null)
         {
-            throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(datum.Year)} bestaat niet. Open het eerst bij Boekjaren.");
+            throw new InvalidOperationException($"Boekjaar {Jaartekst(datum.Year)} bestaat niet. Open het eerst bij Boekjaren.");
         }
 
         if (!jaar.IsOpen)
         {
-            throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(datum.Year)} is afgesloten.");
+            throw new InvalidOperationException($"Boekjaar {Jaartekst(datum.Year)} is afgesloten.");
         }
     }
 
     private static void ControleerAfsluiten(BoekhoudingStand stand, int jaar)
     {
-        var boekjaar = stand.Boekjaar(jaar) ?? throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} bestaat niet.");
+        var boekjaar = stand.Boekjaar(jaar) ?? throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} bestaat niet.");
         if (!boekjaar.IsOpen)
         {
-            throw new InvalidOperationException($"Boekjaar {VoorbladInlezer.Jaar(jaar)} is al afgesloten.");
+            throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} is al afgesloten.");
         }
 
         if (stand.Boekjaren.Any(b => b.Jaar < jaar && b.IsOpen))

@@ -346,28 +346,6 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// Het historische boekjaar (besluiten 122 en 125) telt nooit mee in het grootboek: in de applicatielaag gebruiken
-    /// alleen het model, de grootboekberekeningen (voor het historische jaar zelf) en de historie-import de historische
-    /// regels en totalen. Bank, contributie, facturen en de jaarafsluiting blijven er dus buiten.
-    /// </summary>
-    [Fact]
-    public void Historische_regels_worden_alleen_gebruikt_door_model_grootboek_en_historie()
-    {
-        string[] toegestaan = ["BoekhoudingModel.cs", "Grootboek.cs", "HistorieDienst.cs", "HistorieInlezer.cs"];
-        var overtredingen = Directory
-            .EnumerateFiles(Path.Combine(Repositorymap(), "src", "BtwBoeker.Application"), "*.cs", SearchOption.AllDirectories)
-            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
-            .Where(f => File.ReadAllText(f) is var tekst
-                && (tekst.Contains("HistorischeRegel", StringComparison.Ordinal) || tekst.Contains("HistorischTotaal", StringComparison.Ordinal)
-                    || tekst.Contains("HistorischeTotalen", StringComparison.Ordinal)))
-            .Select(Path.GetFileName)
-            .ToList();
-
-        Assert.Empty(overtredingen);
-    }
-
-    /// <summary>
     /// De jaarrekeningindeling is alleen weergave (besluiten 263–268): in de applicatielaag gebruiken alleen het model, de
     /// rekenaar, de dienst, de rapporten en het sjabloonbestand haar; grootboek, jaarafsluiting, bank en boekingen niet.
     /// </summary>

@@ -77,7 +77,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel), nameof(HeeftLaatsteDatabase), nameof(LaatsteDatabaseNaam), nameof(LaatsteDatabaseMap))]
     [NotifyCanExecuteChangedFor(
         nameof(OpenModuleCommand), nameof(OpenModuleViaSneltoetsCommand), nameof(SluitDatabaseCommand), nameof(MaakBackupCommand),
-        nameof(ImporteerBoekhoudingCommand), nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand), nameof(ImporteerHistorieCommand))]
+        nameof(ImporteerBankafschriftCommand), nameof(ImporteerSjabloonCommand))]
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
@@ -273,31 +273,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     }
 
     /// <summary>
-    /// Bestand › Importeren › Boekhouding uit Excel (besluit 62): opent Boekhouding voor de administratie van het actieve
-    /// tabblad, anders de Vereniging (besluit 17), en start de importwizard.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task ImporteerBoekhoudingAsync()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
-
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
-        {
-            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            await boekhouding.OvernemenUitExcelCommand.ExecuteAsync(null);
-        }
-    }
-
-    /// <summary>
     /// Bestand › Importeren › Bankafschrift (CAMT.053): opent Boekhouding voor de administratie van het actieve tabblad,
     /// anders de Vereniging (besluit 17), en start de bankimport.
     /// </summary>
@@ -344,31 +319,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             }
 
             await boekhouding.SjabloonInlezenCommand.ExecuteAsync(null);
-        }
-    }
-
-    /// <summary>
-    /// Bestand › Importeren › Historie uit Excel (besluit 125): opent Boekhouding voor de administratie van het actieve
-    /// tabblad, anders de Vereniging (besluit 17), en neemt de historie over.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task ImporteerHistorieAsync()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
-
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
-        {
-            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            await boekhouding.HistorieInlezenCommand.ExecuteAsync(null);
         }
     }
 
@@ -458,7 +408,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     Task IStartwizardRegie.RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze) =>
         InBoekhoudingAsync(administratie, boekhouding => keuze switch
         {
-            Boekhoudingkeuze.Excel => boekhouding.OvernemenUitExcelCommand.ExecuteAsync(null),
             Boekhoudingkeuze.Standaard => boekhouding.StandaardInrichtenCommand.ExecuteAsync(null),
             Boekhoudingkeuze.Sjabloon => boekhouding.SjabloonInlezenCommand.ExecuteAsync(null),
             _ => boekhouding.LeegBeginnenCommand.ExecuteAsync(null),

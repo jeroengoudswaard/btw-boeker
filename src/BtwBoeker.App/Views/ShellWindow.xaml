@@ -98,12 +98,8 @@
                 <MenuItem Header="Op_slaan" InputGestureText="Ctrl+S" Command="{Binding OpslaanCommand}" />
                 <Separator />
                 <MenuItem Header="_Importeren" AutomationProperties.AutomationId="Menu_Importeren">
-                    <MenuItem Header="_Boekhouding uit Excel..." Command="{Binding ImporteerBoekhoudingCommand}"
-                              AutomationProperties.AutomationId="Menu_ImporteerBoekhouding" />
                     <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
-                    <MenuItem Header="_Historie uit Excel..." Command="{Binding ImporteerHistorieCommand}"
-                              AutomationProperties.AutomationId="Menu_ImporteerHistorie" />
                     <MenuItem Header="_Rekeningschema-sjabloon..." Command="{Binding ImporteerSjabloonCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerSjabloon" />
                 </MenuItem>

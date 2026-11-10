@@ -14,23 +14,8 @@ public sealed class XafExportViewModelTests : IDisposable
         _omgeving.Dispose();
     }
 
-    /// <summary>Ingericht via de Excel-overname: rekeningschema plus een geboekte openingsbalans 2026.</summary>
-    private async Task<ViewModels.Boekhouding.BoekhoudingViewModel> IngerichtAsync()
-    {
-        var vm = _omgeving.Maak();
-        await vm.VernieuwCommand.ExecuteAsync(null);
-        _omgeving.Dialogen.ExcelBestand = "boekhouding.xlsx";
-        _omgeving.Dialogen.BoekhoudingImport = async wizard =>
-        {
-            await wizard.VolgendeCommand.ExecuteAsync(null);
-            await wizard.VolgendeCommand.ExecuteAsync(null);
-            await wizard.VolgendeCommand.ExecuteAsync(null);
-            return wizard.IsKlaar;
-        };
-        await vm.OvernemenUitExcelCommand.ExecuteAsync(null);
-        Assert.True(vm.IsIngericht);
-        return vm;
-    }
+    /// <summary>Ingericht met een voorstel: rekeningschema plus een geboekte openingsbalans 2026.</summary>
+    private Task<ViewModels.Boekhouding.BoekhoudingViewModel> IngerichtAsync() => _omgeving.OpenIngerichtAsync();
 
     [Fact]
     public async Task Exporteert_het_gekozen_boekjaar_als_geldige_auditfile()

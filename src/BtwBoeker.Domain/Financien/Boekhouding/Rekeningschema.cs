@@ -231,14 +231,7 @@ public sealed class Boekjaar
     public BoekjaarStatus Status { get; private set; }
     public DateTime? AfgeslotenUtc { get; private set; }
 
-    /// <summary>Overgenomen uit Excel als losse T-rekeningen (besluit 122): alleen-lezen en nooit in het grootboek.</summary>
-    public bool IsHistorisch { get; private set; }
-
     public bool IsOpen => Status == BoekjaarStatus.Open;
-
-    /// <summary>Een afgesloten, alleen-lezen boekjaar met de historie uit de Excel-boekhouding.</summary>
-    public static Boekjaar Historisch(AdministratieSoort administratie, int jaar, DateTime nuUtc) =>
-        new(administratie, jaar) { IsHistorisch = true, Status = BoekjaarStatus.Afgesloten, AfgeslotenUtc = nuUtc };
 
     public void Sluit(DateTime nuUtc)
     {
@@ -253,11 +246,6 @@ public sealed class Boekjaar
 
     public void Heropen()
     {
-        if (IsHistorisch)
-        {
-            throw new InvalidOperationException($"Boekjaar {Jaar} is historisch (overgenomen uit Excel) en kan niet worden heropend.");
-        }
-
         Status = BoekjaarStatus.Open;
         AfgeslotenUtc = null;
     }

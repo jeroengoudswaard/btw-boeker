@@ -43,7 +43,7 @@ public sealed class BijlagenViewModelTests : IDisposable
         var dienst = new BoekhoudingDienst(_omgeving.Sessie, _omgeving.Tijd);
         if (!_ingericht)
         {
-            await dienst.ImporteerAsync(Ver, VoorbladInlezer.Lees(BoekhoudingTestomgeving.Voorblad()));
+            await dienst.ImporteerAsync(Ver, Application.Tests.Boekhouding.Testvoorstel.Standaard());
             _ingericht = true;
         }
 

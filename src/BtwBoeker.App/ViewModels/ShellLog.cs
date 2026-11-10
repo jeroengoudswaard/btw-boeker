@@ -28,11 +28,8 @@ internal static partial class ShellLog
     [LoggerMessage(7, LogLevel.Information, "Back-up teruggezet naar {Bestand}")]
     public static partial void BackupTeruggezet(ILogger logger, string bestand);
 
-    [LoggerMessage(12, LogLevel.Information, "Boekhouding {Administratie} overgenomen uit Excel: {Aantal} rekeningen")]
+    [LoggerMessage(12, LogLevel.Information, "Boekhouding {Administratie} ingericht: {Aantal} rekeningen")]
     public static partial void BoekhoudingOvergenomen(ILogger logger, string administratie, int aantal);
-
-    [LoggerMessage(13, LogLevel.Warning, "Boekhouding {Administratie} overgenomen met een bewust geboekt verschil van {Verschil} op rekening {Rekening}")]
-    public static partial void BoekhoudingVerschilGeboekt(ILogger logger, string administratie, string verschil, string rekening);
 
     [LoggerMessage(14, LogLevel.Information, "Boekjaar {Jaar} van {Administratie} {Handeling}")]
     public static partial void BoekjaarGewijzigd(ILogger logger, int jaar, string administratie, string handeling);

@@ -145,13 +145,9 @@ public sealed record KaartRegel(KaartMutatie Mutatie)
     public string Saldo => new Bedrag(Mutatie.LopendSaldo).ToString();
 }
 
-public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt, bool IsHistorisch = false)
+public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt)
 {
     public string Jaartekst => Jaar.ToString(CultureInfo.InvariantCulture);
 
-    /// <summary>Een historisch jaar (besluit 122) is afgesloten maar kan niet worden heropend.</summary>
-    public bool IsAfgesloten => !IsOpen && !IsHistorisch;
-
-    /// <summary>Een historisch boekjaar heeft geen echte journaalposten en kan niet als auditfile (besluit 258).</summary>
-    public bool KanAuditfile => !IsHistorisch;
+    public bool IsAfgesloten => !IsOpen;
 }

@@ -7,10 +7,9 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels.Inrichting;
 
-/// <summary>De vier routes van een lege boekhouding (besluit 114), zoals op de startkaart van het tabblad Boekhouding.</summary>
+/// <summary>De routes van een lege boekhouding, zoals op de startkaart van het tabblad Boekhouding.</summary>
 public enum Boekhoudingkeuze
 {
-    Excel,
     Standaard,
     Sjabloon,
     Leeg,

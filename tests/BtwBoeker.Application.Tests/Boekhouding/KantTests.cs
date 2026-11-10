@@ -8,25 +8,11 @@ namespace BtwBoeker.Application.Tests.Boekhouding;
 /// <summary>Baten of lasten per resultaatrekening (besluit 152).</summary>
 public sealed class KantTests
 {
-    [Theory]
-    [InlineData(0, 50000, ResultaatKant.Baten)]   // credit in de W&V: baten
-    [InlineData(30000, 0, ResultaatKant.Lasten)]  // debet: lasten
-    public void Overname_uit_excel_stelt_de_kant_voor_uit_het_saldo_van_vorig_jaar(long debet, long credit, ResultaatKant verwacht)
-    {
-        var rekening = new VoorbladRekening(4900, "Verhuur", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul)
-        {
-            WenvDebet = new Bedrag(debet),
-            WenvCredit = new Bedrag(credit),
-        };
-
-        Assert.Equal(verwacht, rekening.VoorgesteldeKant);
-    }
-
     [Fact]
     public void Zonder_saldo_of_bij_een_balansrekening_geen_voorstel()
     {
-        Assert.Null(new VoorbladRekening(4900, "X", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul).VoorgesteldeKant);
-        Assert.Null(new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul) { WenvCredit = new Bedrag(1) }.VoorgesteldeKant);
+        Assert.Null(new Inrichtrekening(4900, "X", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul).VoorgesteldeKant);
+        Assert.Null(new Inrichtrekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul) { Kant = ResultaatKant.Baten }.VoorgesteldeKant);
     }
 
     [Fact]

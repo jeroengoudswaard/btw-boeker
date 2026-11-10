@@ -95,10 +95,6 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
             .OrderBy(r => r.Volgorde).ThenBy(r => r.Id).ToListAsync(annulering).ConfigureAwait(false);
         // Relaties zijn gedeeld door beide administraties (besluit 105).
         var relaties = await context.Relaties.OrderBy(r => r.Naam).ToListAsync(annulering).ConfigureAwait(false);
-        var historischeRegels = await context.HistorischeRegels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
-            .OrderBy(r => r.Jaar).ThenBy(r => r.Datum).ThenBy(r => r.Volgorde).ToListAsync(annulering).ConfigureAwait(false);
-        var historischeTotalen = await context.HistorischeTotalen.Include(t => t.Rekening).Where(t => t.Administratie == administratie)
-            .ToListAsync(annulering).ConfigureAwait(false);
         // Zonder inhoud: die wordt pas geladen bij bekijken of exporteren.
         var bijlagen = await context.Bijlagen.Where(b => b.Administratie == administratie).OrderBy(b => b.ToegevoegdUtc)
             .ToListAsync(annulering).ConfigureAwait(false);
@@ -111,8 +107,6 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
             Bankmutaties = mutaties,
             Boekingsregels = regels,
             Relaties = relaties,
-            HistorischeRegels = historischeRegels,
-            HistorischeTotalen = historischeTotalen,
             Bijlagen = bijlagen,
             Jaarrekeningindelingen = indelingen,
         };

@@ -26,11 +26,6 @@ public sealed record BoekhoudingStand(
     /// <summary>Alle relaties; gedeeld door beide administraties (besluit 105).</summary>
     public IReadOnlyList<Relatie> Relaties { get; init; } = [];
 
-    /// <summary>De regels van de T-rekeningen uit Excel (besluit 122); nooit onderdeel van het grootboek.</summary>
-    public IReadOnlyList<HistorischeRegel> HistorischeRegels { get; init; } = [];
-
-    public IReadOnlyList<HistorischTotaal> HistorischeTotalen { get; init; } = [];
-
     /// <summary>De bijlagen zonder inhoud (besluit 84); de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
     public IReadOnlyList<Bijlage> Bijlagen { get; init; } = [];
 
@@ -40,9 +35,6 @@ public sealed record BoekhoudingStand(
     public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
 
     public bool HeeftBijlage(Guid postId) => Bijlagen.Any(b => b.PostId == postId);
-
-    /// <summary>Het jaar is historisch (overgenomen uit Excel): rapporten komen uit de totalen van het Voorblad.</summary>
-    public bool IsHistorisch(int jaar) => Boekjaar(jaar) is { IsHistorisch: true };
 
     public bool IsIngericht => Rekeningen.Count > 0;
 
@@ -135,12 +127,6 @@ public sealed record KaartMutatie(Guid PostId, DateOnly Datum, string Nummer, st
 public sealed record Grootboekkaart(Grootboekrekening Rekening, DateOnly Van, DateOnly Tot, long Beginsaldo, IReadOnlyList<KaartMutatie> Mutaties)
 {
     public long Eindsaldo => Mutaties.Count == 0 ? Beginsaldo : Mutaties[^1].LopendSaldo;
-
-    /// <summary>Een historisch jaar: de regels komen uit Excel en zijn niet dubbel geboekt.</summary>
-    public bool IsHistorisch { get; init; }
-
-    /// <summary>Bij een historisch jaar het saldo volgens het Voorblad; <c>null</c> als de rekening daar niet op staat.</summary>
-    public long? TotaalVolgensVoorblad { get; init; }
 }
 
 /// <summary>Een rapport als tabel, voor afdrukken en export (besluit 67). Cellen zijn tekst of <see cref="Bedrag"/>.</summary>

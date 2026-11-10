@@ -37,12 +37,6 @@ public static class XafSchrijver
         var stand = invoer.Stand;
         var boekjaar = stand.Boekjaren.FirstOrDefault(b => b.Jaar == invoer.Jaar)
             ?? throw new InvalidOperationException($"Het boekjaar {invoer.Jaar} bestaat niet in deze administratie.");
-        if (boekjaar.IsHistorisch)
-        {
-            throw new InvalidOperationException(
-                $"Boekjaar {invoer.Jaar} is een historisch boekjaar uit Excel zonder echte journaalposten en kan niet als auditfile worden geëxporteerd.");
-        }
-
         var vanHetJaar = stand.Posten.Where(p => p.Jaar == invoer.Jaar).ToList();
         var geboekt = vanHetJaar.Where(p => p.IsGeboekt).ToList();
         var opening = geboekt.Where(p => p.Soort == PostSoort.Openingsbalans).ToList();

@@ -46,15 +46,13 @@
             <StackPanel>
                 <TextBlock Text="Deze administratie heeft nog geen boekhouding" Style="{StaticResource Sectietitel}" />
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
-                           Text="Begin met het standaardschema voor scoutinggroepen, met een sjabloon van een andere groep, met een overname uit de huidige Excel-boekhouding of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
+                           Text="Begin met het standaardschema, met een rekeningschema-sjabloon of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
                 <WrapPanel>
                     <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                             Margin="0,0,8,8" ToolTip="Een compact rekeningschema met rubrieken, aan te passen vóór het inrichten"
                             AutomationProperties.AutomationId="StandaardInrichten" />
                     <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Margin="0,0,8,8"
                             ToolTip="Een rekeningschema-sjabloon (.btwsjabloon) van een andere groep" AutomationProperties.AutomationId="SjabloonInlezen" />
-                    <Button Content="_Overnemen uit Excel..." Command="{Binding OvernemenUitExcelCommand}"
-                            Margin="0,0,8,8" AutomationProperties.AutomationId="OvernemenUitExcel" />
                     <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" Margin="0,0,8,8" AutomationProperties.AutomationId="LeegBeginnen" />
                 </WrapPanel>
             </StackPanel>
@@ -92,20 +90,6 @@
                     </Button>
                 </StackPanel>
             </WrapPanel>
-
-            <!-- ===== Historisch boekjaar (besluit 122) ===== -->
-            <tg:Groepskader DockPanel.Dock="Top" Margin="0,0,0,12" Padding="12,8" CornerRadius="4" BorderThickness="1"
-                            BorderBrush="{DynamicResource SystemFillColorCautionBrush}" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}"
-                            Visibility="{Binding IsHistorischJaar, Converter={StaticResource BoolNaarZichtbaar}}"
-                            AutomationProperties.Name="Historisch boekjaar" AutomationProperties.AutomationId="HistorischBoekjaar">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE81C;" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <TextBlock TextWrapping="Wrap" VerticalAlignment="Center">
-                        <Run Text="{DynamicResource T.Band.Historisch}" FontWeight="SemiBold" />
-                        <Run Text="{DynamicResource T.Band.HistorischUitleg}" />
-                    </TextBlock>
-                </StackPanel>
-            </tg:Groepskader>
 
             <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="BoekhoudingSubtabbladen">
                 <!-- Sinds v0.8.0 kiest de navigatiebalk het onderdeel (besluiten 178 en 181); de tabkoppen zijn verborgen. -->
@@ -849,20 +833,6 @@
                             <Run Text="   ·   eindsaldo " /><Run Text="{Binding KaartEindsaldo, Mode=OneWay}" FontWeight="SemiBold" />
                             <Run Text="   (positief = debet)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </TextBlock>
-                        <TextBlock DockPanel.Dock="Bottom" Margin="0,4,0,0" Text="{Binding KaartVoorbladtekst}" TextWrapping="Wrap"
-                                   AutomationProperties.AutomationId="KaartVoorblad" AutomationProperties.LiveSetting="Polite"
-                                   Visibility="{Binding KaartVoorbladtekst, Converter={StaticResource NietNullNaarZichtbaar}}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource Toelichting}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding KaartWijktAf}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}" />
-                                            <Setter Property="FontWeight" Value="SemiBold" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
                         <DataGrid ItemsSource="{Binding KaartMutaties}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                                   AutomationProperties.Name="Mutaties op de grootboekkaart" AutomationProperties.AutomationId="KaartMutaties">
                             <DataGrid.Columns>
@@ -940,7 +910,6 @@
                                                         AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} heropenen}" />
                                                 <Button Content="Auditfile (XAF)..." CommandParameter="{Binding}"
                                                         Command="{Binding DataContext.ExporteerXafCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Visibility="{Binding KanAuditfile, Converter={StaticResource BoolNaarZichtbaar}}"
                                                         ToolTip="Het boekjaar als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander boekhoudpakket"
                                                         AutomationProperties.Name="{Binding Jaartekst, StringFormat=Auditfile van boekjaar {0} exporteren}" />
                                             </StackPanel>

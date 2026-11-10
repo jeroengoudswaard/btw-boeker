@@ -40,20 +40,12 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
 
     private async Task<Guid> ConceptAsync(bool boeken = false)
     {
-        var pad = _map.Bestand("boekhouding.xlsx");
-        if (!File.Exists(pad))
+        if (!(await _boekhouding.LaadAsync(Ver)).IsIngericht)
         {
-            using var boek = new XLWorkbook();
-            var blad = boek.Worksheets.Add("Voorblad");
-            blad.Cell(1, 1).Value = 2025;
-            blad.Cell(3, 2).Value = "Vermogen";
-            blad.Cell(4, 1).Value = 600; blad.Cell(4, 2).Value = "Algemene Reserve"; blad.Cell(4, 10).Value = 100;
-            blad.Cell(5, 2).Value = "Kas Bank";
-            blad.Cell(6, 1).Value = 1100; blad.Cell(6, 2).Value = "Bank"; blad.Cell(6, 9).Value = 100;
-            blad.Cell(7, 2).Value = "Kosten";
-            blad.Cell(8, 1).Value = 4115; blad.Cell(8, 2).Value = "Energie";
-            boek.SaveAs(pad);
-            await _boekhouding.ImporteerAsync(Ver, VoorbladInlezer.Lees(new ClosedXmlWerkbladLezer().Lees(pad, VoorbladInlezer.Werkbladnaam)));
+            await _boekhouding.ImporteerAsync(Ver, Application.Tests.Boekhouding.Testvoorstel.Maak(2026,
+                Application.Tests.Boekhouding.Testvoorstel.Balans(600, "Algemene Reserve", "Vermogen", credit: 100, rol: Domain.Financien.Boekhouding.RekeningRol.Reserve),
+                Application.Tests.Boekhouding.Testvoorstel.Balans(1100, "Bank", "Kas Bank", debet: 100),
+                Application.Tests.Boekhouding.Testvoorstel.Resultaat(4115, "Energie", "Kosten")));
         }
 
         var stand = await _boekhouding.LaadAsync(Ver);

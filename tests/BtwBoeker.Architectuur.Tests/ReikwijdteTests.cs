@@ -42,7 +42,7 @@ public class ReikwijdteTests
         Assert.Empty(BestandenMet("Begroting", "Begroot", "Meerjaren"));
     }
 
-    [Fact(Skip = "Stap 2a, deel 2: wordt aangezet zodra de Excel-overname en het historisch boekjaar zijn verwijderd.")]
+    [Fact]
     public void Excel_overname_en_historisch_boekjaar_bestaan_niet()
     {
         Assert.Empty(BestandenMet("Historie", "Historisch", "Voorblad", "BoekhoudingImport", "WerkbladLezer"));

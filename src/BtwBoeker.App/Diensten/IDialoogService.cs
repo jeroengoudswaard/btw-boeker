@@ -51,8 +51,6 @@ public interface IDialoogService
     /// <summary>Waar de auditfile (XAF) heen moet (besluit 197).</summary>
     string? KiesXafDoel(string voorgesteldeNaam);
 
-    string? KiesExcelBestand();
-
     /// <summary>Een of meer CAMT.053-bankafschriften (.xml).</summary>
     IReadOnlyList<string>? KiesCamtBestanden();
 
@@ -71,12 +69,6 @@ public interface IDialoogService
 
     /// <returns><c>true</c> als de jaarrekeningindeling is opgeslagen (besluiten 263–268).</returns>
     bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor);
-
-    /// <returns><c>true</c> als de boekhouding is overgenomen.</returns>
-    bool ToonBoekhoudingImport(BoekhoudingImportViewModel wizard);
-
-    /// <returns><c>true</c> als de historie is overgenomen.</returns>
-    bool ToonHistorieImport(HistorieImportViewModel wizard);
 
     /// <summary>Eén of meer bonnen of facturen (PDF, JPG, PNG); leeg bij annuleren.</summary>
     IReadOnlyList<string> KiesBijlagen();

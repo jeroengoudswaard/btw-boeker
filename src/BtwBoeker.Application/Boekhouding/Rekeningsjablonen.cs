@@ -134,7 +134,7 @@ public static class Rekeningsjablonen
     /// gekozen speltak (dubbele en lege namen worden overgeslagen). Alle bedragen zijn nul.
     /// </summary>
     /// <exception cref="InvalidOperationException">Een speltakrekening valt samen met een bestaand nummer of buiten het bereik.</exception>
-    public static IReadOnlyList<VoorbladRekening> Rekeningen(Rekeningsjabloon sjabloon, IEnumerable<string> speltakken)
+    public static IReadOnlyList<Inrichtrekening> Rekeningen(Rekeningsjabloon sjabloon, IEnumerable<string> speltakken)
     {
         ArgumentNullException.ThrowIfNull(sjabloon);
         ArgumentNullException.ThrowIfNull(speltakken);
@@ -157,11 +157,11 @@ public static class Rekeningsjablonen
         var volgorde = sjabloon.Rubrieken.Select(r => r.Naam).ToList();
         return [.. alle
             .OrderBy(r => r.Rubriek is null ? int.MaxValue : volgorde.IndexOf(r.Rubriek)).ThenBy(r => r.Nummer)
-            .Select(r => new VoorbladRekening(r.Nummer, r.Naam, r.Rubriek, r.Soort, r.Rol, false, Bedrag.Nul, Bedrag.Nul) { Kant = r.Kant })];
+            .Select(r => new Inrichtrekening(r.Nummer, r.Naam, r.Rubriek, r.Soort, r.Rol, false, Bedrag.Nul, Bedrag.Nul) { Kant = r.Kant })];
     }
 
-    /// <summary>Het voorstel voor <see cref="BoekhoudingDienst.ImporteerAsync"/>: dezelfde route als de Excel-overname.</summary>
-    public static VoorbladVoorstel Voorstel(IReadOnlyList<VoorbladRekening> rekeningen, int beginjaar) =>
+    /// <summary>Het voorstel voor <see cref="BoekhoudingDienst.ImporteerAsync"/>.</summary>
+    public static Inrichtvoorstel Voorstel(IReadOnlyList<Inrichtrekening> rekeningen, int beginjaar) =>
         new(beginjaar - 1, rekeningen, []) { Herkomst = "standaardinrichting", MetVerkoopboek = true };
 
     private static void Controleer(Rekeningsjabloon sjabloon)

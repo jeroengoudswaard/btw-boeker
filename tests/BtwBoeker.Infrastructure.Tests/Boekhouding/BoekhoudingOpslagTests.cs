@@ -6,10 +6,11 @@ using BtwBoeker.Domain.Financien;
 using BtwBoeker.Domain.Financien.Boekhouding;
 using BtwBoeker.Infrastructure.Database;
 using BtwBoeker.Infrastructure.Excel;
+using BtwBoeker.Application.Tests.Boekhouding;
 
 namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 
-/// <summary>Grootboek op een echte, versleutelde database, met een synthetisch Excel-bestand in de opbouw van het Voorblad.</summary>
+/// <summary>Grootboek op een echte, versleutelde database, ingericht met een verzonnen voorstel.</summary>
 public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
 {
     private const string Wachtwoord = "scouting is fantastisch";
@@ -31,32 +32,8 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
 
     public void Dispose() => _map.Dispose();
 
-    private string MaakVoorblad(double bank = 799.5)
-    {
-        var pad = _map.Bestand("boekhouding.xlsx");
-        using var boek = new XLWorkbook();
-        var blad = boek.Worksheets.Add("Voorblad");
-        blad.Cell(1, 1).Value = 2025;
-        blad.Cell(1, 2).Value = "Omschrijving";
-        blad.Cell(3, 2).Value = "Vermogen";
-        blad.Cell(4, 1).Value = 600; blad.Cell(4, 2).Value = "Algemene Reserve"; blad.Cell(4, 10).Value = 1000;
-        blad.Cell(7, 2).Value = "Kas Bank";
-        blad.Cell(8, 1).Value = 1000; blad.Cell(8, 2).Value = "Kas"; blad.Cell(8, 9).Value = 200.5;
-        blad.Cell(9, 1).Value = 1100; blad.Cell(9, 2).Value = "Bank"; blad.Cell(9, 9).Value = bank;
-        blad.Cell(13, 2).Value = "Terreinkosten";
-        blad.Cell(14, 1).Value = 4115; blad.Cell(14, 2).Value = "Energie"; blad.Cell(14, 7).Value = 300;
-        blad.Cell(17, 2).Value = "Contributie";
-        blad.Cell(18, 1).Value = 8020; blad.Cell(18, 2).Value = "Contributie Welpen"; blad.Cell(18, 8).Value = 500;
-        blad.Cell(22, 3).FormulaA1 = "SUM(C3:C21)";
-        boek.SaveAs(pad);
-        return pad;
-    }
-
-    private async Task ImporteerAsync(double bank = 799.5, VerschilKeuze? verschil = null)
-    {
-        var voorstel = VoorbladInlezer.Lees(new ClosedXmlWerkbladLezer().Lees(MaakVoorblad(bank), VoorbladInlezer.Werkbladnaam));
-        await _dienst.ImporteerAsync(Ver, voorstel, verschil);
-    }
+    private Task ImporteerAsync(decimal bank = 799.5m, VerschilKeuze? verschil = null) =>
+        _dienst.ImporteerAsync(Ver, Testvoorstel.Standaard(bank), verschil);
 
     private static PostInvoer Invoer(BoekhoudingStand stand, long bedrag, Guid? id = null) => new(
         id, stand.Dagboeken.Single(d => d.Code == "MEM").Id, new DateOnly(2026, 5, 1), "Energie mei",
@@ -66,7 +43,7 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
         ]);
 
     [Fact]
-    public async Task Import_uit_xlsx_maakt_schema_dagboeken_en_openingsbalans()
+    public async Task Inrichten_maakt_schema_dagboeken_en_openingsbalans()
     {
         await ImporteerAsync();
 
@@ -84,10 +61,10 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task Import_met_verschil_alleen_na_bewuste_keuze()
     {
-        await Assert.ThrowsAsync<InvalidOperationException>(() => ImporteerAsync(bank: 806.74));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ImporteerAsync(bank: 806.74m));
         Assert.False((await _dienst.LaadAsync(Ver)).IsIngericht);
 
-        await ImporteerAsync(bank: 806.74, verschil: VerschilKeuze.Standaard);
+        await ImporteerAsync(bank: 806.74m, verschil: VerschilKeuze.Standaard);
 
         var stand = await _dienst.LaadAsync(Ver);
         var verschil = stand.Rekeningen.Single(r => r.Nummer == 1299);
@@ -150,12 +127,5 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
         Assert.Contains(blad.CellsUsed(), c => c.DataType == XLDataType.Number && c.GetDouble() == 1000.0);
     }
 
-    [Fact]
-    public async Task Onbekend_bestand_geeft_begrijpelijke_fout()
-    {
-        var pad = _map.Bestand("kapot.xlsx");
-        await File.WriteAllTextAsync(pad, "geen excel");
 
-        Assert.Throws<InvalidOperationException>(() => new ClosedXmlWerkbladLezer().Lees(pad, "Voorblad"));
-    }
 }

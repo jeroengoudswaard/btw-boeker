@@ -178,13 +178,13 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
         var dienst = new BoekhoudingDienst(sessie, new VasteTijd(DateTimeOffset.UtcNow));
-        var voorstel = new VoorbladVoorstel(2025,
+        var voorstel = new Inrichtvoorstel(2025,
         [
-            new VoorbladRekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(140000)),
-            new VoorbladRekening(1000, "Kas", "Kas Bank", RekeningSoort.Balans, RekeningRol.Kas, false, new Bedrag(40000), Bedrag.Nul),
-            new VoorbladRekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(100000), Bedrag.Nul),
-            new VoorbladRekening(4115, "Energie", "Terreinkosten", RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
-            new VoorbladRekening(9990, "Memoriaal", null, RekeningSoort.Balans, RekeningRol.Geen, true, Bedrag.Nul, Bedrag.Nul),
+            new Inrichtrekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(140000)),
+            new Inrichtrekening(1000, "Kas", "Kas Bank", RekeningSoort.Balans, RekeningRol.Kas, false, new Bedrag(40000), Bedrag.Nul),
+            new Inrichtrekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(100000), Bedrag.Nul),
+            new Inrichtrekening(4115, "Energie", "Terreinkosten", RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
+            new Inrichtrekening(9990, "Memoriaal", null, RekeningSoort.Balans, RekeningRol.Geen, true, Bedrag.Nul, Bedrag.Nul),
         ], []);
 
         await dienst.ImporteerAsync(Ver, voorstel);
@@ -208,8 +208,8 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     {
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
-        var voorstel = new VoorbladVoorstel(2025,
-            [new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(100), Bedrag.Nul)], []);
+        var voorstel = new Inrichtvoorstel(2025,
+            [new Inrichtrekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(100), Bedrag.Nul)], []);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => new BoekhoudingDienst(sessie, TimeProvider.System).ImporteerAsync(Ver, voorstel));
         Assert.Empty(leeg.Rekeningen);
@@ -220,10 +220,10 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     {
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
-        var voorstel = new VoorbladVoorstel(2025,
+        var voorstel = new Inrichtvoorstel(2025,
         [
-            new VoorbladRekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(2355664)),
-            new VoorbladRekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(2356388), Bedrag.Nul),
+            new Inrichtrekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(2355664)),
+            new Inrichtrekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(2356388), Bedrag.Nul),
         ], []);
 
         await new BoekhoudingDienst(sessie, TimeProvider.System)
@@ -242,11 +242,11 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     {
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
-        var voorstel = new VoorbladVoorstel(2025,
+        var voorstel = new Inrichtvoorstel(2025,
         [
-            new VoorbladRekening(600, "Algemene reserve", null, RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(1000)),
-            new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
-            new VoorbladRekening(1298, "Kruisposten", null, RekeningSoort.Balans, RekeningRol.Kruisposten, false, Bedrag.Nul, Bedrag.Nul),
+            new Inrichtrekening(600, "Algemene reserve", null, RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(1000)),
+            new Inrichtrekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
+            new Inrichtrekening(1298, "Kruisposten", null, RekeningSoort.Balans, RekeningRol.Kruisposten, false, Bedrag.Nul, Bedrag.Nul),
         ], []);
 
         await new BoekhoudingDienst(sessie, TimeProvider.System).ImporteerAsync(Ver, voorstel, new VerschilKeuze(1298, "Kruisposten"));
@@ -260,10 +260,10 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
     {
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
-        var voorstel = new VoorbladVoorstel(2025,
+        var voorstel = new Inrichtvoorstel(2025,
         [
-            new VoorbladRekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
-            new VoorbladRekening(4115, "Energie", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
+            new Inrichtrekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
+            new Inrichtrekening(4115, "Energie", null, RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
         ], []);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>

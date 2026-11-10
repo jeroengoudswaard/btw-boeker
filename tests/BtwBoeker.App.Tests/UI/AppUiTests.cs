@@ -92,7 +92,6 @@ public sealed class AppUiTests : IDisposable
         bestand.Expand();
         var importeren = Zoek(venster, "Menu_Importeren").AsMenuItem();
         importeren.Expand();
-        Assert.False(Zoek(venster, "Menu_ImporteerHistorie").IsEnabled); // zonder database
         Zoek(venster, "Menu_ImporteerSjabloon");
         importeren.Collapse();
         bestand.Collapse();
@@ -296,7 +295,6 @@ public sealed class AppUiTests : IDisposable
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
-        Zoek(venster, "OvernemenUitExcel");
         Zoek(venster, "SjabloonInlezen");
         Bewaar(venster, "10-boekhouding-leeg");
         Zoek(venster, "StandaardInrichten").AsButton().Invoke();

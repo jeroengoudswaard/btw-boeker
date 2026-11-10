@@ -98,7 +98,7 @@ public sealed partial class BoekhoudingViewModel
     {
         if (_stand is null || !IsIngericht)
         {
-            _dialogen.ToonInformatie("Bankafschrift inlezen", "Richt eerst de boekhouding in (overnemen uit Excel of leeg beginnen).");
+            _dialogen.ToonInformatie("Bankafschrift inlezen", "Richt eerst de boekhouding in (met een sjabloon of leeg beginnen).");
             return;
         }
 

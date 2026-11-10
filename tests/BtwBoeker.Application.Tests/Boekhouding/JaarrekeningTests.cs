@@ -137,19 +137,6 @@ public sealed class JaarrekeningTests
     }
 
     [Fact]
-    public void Historisch_vorig_jaar_komt_uit_het_voorblad()
-    {
-        _data.Boekjaren.RemoveAll(b => b.Jaar == 2025);
-        _data.Boekjaren.Add(Boekjaar.Historisch(BoekhoudingTestdata.Ver, 2025, Nu));
-        _data.HistorischeTotalen.Add(new HistorischTotaal(BoekhoudingTestdata.Ver, 2025, _data.Welpen, Bedrag.Nul, new Bedrag(77700)));
-        Boekingen();
-
-        var jr = Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2026);
-
-        Assert.Equal(new Bedrag(77700), jr.Deel(JaarrekeningAfdeling.Baten).VorigJaar);
-    }
-
-    [Fact]
     public void Rapport_heeft_kolommen_dit_jaar_en_vorig_jaar_met_of_zonder_rekeningen()
     {
         Boekingen();

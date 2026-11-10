@@ -23,5 +23,6 @@
   <ItemGroup>
     <!-- Dezelfde synthetische CAMT.053-bestanden als in de Application-tests -->
     <Compile Include="..\BtwBoeker.Application.Tests\Bank\CamtVoorbeeld.cs" Link="Bank\CamtVoorbeeld.cs" />
+    <Compile Include="..\BtwBoeker.Application.Tests\Boekhouding\Testvoorstel.cs" Link="Boekhouding\Testvoorstel.cs" />
   </ItemGroup>
 </Project>

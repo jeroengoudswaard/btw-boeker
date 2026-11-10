@@ -48,30 +48,6 @@ internal static class BoekhoudingConfiguratie
             b.Ignore(x => x.IsOpen);
         });
 
-        // Historisch boekjaar (besluit 122): aparte tabellen, nooit onderdeel van journaal of grootboek.
-        modelBuilder.Entity<HistorischeRegel>(b =>
-        {
-            b.ToTable("HistorischeRegels");
-            b.HasKey(x => x.Id);
-            b.Property(x => x.Omschrijving).IsRequired().HasMaxLength(HistorischeRegel.MaximaleOmschrijvingLengte);
-            b.Property(x => x.Debet).HasConversion(BedragConverter);
-            b.Property(x => x.Credit).HasConversion(BedragConverter);
-            b.HasOne(x => x.Rekening).WithMany().HasForeignKey("RekeningId").IsRequired().OnDelete(DeleteBehavior.Restrict);
-            b.HasIndex(x => new { x.Administratie, x.Jaar });
-            b.Ignore(x => x.Saldo);
-        });
-
-        modelBuilder.Entity<HistorischTotaal>(b =>
-        {
-            b.ToTable("HistorischeTotalen");
-            b.HasKey(x => x.Id);
-            b.Property(x => x.Debet).HasConversion(BedragConverter);
-            b.Property(x => x.Credit).HasConversion(BedragConverter);
-            b.HasOne(x => x.Rekening).WithMany().HasForeignKey("RekeningId").IsRequired().OnDelete(DeleteBehavior.Restrict);
-            b.HasIndex("Administratie", "Jaar", "RekeningId").IsUnique();
-            b.Ignore(x => x.Saldo);
-        });
-
         modelBuilder.Entity<Journaalpost>(b =>
         {
             b.ToTable("Journaalposten");

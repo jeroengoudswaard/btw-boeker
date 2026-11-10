@@ -52,27 +52,6 @@ public sealed class BoekhoudingViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Overname_via_wizard_richt_de_administratie_in()
-    {
-        var vm = _omgeving.Maak();
-        await vm.VernieuwCommand.ExecuteAsync(null);
-        _omgeving.Dialogen.ExcelBestand = "boekhouding.xlsx";
-        _omgeving.Dialogen.BoekhoudingImport = async wizard =>
-        {
-            await wizard.VolgendeCommand.ExecuteAsync(null); // bestand → rekeningen
-            await wizard.VolgendeCommand.ExecuteAsync(null); // rekeningen → beginbalans
-            await wizard.VolgendeCommand.ExecuteAsync(null); // importeren
-            return wizard.IsKlaar;
-        };
-
-        await vm.OvernemenUitExcelCommand.ExecuteAsync(null);
-
-        Assert.True(vm.IsIngericht);
-        Assert.Equal("MEM-2026-0001", Assert.Single(vm.Posten).Nummer);
-        Assert.Equal(5, vm.Rekeningen.Count);
-    }
-
-    [Fact]
     public async Task Nieuwe_post_boeken_met_ctrl_enter()
     {
         var vm = await _omgeving.OpenIngerichtAsync();

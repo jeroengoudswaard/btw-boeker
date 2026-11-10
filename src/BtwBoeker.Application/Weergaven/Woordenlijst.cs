@@ -81,10 +81,6 @@ public static class Woordenlijst
         new("Tekst.ConceptBank",
             "Een concept kunt u in het Journaal controleren, splitsen of verwijderen; de bankregel staat vast.",
             "Een voorlopige boeking kun je bij Alle boekingen controleren, splitsen of verwijderen; de bankregel staat vast."),
-        new("Band.Historisch", "Historisch boekjaar, overgenomen uit Excel, niet dubbel geboekt.", "Dit jaar komt uit de oude Excel-boekhouding."),
-        new("Band.HistorischUitleg",
-            "Alleen-lezen. Het Journaal is leeg; de regels staan per rekening bij Grootboekkaart, de rapporten volgen het Voorblad.",
-            "Je kunt het alleen bekijken. Bij Alle boekingen staat niets; de regels zie je per potje bij Inhoud van een potje, de overzichten volgen het Voorblad."),
 
         // Meldingen ({0} = nummer of aantal)
         new("Melding.PostGeboekt", "Post {0} is geboekt.", "Boeking {0} is definitief gemaakt."),

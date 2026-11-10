@@ -63,4 +63,25 @@ public sealed class MigratieTests : IDisposable
         Assert.True(await TabelBestaatAsync(nieuw, "Jaarrekeningindelingen"));
         Assert.Equal("Verhuur", Assert.Single(await nieuw.Rubrieken.ToListAsync()).Naam);
     }
+
+    [Fact]
+    public async Task Historie_uit_excel_verdwijnt_en_gewone_boekjaren_blijven()
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync(Basis);
+            // Status 1 = open, 2 = afgesloten; 2025 is een historisch boekjaar uit de vervallen Excel-overname, 2026 een gewoon jaar.
+            await oud.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Boekjaren (Administratie, Jaar, Status, AfgeslotenUtc, IsHistorisch) VALUES (1, 2025, 2, '2026-01-01', 1), (1, 2026, 1, NULL, 0)");
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        Assert.False(await TabelBestaatAsync(nieuw, "HistorischeRegels"));
+        Assert.False(await TabelBestaatAsync(nieuw, "HistorischeTotalen"));
+        var jaar = Assert.Single(await nieuw.Boekjaren.ToListAsync());
+        Assert.Equal(2026, jaar.Jaar);
+        Assert.True(jaar.IsOpen);
+    }
 }

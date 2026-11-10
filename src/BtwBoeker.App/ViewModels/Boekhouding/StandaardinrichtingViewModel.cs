@@ -29,13 +29,13 @@ public sealed partial class SpeltakKeuze(string naam) : ObservableObject
 /// <summary>Eén rekening uit het sjabloon: aan of uit, naam aan te passen en (bij een balansrekening) een beginsaldo.</summary>
 public sealed partial class InrichtRekeningRegel : ObservableObject
 {
-    public InrichtRekeningRegel(VoorbladRekening bron)
+    public InrichtRekeningRegel(Inrichtrekening bron)
     {
         Bron = bron;
         Naam = bron.Naam;
     }
 
-    public VoorbladRekening Bron { get; }
+    public Inrichtrekening Bron { get; }
     public int Nummer => Bron.Nummer;
     public string Rubriek => Bron.Rubriek ?? string.Empty;
     public bool IsBalans => Bron.Soort == RekeningSoort.Balans;
@@ -68,7 +68,7 @@ public sealed partial class InrichtRekeningRegel : ObservableObject
         : Debet is null || Credit is null ? $"Rekening {Nummer}: vul een bedrag in als 1.234,56, of laat het leeg."
         : null;
 
-    internal VoorbladRekening Gekozen => Bron with
+    internal Inrichtrekening Gekozen => Bron with
     {
         Naam = Naam.Trim(), Overslaan = !IsGekozen, Debet = IsBalans ? Debet ?? Bedrag.Nul : Bedrag.Nul, Credit = IsBalans ? Credit ?? Bedrag.Nul : Bedrag.Nul,
     };
@@ -88,7 +88,7 @@ public sealed partial class InrichtRekeningRegel : ObservableObject
 /// <summary>
 /// Inrichten met een sjabloon (besluiten 114–120): 1 speltakken (alleen als het sjabloon contributierekeningen per speltak
 /// kent), 2 rekeningen aan/uit en namen, 3 beginsaldi met de controle debet = credit (een verschil alleen bewust op een
-/// tussenrekening, besluit 73), 4 klaar. Het inrichten zelf loopt via dezelfde route als de Excel-overname.
+/// tussenrekening, besluit 73), 4 klaar. Het inrichten zelf loopt via BoekhoudingDienst.ImporteerAsync.
 /// </summary>
 public sealed partial class StandaardinrichtingViewModel : ObservableObject
 {
@@ -201,7 +201,7 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
         : Rekeningen.Any(r => r.Nummer == nummer && r.IsGekozen) || !string.IsNullOrWhiteSpace(Verschilnaam) ? null
         : "Vul de naam van de nieuwe rekening in.";
 
-    private VoorbladVoorstel Voorstel => Rekeningsjablonen.Voorstel([.. Rekeningen.Where(r => r.Fout is null).Select(r => r.Gekozen)], Beginjaar);
+    private Inrichtvoorstel Voorstel => Rekeningsjablonen.Voorstel([.. Rekeningen.Where(r => r.Fout is null).Select(r => r.Gekozen)], Beginjaar);
 
     [RelayCommand]
     private void SpeltakToevoegen()

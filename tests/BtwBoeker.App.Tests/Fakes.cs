@@ -24,14 +24,9 @@ internal sealed class FakeDialoogService : IDialoogService
     public List<string> Bevestigingsvragen { get; } = [];
     public Herstelsleutel? GetoondeHerstelsleutel { get; private set; }
     public string? XmlDoel { get; set; }
-    public string? ExcelBestand { get; set; }
     public string? XlsxDoel { get; set; }
     public string? CsvDoel { get; set; }
 
-    /// <summary>Wat de "gebruiker" in de importwizard van de boekhouding doet; standaard annuleren.</summary>
-    public Func<ViewModels.Boekhouding.BoekhoudingImportViewModel, Task<bool>>? BoekhoudingImport { get; set; }
-
-    public string? KiesExcelBestand() => ExcelBestand;
     public string? KiesCsvDoel(string voorgesteldeNaam) => CsvDoel;
 
     public IReadOnlyList<string> Bijlagen { get; set; } = [];
@@ -93,9 +88,6 @@ internal sealed class FakeDialoogService : IDialoogService
     public bool ToonStandaardinrichting(ViewModels.Boekhouding.StandaardinrichtingViewModel wizard) =>
         Standaardinrichting is not null && Standaardinrichting(wizard).GetAwaiter().GetResult();
 
-    public bool ToonBoekhoudingImport(ViewModels.Boekhouding.BoekhoudingImportViewModel wizard) =>
-        BoekhoudingImport is not null && BoekhoudingImport(wizard).GetAwaiter().GetResult();
-
     public string? KiesXmlDoel(string voorgesteldeNaam) => XmlDoel;
 
     public string? XafDoel { get; set; }
@@ -140,11 +132,6 @@ internal sealed class FakeDialoogService : IDialoogService
     public string? Informatie { get; private set; }
 
     public void ToonInformatie(string titel, string melding) => Informatie = melding;
-
-    public Func<ViewModels.Boekhouding.HistorieImportViewModel, Task<bool>>? HistorieImport { get; set; }
-
-    public bool ToonHistorieImport(ViewModels.Boekhouding.HistorieImportViewModel wizard) =>
-        HistorieImport is not null && HistorieImport(wizard).GetAwaiter().GetResult();
 
     /// <summary>Wat de "gebruiker" in de startwizard doet; standaard direct sluiten (zoals ✕).</summary>
     public Func<ViewModels.Inrichting.StartwizardViewModel, Task>? Startwizard { get; set; }
@@ -351,8 +338,6 @@ internal sealed class InMemoryBoekhoudingOpslag : BtwBoeker.Application.Boekhoud
             Boekingsregels = [.. lijst.OfType<Domain.Financien.Bank.Boekingsregel>().OrderBy(r => r.Volgorde).ThenBy(r => r.Id)],
             // Relaties zijn gedeeld door beide administraties (besluit 105).
             Relaties = [.. _gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Relaties.Relatie>().OrderBy(r => r.Naam, StringComparer.CurrentCulture)],
-            HistorischeRegels = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischeRegel>()],
-            HistorischeTotalen = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischTotaal>()],
             Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
             Jaarrekeningindelingen = [.. lijst.OfType<Domain.Financien.Boekhouding.Jaarrekeningindeling>()],
         };
@@ -363,21 +348,7 @@ internal sealed class InMemoryBoekhoudingOpslag : BtwBoeker.Application.Boekhoud
 internal static class FakeBoekhouding
 {
     public static BoekhoudingHulpmiddelen Hulpmiddelen() =>
-        new(new FakeWerkbladLezer(), new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst());
-}
-
-internal sealed class FakeWerkbladLezer : BtwBoeker.Application.Boekhouding.IWerkbladLezer
-{
-    public BtwBoeker.Application.Boekhouding.Werkblad? Blad { get; set; }
-
-    public BtwBoeker.Application.Boekhouding.Werkblad Lees(string pad, string werkblad) =>
-        Blad ?? throw new InvalidOperationException("Het Excel-bestand kan niet worden gelezen.");
-
-    /// <summary>Alle werkbladen; standaard alleen het Voorblad.</summary>
-    public IReadOnlyList<BtwBoeker.Application.Boekhouding.GenoemdWerkblad>? Bladen { get; set; }
-
-    public IReadOnlyList<BtwBoeker.Application.Boekhouding.GenoemdWerkblad> LeesAlle(string pad) =>
-        Bladen ?? [new(BtwBoeker.Application.Boekhouding.VoorbladInlezer.Werkbladnaam, Lees(pad, BtwBoeker.Application.Boekhouding.VoorbladInlezer.Werkbladnaam))];
+        new(new FakeSpreadsheetSchrijver(), new FakeAfdrukDienst());
 }
 
 internal sealed class FakeSpreadsheetSchrijver : BtwBoeker.Application.Boekhouding.ISpreadsheetSchrijver

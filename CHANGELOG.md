@@ -8,9 +8,11 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Begroting en meerjarenplan** (besluiten 6 en 28): de pagina *Begroting* (Ctrl+5), het subtabblad *Meerjarenplan*, het rapport *Begroting en werkelijk* en de afdruk voor de ALV. Ctrl+2 tot en met Ctrl+6 zijn vervallen; Ctrl+1 opent de boekhouding.
 - **Kolom *begroot* in de jaarrekening**: de jaarrekening toont dit jaar en vorig jaar (besluit 27).
 - **Start**: het resultaat tot vandaag staat zonder vergelijking met een begroting.
+- **Excel-overname en historisch boekjaar** (besluiten 25 en 28): *Bestand › Importeren › Boekhouding uit Excel* en *Historie uit Excel*, de knop *Overnemen uit Excel* en de band *Historisch boekjaar*. Inrichten gaat met een sjabloon, het standaardschema of leeg; XAF importeren volgt in stap 2b.
 
 ### Gewijzigd
 - **Database**: de migratie *VerwijderBegrotingEnMeerjarenplan* verwijdert de tabellen van begroting en meerjarenplan uit een bestaande database. Rekeningschema, boekingen en jaarrekeningindeling blijven ongewijzigd (getest in `MigratieTests`).
+- **Database**: de migratie *VerwijderExcelHistorie* verwijdert de historische regels en totalen en een historisch boekjaar (dat had geen journaalposten); gewone boekjaren blijven.
 
 ## [0.18.1] - 2026-11-07: Opslaan, tellers en MSI met versienummer (besluiten 274–278)
 

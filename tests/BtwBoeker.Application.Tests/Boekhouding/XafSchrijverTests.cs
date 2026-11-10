@@ -148,17 +148,6 @@ public class XafSchrijverTests
     }
 
     [Fact]
-    public void Een_historisch_boekjaar_kan_niet_als_auditfile()
-    {
-        var data = new BoekhoudingTestdata();
-        data.Boekjaren.Add(Boekjaar.Historisch(BoekhoudingTestdata.Ver, 2025, DateTime.UtcNow));
-
-        var fout = Assert.Throws<InvalidOperationException>(() => Schrijf(data, 2025));
-        Assert.Contains("historisch", fout.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Throws<InvalidOperationException>(() => Schrijf(data, 2030));
-    }
-
-    [Fact]
     public void Lange_teksten_worden_ingekort_tot_wat_het_schema_toestaat()
     {
         var data = new BoekhoudingTestdata();

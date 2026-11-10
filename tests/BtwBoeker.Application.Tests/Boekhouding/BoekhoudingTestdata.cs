@@ -45,8 +45,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<Bankmutatie> Bankmutaties { get; } = [];
     public List<Boekingsregel> Boekingsregels { get; } = [];
     public List<Relatie> Relaties { get; } = [];
-    public List<HistorischeRegel> HistorischeRegels { get; } = [];
-    public List<HistorischTotaal> HistorischeTotalen { get; } = [];
     public List<Bijlage> Bijlagen { get; } = [];
     public List<Jaarrekeningindeling> Jaarrekeningindelingen { get; } = [];
     public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
@@ -65,8 +63,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         Bankmutaties = Bankmutaties.ToList(),
         Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
         Relaties = Relaties.ToList(),
-        HistorischeRegels = HistorischeRegels.ToList(),
-        HistorischeTotalen = HistorischeTotalen.ToList(),
         Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
         Jaarrekeningindelingen = Jaarrekeningindelingen.ToList(),
     };
@@ -134,8 +130,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case Bankmutatie m: Bankmutaties.Add(m); break;
                 case Boekingsregel r: Boekingsregels.Add(MetId(r)); break;
                 case Relatie relatie: Relaties.Add(relatie); break;
-                case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
-                case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
                 case Bijlage bijlage: Bijlagen.Add(bijlage); break;
                 case Jaarrekeningindeling indeling: Jaarrekeningindelingen.Add(MetId(indeling)); break;
                 case BijlageInhoud inhoud: Bijlageinhoud[inhoud.BijlageId] = inhoud.Gegevens; break;

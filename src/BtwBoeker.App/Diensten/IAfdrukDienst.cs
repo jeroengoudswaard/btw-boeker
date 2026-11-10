@@ -11,7 +11,7 @@ public interface IAfdrukDienst
 
 /// <summary>Wat de pagina's Boekhouding nodig hebben van buiten de ViewModels.</summary>
 public sealed record BoekhoudingHulpmiddelen(
-    IWerkbladLezer Lezer, ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, ViewModels.Woordenboek? Woordenboek = null,
+    ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, ViewModels.Woordenboek? Woordenboek = null,
     Application.Bijlagen.IPdfTekstLezer? Tekstlezer = null)
 {
     /// <summary>Leest datum en bedrag uit PDF-bonnen (besluit 96); zonder lezer vult de gebruiker ze zelf in.</summary>

@@ -124,8 +124,6 @@
                                 AutomationProperties.AutomationId="StartwizardStandaard" />
                         <Button Content="Sjabloon..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Sjabloon}"
                                 Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardSjabloon" />
-                        <Button Content="Excel overnemen..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Excel}"
-                                Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardExcel" />
                         <Button Content="Leeg beginnen" Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Leeg}"
                                 Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardLeeg" />
                     </StackPanel>
