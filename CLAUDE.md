@@ -62,6 +62,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 17 | Bedragen | Altijd in hele centen (`Bedrag.Centen`); afronden op de helft naar boven (`MidpointRounding.AwayFromZero`) |
 | 18 | Installatie | MSI (WiX 5), self-contained win-x64, `BtwBoeker-<versie>.msi`, eigen UpgradeCode; geen codesigning in de bèta |
 | 19 | Website | De release-workflow publiceert alleen naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat. Er is nog geen BTW-Boeker-pagina |
+| 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests`. De Android-iconen in `assets/android/` horen bij Verenigd en blijven voorlopig staan |
 
 ## Planning
 
