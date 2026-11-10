@@ -57,6 +57,20 @@ public class ArchitectuurTests
         Assert.True(File.Exists(Path.Combine(map, "Assets", "BtwBoeker.ico")));
     }
 
+    /// <summary>Keuze A (2026-11-10): de eigen titelbalk toont linksboven het app-icoon op 16 px, zoals Windows 11-apps.</summary>
+    [Fact]
+    public void Titelbalk_toont_het_icoon_op_16_px()
+    {
+        var map = Path.Combine(Repositorymap(), "src", "BtwBoeker.App");
+        var project = File.ReadAllText(Path.Combine(map, "BtwBoeker.App.csproj"));
+        var venster = File.ReadAllText(Path.Combine(map, "Views", "ShellWindow.xaml"));
+
+        Assert.Contains(@"<Resource Include=""Assets\BtwBoeker.ico"" />", project, StringComparison.Ordinal);
+        Assert.Contains(@"Source=""/Assets/BtwBoeker.ico"" Width=""16"" Height=""16""", venster, StringComparison.Ordinal);
+        Assert.Contains(@"AutomationProperties.AutomationId=""TitelbalkIcoon""", venster, StringComparison.Ordinal);
+        Assert.DoesNotContain(@"<TextBlock Text=""BTW""", venster, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void PdfPig_wordt_alleen_in_infrastructure_gebruikt()
     {

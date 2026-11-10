@@ -139,6 +139,9 @@ public sealed class AppUiTests : IDisposable
         var maximaliseer = Zoek(venster, "VensterMaximaliseren").AsButton(); // besluit 221
         Zoek(venster, "VensterMinimaliseren");
         Zoek(venster, "VensterSluiten");
+        // Keuze A: het app-icoon op 16 px (in schermpixels afhankelijk van de schaal); een ontbrekende resource laat het venster niet laden.
+        var icoon = Zoek(venster, "TitelbalkIcoon").BoundingRectangle;
+        Assert.True(icoon.Width > 0 && icoon.Width == icoon.Height, $"Titelbalkicoon {icoon.Width}×{icoon.Height}");
         maximaliseer.Invoke();
         Assert.True(Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Maximized, Wachttijd).Result);
         Assert.Equal("Herstellen", Zoek(venster, "VensterMaximaliseren").Name);

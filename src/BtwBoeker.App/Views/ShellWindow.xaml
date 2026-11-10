@@ -76,7 +76,9 @@
                 <Button Style="{StaticResource Sluitknop}" Content="&#xE8BB;" Click="Afsluiten_Click" ToolTip="Sluiten"
                         AutomationProperties.Name="Sluiten" AutomationProperties.AutomationId="VensterSluiten" />
             </StackPanel>
-            <TextBlock Text="BTW" Margin="16,0,8,0" VerticalAlignment="Center" FontWeight="SemiBold" AutomationProperties.Name="BTW-Boeker" />
+            <!-- Keuze A (2026-11-10): het app-icoon op 16 px, zoals Windows 11-apps -->
+            <Image Source="/Assets/BtwBoeker.ico" Width="16" Height="16" Margin="16,0,12,0" VerticalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="BTW-Boeker" AutomationProperties.AutomationId="TitelbalkIcoon" />
             <TextBlock Text="{Binding Venstertitel}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </DockPanel>

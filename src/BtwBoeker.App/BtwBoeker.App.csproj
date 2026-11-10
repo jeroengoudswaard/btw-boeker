@@ -25,6 +25,9 @@
     <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\BtwBoeker.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="BtwBoeker.App.Tests" />
     <Using Include="System.IO" />
   </ItemGroup>
