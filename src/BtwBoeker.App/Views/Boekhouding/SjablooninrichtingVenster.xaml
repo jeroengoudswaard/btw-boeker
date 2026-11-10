@@ -1,0 +1,194 @@
+<Window x:Class="BtwBoeker.App.Views.Boekhouding.SjablooninrichtingVenster"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:BtwBoeker.App.Views.Toegankelijkheid"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels.Boekhouding"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:SjablooninrichtingViewModel}"
+        Title="Boekhouding inrichten met een sjabloon"
+        Width="920" Height="660" MinWidth="680" MinHeight="480"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        AutomationProperties.AutomationId="Sjablooninrichting">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="24,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <StackPanel>
+                <TextBlock Text="{Binding Sjabloonnaam}" Style="{StaticResource Sectietitel}" Margin="0,0,0,8" />
+                <StackPanel Orientation="Horizontal" AutomationProperties.Name="Stappen">
+                    <StackPanel.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="0,0,24,0" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock x:Name="Stap1" Text="Rekeningen" />
+                    <TextBlock x:Name="Stap2" Text="Beginsaldi" />
+                    <TextBlock x:Name="Stap3" Text="Klaar" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="24,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <ProgressBar DockPanel.Dock="Left" Width="120" Height="4" IsIndeterminate="True" VerticalAlignment="Center"
+                             Visibility="{Binding IsBezig, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.Name="Bezig" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="&lt; V_orige" Style="{StaticResource DialoogKnop}" Command="{Binding VorigeCommand}"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="InrichtenVorige" />
+                    <Button Style="{StaticResource DialoogKnop}" IsDefault="True" Command="{Binding VolgendeCommand}"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="InrichtenVolgende">
+                        <AccessText Text="{Binding Volgendetekst, StringFormat='_{0} &gt;'}" />
+                    </Button>
+                    <Button Content="Annuleren" Style="{StaticResource DialoogKnop}" IsCancel="True"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="InrichtenAnnuleren" />
+                    <Button Content="Sluiten" Style="{StaticResource DialoogKnop}" IsDefault="True" Click="Sluiten_Click"
+                            Visibility="{Binding IsKlaar, Converter={StaticResource BoolNaarZichtbaar}}" AutomationProperties.AutomationId="InrichtenSluiten" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <StackPanel DockPanel.Dock="Bottom" Margin="24,0,24,8">
+            <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" AutomationProperties.LiveSetting="Assertive"
+                       Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
+        </StackPanel>
+
+        <Grid Margin="24,16">
+            <!-- ===== Rekeningen ===== -->
+            <DockPanel Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Rekeningen}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,8" TextWrapping="Wrap"
+                           Text="Zet rekeningen die u niet nodig hebt uit en pas namen aan. Later toevoegen kan altijd in het Rekeningschema. De reserverekening is nodig voor de jaarafsluiting." />
+                <TextBlock DockPanel.Dock="Bottom" Text="{Binding Rekeningfout}" Style="{StaticResource Foutmelding}" Margin="0,8,0,0"
+                           Visibility="{Binding Rekeningfout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                <DataGrid ItemsSource="{Binding Rekeningen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserSortColumns="False" HeadersVisibility="Column" AutomationProperties.Name="Rekeningen uit het sjabloon"
+                          AutomationProperties.AutomationId="InrichtRekeningen">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Gebruiken" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:InrichtRekeningRegel}">
+                                    <CheckBox IsChecked="{Binding IsGekozen, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"
+                                              IsEnabled="{Binding IsVerplicht, Converter={StaticResource Niet}}"
+                                              AutomationProperties.Name="{Binding Naam, StringFormat={}{0} gebruiken}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" IsReadOnly="True" Width="Auto" />
+                        <DataGridTemplateColumn Header="Naam" Width="2*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:InrichtRekeningRegel}">
+                                    <TextBox Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{Binding Nummer, StringFormat=Naam van rekening {0}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Rubriek" Binding="{Binding Rubriek}" IsReadOnly="True" Width="*" />
+                        <DataGridTextColumn Header="Soort" Binding="{Binding Soorttekst}" IsReadOnly="True" Width="Auto" />
+                        <DataGridTextColumn Header="Rol" Binding="{Binding Roltekst}" IsReadOnly="True" Width="Auto" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <!-- ===== Beginsaldi ===== -->
+            <DockPanel Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Beginsaldi}">
+                <TextBlock DockPanel.Dock="Top" Text="{Binding Beginsaldititel}" Style="{StaticResource Sectietitel}" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <Label Content="Begin_jaar" Target="{Binding ElementName=BeginjaarKeuze}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                    <ComboBox x:Name="BeginjaarKeuze" ItemsSource="{Binding Beginjaren}" SelectedItem="{Binding Beginjaar}" Width="90"
+                              ToolTip="Het eerste boekjaar in BTW-Boeker; de beginsaldi gelden per 1 januari van dat jaar" AutomationProperties.AutomationId="InrichtenBeginjaar" />
+                </StackPanel>
+                <!-- Dit is definitief; daarna alleen nog memoriaalboekingen. -->
+                <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" Margin="0,0,0,12"
+                                AutomationProperties.Name="Definitief" AutomationProperties.AutomationId="BeginsaldiDefinitief">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="⚠" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Top"
+                                   Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="Dit is definitief" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource Toelichting}" Margin="0,4,0,0"
+                                       Text="Het beginjaar en de beginsaldi worden de openingsbalans van de boekhouding. Daarna kunt u ze niet meer wijzigen: een fout herstelt u met een memoriaalboeking. Neem de bedragen dus over uit de eindbalans of de bankafschriften per 31 december van het vorige jaar." />
+                        </StackPanel>
+                    </DockPanel>
+                </tg:Groepskader>
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,12" AutomationProperties.Name="Uitleg debet en credit">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Debet" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}"
+                                   Text="Wat u heeft of nog krijgt: het saldo op de bank en in de kas, nog te ontvangen bedragen of bedragen die al vooruit zijn betaald." />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Credit" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}"
+                                   Text="Waar dat tegenover staat: het eigen vermogen (de reserve) en wat u nog moet betalen, zoals openstaande rekeningen of vooruit ontvangen bedragen." />
+                    </StackPanel>
+                </Grid>
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,8" TextWrapping="Wrap"
+                           Text="Bij een kloppende balans is het totaal debet gelijk aan het totaal credit. Leeg laten mag; dan begint u zonder openingsbalans." />
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                    <TextBlock>
+                        <Run Text="Totaal debet " /><Run Text="{Binding TotaalDebettekst, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="   ·   totaal credit " /><Run Text="{Binding TotaalCredittekst, Mode=OneWay}" FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock Text="{Binding Rekeningfout}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0"
+                               Visibility="{Binding Rekeningfout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                    <TextBlock Text="De beginsaldi zijn in evenwicht." Margin="0,8,0,0" Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                               Visibility="{Binding IsInEvenwicht, Converter={StaticResource BoolNaarZichtbaar}}" />
+                    <tg:Groepskader Style="{StaticResource Kaart}" Margin="0,8,0,0" AutomationProperties.Name="Verschil in de beginsaldi" AutomationProperties.AutomationId="BeginsaldiVerschil"
+                            Visibility="{Binding IsInEvenwicht, Converter={StaticResource OnwaarNaarZichtbaar}}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Foutmelding}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite">
+                                <Run Text="De beginsaldi zijn niet in evenwicht: verschil " /><Run Text="{Binding Verschiltekst, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=". Zonder keuze wordt er niets ingericht." />
+                            </TextBlock>
+                            <CheckBox Content="Het verschil _bewust boeken op een tussenrekening (te onderzoeken)" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding VerschilBewustBoeken}"
+                                      AutomationProperties.AutomationId="InrichtenVerschilBewust" />
+                            <StackPanel Orientation="Horizontal" Margin="24,8,0,0" IsEnabled="{Binding VerschilBewustBoeken}">
+                                <Label Content="_Rekening" Target="{Binding ElementName=Verschilnummer}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                                <TextBox x:Name="Verschilnummer" Width="80" Text="{Binding Verschilnummer, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                                <TextBox Width="260" Text="{Binding Verschilnaam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Naam van de tussenrekening" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Verschilfout}" Style="{StaticResource Foutmelding}" Margin="24,4,0,0"
+                                       Visibility="{Binding Verschilfout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                        </StackPanel>
+                    </tg:Groepskader>
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding Balansrekeningen}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserSortColumns="False" HeadersVisibility="Column" AutomationProperties.Name="Beginsaldi" AutomationProperties.AutomationId="Beginsaldi">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nummer" Binding="{Binding Nummer}" IsReadOnly="True" Width="Auto" />
+                        <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" IsReadOnly="True" Width="2*" />
+                        <DataGridTextColumn Header="Rubriek" Binding="{Binding Rubriek}" IsReadOnly="True" Width="*" />
+                        <DataGridTemplateColumn Header="Debet" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:InrichtRekeningRegel}">
+                                    <TextBox Text="{Binding Debettekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right"
+                                             AutomationProperties.Name="{Binding Naam, StringFormat=Debet {0}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Credit" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:InrichtRekeningRegel}">
+                                    <TextBox Text="{Binding Credittekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right"
+                                             AutomationProperties.Name="{Binding Naam, StringFormat=Credit {0}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <!-- ===== Klaar ===== -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="560"
+                        Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}">
+                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE930;" FontSize="48" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                <TextBlock Text="Boekhouding ingericht" Style="{StaticResource Sectietitel}" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Samenvatting}" Style="{StaticResource Toelichting}" TextWrapping="Wrap" AutomationProperties.AutomationId="InrichtenSamenvatting" />
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

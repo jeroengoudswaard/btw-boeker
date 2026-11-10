@@ -481,7 +481,11 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# ---- Verenigd: NOOIT echte gegevens in Git (AVG) ----
+# ---- BTW-Boeker: NOOIT echte gegevens in Git (AVG) ----
+*.btwdb
+*.btwdb.sleutel
+*.btwbackup
+*.xaf
 *.vdb
 *.vdb.sleutel
 *.vbak

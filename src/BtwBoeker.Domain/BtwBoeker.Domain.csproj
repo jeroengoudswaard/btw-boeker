@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Alleen voor vaste run-ID's in het voorbeeldbestand van de pain.008-tests -->
+    <InternalsVisibleTo Include="BtwBoeker.Application.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,146 @@
+<UserControl x:Class="BtwBoeker.App.Views.OverzichtView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tg="clr-namespace:BtwBoeker.App.Views.Toegankelijkheid"
+             xmlns:conv="clr-namespace:BtwBoeker.App.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels"
+             xmlns:inr="clr-namespace:BtwBoeker.Application.Inrichting;assembly=BtwBoeker.Application"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:OverzichtViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="{StaticResource PaginaMarge}">
+
+            <!-- ===== Welkomstscherm: nog geen database geopend ===== -->
+            <tg:Groepspaneel HorizontalAlignment="Center" VerticalAlignment="Top" Width="696" Margin="0,48,0,48"
+                        Visibility="{Binding Shell.IsDatabaseOpen, Converter={StaticResource OnwaarNaarZichtbaar}}"
+                        AutomationProperties.Name="Startpagina" AutomationProperties.AutomationId="Startpagina">
+                <Border Width="64" Height="64" CornerRadius="8" HorizontalAlignment="Center" Margin="0,0,0,16" Background="{DynamicResource AccentFillColorDefaultBrush}">
+                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE73E;" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                </Border>
+                <TextBlock Text="Welkom bij BTW-Boeker" Style="{StaticResource Welkomstitel}" AutomationProperties.HeadingLevel="Level1" />
+                <TextBlock Style="{StaticResource Toelichting}" TextAlignment="Center" Margin="0,8,0,32" MaxWidth="480"
+                           Text="Boekhouding, bank, facturen en bonnen, versleuteld in één bestand." />
+
+                <UniformGrid Columns="3" Margin="-8,0">
+                    <Button Style="{StaticResource Hoofdtegel}" Margin="8,0" Command="{Binding Shell.NieuweDatabaseCommand}"
+                            AutomationProperties.Name="Nieuwe database" AutomationProperties.AutomationId="StartNieuw" ToolTip="Ctrl+N">
+                        <StackPanel>
+                            <Border Style="{StaticResource Pictogramtegel}" HorizontalAlignment="Left" Background="{DynamicResource AccentFillColorDefaultBrush}">
+                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE710;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                            </Border>
+                            <TextBlock Text="Nieuwe database" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
+                            <TextBlock Text="Begin met een lege, versleutelde administratie." Style="{StaticResource Toelichting}" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Keuzetegel}" Margin="8,0" Command="{Binding Shell.OpenDatabaseCommand}"
+                            AutomationProperties.Name="Database openen" AutomationProperties.AutomationId="StartOpenen" ToolTip="Ctrl+O">
+                        <StackPanel>
+                            <Border Style="{StaticResource Pictogramtegel}" HorizontalAlignment="Left" Background="{conv:Paletkleur Naam=Blauw, Tint=True}">
+                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE8E5;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{conv:Paletkleur Naam=Blauw}" />
+                            </Border>
+                            <TextBlock Text="Database openen" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
+                            <TextBlock Text="Kies een bestaand .btwdb-bestand." Style="{StaticResource Toelichting}" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Keuzetegel}" Margin="8,0" Command="{Binding Shell.HerstelBackupCommand}"
+                            AutomationProperties.Name="Back-up terugzetten" AutomationProperties.AutomationId="StartBackup">
+                        <StackPanel>
+                            <Border Style="{StaticResource Pictogramtegel}" HorizontalAlignment="Left" Background="{conv:Paletkleur Naam=Koraal, Tint=True}">
+                                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE777;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{conv:Paletkleur Naam=Koraal}" />
+                            </Border>
+                            <TextBlock Text="Back-up terugzetten" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
+                            <TextBlock Text="Herstel een .btwbackup-back-up als nieuwe database." Style="{StaticResource Toelichting}" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                </UniformGrid>
+
+                <StackPanel Margin="0,32,0,0" Visibility="{Binding Shell.HeeftLaatsteDatabase, Converter={StaticResource BoolNaarZichtbaar}}">
+                    <TextBlock Text="Laatst geopend" Style="{StaticResource Toelichting}" FontSize="12" Margin="0,0,0,8" />
+                    <Button Style="{StaticResource Keuzetegel}" Height="56" Padding="16,0" Command="{Binding Shell.OpenLaatsteDatabaseCommand}"
+                            AutomationProperties.Name="{Binding Shell.LaatsteDatabaseNaam, StringFormat=Laatst geopend: {0}}" AutomationProperties.AutomationId="StartLaatste">
+                        <DockPanel VerticalAlignment="Center">
+                            <TextBlock DockPanel.Dock="Right" FontFamily="{StaticResource Pictogrammen}" Text="&#xE76C;" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock DockPanel.Dock="Left" FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Shell.LaatsteDatabaseNaam}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Shell.LaatsteDatabaseMap}" Style="{StaticResource Toelichting}" FontSize="12" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Button>
+                </StackPanel>
+            </tg:Groepspaneel>
+
+            <!-- ===== Start: database geopend: kerncijfers en kaarten met de volgende stap ===== -->
+            <StackPanel Visibility="{Binding Shell.IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
+
+                <ItemsControl ItemsSource="{Binding Kerncijfers}" Focusable="False" Margin="-8,0,-8,16"
+                              AutomationProperties.Name="Kerncijfers" AutomationProperties.AutomationId="Kerncijfers">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:Kerncijferregel}">
+                            <Border Style="{StaticResource Kaart}" Margin="8,0,8,16" AutomationProperties.Name="{Binding Titel}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Titel}" Style="{StaticResource Kerncijfertitel}" />
+                                    <TextBlock Text="{Binding Waarde}" Style="{StaticResource Kerncijferwaarde}" />
+                                    <TextBlock Text="{Binding Toelichting}" FontSize="12" Style="{StaticResource Toelichting}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Te doen" Style="{StaticResource Sectietitel}" Margin="0,4,0,12" />
+                <ItemsControl ItemsSource="{Binding Kaarten}" Focusable="False" Margin="-8,0" AutomationProperties.Name="Te doen" AutomationProperties.AutomationId="Startkaarten">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type inr:Startkaart}">
+                            <Border Style="{StaticResource Kaart}" MinHeight="136" Margin="8,0,8,16">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Bottom" Content="{Binding Knoptekst}" Style="{StaticResource Tekstknop}" Margin="0,12,0,0"
+                                            Command="{Binding DataContext.Shell.KaartOpenenCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" AutomationProperties.Name="{Binding Titel}"
+                                            AutomationProperties.AutomationId="{Binding Soort, StringFormat=Kaart_{0}}" />
+                                    <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Top"
+                                            Background="{Binding Soort, Converter={StaticResource Onderdeeltint}}">
+                                        <TextBlock Text="{Binding Aantal}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Foreground="{Binding Soort, Converter={StaticResource Onderdeelkleur}}" />
+                                    </Border>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Titel}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Administratie}" Style="{StaticResource Toelichting}" FontSize="12"
+                                                   Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                        <TextBlock Text="{Binding Tekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <!-- Leeg scherm: niets te doen. -->
+                <Border Style="{StaticResource Kaart}" MaxWidth="480" HorizontalAlignment="Left"
+                        Visibility="{Binding Kaarten.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}">
+                    <StackPanel>
+                        <TextBlock Text="✓ Alles is bij" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Toelichting}" Text="Er staat niets klaar. Kies links een onderdeel om verder te werken." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

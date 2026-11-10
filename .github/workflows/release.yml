@@ -1,7 +1,8 @@
-# Besluiten 250–254: het installatiebestand (MSI), de webapp voor GitHub Pages en de schermafbeeldingen voor de website.
+# Het installatiebestand (MSI) en de schermafbeeldingen voor de website.
 #
-# - Bij een versietag (v0.15.0): bouwen, testen en publiceren naar de release "verenigd" in de websiterepository
-#   (jeroengoudswaard/jeroengoudswaard.github.io). Daarvoor is het geheim WEBSITE_TOKEN nodig (zie docs/PUBLICEREN.md).
+# - Bij een versietag (v0.19.0): bouwen, testen en (als WEBSITE_PUBLICEREN aan staat) publiceren naar de release
+#   "btw-boeker" in de websiterepository (jeroengoudswaard/jeroengoudswaard.github.io). Daarvoor is het geheim
+#   WEBSITE_TOKEN nodig (zie docs/PUBLICEREN.md).
 # - Bij een pull request dat het installatiebestand of deze workflow wijzigt, en met de hand: alleen bouwen, ter controle.
 name: Release
 
@@ -50,13 +51,13 @@ jobs:
           dotnet test --no-build --configuration Release --filter "Categorie!=UI"
 
       - name: Publiceren (self-contained, win-x64)
-        run: dotnet publish src/Verenigd.App --configuration Release --runtime win-x64 --self-contained -p:Version=${{ steps.versie.outputs.versie }} --output artifacts/publish
+        run: dotnet publish src/BtwBoeker.App --configuration Release --runtime win-x64 --self-contained -p:Version=${{ steps.versie.outputs.versie }} --output artifacts/publish
 
       - name: Installatiebestand bouwen (WiX)
         shell: pwsh
         run: |
-          dotnet build installer/Verenigd.Installer.wixproj --configuration Release "-p:Versie=${{ steps.versie.outputs.versie }}" "-p:PublicatieMap=$PWD\artifacts\publish"
-          $naam = "Verenigd-${{ steps.versie.outputs.versie }}.msi"
+          dotnet build installer/BtwBoeker.Installer.wixproj --configuration Release "-p:Versie=${{ steps.versie.outputs.versie }}" "-p:PublicatieMap=$PWD\artifacts\publish"
+          $naam = "BtwBoeker-${{ steps.versie.outputs.versie }}.msi"
           $msi = Get-ChildItem installer/bin -Recurse -Filter $naam | Select-Object -First 1
           if (-not $msi) { throw "$naam niet gevonden" }
           New-Item -ItemType Directory -Force artifacts/uitvoer/release | Out-Null
@@ -64,13 +65,13 @@ jobs:
           Get-ChildItem artifacts/uitvoer/release
 
       # FlaUI heeft een bureaublad nodig; op een GitHub-runner is dat niet gegarandeerd. Lukt het niet, dan gaat de release
-      # door zonder nieuwe schermafbeeldingen van de desktop (de website houdt dan de vorige).
-      - name: Schermafbeeldingen desktop (demodatabase, licht en donker)
+      # door zonder nieuwe schermafbeeldingen (de website houdt dan de vorige).
+      - name: Schermafbeeldingen (demodatabase, licht en donker)
         continue-on-error: true
         shell: pwsh
         env:
-          VERENIGD_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
-        run: dotnet test tests/Verenigd.App.Tests --no-build --configuration Release --filter "Categorie=Schermafbeeldingen" --blame-hang --blame-hang-timeout 4m
+          BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
+        run: dotnet test tests/BtwBoeker.App.Tests --no-build --configuration Release --filter "Categorie=Schermafbeeldingen" --blame-hang --blame-hang-timeout 4m
 
       - uses: actions/upload-artifact@v7
         with:
@@ -78,43 +79,10 @@ jobs:
           path: artifacts/uitvoer
           if-no-files-found: error
 
-  webapp:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          # Geen automatische cache: er staat geen lockbestand in de hoofdmap, en de release-workflow heeft geheimen.
-          package-manager-cache: false
-
-      - name: Bouwen voor GitHub Pages (/verenigd/app)
-        working-directory: webapp
-        env:
-          BASE_PATH: /verenigd/app
-          # Leeg zolang de Supabase-koppeling er niet is (besluit 254); daarna als repository-variabelen.
-          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
-          npm run build
-          mkdir -p uitvoer && (cd build && zip -qr ../uitvoer/verenigd-web.zip .)
-
-      - name: Schermafbeeldingen webapp (verzonnen gegevens)
-        working-directory: webapp
-        run: SCHERMEN=$PWD/uitvoer/schermen npx playwright test tests/schermen.spec.ts
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: webapp
-          path: webapp/uitvoer
-          if-no-files-found: error
-
   publiceren:
-    needs: [installatiebestand, webapp]
-    if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
+    needs: [installatiebestand]
+    # Publiceren naar de website staat uit tot er een BTW-Boeker-pagina is: zet dan de repository-variabele WEBSITE_PUBLICEREN op 'true'.
+    if: vars.WEBSITE_PUBLICEREN == 'true' && github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -125,21 +93,20 @@ jobs:
         with:
           path: uit
 
-      - name: Release "verenigd" op de website bijwerken
+      - name: Release "btw-boeker" op de website bijwerken
         env:
           GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
           VERSIE: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           ls -R uit
-          notities="Verenigd ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit) en de webapp voor de leiding. Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
-          if gh release view verenigd --repo "$WEBSITE" > /dev/null 2>&1; then
-            gh release edit verenigd --repo "$WEBSITE" --title "Verenigd ${VERSIE#v} (bèta)" --notes "$notities"
+          notities="BTW-Boeker ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit). Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
+          if gh release view btw-boeker --repo "$WEBSITE" > /dev/null 2>&1; then
+            gh release edit btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities"
           else
-            gh release create verenigd --repo "$WEBSITE" --title "Verenigd ${VERSIE#v} (bèta)" --notes "$notities" --prerelease
+            gh release create btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities" --prerelease
           fi
-          gh release upload verenigd --repo "$WEBSITE" --clobber \
-            uit/installatiebestand/release/*.msi uit/webapp/verenigd-web.zip
+          gh release upload btw-boeker --repo "$WEBSITE" --clobber uit/installatiebestand/release/*.msi
 
       - name: Versie en schermafbeeldingen in de website zetten
         env:
@@ -147,37 +114,21 @@ jobs:
         run: |
           set -euo pipefail
           git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${WEBSITE}.git" site
-          mkdir -p site/verenigd/screens
-          cp uit/webapp/schermen/*.png site/verenigd/screens/
+          mkdir -p site/btw-boeker/screens
           if ls uit/installatiebestand/schermen/*.png > /dev/null 2>&1; then
-            cp uit/installatiebestand/schermen/*.png site/verenigd/screens/
+            cp uit/installatiebestand/schermen/*.png site/btw-boeker/screens/
           else
-            echo "::warning::Geen schermafbeeldingen van de desktop (geen bureaublad op de runner?); de vorige blijven staan."
+            echo "::warning::Geen schermafbeeldingen (geen bureaublad op de runner?); de vorige blijven staan."
           fi
-          # Besluiten 274 en 275: het versielabel en de downloadknop; faalt zichtbaar als ze niet meer te vinden zijn.
+          # Het versielabel en de downloadknop; faalt zichtbaar als ze niet meer te vinden zijn.
           bash bron/.github/scripts/website-bijwerken.sh site "${GITHUB_REF_NAME#v}"
           cd site
-          git config user.name "verenigd-release"
-          git config user.email "verenigd-release@users.noreply.github.com"
-          git add verenigd/screens index.html verenigd/index.html
+          git config user.name "btw-boeker-release"
+          git config user.email "btw-boeker-release@users.noreply.github.com"
+          git add btw-boeker/screens index.html btw-boeker/index.html
           if git diff --cached --quiet; then
             echo "Website ongewijzigd."
           else
-            git commit -m "Verenigd ${GITHUB_REF_NAME}: versie en schermafbeeldingen"
+            git commit -m "BTW-Boeker ${GITHUB_REF_NAME}: versie en schermafbeeldingen"
             git push
           fi
-
-      # Besluit 274: er is alleen nog een bestand met het versienummer. Pas na de push: de knop wijst dan al naar de nieuwe naam.
-      - name: Oude vaste link Verenigd.msi opruimen
-        env:
-          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
-        run: |
-          set -euo pipefail
-          if gh release view verenigd --repo "$WEBSITE" --json assets --jq '.assets[].name' | grep -qx 'Verenigd.msi'; then
-            gh release delete-asset verenigd Verenigd.msi --repo "$WEBSITE" --yes
-          fi
-
-      - name: Website opnieuw publiceren (webapp uitpakken)
-        env:
-          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
-        run: gh api "repos/${WEBSITE}/dispatches" -f event_type=app-released

@@ -1,0 +1,101 @@
+﻿<Application x:Class="BtwBoeker.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:BtwBoeker.App.Converters"
+             ThemeMode="System"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Views/Thema/FluentMica.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolNaarZichtbaar" />
+            <conv:KleurNaarBrushConverter x:Key="KleurNaarBrush" />
+            <conv:NullNaarZichtbaarheidConverter x:Key="NietNullNaarZichtbaar" />
+            <conv:NullNaarZichtbaarheidConverter x:Key="NullNaarZichtbaar" Omgekeerd="True" />
+            <conv:OmgekeerdeBoolNaarZichtbaarheidConverter x:Key="OnwaarNaarZichtbaar" />
+            <conv:GelijkAanParameterConverter x:Key="GelijkAan" />
+            <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
+            <conv:GroterDanNulNaarZichtbaarheidConverter x:Key="GroterDanNulNaarZichtbaar" />
+            <conv:NietConverter x:Key="Niet" />
+            <conv:BankkeuzeTekstConverter x:Key="BankkeuzeTekst" />
+            <conv:EnumNaarIndexConverter x:Key="EnumNaarIndex" />
+            <conv:RapportNaarDocumentConverter x:Key="RapportNaarDocument" />
+            <conv:HoofdactieStijlConverter x:Key="HoofdactieStijl" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeelkleur" />
+            <conv:OnderdeelkleurConverter x:Key="Onderdeeltint" Tint="True" />
+
+            <FontFamily x:Key="Pictogrammen">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+            <!-- Standaardmaten volgens de Windows-richtlijnen (veelvouden van 4/8). -->
+            <Thickness x:Key="PaginaMarge">48,24,48,32</Thickness>
+            <Thickness x:Key="KaartPadding">16</Thickness>
+
+            <Style x:Key="Paginatitel" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Koplettertype}" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,0,0,16" />
+            </Style>
+            <Style x:Key="Sectietitel" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,8,0,8" />
+            </Style>
+            <Style x:Key="Toelichting" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="Foutmelding" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Margin" Value="0,8,0,0" />
+            </Style>
+            <!-- De accentknop en het selectievakje van het Fluent-thema herkennen geen toegangstoets ("_Boeken" verschijnt letterlijk);
+                 deze sjabloon toont de tekst als AccessText, zodat Alt+letter weer werkt. -->
+            <DataTemplate x:Key="Toegangstekst">
+                <AccessText Text="{Binding}" />
+            </DataTemplate>
+            <Style x:Key="Kaart" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+            <Style x:Key="Knoppenbalk" TargetType="StackPanel">
+                <Setter Property="Orientation" Value="Horizontal" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="Margin" Value="0,24,0,0" />
+            </Style>
+            <!-- Knoppen in de voet van een venster even breed (120 px), de hoofdactie rechts. -->
+            <Style x:Key="DialoogKnop" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="MinWidth" Value="120" />
+                <Setter Property="Margin" Value="8,0,0,0" />
+            </Style>
+            <!-- Een actie die pas nodig is als er iets te doen is, als rustige link in de accentkleur. -->
+            <Style x:Key="Linkknop" TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Padding" Value="0,4" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter RecognizesAccessKey="True" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

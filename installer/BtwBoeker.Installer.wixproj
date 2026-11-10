@@ -1,0 +1,20 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <!--
+    Het installatiebestand (MSI) van BTW-Boeker. Bevat de self-contained publicatie voor win-x64.
+    Bouwen (alleen op Windows), vanuit de hoofdmap:
+      dotnet publish src/BtwBoeker.App -c Release -r win-x64 -self-contained -o artifacts/publish
+      dotnet build installer/BtwBoeker.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=../artifacts/publish
+    WiX 5 (MS-RL); bewust niet WiX 6, dat een onderhoudsbijdrage (OSMF) vraagt.
+  -->
+  <PropertyGroup>
+    <Platform>x64</Platform>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Versie Condition="'$(Versie)' == ''">0.0.0</Versie>
+    <!-- Het versienummer staat in de bestandsnaam. -->
+    <OutputName>BtwBoeker-$(Versie)</OutputName>
+    <PublicatieMap Condition="'$(PublicatieMap)' == ''">..\artifacts\publish</PublicatieMap>
+    <DefineConstants>Versie=$(Versie);PublicatieMap=$(PublicatieMap)</DefineConstants>
+    <SuppressValidation>false</SuppressValidation>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
