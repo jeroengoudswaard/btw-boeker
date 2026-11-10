@@ -4,6 +4,9 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Opgelost
+- **App-icoon** (besluit 20): het programma, het venster en de taakbalk toonden het standaardicoon van Windows; alleen de snelkoppeling uit de MSI had het eigen icoon. `BTW-Boeker.exe` heeft nu `BtwBoeker.ico` (groene tegel met huisje en BTW).
+
 ### Verwijderd
 - **Begroting en meerjarenplan** (besluiten 6 en 28): de pagina *Begroting* (Ctrl+5), het subtabblad *Meerjarenplan*, het rapport *Begroting en werkelijk* en de afdruk voor de ALV. Ctrl+2 tot en met Ctrl+6 zijn vervallen; Ctrl+1 opent de boekhouding.
 - **Kolom *begroot* in de jaarrekening**: de jaarrekening toont dit jaar en vorig jaar (besluit 27).

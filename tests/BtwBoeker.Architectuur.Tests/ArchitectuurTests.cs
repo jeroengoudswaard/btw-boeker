@@ -51,7 +51,10 @@ public class ArchitectuurTests
         var project = File.ReadAllText(Path.Combine(map, "BtwBoeker.App.csproj"));
         Assert.Contains("<AssemblyName>BTW-Boeker</AssemblyName>", project, StringComparison.Ordinal);
         Assert.Contains("<Product>BTW-Boeker</Product>", project, StringComparison.Ordinal);
-        Assert.DoesNotContain("BtwBoeker.ico", project, StringComparison.Ordinal);
+        // Besluit 20: het eigen icoon (uit assets/bron/btw-boeker-icoon-1024.png) is het icoon van het programma, het venster
+        // en de taakbalk; de MSI gebruikt hetzelfde bestand voor de snelkoppeling.
+        Assert.Contains(@"<ApplicationIcon>Assets\BtwBoeker.ico</ApplicationIcon>", project, StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(map, "Assets", "BtwBoeker.ico")));
     }
 
     [Fact]
