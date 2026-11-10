@@ -90,7 +90,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
                 throw new InvalidOperationException("Een geboekte post kan niet worden verwijderd; maak een tegenboeking.");
             }
 
-            // De banktransactie gaat terug naar de werkvoorraad (besluit 75).
+            // De banktransactie gaat terug naar de werkvoorraad.
             stand.MutatieVan(post.Id)?.Ontkoppel();
             var wijziging = new BoekhoudingWijziging<bool>(true);
             wijziging.Verwijderen.Add(post);

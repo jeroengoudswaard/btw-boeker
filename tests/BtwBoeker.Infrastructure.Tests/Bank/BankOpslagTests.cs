@@ -14,7 +14,7 @@ namespace BtwBoeker.Infrastructure.Tests.Bank;
 /// <summary>Bankimport op een echte, versleutelde database, met synthetische CAMT.053-bestanden.</summary>
 public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();

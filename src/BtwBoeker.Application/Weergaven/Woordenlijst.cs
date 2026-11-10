@@ -1,14 +1,14 @@
 namespace BtwBoeker.Application.Weergaven;
 
 /// <summary>
-/// Eén begrip in twee weergaven (besluit 127). <see cref="Uitleg"/> verschijnt alleen in Eenvoudig, als tooltip. Een
+/// Eén begrip in twee weergaven. <see cref="Uitleg"/> verschijnt alleen in Eenvoudig, als tooltip. Een
 /// underscore geeft de toegangstoets aan (Alt+letter).
 /// </summary>
 public sealed record Term(string Sleutel, string Expert, string Eenvoudig, string? Uitleg = null);
 
 /// <summary>
-/// De woordenlijst voor het tabblad Financiën (besluiten 127, 128, 130 en 133). Alleen visueel: de database, afdrukken en
-/// export blijven formeel (besluit 131). De XAML gebruikt de sleutels als <c>{DynamicResource T.Sleutel}</c> en
+/// De woordenlijst voor het tabblad Financiën. Alleen visueel: de database, afdrukken en
+/// export blijven formeel. De XAML gebruikt de sleutels als <c>{DynamicResource T.Sleutel}</c> en
 /// <c>{DynamicResource U.Sleutel}</c>; een architectuurtest bewaakt dat elke sleutel hier staat.
 /// </summary>
 public static class Woordenlijst
@@ -28,7 +28,7 @@ public static class Woordenlijst
         new("Rapporten", "Rapporten", "Overzichten"),
         new("Boekjaren", "Boekjaren", "Jaren"),
         new("Saldibalans", "Saldibalans", "Stand van alle potjes", "Per potje het totaal dat erbij en eraf ging, en de stand."),
-        new("Balans", "Balans", "Bezittingen en schulden", "Wat de vereniging bezit (bank, kas) en wat ze verschuldigd is, op 31 december."),
+        new("Balans", "Balans", "Bezittingen en schulden", "Wat u bezit (bank, kas) en wat u verschuldigd bent, op 31 december."),
         new("WinstEnVerlies", "Staat van baten en lasten", "Inkomsten en uitgaven", "Alle inkomsten en uitgaven van het jaar en wat er overblijft."),
         new("Concept", "Concept", "Nog niet definitief", "Een voorlopige boeking: nog te wijzigen of te verwijderen, en telt nog niet mee."),
         new("Geboekt", "Geboekt", "Definitief", "Een definitieve boeking telt mee en kan alleen nog worden teruggedraaid."),

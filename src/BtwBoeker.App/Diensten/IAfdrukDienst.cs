@@ -2,7 +2,7 @@ using BtwBoeker.Application.Boekhouding;
 
 namespace BtwBoeker.App.Diensten;
 
-/// <summary>Afdrukken via het standaard Windows-afdrukvenster, dus ook naar PDF ("Microsoft Print to PDF", besluit 67).</summary>
+/// <summary>Afdrukken via het standaard Windows-afdrukvenster, dus ook naar PDF ("Microsoft Print to PDF").</summary>
 public interface IAfdrukDienst
 {
     /// <returns><c>false</c> als de gebruiker het afdrukken annuleert.</returns>
@@ -14,10 +14,10 @@ public sealed record BoekhoudingHulpmiddelen(
     ISpreadsheetSchrijver Schrijver, IAfdrukDienst Afdruk, ViewModels.Woordenboek? Woordenboek = null,
     Application.Bijlagen.IPdfTekstLezer? Tekstlezer = null)
 {
-    /// <summary>Leest datum en bedrag uit PDF-bonnen (besluit 96); zonder lezer vult de gebruiker ze zelf in.</summary>
+    /// <summary>Leest datum en bedrag uit PDF-bonnen; zonder lezer vult de gebruiker ze zelf in.</summary>
     public Application.Bijlagen.IPdfTekstLezer PdfTekst { get; } = Tekstlezer ?? new GeenTekst();
 
-    /// <summary>De woorden van de gekozen weergave, gedeeld door de hele app (besluit 127).</summary>
+    /// <summary>De woorden van de gekozen weergave, gedeeld door de hele app.</summary>
     public ViewModels.Woordenboek Woorden { get; } = Woordenboek ?? new ViewModels.Woordenboek();
 }
 

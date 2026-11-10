@@ -180,7 +180,7 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         var dienst = new BoekhoudingDienst(sessie, new VasteTijd(DateTimeOffset.UtcNow));
         var voorstel = new Inrichtvoorstel(2025,
         [
-            new Inrichtrekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(140000)),
+            new Inrichtrekening(600, "Eigen vermogen", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(140000)),
             new Inrichtrekening(1000, "Kas", "Kas Bank", RekeningSoort.Balans, RekeningRol.Kas, false, new Bedrag(40000), Bedrag.Nul),
             new Inrichtrekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(100000), Bedrag.Nul),
             new Inrichtrekening(4115, "Energie", "Terreinkosten", RekeningSoort.Resultaat, RekeningRol.Geen, false, Bedrag.Nul, Bedrag.Nul),
@@ -222,7 +222,7 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         await using var sessie = new FakeSessie(leeg);
         var voorstel = new Inrichtvoorstel(2025,
         [
-            new Inrichtrekening(600, "Algemene reserve", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(2355664)),
+            new Inrichtrekening(600, "Eigen vermogen", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(2355664)),
             new Inrichtrekening(1100, "Bank", "Kas Bank", RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(2356388), Bedrag.Nul),
         ], []);
 
@@ -244,7 +244,7 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         await using var sessie = new FakeSessie(leeg);
         var voorstel = new Inrichtvoorstel(2025,
         [
-            new Inrichtrekening(600, "Algemene reserve", null, RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(1000)),
+            new Inrichtrekening(600, "Eigen vermogen", null, RekeningSoort.Balans, RekeningRol.Reserve, false, Bedrag.Nul, new Bedrag(1000)),
             new Inrichtrekening(1100, "Bank", null, RekeningSoort.Balans, RekeningRol.Geen, false, new Bedrag(900), Bedrag.Nul),
             new Inrichtrekening(1298, "Kruisposten", null, RekeningSoort.Balans, RekeningRol.Kruisposten, false, Bedrag.Nul, Bedrag.Nul),
         ], []);

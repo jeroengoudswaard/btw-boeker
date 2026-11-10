@@ -8,23 +8,23 @@ using BtwBoeker.Infrastructure.Database;
 namespace BtwBoeker.Infrastructure.Tests.Prestaties;
 
 /// <summary>
-/// Besluit 234: een kunstmatige database van realistische omvang (een rekeningschema, twee boekjaren en een paar duizend
+/// Een kunstmatige database van realistische omvang (een rekeningschema, twee boekjaren en een paar duizend
 /// geboekte posten), om de snelheid van laden, boeken en overzichten te meten. Geen echte gegevens.
 /// </summary>
 internal static class Testdatabase
 {
-    public const string Wachtwoord = "scouting is fantastisch";
+    public const string Wachtwoord = "zonnig vakantiehuis 2026";
     public static readonly DateTime Nu = new(2026, 11, 3, 12, 0, 0, DateTimeKind.Utc);
 
     private static readonly (int Nummer, string Naam, RekeningSoort Soort)[] Rekeningen =
     [
-        (600, "Algemene reserve", RekeningSoort.Balans),
+        (600, "Eigen vermogen", RekeningSoort.Balans),
         (1000, "Kas", RekeningSoort.Balans),
         (1100, "Bank", RekeningSoort.Balans),
         (1150, "Spaarrekening", RekeningSoort.Balans),
         (1300, "Debiteuren contributie", RekeningSoort.Balans),
-        (4000, "Afdracht Scouting Nederland", RekeningSoort.Resultaat),
-        (4100, "Opkomsten", RekeningSoort.Resultaat),
+        (4000, "Parkbijdrage", RekeningSoort.Resultaat),
+        (4100, "Klein onderhoud", RekeningSoort.Resultaat),
         (4110, "Kampen", RekeningSoort.Resultaat),
         (4200, "Huur", RekeningSoort.Resultaat),
         (4210, "Energie", RekeningSoort.Resultaat),

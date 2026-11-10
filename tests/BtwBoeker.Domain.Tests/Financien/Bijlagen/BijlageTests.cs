@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien.Bijlagen;
 
 namespace BtwBoeker.Domain.Tests.Financien.Bijlagen;
 
-/// <summary>Bijlagen bij journaalposten (besluiten 83, 84, 97, 136 en 137).</summary>
+/// <summary>Bijlagen bij journaalposten.</summary>
 public sealed class BijlageTests
 {
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
@@ -89,7 +89,7 @@ public sealed class BijlageTests
         Assert.Equal(new DateOnly(2026, 10, 12), bijlage.Datum);
         Assert.Equal(new Bedrag(2345), bijlage.Bedrag);
 
-        bijlage.ZetGegevens(null, new Bedrag(-1500)); // creditnota (besluit 142)
+        bijlage.ZetGegevens(null, new Bedrag(-1500)); // creditnota
         Assert.Equal(new Bedrag(-1500), bijlage.Bedrag);
     }
 

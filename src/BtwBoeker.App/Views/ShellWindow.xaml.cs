@@ -22,7 +22,7 @@ public partial class ShellWindow : Window
         Accentkleuren.PasToe(Resources, _viewModel.GekozenAdministratie?.Accentkleur);
     }
 
-    /// <summary>Besluit 216: de accentkleur (knoppen, streepje, tellers) volgt de gekozen administratie.</summary>
+    /// <summary>De accentkleur (knoppen, streepje, tellers) volgt de gekozen administratie.</summary>
     private void ViewModelGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ShellViewModel.GekozenAdministratie))
@@ -52,7 +52,7 @@ public partial class ShellWindow : Window
         }
     }
 
-    /// <summary>Besluit 221: een gemaximaliseerd venster met eigen titelbalk valt anders buiten het scherm; het pictogram wisselt.</summary>
+    /// <summary>Een gemaximaliseerd venster met eigen titelbalk valt anders buiten het scherm; het pictogram wisselt.</summary>
     protected override void OnStateChanged(EventArgs e)
     {
         base.OnStateChanged(e);
@@ -114,7 +114,7 @@ public partial class ShellWindow : Window
         }
     }
 
-    /// <summary>Besluit 179: in Eenvoudig toont Alt de menubalk tijdelijk, zodat ook Alt+letter werkt.</summary>
+    /// <summary>In Eenvoudig toont Alt de menubalk tijdelijk, zodat ook Alt+letter werkt.</summary>
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
@@ -127,7 +127,7 @@ public partial class ShellWindow : Window
         base.OnPreviewKeyDown(e);
     }
 
-    /// <summary>Besluit 273: een klik op <i>Meer…</i> klapt om; hij selecteert de regel niet.</summary>
+    /// <summary>Een klik op <i>Meer…</i> klapt om; hij selecteert de regel niet.</summary>
     private void Navigatiebalk_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (ItemsControl.ContainerFromElement(Navigatiebalk, (DependencyObject)e.OriginalSource) is ListBoxItem { DataContext: NavigatieItem { IsMeer: true } meer } regel)
@@ -138,7 +138,7 @@ public partial class ShellWindow : Window
         }
     }
 
-    /// <summary>Besluit 273: Enter en Spatie klappen <i>Meer…</i> om; de pijltjes lopen er alleen overheen.</summary>
+    /// <summary>Enter en Spatie klappen <i>Meer…</i> om; de pijltjes lopen er alleen overheen.</summary>
     private void Navigatiebalk_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key is Key.Enter or Key.Space && Keyboard.FocusedElement is ListBoxItem { DataContext: NavigatieItem { IsMeer: true } meer })

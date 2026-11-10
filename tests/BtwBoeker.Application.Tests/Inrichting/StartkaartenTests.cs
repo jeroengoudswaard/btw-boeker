@@ -10,7 +10,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Inrichting;
 
-/// <summary>Besluit 183: kaarten op de startpagina, alleen als er iets te doen is.</summary>
+/// <summary>Kaarten op de startpagina, alleen als er iets te doen is.</summary>
 public sealed class StartkaartenTests
 {
     private static readonly DateOnly Vandaag = new(2026, 11, 3);

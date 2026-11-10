@@ -37,9 +37,9 @@ public class AdministratieTests
     {
         var a = Standaard();
 
-        a.WijzigNaam("  Scouting Vereniging  ");
+        a.WijzigNaam("  Vakantiehuis De Duinen  ");
 
-        Assert.Equal("Scouting Vereniging", a.Naam);
+        Assert.Equal("Vakantiehuis De Duinen", a.Naam);
     }
 
     [Fact]

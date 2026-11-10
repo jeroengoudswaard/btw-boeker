@@ -5,7 +5,7 @@ using BtwBoeker.Infrastructure.Tests.Demo;
 
 namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 
-/// <summary>Besluiten 197 en 255–259: de auditfile uit een echte (versleutelde) database, met verzonnen gegevens.</summary>
+/// <summary>De auditfile uit een echte (versleutelde) database, met verzonnen gegevens.</summary>
 public sealed class XafDienstTests : IDisposable
 {
     private static readonly DateTimeOffset Nu = new(2026, 11, 4, 12, 0, 0, TimeSpan.Zero);
@@ -57,7 +57,7 @@ public sealed class XafDienstTests : IDisposable
     [Fact]
     public void De_bestandsnaam_bevat_administratie_en_jaar()
     {
-        Assert.Equal("auditfile-scouting-de-voorbeeldgroep-2026.xaf", XafDienst.Bestandsnaam("Scouting De Voorbeeldgroep", 2026));
+        Assert.Equal("auditfile-vakantiehuis-de-voorbeeld-2026.xaf", XafDienst.Bestandsnaam("Vakantiehuis De Voorbeeld", 2026));
     }
 
     private sealed class VasteTijd(DateTimeOffset nu) : TimeProvider

@@ -23,7 +23,7 @@ public partial class StartwizardVenster : Window
             return;
         }
 
-        // ✕ of Alt+F4 werkt als "Later verder" (besluit 170); niet terwijl een stap bezig is.
+        // ✕ of Alt+F4 werkt als "Later verder"; niet terwijl een stap bezig is.
         e.Cancel = true;
         if (!_viewModel.IsBezig)
         {

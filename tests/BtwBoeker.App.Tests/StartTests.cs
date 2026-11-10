@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien;
 
 namespace BtwBoeker.App.Tests;
 
-/// <summary>Start in de nieuwe stijl (besluiten 216, 217 en 220): kerncijfers en tellers in de navigatiebalk.</summary>
+/// <summary>Start in de nieuwe stijl: kerncijfers en tellers in de navigatiebalk.</summary>
 public sealed class StartTests
 {
     private static Startkaart Kaart(Startkaartsoort soort, AdministratieSoort? administratie, int aantal) =>

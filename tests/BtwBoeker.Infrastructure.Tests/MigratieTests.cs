@@ -98,6 +98,23 @@ public sealed class MigratieTests : IDisposable
         Assert.Equal(BtwBoeker.Domain.Administraties.AdministratieSoort.Vereniging, Assert.Single(getoond).Soort);
     }
 
+    [Theory]
+    [InlineData("Vereniging", "Mijn administratie")] // de oude standaardnaam wordt de nieuwe
+    [InlineData("Vakantiehuisje", "Vakantiehuisje")] // een zelf gekozen naam blijft
+    public async Task Alleen_de_oude_standaardnaam_wordt_mijn_administratie(string voor, string na)
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync(Basis);
+            await oud.Database.ExecuteSqlRawAsync("UPDATE Administraties SET Naam = {0} WHERE Id = 1", voor);
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        Assert.Equal(na, (await nieuw.Administraties.SingleAsync(a => a.Id == 1)).Naam);
+    }
+
     [Fact]
     public async Task Historie_uit_excel_verdwijnt_en_gewone_boekjaren_blijven()
     {

@@ -18,7 +18,7 @@ public sealed record CamtAfschrift(Iban Iban, string Nummer, DateOnly Datum, lon
 public sealed record CamtBestand(string Versie, IReadOnlyList<CamtAfschrift> Afschriften, IReadOnlyList<string> Meldingen);
 
 /// <summary>
-/// Leest CAMT.053-bankafschriften (versie 001.02 en 001.08) van Rabobank en ING (besluit 6). Elementen worden op naam
+/// Leest CAMT.053-bankafschriften (versie 001.02 en 001.08) van Rabobank en ING. Elementen worden op naam
 /// gezocht, zodat beide versies met dezelfde code werken. DTD's en externe entiteiten zijn uitgeschakeld.
 /// </summary>
 public static class Camt053Lezer

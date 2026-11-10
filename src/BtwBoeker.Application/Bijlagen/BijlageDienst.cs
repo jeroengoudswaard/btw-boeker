@@ -13,7 +13,7 @@ public sealed record OvergeslagenBestand(string Bestandsnaam, string Reden);
 public sealed record BijlagenToegevoegd(IReadOnlyList<Bijlage> Toegevoegd, IReadOnlyList<OvergeslagenBestand> Overgeslagen);
 
 /// <summary>
-/// Bijlagen bij journaalposten en het postvak bonnen (besluiten 83–86, 96, 97 en 135–137). De inhoud staat versleuteld in
+/// Bijlagen bij journaalposten en het postvak bonnen. De inhoud staat versleuteld in
 /// de database en komt nooit onversleuteld op schijf, behalve bij <i>Opslaan als…</i> in de app.
 /// </summary>
 public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, TimeProvider tijd)
@@ -85,7 +85,7 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
         }, annulering).ConfigureAwait(false);
     }
 
-    /// <summary>Ook bij een geboekte post (besluit 136).</summary>
+    /// <summary>Ook bij een geboekte post.</summary>
     /// <exception cref="InvalidOperationException">De bijlage of de post bestaat niet.</exception>
     public Task KoppelAsync(AdministratieSoort administratie, Guid bijlageId, Guid postId, CancellationToken annulering = default) =>
         Wijzig(administratie, bijlageId, (stand, bijlage) =>
@@ -106,7 +106,7 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
         AdministratieSoort administratie, Guid bijlageId, DateOnly? datum, Bedrag? bedrag, CancellationToken annulering = default) =>
         Wijzig(administratie, bijlageId, (_, bijlage) => bijlage.ZetGegevens(datum, bedrag), annulering);
 
-    /// <summary>Ook bij een geboekte post (besluit 136); de inhoud wordt mee verwijderd.</summary>
+    /// <summary>Ook bij een geboekte post; de inhoud wordt mee verwijderd.</summary>
     public Task VerwijderAsync(AdministratieSoort administratie, Guid bijlageId, CancellationToken annulering = default) =>
         sessie.Boekhouding.PasToeAsync(administratie, stand =>
         {

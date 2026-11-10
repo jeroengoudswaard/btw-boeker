@@ -47,7 +47,7 @@ public class ModuleCatalogusTests
         Assert.Equal([ModuleSoort.Overzicht], ModuleCatalogus.Alle.Where(m => !m.KanSluiten).Select(m => m.Soort));
     }
 
-    /// <summary>Besluit 242: elke pagina heeft een kop met één zin uitleg.</summary>
+    /// <summary>Elke pagina heeft een kop met één zin uitleg.</summary>
     [Fact]
     public void Elke_module_heeft_een_omschrijving_van_een_korte_zin()
     {

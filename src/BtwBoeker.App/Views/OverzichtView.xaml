@@ -12,7 +12,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="{StaticResource PaginaMarge}">
 
-            <!-- ===== Welkomstscherm: nog geen database geopend (besluit 241) ===== -->
+            <!-- ===== Welkomstscherm: nog geen database geopend ===== -->
             <tg:Groepspaneel HorizontalAlignment="Center" VerticalAlignment="Top" Width="696" Margin="0,48,0,48"
                         Visibility="{Binding Shell.IsDatabaseOpen, Converter={StaticResource OnwaarNaarZichtbaar}}"
                         AutomationProperties.Name="Startpagina" AutomationProperties.AutomationId="Startpagina">
@@ -78,7 +78,7 @@
                 </StackPanel>
             </tg:Groepspaneel>
 
-            <!-- ===== Start: database geopend: kerncijfers (besluit 217) en kaarten met de volgende stap (besluit 183) ===== -->
+            <!-- ===== Start: database geopend: kerncijfers en kaarten met de volgende stap ===== -->
             <StackPanel Visibility="{Binding Shell.IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
 
                 <ItemsControl ItemsSource="{Binding Kerncijfers}" Focusable="False" Margin="-8,0,-8,16"

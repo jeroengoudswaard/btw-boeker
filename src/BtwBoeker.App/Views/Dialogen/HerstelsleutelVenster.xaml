@@ -9,7 +9,7 @@
         <TextBlock TextWrapping="Wrap" Margin="0,0,0,16">
             Bent u uw wachtwoord kwijt, dan kunt u de database <Bold>alleen</Bold> met deze sleutel nog openen.
             BTW-Boeker bewaart de sleutel nergens. Druk hem af of sla hem op op een veilige plek, bijvoorbeeld
-            in de kluis van de vereniging of in een wachtwoordmanager — niet in dezelfde map als de database.
+            in een kluis of in een wachtwoordmanager — niet in dezelfde map als de database.
         </TextBlock>
         <Border Style="{StaticResource Kaart}">
             <TextBox x:Name="Sleutel" IsReadOnly="True" BorderThickness="0" Background="Transparent"

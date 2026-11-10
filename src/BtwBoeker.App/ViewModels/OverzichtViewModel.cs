@@ -5,12 +5,12 @@ using BtwBoeker.Application.Modules;
 
 namespace BtwBoeker.App.ViewModels;
 
-/// <summary>Een kerncijfer op Start (besluit 217): titel, bedrag en een korte toelichting.</summary>
+/// <summary>Een kerncijfer op Start: titel, bedrag en een korte toelichting.</summary>
 public sealed record Kerncijferregel(string Titel, string Waarde, string Toelichting);
 
 /// <summary>
 /// Startpagina: zonder database de keuzes om te beginnen, met database de kerncijfers van de gekozen administratie
-/// (besluit 217) en de kaarten met werk (besluit 183).
+/// en de kaarten met werk.
 /// </summary>
 public sealed class OverzichtViewModel(ShellViewModel shell)
     : TabbladViewModel(ModuleCatalogus.Geef(ModuleSoort.Overzicht), administratie: null)

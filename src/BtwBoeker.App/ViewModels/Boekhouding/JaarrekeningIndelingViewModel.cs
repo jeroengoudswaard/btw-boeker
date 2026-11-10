@@ -80,7 +80,7 @@ public sealed partial class IndelingsregelRij : ObservableObject
 }
 
 /// <summary>
-/// Venster <i>Indeling bewerken</i> (besluiten 263–268): kopjes, regels met rubrieken en subtotalen per deel. Een rubriek
+/// Venster <i>Indeling bewerken</i>: kopjes, regels met rubrieken en subtotalen per deel. Een rubriek
 /// kan maar bij één regel van een deel staan; bij de andere regels is hij grijs.
 /// </summary>
 public sealed partial class JaarrekeningIndelingViewModel : ObservableObject

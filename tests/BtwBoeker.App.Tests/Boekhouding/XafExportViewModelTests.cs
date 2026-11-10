@@ -2,7 +2,7 @@ using BtwBoeker.Application.Boekhouding;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Besluiten 197 en 255–259: Bestand › Exporteren › Auditfile (XAF) en de knop bij Boekjaren.</summary>
+/// <summary>Bestand › Exporteren › Auditfile (XAF) en de knop bij Boekjaren.</summary>
 public sealed class XafExportViewModelTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();

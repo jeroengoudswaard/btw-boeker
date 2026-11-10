@@ -8,7 +8,7 @@ namespace BtwBoeker.Infrastructure.Database;
 
 public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> options) : DbContext(options)
 {
-    /// <summary>Besluit 234: na elk geslaagd opslaan verhoogd, zodat momentopnamen weten dat ze verouderd zijn.</summary>
+    /// <summary>Na elk geslaagd opslaan verhoogd, zodat momentopnamen weten dat ze verouderd zijn.</summary>
     internal Wijzigingen? Wijzigingen { get; init; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -61,7 +61,7 @@ public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> opti
                 {
                     Id = 1,
                     Soort = AdministratieSoort.Vereniging,
-                    Naam = "Vereniging",
+                    Naam = "Mijn administratie",
                     Accentkleur = Administratie.Standaardkleur(AdministratieSoort.Vereniging),
                 });
         });

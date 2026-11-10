@@ -25,7 +25,7 @@ public sealed partial class BoekhoudingViewModel
     [NotifyCanExecuteChangedFor(nameof(BonKoppelenCommand), nameof(BonVerwijderenCommand), nameof(BonBekijkenCommand), nameof(BonGegevensOpslaanCommand))]
     public partial BonRegel? GeselecteerdeBon { get; set; }
 
-    /// <summary>Filter in het Journaal: uitgaven en ontvangsten van bank of kas boven de drempel zonder bijlage (besluiten 145 en 214).</summary>
+    /// <summary>Filter in het Journaal: uitgaven en ontvangsten van bank of kas boven de drempel zonder bijlage.</summary>
     [ObservableProperty]
     public partial bool AlleenZonderBon { get; set; }
 
@@ -54,7 +54,7 @@ public sealed partial class BoekhoudingViewModel
         OnPropertyChanged(nameof(Postvaktekst));
     }
 
-    /// <summary>Besluit 214: de drempel van de eigen administratie.</summary>
+    /// <summary>De drempel van de eigen administratie.</summary>
     private void BerekenZonderBon() =>
         _zonderBon = [.. ZonderBon.Posten(_stand!, new Domain.Financien.Bedrag(Administratie?.Model.ZonderBonDrempel ?? Domain.Administraties.Administratie.StandaardZonderBonDrempel)).Select(p => p.Id)];
 
@@ -122,7 +122,7 @@ public sealed partial class BoekhoudingViewModel
     [RelayCommand]
     private Task BijlageOpslaanAsync(BijlageRegel? regel) => regel is null ? Task.CompletedTask : OpslaanAlsAsync(regel.Bijlage);
 
-    /// <summary>Ook bij een geboekte post (besluit 136), na bevestiging.</summary>
+    /// <summary>Ook bij een geboekte post, na bevestiging.</summary>
     [RelayCommand]
     private Task BijlageVerwijderenAsync(BijlageRegel? regel) => regel is null ? Task.CompletedTask : VerwijderBijlageAsync(regel.Bijlage);
 

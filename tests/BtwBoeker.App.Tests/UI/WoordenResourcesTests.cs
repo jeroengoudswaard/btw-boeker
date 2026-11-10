@@ -6,7 +6,7 @@ using BtwBoeker.Application.Instellingen;
 
 namespace BtwBoeker.App.Tests.UI;
 
-/// <summary>De app-resources T. en U. wisselen mee met de weergave (besluit 127; alleen op Windows, WPF).</summary>
+/// <summary>De app-resources T. en U. wisselen mee met de weergave.</summary>
 public sealed class WoordenResourcesTests
 {
     [Fact]

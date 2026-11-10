@@ -4,7 +4,7 @@ using BtwBoeker.Application.Modules;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Eén regel in de navigatiebalk (besluiten 168, 178 en 181): een module, of een onderdeel (subtabblad) van Boekhouding of
+/// Eén regel in de navigatiebalk: een module, of een onderdeel (subtabblad) van Boekhouding of
 /// Onderdelen staan alleen in de lijst als hun module is uitgeklapt.
 /// </summary>
 public sealed partial class NavigatieItem(string sleutel, string titel, string pictogram, ModuleSoort module, int? onderdeel) : ObservableObject
@@ -24,7 +24,7 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
 
     public bool IsSubitem => Onderdeel is not null || IsMeer;
 
-    /// <summary>Besluit 269: de inklapbare regel <i>Meer…</i> met de onderdelen voor inrichting.</summary>
+    /// <summary>De inklapbare regel <i>Meer…</i> met de onderdelen voor inrichting.</summary>
     public bool IsMeer { get; init; }
 
     /// <summary>Een onderdeel onder <i>Meer…</i>: één stap verder ingesprongen.</summary>
@@ -36,7 +36,7 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
 
     public bool HeeftOnderdelen { get; init; }
 
-    /// <summary>Besluit 220: het aantal dat er te doen is, of <c>null</c>.</summary>
+    /// <summary>Het aantal dat er te doen is, of <c>null</c>.</summary>
     [ObservableProperty]
     public partial int? Teller { get; set; }
 

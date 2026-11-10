@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 namespace BtwBoeker.Infrastructure.Tests.Prestaties;
 
 /// <summary>
-/// Besluit 234: meet de handelingen die de gebruiker traag vindt (besluit 235) op de kunstmatige testdatabase en schrijft de
+/// Meet de handelingen die de gebruiker traag vindt op de kunstmatige testdatabase en schrijft de
 /// tijden in de testuitvoer, voor de tabel vóór en na in de pull request. Met ruime budgetten tegen terugval.
 /// </summary>
 [Trait("Categorie", "Prestaties")]

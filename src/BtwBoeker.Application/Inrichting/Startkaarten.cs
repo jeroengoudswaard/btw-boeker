@@ -22,7 +22,7 @@ public enum Startkaartsoort
 public sealed record Startkaart(Startkaartsoort Soort, AdministratieSoort? Administratie, int Aantal, string Titel, string Tekst, string Knoptekst);
 
 /// <summary>
-/// Bepaalt de kaarten op de startpagina (besluit 183): elk met de volgende stap en één knop, alleen als er iets te doen is.
+/// Bepaalt de kaarten op de startpagina: elk met de volgende stap en één knop, alleen als er iets te doen is.
 /// </summary>
 public static class Startkaarten
 {
@@ -51,7 +51,7 @@ public static class Startkaarten
                 n => Enkelvoud(n, "conceptpost", "conceptposten") + " te boeken", "Controleer de concepten en boek ze (Ctrl+B).", "Naar het journaal");
             VoegToe(kaarten, stand, Startkaartsoort.Postvak, stand.Bijlagen.Count(b => b.IsInPostvak),
                 n => Enkelvoud(n, "bon", "bonnen") + " in het postvak", "Koppel de bonnen aan een post.", "Naar het postvak");
-            var drempel = drempels?.GetValueOrDefault(stand.Administratie) ?? ZonderBon.StandaardDrempel; // besluit 214
+            var drempel = drempels?.GetValueOrDefault(stand.Administratie) ?? ZonderBon.StandaardDrempel;
             VoegToe(kaarten, stand, Startkaartsoort.ZonderBon, ZonderBon.Posten(stand, drempel).Count,
                 n => Enkelvoud(n, "boeking", "boekingen") + " zonder bon", $"Uitgaven of ontvangsten boven {drempel} zonder bijlage.", "Bekijken");
         }
@@ -64,7 +64,7 @@ public static class Startkaarten
         sessie is null ? [] : (await LaadAsync(sessie, vandaag, annulering).ConfigureAwait(false)).Kaarten;
 
     /// <summary>
-    /// Besluit 234: alles voor Start in één keer laden (de boekhouding één keer, niet ook nog eens voor de inrichtingsstatus
+    /// Alles voor Start in één keer laden (de boekhouding één keer, niet ook nog eens voor de inrichtingsstatus
     /// en de kerncijfers). De kerncijfers rekenen met <see cref="Startgegevens.Boekhouding"/>.
     /// </summary>
     public static async Task<Startgegevens> LaadAsync(IDatabaseSessie sessie, DateOnly vandaag, CancellationToken annulering = default)

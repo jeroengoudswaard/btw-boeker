@@ -35,7 +35,7 @@ public interface IDatabaseSessie : IAsyncDisposable
     string Pad { get; }
 
     /// <summary>
-    /// Besluit 277: er is iets in de database opgeslagen, door welke opslag dan ook. Kan op elke thread komen en vlak na elkaar.
+    /// Er is iets in de database opgeslagen, door welke opslag dan ook. Kan op elke thread komen en vlak na elkaar.
     /// </summary>
     event EventHandler? Gewijzigd
     {
@@ -47,7 +47,7 @@ public interface IDatabaseSessie : IAsyncDisposable
 
     IBoekhoudingRepository Boekhouding { get; }
 
-    /// <summary>De voortgang van de startwizard (besluit 173).</summary>
+    /// <summary>De voortgang van de startwizard.</summary>
     Inrichting.IStartwizardOpslag Startwizard { get; }
 
     /// <summary>Schrijft een consistente, versleutelde back-up (database + sleutelbestand) naar één bestand.</summary>

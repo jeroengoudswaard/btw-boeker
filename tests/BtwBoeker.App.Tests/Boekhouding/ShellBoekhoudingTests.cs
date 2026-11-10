@@ -9,7 +9,7 @@ namespace BtwBoeker.App.Tests.Boekhouding;
 
 public sealed class ShellBoekhoudingTests
 {
-    private const string Pad = @"C:\Data\scouting.btwdb";
+    private const string Pad = @"C:\Data\vakantiehuis.btwdb";
     private const string Wachtwoord = "geheim-wachtwoord";
     private readonly FakeDatabaseBeheer _beheer = new();
     private readonly FakeDialoogService _dialogen = new();

@@ -3,7 +3,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.Domain.Financien.Bijlagen;
 
-/// <summary>De toegestane bestandstypen (besluit 137), herkend aan de eerste bytes van de inhoud.</summary>
+/// <summary>De toegestane bestandstypen, herkend aan de eerste bytes van de inhoud.</summary>
 public enum BijlageSoort
 {
     Pdf = 1,
@@ -12,13 +12,13 @@ public enum BijlageSoort
 }
 
 /// <summary>
-/// Een bon of factuur bij een journaalpost (besluiten 83 en 84). Zonder post staat de bijlage in het postvak (besluit 85).
-/// Koppelen en ontkoppelen mag ook bij een geboekte post; de boeking zelf verandert niet (besluit 136). De inhoud staat
+/// Een bon of factuur bij een journaalpost. Zonder post staat de bijlage in het postvak.
+/// Koppelen en ontkoppelen mag ook bij een geboekte post; de boeking zelf verandert niet. De inhoud staat
 /// apart in <see cref="BijlageInhoud"/>, zodat lijsten licht blijven.
 /// </summary>
 public sealed class Bijlage
 {
-    /// <summary>Besluit 97: maximaal 10 MB per bijlage.</summary>
+    /// <summary>Maximaal 10 MB per bijlage.</summary>
     public const int MaximaleGrootte = 10 * 1024 * 1024;
 
     public const int MaximaleNaamLengte = 200;
@@ -65,10 +65,10 @@ public sealed class Bijlage
     /// <summary>SHA-256 van de inhoud, om hetzelfde bestand te herkennen.</summary>
     public string Controlecode { get; private set; }
 
-    /// <summary>De datum op de bon: herkend uit de PDF-tekst of ingevuld (besluit 96).</summary>
+    /// <summary>De datum op de bon: herkend uit de PDF-tekst of ingevuld.</summary>
     public DateOnly? Datum { get; private set; }
 
-    /// <summary>Het totaalbedrag op de bon: herkend uit de PDF-tekst of ingevuld (besluit 96); negatief bij een creditnota (besluit 142).</summary>
+    /// <summary>Het totaalbedrag op de bon: herkend uit de PDF-tekst of ingevuld; negatief bij een creditnota.</summary>
     public Bedrag? Bedrag { get; private set; }
 
     public DateTime ToegevoegdUtc { get; private set; }

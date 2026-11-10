@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 namespace BtwBoeker.App.Diensten;
 
 /// <summary>
-/// Pagina's van een PDF of een afbeelding als WPF-afbeelding, met de PDF-functie van Windows zelf (besluit 135). Alles in
+/// Pagina's van een PDF of een afbeelding als WPF-afbeelding, met de PDF-functie van Windows zelf. Alles in
 /// het geheugen: de bijlage komt niet onversleuteld op schijf.
 /// </summary>
 public static class PdfPaginas

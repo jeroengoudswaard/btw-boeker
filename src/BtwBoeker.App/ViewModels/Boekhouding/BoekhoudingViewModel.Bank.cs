@@ -10,7 +10,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.App.ViewModels.Boekhouding;
 
-/// <summary>Subtabbladen Bank en Boekingsregels (stap 4b, besluiten 74–82).</summary>
+/// <summary>Subtabbladen Bank en Boekingsregels.</summary>
 public sealed partial class BoekhoudingViewModel
 {
     private BankDienst? _bankdienst;
@@ -33,10 +33,10 @@ public sealed partial class BoekhoudingViewModel
     [NotifyPropertyChangedFor(nameof(HeeftMeerdereBankrekeningen))]
     public partial IReadOnlyList<Dagboek> Bankrekeningen { get; private set; } = [];
 
-    /// <summary>Besluit 269: de keuze van de bankrekening alleen als er meer dan één is.</summary>
+    /// <summary>De keuze van de bankrekening alleen als er meer dan één is.</summary>
     public bool HeeftMeerdereBankrekeningen => Bankrekeningen.Count > 1;
 
-    /// <summary>Besluit 270: de knop toont hoeveel er te doen is.</summary>
+    /// <summary>De knop toont hoeveel er te doen is.</summary>
     public string ConceptenBoekenTekst => $"{Woorden["Knop.ConceptenBoeken"]} ({AantalConceptAlleRekeningen})";
 
     public string RegelsToepassenTekst => $"Regels _toepassen ({AantalTeVerwerken})";
@@ -66,12 +66,12 @@ public sealed partial class BoekhoudingViewModel
     [ObservableProperty]
     public partial int AantalConcept { get; private set; }
 
-    /// <summary>Besluit 278: <i>Concepten boeken</i> boekt alle bankrekeningen, dus de knop toont dit aantal en niet dat van de gekozen.</summary>
+    /// <summary><i>Concepten boeken</i> boekt alle bankrekeningen, dus de knop toont dit aantal en niet dat van de gekozen.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ConceptenBoekenTekst))]
     public partial int AantalConceptAlleRekeningen { get; private set; }
 
-    /// <summary>Besluit 277: per bankrekening (dagboek-Id) het aantal te verwerken; de keuzelijst toont het achter de naam.</summary>
+    /// <summary>Per bankrekening (dagboek-Id) het aantal te verwerken; de keuzelijst toont het achter de naam.</summary>
     [ObservableProperty]
     public partial IReadOnlyDictionary<int, int> TeVerwerkenPerRekening { get; private set; } = new Dictionary<int, int>();
 
@@ -141,7 +141,7 @@ public sealed partial class BoekhoudingViewModel
         }, null);
     }
 
-    /// <summary>Ctrl+B (besluit 82): alle concepten van de bankdagboeken boeken na controle.</summary>
+    /// <summary>Ctrl+B: alle concepten van de bankdagboeken boeken na controle.</summary>
     [RelayCommand]
     private async Task ConceptenBoekenAsync()
     {
@@ -373,7 +373,7 @@ public sealed partial class BoekhoudingViewModel
         }, null);
     }
 
-    /// <summary>Besluit 276: niet-opgeslagen regels die de lopende Ctrl+S overleven; alleen gevuld tijdens <see cref="BewaarAsync"/>.</summary>
+    /// <summary>Niet-opgeslagen regels die de lopende Ctrl+S overleven; alleen gevuld tijdens <see cref="BewaarAsync"/>.</summary>
     private List<BoekingsregelRegel> _halveRegels = [];
 
     private void LaadRegels()

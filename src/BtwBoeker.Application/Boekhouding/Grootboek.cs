@@ -4,7 +4,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.Application.Boekhouding;
 
 /// <summary>
-/// Berekeningen op het grootboek. Alleen geboekte posten tellen (besluit 71); niets wordt apart opgeslagen.
+/// Berekeningen op het grootboek. Alleen geboekte posten tellen; niets wordt apart opgeslagen.
 /// </summary>
 public static class Grootboek
 {
@@ -37,7 +37,7 @@ public static class Grootboek
         return new Saldibalans(jaar, regels);
     }
 
-    /// <summary>Staat van baten en lasten per rubriek (besluit 69), zonder de afsluitpost.</summary>
+    /// <summary>Staat van baten en lasten per rubriek, zonder de afsluitpost.</summary>
     public static WinstEnVerlies WinstEnVerlies(BoekhoudingStand stand, int jaar)
     {
         var saldi = GeboektePosten(stand, jaar)

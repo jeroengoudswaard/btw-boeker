@@ -68,12 +68,12 @@
                 <Setter Property="HorizontalAlignment" Value="Right" />
                 <Setter Property="Margin" Value="0,24,0,0" />
             </Style>
-            <!-- Besluit 240: knoppen in de voet van een venster even breed (120 px), de hoofdactie rechts. -->
+            <!-- Knoppen in de voet van een venster even breed (120 px), de hoofdactie rechts. -->
             <Style x:Key="DialoogKnop" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="MinWidth" Value="120" />
                 <Setter Property="Margin" Value="8,0,0,0" />
             </Style>
-            <!-- Besluit 270: een actie die pas nodig is als er iets te doen is, als rustige link in de accentkleur. -->
+            <!-- Een actie die pas nodig is als er iets te doen is, als rustige link in de accentkleur. -->
             <Style x:Key="Linkknop" TargetType="Button">
                 <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
                 <Setter Property="Cursor" Value="Hand" />

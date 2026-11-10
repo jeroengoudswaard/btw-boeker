@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Boekhouding;
 
-/// <summary>Baten of lasten per resultaatrekening (besluit 152).</summary>
+/// <summary>Baten of lasten per resultaatrekening.</summary>
 public sealed class KantTests
 {
     [Fact]

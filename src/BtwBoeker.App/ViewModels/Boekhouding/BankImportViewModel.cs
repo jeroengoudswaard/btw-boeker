@@ -70,7 +70,7 @@ public sealed partial class BankImportRekeningRegel : ObservableObject
 
     internal void VernieuwFout() => OnPropertyChanged(nameof(Fout));
 
-    /// <summary>Besluit 80: waarschuwen als het eerste beginsaldo niet gelijk is aan het grootboek.</summary>
+    /// <summary>Waarschuwen als het eerste beginsaldo niet gelijk is aan het grootboek.</summary>
     private void VernieuwBeginsaldo()
     {
         Meldingen.Vervang(Import.Meldingen);
@@ -84,8 +84,8 @@ public sealed partial class BankImportRekeningRegel : ObservableObject
 
 /// <summary>
 /// Wizard voor het inlezen van CAMT.053-bankafschriften: 1 bestanden lezen, 2 controleren (nieuw/al bekend, saldi, nieuwe
-/// eigen rekening koppelen), 3 inlezen na een back-up. Herkende transacties worden concept (besluit 74), de rest komt in
-/// de werkvoorraad (besluit 75).
+/// eigen rekening koppelen), 3 inlezen na een back-up. Herkende transacties worden concept, de rest komt in
+/// de werkvoorraad.
 /// </summary>
 public sealed partial class BankImportViewModel : ObservableObject
 {

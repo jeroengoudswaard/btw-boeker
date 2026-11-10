@@ -5,7 +5,7 @@ using BtwBoeker.Application.Modules;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Meldingen van een pagina voor de statusregel (besluit 168): <see cref="Melding"/> krijgt ✓, <see cref="Waarschuwing"/> ⚠,
+/// Meldingen van een pagina voor de statusregel: <see cref="Melding"/> krijgt ✓, <see cref="Waarschuwing"/> ⚠,
 /// <see cref="Foutmelding"/> ✕.
 /// </summary>
 public interface IPaginameldingen
@@ -39,13 +39,13 @@ public abstract class TabbladViewModel : ObservableObject
 
     public string Titel => Administratie is null ? Moduletitel : $"{Moduletitel} · {Administratie.Naam}";
 
-    /// <summary>De naam van de module in de tabtitel; Financiën volgt de weergave (besluit 127).</summary>
+    /// <summary>De naam van de module in de tabtitel; Financiën volgt de weergave.</summary>
     protected virtual string Moduletitel => Module.Titel;
 
-    /// <summary>Besluit 242: de titel in de kop van de pagina (zonder de administratie, die staat ernaast).</summary>
+    /// <summary>De titel in de kop van de pagina (zonder de administratie, die staat ernaast).</summary>
     public string Paginatitel => Moduletitel;
 
-    /// <summary>Besluit 242: één zin uitleg onder de titel.</summary>
+    /// <summary>Één zin uitleg onder de titel.</summary>
     public string Omschrijving => Module.Omschrijving;
 
     public bool KanSluiten => Module.KanSluiten;
@@ -59,7 +59,7 @@ public abstract class TabbladViewModel : ObservableObject
 
     public virtual bool HeeftOnopgeslagenWijzigingen => false;
 
-    /// <summary>Opent E-mail › Opstellen met een voorbereid bericht (besluiten 205–207); de Shell vult dit in.</summary>
+    /// <summary>Opent E-mail › Opstellen met een voorbereid bericht; de Shell vult dit in.</summary>
     public virtual bool KanOpslaan => false;
 
     /// <returns><c>true</c> als alles is opgeslagen.</returns>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test voor website-bijwerken.sh (besluiten 274 en 275). Draait in de CI; lokaal: bash .github/scripts/website-bijwerken.test.sh
+# Test voor website-bijwerken.sh. Draait in de CI; lokaal: bash .github/scripts/website-bijwerken.test.sh
 set -u
 
 script="$(dirname "$0")/website-bijwerken.sh"

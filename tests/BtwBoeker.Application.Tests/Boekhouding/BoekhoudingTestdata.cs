@@ -26,7 +26,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         var kasbank = Rubriek("Kas Bank");
         var baten = Rubriek("Contributie");
         var kosten = Rubriek("Terreinkosten");
-        Reserve = Rekening(600, "Algemene reserve", RekeningSoort.Balans, vermogen, RekeningRol.Reserve);
+        Reserve = Rekening(600, "Eigen vermogen", RekeningSoort.Balans, vermogen, RekeningRol.Reserve);
         Kas = Rekening(1000, "Kas", RekeningSoort.Balans, kasbank, RekeningRol.Kas);
         Bank = Rekening(1100, "Bank", RekeningSoort.Balans, kasbank);
         Energie = Rekening(4115, "Energie", RekeningSoort.Resultaat, kosten);

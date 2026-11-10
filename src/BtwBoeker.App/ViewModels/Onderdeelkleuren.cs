@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Administraties;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Besluit 239: elk onderdeel een eigen kleur, alleen in het pictogram (op een zachte tint) en in de dunne band boven de
+/// Elk onderdeel een eigen kleur, alleen in het pictogram (op een zachte tint) en in de dunne band boven de
 /// pagina. Eén palet voor licht en donker: elke kleur haalt minstens 3 : 1 op de tint en op de grond van beide thema's.
 /// De accentkleur van de administratie blijft voor knoppen, selectie en tellers.
 /// </summary>
@@ -44,7 +44,7 @@ public static class Onderdeelkleuren
         return new Kleur(Meng(kleur.R, grond.R), Meng(kleur.G, grond.G), Meng(kleur.B, grond.B));
     }
 
-    /// <summary>Een vaste kleur per groep (voor de initialen in Leden), zonder grijs; geen groep is grijs.</summary>
+    /// <summary>Een vaste kleur per naam (bijvoorbeeld voor initialen), zonder grijs; geen naam is grijs.</summary>
     public static Kleur VoorGroep(string? groep)
     {
         if (string.IsNullOrWhiteSpace(groep))

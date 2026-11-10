@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Boekhouding;
 
-/// <summary>Jaarrekeningindeling (besluiten 263–268). Alle bedragen zijn verzonnen.</summary>
+/// <summary>Jaarrekeningindeling. Alle bedragen zijn verzonnen.</summary>
 public sealed class JaarrekeningTests
 {
     private static readonly DateTime Nu = new(2026, 11, 5, 9, 0, 0, DateTimeKind.Utc);

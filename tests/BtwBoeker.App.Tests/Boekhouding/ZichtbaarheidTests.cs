@@ -2,7 +2,7 @@ using BtwBoeker.App.ViewModels.Boekhouding;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Alleen zichtbaar wat nu nodig is (besluiten 269–272).</summary>
+/// <summary>Alleen zichtbaar wat nu nodig is.</summary>
 public sealed class ZichtbaarheidTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();

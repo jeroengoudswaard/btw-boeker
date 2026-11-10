@@ -4,7 +4,7 @@ using BtwBoeker.Domain.Administraties;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Besluit 220: de aantallen bij de onderdelen in de navigatiebalk, uit dezelfde berekening als de startkaarten. Een
+/// De aantallen bij de onderdelen in de navigatiebalk, uit dezelfde berekening als de startkaarten. Een
 /// module telt de onderdelen op, zodat het aantal ook zichtbaar is als de module is ingeklapt.
 /// </summary>
 public static class Navigatietellers

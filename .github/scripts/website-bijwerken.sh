@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Besluiten 274 en 275: zet de nieuwe versie op de website: het label op de startpagina en de downloadknop op de pagina van
+# Zet de nieuwe versie op de website: het label op de startpagina en de downloadknop op de pagina van
 # BTW-Boeker. Gebruik: website-bijwerken.sh <map van de websiterepository> <versie, bijv. 0.19.0>
 # Vindt het label of de knop niet, dan faalt het zichtbaar en wijzigt het niets, zodat de site niet ongemerkt veroudert.
 set -euo pipefail

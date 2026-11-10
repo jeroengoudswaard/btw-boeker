@@ -23,13 +23,13 @@ public sealed record BoekhoudingStand(
     /// <summary>In volgorde: de eerste passende regel wint.</summary>
     public IReadOnlyList<Boekingsregel> Boekingsregels { get; init; } = [];
 
-    /// <summary>Alle relaties; gedeeld door beide administraties (besluit 105).</summary>
+    /// <summary>Alle relaties; gedeeld door beide administraties.</summary>
     public IReadOnlyList<Relatie> Relaties { get; init; } = [];
 
-    /// <summary>De bijlagen zonder inhoud (besluit 84); de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
+    /// <summary>De bijlagen zonder inhoud; de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
     public IReadOnlyList<Bijlage> Bijlagen { get; init; } = [];
 
-    /// <summary>Eigen indelingen van balans en baten en lasten (besluiten 263–268); zonder indeling geldt de automatische.</summary>
+    /// <summary>Eigen indelingen van balans en baten en lasten; zonder indeling geldt de automatische.</summary>
     public IReadOnlyList<Jaarrekeningindeling> Jaarrekeningindelingen { get; init; } = [];
 
     public IEnumerable<Bijlage> BijlagenVan(Guid postId) => Bijlagen.Where(b => b.PostId == postId);
@@ -74,12 +74,12 @@ public sealed record RegelInvoerId(int RekeningId, string? Omschrijving, Bedrag 
 
 public sealed record PostInvoer(Guid? Id, int DagboekId, DateOnly Datum, string Omschrijving, IReadOnlyList<RegelInvoerId> Regels);
 
-/// <param name="Kant">Baten of lasten bij een resultaatrekening (besluit 152); <c>null</c> = ongewijzigd of de standaard.</param>
+/// <param name="Kant">Baten of lasten bij een resultaatrekening; <c>null</c> = ongewijzigd of de standaard.</param>
 public sealed record RekeningInvoer(int? Id, int Nummer, string Naam, int? RubriekId, RekeningSoort Soort, RekeningRol Rol, bool IsActief, ResultaatKant? Kant = null);
 
 public sealed record RubriekInvoer(int? Id, string Naam, int Volgorde);
 
-/// <summary>Besluit 73: bewuste keuze om een verschil in de beginbalans op deze (balans)rekening te boeken.</summary>
+/// <summary>Bewuste keuze om een verschil in de beginbalans op deze (balans)rekening te boeken.</summary>
 public sealed record VerschilKeuze(int Nummer, string Naam)
 {
     public static VerschilKeuze Standaard { get; } = new(1299, "Te onderzoeken verschillen");
@@ -129,7 +129,7 @@ public sealed record Grootboekkaart(Grootboekrekening Rekening, DateOnly Van, Da
     public long Eindsaldo => Mutaties.Count == 0 ? Beginsaldo : Mutaties[^1].LopendSaldo;
 }
 
-/// <summary>Een rapport als tabel, voor afdrukken en export (besluit 67). Cellen zijn tekst of <see cref="Bedrag"/>.</summary>
+/// <summary>Een rapport als tabel, voor afdrukken en export. Cellen zijn tekst of <see cref="Bedrag"/>.</summary>
 public sealed record RapportTabel(string Titel, string? Subtitel, IReadOnlyList<RapportKolom> Kolommen, IReadOnlyList<RapportRij> Rijen)
 {
     /// <summary>Liggend afdrukken met kleinere letters, voor brede tabellen.</summary>

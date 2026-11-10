@@ -107,7 +107,7 @@ public static class BankimportPlanner
     }
 
     /// <summary>
-    /// Besluit 80: het beginsaldo van het eerste afschrift in een boekjaar moet gelijk zijn aan het grootboeksaldo van
+    /// Het beginsaldo van het eerste afschrift in een boekjaar moet gelijk zijn aan het grootboeksaldo van
     /// <paramref name="rekening"/> op dat moment (openingsbalans plus eerder geboekte posten). Alleen als er nog geen
     /// eerdere afschriften van deze rekening zijn ingelezen.
     /// </summary>

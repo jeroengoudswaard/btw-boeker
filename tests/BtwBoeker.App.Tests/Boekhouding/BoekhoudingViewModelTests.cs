@@ -87,7 +87,7 @@ public sealed class BoekhoudingViewModelTests : IDisposable
         vm.Editor!.Omschrijving = "Naast de regel";
         VulRegel(vm.Editor, 0, 4115, "10,00", "");
 
-        Assert.False(await vm.BewaarAsync()); // besluit 276: de regel is nog niet opgeslagen
+        Assert.False(await vm.BewaarAsync()); // De regel is nog niet opgeslagen
 
         Assert.Single(vm.Posten, p => p.Status == "Concept");
         Assert.Equal("gemeente", vm.Boekingsregels.Single().NaamBevat);

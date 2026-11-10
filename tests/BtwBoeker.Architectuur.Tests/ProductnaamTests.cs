@@ -11,15 +11,18 @@ public class ProductnaamTests
 
     private static readonly string[] OudeExtensies = [".v" + "db", ".v" + "bak", ".vs" + "jabloon"];
 
+    // Bewust samengesteld, zodat dit bestand het woord zelf niet bevat.
+    private static readonly string OudDomein = "scout" + "ing";
+
+    // CLAUDE.md beschrijft de herkomst van het product.
     private static readonly string[] Uitzonderingen =
     [
-        "CHANGELOG.md",
-        "COPILOT.md",
         "CLAUDE.md",
         "ProductnaamTests.cs",
     ];
 
-    private static readonly string[] Genegeerdemappen = [".git", "bin", "obj", "node_modules", "artifacts", "TestResults", ".vs"];
+    // prive/ en voorbeelden/ bevatten echte gegevens en worden nooit gelezen.
+    private static readonly string[] Genegeerdemappen = [".git", "bin", "obj", "node_modules", "artifacts", "TestResults", ".vs", "prive", "privé", "voorbeelden"];
 
     private static readonly string[] Tekstextensies =
         [".cs", ".csproj", ".slnx", ".xaml", ".xml", ".json", ".md", ".yml", ".yaml", ".sh", ".wxs", ".wixproj", ".props", ".targets", ".config", ".txt", ".ts", ".svelte", ".html"];
@@ -91,6 +94,19 @@ public class ProductnaamTests
         var gevonden = Gecontroleerd()
             .Where(p => Tekstextensies.Contains(Path.GetExtension(p), StringComparer.OrdinalIgnoreCase))
             .Where(p => File.ReadAllText(Path.Combine(wortel, p)).Contains(OudeNaam, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.Empty(gevonden);
+    }
+
+    /// <summary>BTW-Boeker is geen ledenadministratie meer: teksten, tests en documentatie noemen het oude domein niet.</summary>
+    [Fact]
+    public void Geen_tekstbestand_noemt_het_oude_domein()
+    {
+        var wortel = Opslagplaats();
+        var gevonden = Gecontroleerd()
+            .Where(p => Tekstextensies.Contains(Path.GetExtension(p), StringComparer.OrdinalIgnoreCase))
+            .Where(p => File.ReadAllText(Path.Combine(wortel, p)).Contains(OudDomein, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         Assert.Empty(gevonden);

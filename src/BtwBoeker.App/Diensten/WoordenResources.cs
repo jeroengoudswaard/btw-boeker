@@ -6,7 +6,7 @@ namespace BtwBoeker.App.Diensten;
 
 /// <summary>
 /// Houdt de app-resources <c>T.Sleutel</c> (tekst) en <c>U.Sleutel</c> (uitleg, alleen in Eenvoudig) gelijk aan het
-/// woordenboek, zodat <c>{DynamicResource T.Journaal}</c> in de XAML direct meewisselt (besluit 127).
+/// woordenboek, zodat <c>{DynamicResource T.Journaal}</c> in de XAML direct meewisselt.
 /// </summary>
 public static class WoordenResources
 {

@@ -64,7 +64,7 @@ internal sealed class DatabaseSessie : IDatabaseSessie
 
     public ValueTask DisposeAsync()
     {
-        DatabaseBeheer.LeegPool(Pad, _databasesleutel); // besluit 236: geen open bestandshandles na sluiten
+        DatabaseBeheer.LeegPool(Pad, _databasesleutel); // Geen open bestandshandles na sluiten
         CryptographicOperations.ZeroMemory(_databasesleutel);
         return ValueTask.CompletedTask;
     }

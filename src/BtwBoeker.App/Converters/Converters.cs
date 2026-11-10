@@ -65,7 +65,7 @@ public sealed class GelijkAanNaarZichtbaarheidConverter : IValueConverter
         throw new NotSupportedException();
 }
 
-/// <summary>Besluit 270: zichtbaar als een aantal groter is dan nul (een knop die alleen verschijnt als er iets te doen is).</summary>
+/// <summary>Zichtbaar als een aantal groter is dan nul (een knop die alleen verschijnt als er iets te doen is).</summary>
 public sealed class GroterDanNulNaarZichtbaarheidConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
@@ -115,7 +115,7 @@ public sealed class RapportNaarDocumentConverter : IValueConverter
 }
 
 /// <summary>
-/// Besluit 168: één hoofdactie per pagina. <c>true</c> geeft de accentstijl, <c>false</c> de gewone knop; zo kan
+/// Één hoofdactie per pagina. <c>true</c> geeft de accentstijl, <c>false</c> de gewone knop; zo kan
 /// <i>Opslaan</i> alleen op pagina's waar opslaan de hoofdactie is blauw zijn.
 /// </summary>
 public sealed class HoofdactieStijlConverter : IValueConverter
@@ -127,7 +127,7 @@ public sealed class HoofdactieStijlConverter : IValueConverter
 }
 
 /// <summary>
-/// Besluit 239: een onderdeel (<see cref="BtwBoeker.Application.Modules.ModuleSoort"/>, of een startkaart via het onderdeel
+/// Een onderdeel (<see cref="BtwBoeker.Application.Modules.ModuleSoort"/>, of een startkaart via het onderdeel
 /// waar hij naartoe leidt) naar zijn kleur. Met <see cref="Tint"/> de kleur voor 16 % dekkend, zodat de tint in licht en
 /// donker vanzelf klopt.
 /// </summary>
@@ -172,7 +172,7 @@ public sealed class PaletkleurExtension : System.Windows.Markup.MarkupExtension
     }
 }
 
-/// <summary>Besluit 277: de naam van een bankrekening met het aantal te verwerken: <c>Betaalrekening (228)</c>.</summary>
+/// <summary>De naam van een bankrekening met het aantal te verwerken: <c>Betaalrekening (228)</c>.</summary>
 public sealed class BankkeuzeTekstConverter : IMultiValueConverter
 {
     public object Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture)

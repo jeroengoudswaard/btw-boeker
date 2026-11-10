@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Bijlagen;
 
-/// <summary>Koppelvoorstel, filter "Zonder bon" en de bijlagendienst (besluiten 83–88, 96, 97 en 135–138).</summary>
+/// <summary>Koppelvoorstel, filter "Zonder bon" en de bijlagendienst.</summary>
 public sealed class BijlagenTests
 {
     private static readonly DateTime Nu = new(2026, 10, 29, 9, 0, 0, DateTimeKind.Utc);
@@ -99,7 +99,7 @@ public sealed class BijlagenTests
         var groteKas = Kasuitgave(new DateOnly(2026, 10, 1), 2500);
         Kasuitgave(new DateOnly(2026, 10, 2), 1000); // precies de drempel: niet erboven
         var bankUit = Post(bankboek, new DateOnly(2026, 10, 3), "Gamma", (_data.Energie, 5000, 0), (_data.Bank, 0, 5000));
-        var ontvangst = Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Welpen, 0, 9000)); // geld erbij (besluit 145)
+        var ontvangst = Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Welpen, 0, 9000)); // geld erbij
         Post(_data.Memoriaal, new DateOnly(2026, 10, 5), "Memoriaal", (_data.Energie, 7000, 0), (_data.Reserve, 0, 7000)); // geen bank of kas
         var metBon = Kasuitgave(new DateOnly(2026, 10, 6), 3000);
         var bon = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);

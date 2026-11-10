@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.Tests;
 
-/// <summary>Herinrichting v0.8.0 (besluiten 168 en 177–183): navigatiebalk, administratiewisselaar, statusregel en menubalk.</summary>
+/// <summary>Herinrichting v0.8.0: navigatiebalk, administratiewisselaar, statusregel en menubalk.</summary>
 public sealed class ShellNavigatieTests
 {
     private const string Pad = @"C:\Data\btw-boeker.btwdb";
@@ -100,7 +100,7 @@ public sealed class ShellNavigatieTests
         var pagina = shell.GeselecteerdTabblad;
         var meer = Item(shell, "Boekhouding.Meer");
 
-        // Besluit 273: WPF selecteert soms twee keer (bij focus en door de actie zelf); pijltjes mogen niets omklappen.
+        // WPF selecteert soms twee keer (bij focus en door de actie zelf); pijltjes mogen niets omklappen.
         foreach (var _ in Enumerable.Range(0, 2))
         {
             shell.GeselecteerdeNavigatie = meer;
@@ -269,7 +269,7 @@ public sealed class ShellNavigatieTests
 
         await shell.OpslaanCommand.ExecuteAsync(null);
 
-        Assert.Equal(Statussoort.Waarschuwing, shell.Statussoort); // besluit 276, niet "Opgeslagen."
+        Assert.Equal(Statussoort.Waarschuwing, shell.Statussoort); // niet "Opgeslagen."
         Assert.Equal("⚠", shell.Statusteken);
         Assert.Equal(boekhouding.Waarschuwing, shell.Statusmelding);
         Assert.Contains("1 boekingsregel nog niet", shell.Statusmelding, StringComparison.Ordinal);
@@ -316,7 +316,7 @@ public sealed class ShellNavigatieTests
         boekhouding.Editor.Regels[0].Debettekst = "10,00";
         Assert.True(await boekhouding.BewaarAsync());
 
-        _beheer.LaatsteSessie!.MeldWijziging(); // besluit 277: de echte sessie doet dit bij elke opslag
+        _beheer.LaatsteSessie!.MeldWijziging(); // De echte sessie doet dit bij elke opslag
 
         await Wacht(() => Item(shell, "Boekhouding.Journaal").Teller == 1);
         Assert.Equal(1, Item(shell, "Boekhouding").Teller);

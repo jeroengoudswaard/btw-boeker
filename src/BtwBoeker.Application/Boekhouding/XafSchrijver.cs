@@ -9,20 +9,20 @@ using BtwBoeker.Domain.Financien.Relaties;
 
 namespace BtwBoeker.Application.Boekhouding;
 
-/// <summary>Alles wat in één auditfile komt: één administratie, één boekjaar (besluiten 197 en 255–259).</summary>
+/// <summary>Alles wat in één auditfile komt: één administratie, één boekjaar.</summary>
 /// <param name="Stand">De boekhouding van de administratie (rekeningen, dagboeken, posten en relaties).</param>
 public sealed record XafInvoer(
     BoekhoudingStand Stand, int Jaar, string Bedrijfsnaam, DateOnly Aangemaakt, string Softwareversie);
 
 /// <param name="Inhoud">Het XML-bestand (UTF-8), geldig volgens XAF 3.2.</param>
 /// <param name="AantalPosten">Geboekte posten in de transacties (zonder de openingsbalans).</param>
-/// <param name="OvergeslagenConcepten">Conceptposten van het boekjaar die niet zijn meegenomen (besluit 259).</param>
+/// <param name="OvergeslagenConcepten">Conceptposten van het boekjaar die niet zijn meegenomen.</param>
 public sealed record XafResultaat(byte[] Inhoud, int AantalPosten, int OvergeslagenConcepten);
 
 /// <summary>
-/// Schrijft een XML Auditfile Financieel 3.2 (XAF), zodat een groep kan overstappen naar een ander pakket of de administratie
-/// aan een accountant kan geven (besluit 197). Alleen geboekte posten; de openingsbalans apart; relaties met IBAN;
-/// omschrijvingen zoals geboekt (besluit 257). Elk bestand wordt vóór
+/// Schrijft een XML Auditfile Financieel 3.2 (XAF), zodat u kunt overstappen naar een ander pakket of de administratie
+/// aan een accountant kan geven. Alleen geboekte posten; de openingsbalans apart; relaties met IBAN;
+/// omschrijvingen zoals geboekt. Elk bestand wordt vóór
 /// het teruggeven gecontroleerd tegen het officiële schema; een ongeldig bestand komt er nooit uit.
 /// </summary>
 public static class XafSchrijver

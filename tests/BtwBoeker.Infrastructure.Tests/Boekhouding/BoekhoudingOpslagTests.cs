@@ -13,7 +13,7 @@ namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 /// <summary>Grootboek op een echte, versleutelde database, ingericht met een verzonnen voorstel.</summary>
 public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();

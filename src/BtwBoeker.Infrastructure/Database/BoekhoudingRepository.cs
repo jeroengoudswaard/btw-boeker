@@ -10,7 +10,7 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
     private readonly Lock _slot = new();
 
     /// <summary>
-    /// Besluit 234: een momentopname per administratie, opnieuw geladen zodra er sinds het laden iets is opgeslagen
+    /// Een momentopname per administratie, opnieuw geladen zodra er sinds het laden iets is opgeslagen
     /// (<see cref="Wijzigingen"/>). Wijzigen gaat altijd via <see cref="PasToeAsync{T}"/> met een eigen, vers geladen stand,
     /// dus de momentopname zelf wordt nooit aangepast.
     /// </summary>
@@ -67,7 +67,7 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
 
         await context.SaveChangesAsync(annulering).ConfigureAwait(false);
         await transactie.CommitAsync(annulering).ConfigureAwait(false);
-        context.Wijzigingen?.Verhoog(); // pas nu zichtbaar voor andere verbindingen (besluit 277)
+        context.Wijzigingen?.Verhoog(); // pas nu zichtbaar voor andere verbindingen
         return resultaat.Uitkomst();
     }
 
@@ -93,7 +93,7 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
             .OrderBy(m => m.Boekdatum).ToListAsync(annulering).ConfigureAwait(false);
         var regels = await context.Boekingsregels.Include(r => r.Rekening).Where(r => r.Administratie == administratie)
             .OrderBy(r => r.Volgorde).ThenBy(r => r.Id).ToListAsync(annulering).ConfigureAwait(false);
-        // Relaties zijn gedeeld door beide administraties (besluit 105).
+        // Relaties zijn gedeeld door beide administraties.
         var relaties = await context.Relaties.OrderBy(r => r.Naam).ToListAsync(annulering).ConfigureAwait(false);
         // Zonder inhoud: die wordt pas geladen bij bekijken of exporteren.
         var bijlagen = await context.Bijlagen.Where(b => b.Administratie == administratie).OrderBy(b => b.ToegevoegdUtc)

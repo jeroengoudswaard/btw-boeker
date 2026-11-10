@@ -15,7 +15,7 @@ namespace BtwBoeker.App.ViewModels.Boekhouding;
 
 /// <summary>
 /// Tabblad Boekhouding van één administratie (stap 4a) met de subtabbladen Journaal, Rekeningschema, Grootboekkaart,
-/// Rapporten en Boekjaren. Geboekte posten zijn onveranderlijk; corrigeren gaat via tegenboeken (besluit 71).
+/// Rapporten en Boekjaren. Geboekte posten zijn onveranderlijk; corrigeren gaat via tegenboeken.
 /// </summary>
 public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameldingen
 {
@@ -51,7 +51,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         Woorden.PropertyChanged += WoordenGewijzigd;
     }
 
-    /// <summary>De woorden van de gekozen weergave (besluit 127); alleen visueel.</summary>
+    /// <summary>De woorden van de gekozen weergave; alleen visueel.</summary>
     public Woordenboek Woorden => _hulpmiddelen.Woorden;
 
     protected override string Moduletitel => Woorden["Boekhouding"];
@@ -89,13 +89,13 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren))]
     public partial IReadOnlyList<int> Boekjaren { get; private set; } = [];
 
-    /// <summary>Besluit 269: de jaarkeuze alleen bij meer dan één boekjaar.</summary>
+    /// <summary>De jaarkeuze alleen bij meer dan één boekjaar.</summary>
     public bool HeeftMeerdereBoekjaren => Boekjaren.Count > 1;
 
-    /// <summary>Besluit 270: afdrukken en exporteren alleen waar er iets af te drukken is.</summary>
+    /// <summary>Afdrukken en exporteren alleen waar er iets af te drukken is.</summary>
     public bool HeeftUitvoer => Subtab is BoekhoudingSubtab.Rapporten or BoekhoudingSubtab.Grootboekkaart;
 
-    /// <summary>Het aantal posten zonder bon in het gekozen jaar (besluiten 145 en 270); 0 = het filter is niet zichtbaar.</summary>
+    /// <summary>Het aantal posten zonder bon in het gekozen jaar; 0 = het filter is niet zichtbaar.</summary>
     public int AantalZonderBon => _allePosten.Count(p => p.DatumWaarde.Year == Jaar && _zonderBon.Contains(p.Id));
 
     public string ZonderBonTekst => $"{AantalZonderBon} zonder bon";
@@ -143,11 +143,11 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     [ObservableProperty]
     public partial string NieuweRubriekNaam { get; set; } = string.Empty;
 
-    /// <summary>Besluit 270: het invoerveld voor een rubriek pas na een klik op <i>+ Rubriek</i>.</summary>
+    /// <summary>Het invoerveld voor een rubriek pas na een klik op <i>+ Rubriek</i>.</summary>
     [ObservableProperty]
     public partial bool IsRubriekinvoerOpen { get; set; }
 
-    /// <summary>Besluit 270: alleen als er concepten zijn een melding dat die niet meetellen (besluit 71).</summary>
+    /// <summary>Alleen als er concepten zijn een melding dat die niet meetellen.</summary>
     [ObservableProperty]
     public partial string? Conceptmelding { get; private set; }
 
@@ -158,10 +158,10 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     [NotifyPropertyChangedFor(nameof(IsJaarrekening))]
     public partial Rapportsoort Rapportsoort { get; set; }
 
-    /// <summary>De jaarrekening volgens de eigen indeling (besluiten 263–268): dan zijn <i>Rekeningen tonen</i> en <i>Indeling bewerken</i> zichtbaar.</summary>
+    /// <summary>De jaarrekening volgens de eigen indeling: dan zijn <i>Rekeningen tonen</i> en <i>Indeling bewerken</i> zichtbaar.</summary>
     public bool IsJaarrekening => Rapportsoort is Rapportsoort.JaarrekeningBalans or Rapportsoort.JaarrekeningBatenLasten;
 
-    /// <summary>De rekeningen onder elke regel van de jaarrekening tonen (besluit 267); standaard aan.</summary>
+    /// <summary>De rekeningen onder elke regel van de jaarrekening tonen; standaard aan.</summary>
     [ObservableProperty]
     public partial bool RekeningenTonen { get; set; } = true;
 
@@ -190,7 +190,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     [ObservableProperty]
     public partial RapportTabel? KaartTabel { get; private set; }
 
-    /// <summary>Kolomkoppen van de kaart per soort potje (besluit 133).</summary>
+    /// <summary>Kolomkoppen van de kaart per soort potje.</summary>
     [ObservableProperty]
     public partial string KaartDebetkop { get; private set; } = "Debet";
 
@@ -210,7 +210,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     [ObservableProperty]
     public partial string? Waarschuwing { get; private set; }
 
-    /// <summary>Besluit 276: alleen opgeslagen rekeningen staan in de keuzelijsten; de pagina Boekingsregels meldt dat.</summary>
+    /// <summary>Alleen opgeslagen rekeningen staan in de keuzelijsten; de pagina Boekingsregels meldt dat.</summary>
     public bool HeeftOnopgeslagenNieuweRekeningen => Rekeningen.Any(r => r.IsNieuw && r.IsGewijzigd);
 
     [ObservableProperty]
@@ -223,7 +223,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public override bool HeeftOnopgeslagenWijzigingen =>
         Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || RelatiesGewijzigd;
 
-    /// <summary>Besluit 276: een halve boekingsregel blokkeert de rest niet; hij blijft staan tot hij klopt.</summary>
+    /// <summary>Een halve boekingsregel blokkeert de rest niet; hij blijft staan tot hij klopt.</summary>
     private bool HeeftBewaarbareWijzigingen =>
         Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || RelatiesGewijzigd;
 
@@ -248,7 +248,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     /// <summary>
     /// Ctrl+S: het concept en gewijzigde rekeningen opslaan. Onwaar als er iets niet is opgeslagen, zoals een halve boekingsregel
-    /// (besluit 276): zo kan de pagina niet ongemerkt worden gesloten.
+    ///: zo kan de pagina niet ongemerkt worden gesloten.
     /// </summary>
     public override async Task<bool> BewaarAsync()
     {
@@ -412,7 +412,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             await LaadAsync(null);
         }, "De boekhouding kon niet worden ingericht.");
 
-    /// <summary>Bestand › Importeren › Rekeningschema-sjabloon (besluit 116).</summary>
+    /// <summary>Bestand › Importeren › Rekeningschema-sjabloon.</summary>
     [RelayCommand]
     private Task SjabloonInlezenAsync()
     {
@@ -456,14 +456,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         ShellLog.BoekhoudingOvergenomen(_logger, Soort.ToString(), wizard.AantalIngericht);
         if (gelezen.Jaarrekening.Count > 0)
         {
-            // De eigen jaarrekeningindeling uit het sjabloon (besluit 116), op naam van de rubrieken.
+            // De eigen jaarrekeningindeling uit het sjabloon, op naam van de rubrieken.
             await VoerUitAsync(() => new JaarrekeningDienst(_sessie).PasSjabloonToeAsync(Soort, gelezen.Jaarrekening), "De jaarrekeningindeling uit het sjabloon kon niet worden overgenomen.");
         }
 
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
     }
 
-    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon: alleen nummers, namen, rubrieken en rollen (besluit 116).</summary>
+    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon: alleen nummers, namen, rubrieken en rollen.</summary>
     [RelayCommand]
     private Task ExporteerSjabloonAsync()
     {
@@ -482,7 +482,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     /// <summary>
     /// Bestand › Exporteren › Auditfile (XAF) en de knop bij Boekjaren: het gekozen boekjaar van deze administratie als
-    /// XAF 3.2, voor een accountant of een overstap naar een ander pakket (besluiten 197 en 255–259).
+    /// XAF 3.2, voor een accountant of een overstap naar een ander pakket.
     /// </summary>
     [RelayCommand]
     private Task ExporteerXafAsync(JaarRegel? regel)
@@ -512,7 +512,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     // ---- Journaal ---------------------------------------------------------------------------
 
-    /// <summary>Ctrl+N binnen het tabblad (besluit 72).</summary>
+    /// <summary>Ctrl+N binnen het tabblad.</summary>
     [RelayCommand]
     private void NieuwePost()
     {
@@ -747,7 +747,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         OnPropertyChanged(nameof(Onderdeel));
     }
 
-    /// <summary>Het onderdeel in de navigatiebalk (besluit 178).</summary>
+    /// <summary>Het onderdeel in de navigatiebalk.</summary>
     public override int? Onderdeel
     {
         get => (int)Subtab;
@@ -834,7 +834,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         return Rapporten.Jaarrekening(jaarrekening, Administratienaam, RekeningenTonen);
     }
 
-    /// <summary>Venster <i>Indeling bewerken</i> voor het gekozen jaarstuk (besluiten 263–268).</summary>
+    /// <summary>Venster <i>Indeling bewerken</i> voor het gekozen jaarstuk.</summary>
     [RelayCommand]
     private async Task IndelingBewerkenAsync()
     {

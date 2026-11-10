@@ -10,29 +10,29 @@ public enum Thema
     Donker,
 }
 
-/// <summary>Welke woorden het tabblad Financiën gebruikt (besluit 127); de gegevens blijven altijd formeel.</summary>
+/// <summary>Welke woorden het tabblad Financiën gebruikt; de gegevens blijven altijd formeel.</summary>
 public enum Weergavemodus
 {
     Expert,
     Eenvoudig,
 }
 
-/// <summary>De pagina die bij een herstart weer opent (besluit 177): module, administratie en onderdeel (subtabblad).</summary>
+/// <summary>De pagina die bij een herstart weer opent: module, administratie en onderdeel (subtabblad).</summary>
 public sealed record LaatstePagina(ModuleSoort Module, AdministratieSoort? Administratie, int? Onderdeel);
 
-/// <summary>Voorkeuren per Windows-gebruiker. Bevat geen persoonsgegevens van leden.</summary>
+/// <summary>Voorkeuren per Windows-gebruiker. Bevat geen persoonsgegevens of bedragen.</summary>
 public sealed record GebruikersInstellingen
 {
     public Thema Thema { get; init; } = Thema.Systeem;
 
-    /// <summary>Standaard Expert (besluit 132).</summary>
+    /// <summary>Standaard Expert.</summary>
     public Weergavemodus Weergave { get; init; } = Weergavemodus.Expert;
 
     public string? LaatsteDatabase { get; init; }
 
     public LaatstePagina? LaatstePagina { get; init; }
 
-    /// <summary>De startwizard opent automatisch bij de eerste start, maar één keer (besluit 169).</summary>
+    /// <summary>De startwizard opent automatisch bij de eerste start, maar één keer.</summary>
     public bool StartwizardGetoond { get; init; }
 }
 

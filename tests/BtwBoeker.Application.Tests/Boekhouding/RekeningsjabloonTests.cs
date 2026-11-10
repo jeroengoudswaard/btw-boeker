@@ -13,7 +13,7 @@ public sealed class RekeningsjabloonTests
     private static string Minimaal(string rekeningen, string formaat = "btw-boeker-rekeningschema", int versie = 1, string rubrieken = """[{"naam":"Vermogen"}]""") =>
         $$"""{"formaat":"{{formaat}}","versie":{{versie}},"naam":"Test","rubrieken":{{rubrieken}},"rekeningen":[{{rekeningen}}]}""";
 
-    private const string Reserve = """{"nummer":600,"naam":"Algemene reserve","rubriek":"Vermogen","soort":"Balans","rol":"Reserve"}""";
+    private const string Reserve = """{"nummer":600,"naam":"Eigen vermogen","rubriek":"Vermogen","soort":"Balans","rol":"Reserve"}""";
 
     [Fact]
     public void Rekeningen_volgen_de_volgorde_van_de_rubrieken_met_nul_bedragen()
@@ -51,11 +51,11 @@ public sealed class RekeningsjabloonTests
         string Fout(string json) => Assert.Throws<InvalidOperationException>(() => Rekeningsjablonen.Lees(json)).Message;
 
         Assert.Contains("nieuwere versie", Fout(Minimaal(Reserve, versie: 2)), StringComparison.Ordinal);
-        Assert.Contains("600", Fout(Minimaal(Reserve + "," + Reserve.Replace("Algemene reserve", "Dubbel", StringComparison.Ordinal))), StringComparison.Ordinal);
+        Assert.Contains("600", Fout(Minimaal(Reserve + "," + Reserve.Replace("Eigen vermogen", "Dubbel", StringComparison.Ordinal))), StringComparison.Ordinal);
         Assert.Contains("reserve", Fout(Minimaal("""{"nummer":1100,"naam":"Bank","rubriek":"Vermogen","soort":"Balans","rol":"Geen"}""")), StringComparison.Ordinal);
         Assert.Contains("Onbekend", Fout(Minimaal(Reserve.Replace("\"Vermogen\"", "\"Onbekend\"", StringComparison.Ordinal))), StringComparison.Ordinal);
         Assert.Contains("nummer", Fout(Minimaal(Reserve.Replace("600", "0", StringComparison.Ordinal))), StringComparison.Ordinal);
-        Assert.Contains("naam", Fout(Minimaal(Reserve.Replace("Algemene reserve", " ", StringComparison.Ordinal))), StringComparison.Ordinal);
+        Assert.Contains("naam", Fout(Minimaal(Reserve.Replace("Eigen vermogen", " ", StringComparison.Ordinal))), StringComparison.Ordinal);
     }
 
     [Fact]

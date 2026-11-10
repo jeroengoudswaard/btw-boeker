@@ -43,7 +43,7 @@ internal static partial class ShellLog
     [LoggerMessage(8, LogLevel.Warning, "{Handeling} mislukt")]
     public static partial void Mislukt(ILogger logger, Exception fout, string handeling);
 
-    /// <summary>Besluit 234: de duur van een handeling, voor de meting vóór en na (alleen de naam van de handeling).</summary>
+    /// <summary>De duur van een handeling, voor de meting vóór en na (alleen de naam van de handeling).</summary>
     [LoggerMessage(40, LogLevel.Information, "Duur {Handeling}: {Milliseconden} ms")]
     public static partial void Duur(ILogger logger, string handeling, long milliseconden);
 }

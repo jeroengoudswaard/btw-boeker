@@ -7,7 +7,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// De woorden van de gekozen weergave (besluit 127): één exemplaar voor de hele app. Een wissel meldt <c>Item[]</c>,
+/// De woorden van de gekozen weergave: één exemplaar voor de hele app. Een wissel meldt <c>Item[]</c>,
 /// zodat bindingen op de indexer en de app-resources (<c>T.</c>/<c>U.</c>) direct meegaan. Alleen visueel.
 /// </summary>
 public sealed partial class Woordenboek : ObservableObject
@@ -31,7 +31,7 @@ public sealed partial class Woordenboek : ObservableObject
         string.Create(CultureInfo.CurrentCulture, $"{aantal} {this[aantal == 1 ? enkelvoud : meervoud]}");
 
     /// <summary>
-    /// De kolomkoppen voor debet en credit van één potje (besluit 133): inkomsten- en uitgavenpotjes Uitgave/Inkomst,
+    /// De kolomkoppen voor debet en credit van één potje: inkomsten- en uitgavenpotjes Uitgave/Inkomst,
     /// geldpotjes Erbij/Eraf, overige balanspotjes Debet/Credit.
     /// </summary>
     public (string Debet, string Credit) Kolomkoppen(Grootboekrekening rekening, bool isGeldpotje)

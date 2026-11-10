@@ -10,7 +10,7 @@ public enum Richting
     Af = 2,
 }
 
-/// <summary>Voorwaarden van een boekingsregel (besluit 78); een lege voorwaarde doet niet mee.</summary>
+/// <summary>Voorwaarden van een boekingsregel; een lege voorwaarde doet niet mee.</summary>
 public sealed record BoekingsregelVoorwaarden(
     string? TegenIban = null, string? NaamBevat = null, string? OmschrijvingBevat = null, Richting Richting = Richting.Beide,
     Bedrag? BedragVan = null, Bedrag? BedragTot = null, string? Transactiecode = null)
@@ -30,7 +30,7 @@ public sealed record BoekingsregelVoorwaarden(
     }
 }
 
-/// <summary>Herkent banktransacties en geeft de grootboekrekening (besluit 64). De eerste passende regel wint.</summary>
+/// <summary>Herkent banktransacties en geeft de grootboekrekening. De eerste passende regel wint.</summary>
 public sealed class Boekingsregel
 {
     private Boekingsregel()

@@ -6,7 +6,7 @@ using BtwBoeker.App.ViewModels.Boekhouding;
 
 namespace BtwBoeker.App.Views.Boekhouding;
 
-/// <summary>Voorbeeld van een bijlage (besluit 86): PDF via Windows zelf, afbeeldingen direct (besluit 135).</summary>
+/// <summary>Voorbeeld van een bijlage: PDF via Windows zelf, afbeeldingen direct.</summary>
 public partial class BijlageVenster : Window
 {
     private readonly BijlageVoorbeeldViewModel _viewModel;

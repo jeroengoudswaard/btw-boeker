@@ -40,7 +40,7 @@ public enum BoekhoudingSubtab
 /// <summary>Eén journaalpost in de lijst.</summary>
 public sealed record PostRegel(Journaalpost Post, Woordenboek? Woorden = null, int AantalBijlagen = 0)
 {
-    /// <summary>Paperclip-kolom in het Journaal (besluit 140).</summary>
+    /// <summary>Paperclip-kolom in het Journaal.</summary>
     public bool HeeftBijlage => AantalBijlagen > 0;
 
     public Guid Id => Post.Id;
@@ -95,7 +95,7 @@ public sealed partial class RekeningRegel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(KantIsKiesbaar))]
     public partial RekeningSoort Soort { get; set; }
 
-    /// <summary>Baten of lasten (besluit 152); alleen bij een resultaatrekening.</summary>
+    /// <summary>Baten of lasten; alleen bij een resultaatrekening.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
     public partial ResultaatKant Kant { get; set; }

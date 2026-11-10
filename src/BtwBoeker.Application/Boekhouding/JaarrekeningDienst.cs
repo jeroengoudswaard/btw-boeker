@@ -7,10 +7,10 @@ namespace BtwBoeker.Application.Boekhouding;
 /// <summary>Eén regel van de indeling zoals de editor of een sjabloon hem opgeeft; rubrieken op Id.</summary>
 public sealed record IndelingsregelGegevens(JaarrekeningAfdeling Afdeling, IndelingsregelSoort Soort, string Tekst, IReadOnlyList<int> RubriekIds);
 
-/// <summary>Eén regel uit een sjabloonbestand; rubrieken op naam (besluit 116).</summary>
+/// <summary>Eén regel uit een sjabloonbestand; rubrieken op naam.</summary>
 public sealed record SjabloonIndelingsregel(JaarrekeningRapport Rapport, JaarrekeningAfdeling Afdeling, IndelingsregelSoort Soort, string Tekst, IReadOnlyList<string> Rubrieken);
 
-/// <summary>Een eigen jaarrekeningindeling bewaren of terugzetten naar de automatische (besluiten 263–268).</summary>
+/// <summary>Een eigen jaarrekeningindeling bewaren of terugzetten naar de automatische.</summary>
 public sealed class JaarrekeningDienst(IDatabaseSessie sessie)
 {
     /// <summary>Vervangt de indeling van één rapport; een lege lijst zet hem terug naar de automatische indeling.</summary>

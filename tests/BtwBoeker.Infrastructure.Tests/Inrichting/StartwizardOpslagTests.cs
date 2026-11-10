@@ -3,10 +3,10 @@ using BtwBoeker.Infrastructure.Database;
 
 namespace BtwBoeker.Infrastructure.Tests.Inrichting;
 
-/// <summary>De voortgang van de startwizard staat in de database zelf (besluit 173) en blijft bewaard na opnieuw openen.</summary>
+/// <summary>De voortgang van de startwizard staat in de database zelf en blijft bewaard na opnieuw openen.</summary>
 public sealed class StartwizardOpslagTests : IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
 

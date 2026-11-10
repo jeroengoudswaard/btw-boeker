@@ -255,7 +255,7 @@ internal sealed class InMemoryAdministratieRepository : IAdministratieRepository
 {
     public List<Administratie> Opgeslagen { get; } =
     [
-        new(AdministratieSoort.Vereniging, "Scouting Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging)),
+        new(AdministratieSoort.Vereniging, "Vakantiehuis De Duinen", Administratie.Standaardkleur(AdministratieSoort.Vereniging)),
     ];
 
     public int AantalKeerBewaard { get; private set; }
@@ -279,7 +279,7 @@ internal sealed class InMemoryBoekhoudingOpslag : BtwBoeker.Application.Boekhoud
     public List<object> Van(AdministratieSoort administratie) =>
         _gegevens.TryGetValue(administratie, out var lijst) ? lijst : _gegevens[administratie] = [];
 
-    /// <summary>Hoe vaak de hele boekhouding is geladen (besluit 234: niet dubbel laden).</summary>
+    /// <summary>Hoe vaak de hele boekhouding is geladen (Niet dubbel laden).</summary>
     public int KeerGeladen { get; set; }
 
     public Task<BtwBoeker.Application.Boekhouding.BoekhoudingStand> LaadAsync(AdministratieSoort administratie, CancellationToken annulering = default)
@@ -335,7 +335,7 @@ internal sealed class InMemoryBoekhoudingOpslag : BtwBoeker.Application.Boekhoud
             Bankafschriften = [.. lijst.OfType<Domain.Financien.Bank.Bankafschrift>().OrderBy(a => a.Datum)],
             Bankmutaties = [.. lijst.OfType<Domain.Financien.Bank.Bankmutatie>().OrderBy(m => m.Boekdatum)],
             Boekingsregels = [.. lijst.OfType<Domain.Financien.Bank.Boekingsregel>().OrderBy(r => r.Volgorde).ThenBy(r => r.Id)],
-            // Relaties zijn gedeeld door beide administraties (besluit 105).
+            // Relaties zijn gedeeld door beide administraties.
             Relaties = [.. _gegevens.Values.SelectMany(l => l).OfType<Domain.Financien.Relaties.Relatie>().OrderBy(r => r.Naam, StringComparer.CurrentCulture)],
             Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
             Jaarrekeningindelingen = [.. lijst.OfType<Domain.Financien.Boekhouding.Jaarrekeningindeling>()],

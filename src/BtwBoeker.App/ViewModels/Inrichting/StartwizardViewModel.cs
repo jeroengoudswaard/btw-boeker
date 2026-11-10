@@ -15,7 +15,7 @@ public enum Boekhoudingkeuze
 }
 
 /// <summary>
-/// Wat de startwizard aan het hoofdvenster vraagt (besluit 172): de bestaande wizards, diensten en tabbladen, zodat de
+/// Wat de startwizard aan het hoofdvenster vraagt: de bestaande wizards, diensten en tabbladen, zodat de
 /// startwizard alleen regisseert en niets opnieuw bouwt.
 /// </summary>
 public interface IStartwizardRegie
@@ -119,7 +119,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
 
     public string Stapnummer => string.Create(CultureInfo.CurrentCulture, $"Stap {(int)Huidig + 1} van {Stappen.Count}");
 
-    /// <summary>Besluit 175: een stap die al klaar is toont "Al ingericht" en de knoppen om het toch opnieuw te doen.</summary>
+    /// <summary>Een stap die al klaar is toont "Al ingericht" en de knoppen om het toch opnieuw te doen.</summary>
     public bool IsHuidigeStapKlaar => Status.IsKlaar(Huidig);
 
     public IReadOnlyList<KlaarRegel> Klaarregels =>

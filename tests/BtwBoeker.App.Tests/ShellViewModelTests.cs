@@ -75,11 +75,11 @@ public sealed class ShellViewModelTests
         Assert.Equal("btw-boeker.btwdb", shell.DatabaseNaam);
     }
 
-    /// <summary>Besluit 241: het welkomstscherm toont de laatst geopende database en opent hem met één klik.</summary>
+    /// <summary>Het welkomstscherm toont de laatst geopende database en opent hem met één klik.</summary>
     [Fact]
     public async Task Welkomstscherm_toont_de_laatst_geopende_database_en_opent_hem()
     {
-        var pad = Path.Combine("Documenten", "BTW-Boeker", "scouting.btwdb");
+        var pad = Path.Combine("Documenten", "BTW-Boeker", "vakantiehuis.btwdb");
         _beheer.Voeg(pad, Wachtwoord);
         _instellingen.Instellingen = new GebruikersInstellingen { LaatsteDatabase = pad };
         var shell = MaakShell();
@@ -88,7 +88,7 @@ public sealed class ShellViewModelTests
 
         Assert.False(shell.IsDatabaseOpen);
         Assert.True(shell.HeeftLaatsteDatabase);
-        Assert.Equal("scouting.btwdb", shell.LaatsteDatabaseNaam);
+        Assert.Equal("vakantiehuis.btwdb", shell.LaatsteDatabaseNaam);
         Assert.Equal("Documenten › BTW-Boeker", shell.LaatsteDatabaseMap);
 
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, HerstelGevraagd: false));
@@ -287,7 +287,7 @@ public sealed class ShellViewModelTests
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Equal("Boekhouding · Scouting Vereniging", shell.GeselecteerdTabblad!.Titel);
+        Assert.Equal("Boekhouding · Vakantiehuis De Duinen", shell.GeselecteerdTabblad!.Titel);
         Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
     }
 
@@ -350,8 +350,8 @@ public sealed class ShellViewModelTests
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
 
         Assert.Equal("btw-boeker.btwdb", shell.DatabaseNaam);
-        Assert.Equal("Scouting Vereniging", shell.ActieveAdministratieNaam);
+        Assert.Equal("Vakantiehuis De Duinen", shell.ActieveAdministratieNaam);
         Assert.Equal("Boekjaar 2026", shell.Boekjaartekst);
-        Assert.Contains("Scouting Vereniging", shell.Venstertitel, StringComparison.Ordinal);
+        Assert.Contains("Vakantiehuis De Duinen", shell.Venstertitel, StringComparison.Ordinal);
     }
 }

@@ -96,7 +96,7 @@ public sealed partial class AdministratieInstellingRegel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Fout), nameof(IsGewijzigd), nameof(Voorbeeldkleur), nameof(Voorbeeldtekstkleur))]
     public partial string KleurHex { get; set; }
 
-    /// <summary>Besluit 214: vanaf welk bedrag het filter <i>Zonder bon</i> een boeking zonder bijlage toont.</summary>
+    /// <summary>Vanaf welk bedrag het filter <i>Zonder bon</i> een boeking zonder bijlage toont.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fout), nameof(IsGewijzigd))]
     public partial string Drempeltekst { get; set; }

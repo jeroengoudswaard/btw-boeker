@@ -34,7 +34,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         return pad;
     }
 
-    /// <summary>Besluit 244: vóór het boeken een bevestiging met het beginjaar en de totalen; nee laat alles staan.</summary>
+    /// <summary>Vóór het boeken een bevestiging met het beginjaar en de totalen; nee laat alles staan.</summary>
     [Fact]
     public async Task Beginsaldi_worden_pas_geboekt_na_bevestiging_met_beginjaar_en_totalen()
     {
@@ -99,7 +99,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         Assert.Contains("1299", wizard.Samenvatting, StringComparison.Ordinal);
     }
 
-    /// <summary>Besluit 198: een administratie kan ook in een eerder jaar beginnen, met beginsaldi per 1 januari van dat jaar.</summary>
+    /// <summary>Een administratie kan ook in een eerder jaar beginnen, met beginsaldi per 1 januari van dat jaar.</summary>
     [Fact]
     public async Task Beginjaar_is_te_kiezen_en_bepaalt_boekjaar_en_openingsbalans()
     {

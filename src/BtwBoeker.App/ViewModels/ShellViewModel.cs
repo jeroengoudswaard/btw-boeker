@@ -23,7 +23,7 @@ public sealed record ModuleVerzoek(ModuleSoort Module, AdministratieSoort? Admin
 }
 
 /// <summary>
-/// Hoofdvenster: database-sessie, navigatiebalk (besluiten 168 en 177–183), menu's en statusregel.
+/// Hoofdvenster: database-sessie, navigatiebalk, menu's en statusregel.
 /// De geopende pagina's blijven bewaard in <see cref="Tabbladen"/> (de naam stamt uit de tijd van de tabbladen).
 /// </summary>
 public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
@@ -83,7 +83,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [ObservableProperty]
     public partial Thema Thema { get; set; }
 
-    /// <summary>Expert of Eenvoudig voor het tabblad Financiën (besluit 127); alleen visueel.</summary>
+    /// <summary>Expert of Eenvoudig voor het tabblad Financiën; alleen visueel.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar))]
     public partial Weergavemodus Weergave { get; set; }
@@ -91,7 +91,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [ObservableProperty]
     public partial string Statusmelding { get; set; } = "Gereed";
 
-    /// <summary>Besluit 168: ✓ gelukt, ⚠ waarschuwing, ✕ fout; zonder teken bij een gewone melding.</summary>
+    /// <summary>✓ gelukt, ⚠ waarschuwing, ✕ fout; zonder teken bij een gewone melding.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Statusteken))]
     public partial Statussoort Statussoort { get; private set; }
@@ -106,7 +106,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     public bool IsDatabaseOpen => DatabaseNaam is not null;
 
-    /// <summary>Besluit 241: de laatst gebruikte database onder de tegels van het welkomstscherm, als hij nog bestaat.</summary>
+    /// <summary>De laatst gebruikte database onder de tegels van het welkomstscherm, als hij nog bestaat.</summary>
     public bool HeeftLaatsteDatabase => !IsDatabaseOpen && _instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad);
 
     public string? LaatsteDatabaseNaam => HeeftLaatsteDatabase ? Path.GetFileName(_instellingen.LaatsteDatabase) : null;
@@ -159,7 +159,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
         else if (!_instellingen.StartwizardGetoond)
         {
-            // Besluit 169: de eerste start opent de startwizard, één keer.
+            // De eerste start opent de startwizard, één keer.
             _instellingen = _instellingen with { StartwizardGetoond = true };
             _opslag.Bewaar(_instellingen);
             await ToonStartwizardAsync(Startstap.Welkom);
@@ -273,8 +273,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     }
 
     /// <summary>
-    /// Bestand › Importeren › Bankafschrift (CAMT.053): opent Boekhouding voor de administratie van het actieve tabblad,
-    /// anders de Vereniging (besluit 17), en start de bankimport.
+    /// Bestand › Importeren › Bankafschrift (CAMT.053): opent Boekhouding en start de bankimport.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
     private async Task ImporteerBankafschriftAsync()
@@ -298,8 +297,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     }
 
     /// <summary>
-    /// Bestand › Importeren › Rekeningschema-sjabloon (besluit 116): opent Boekhouding voor de administratie van het actieve
-    /// tabblad, anders de Vereniging (besluit 17), en richt in met een sjabloonbestand.
+    /// Bestand › Importeren › Rekeningschema-sjabloon: opent Boekhouding voor de administratie van het actieve
+    /// tabblad, en richt in met een sjabloonbestand.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
     private async Task ImporteerSjabloonAsync()
@@ -327,7 +326,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     private Task ExporteerSjabloonAsync() =>
         GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerSjabloonCommand.ExecuteAsync(null) : Task.CompletedTask;
 
-    /// <summary>Bestand › Exporteren › Auditfile (XAF): het gekozen boekjaar van het tabblad Boekhouding (besluit 197).</summary>
+    /// <summary>Bestand › Exporteren › Auditfile (XAF): het gekozen boekjaar van het tabblad Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task ExporteerXafAsync() =>
         GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerXafCommand.ExecuteAsync(null) : Task.CompletedTask;
@@ -367,7 +366,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    // ---- Startwizard (besluiten 169–175) ----------------------------------------------------
+    // ---- Startwizard ----------------------------------------------------
 
     /// <summary>Bestand › Startwizard: verder waar de gebruiker gebleven was, anders vanaf Welkom.</summary>
     [RelayCommand]
@@ -471,7 +470,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             return;
         }
 
-        // Besluit 177: een pagina van een andere administratie opent, dan wisselt de keuze bovenaan mee.
+        // Een pagina van een andere administratie opent, dan wisselt de keuze bovenaan mee.
         if (verzoek.Administratie is { } gevraagd && GekozenAdministratie?.Soort != gevraagd)
         {
             KiesAdministratieZonderWisselen(gevraagd);
@@ -524,7 +523,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             && (verzoek.Administratie is null || Administraties.Any(a => a.Soort == verzoek.Administratie));
     }
 
-    /// <summary>Ctrl+1 (Boekhouding). Financiële modules openen voor de gekozen administratie (besluit 177; anders de Vereniging).</summary>
+    /// <summary>Ctrl+1 (Boekhouding). Financiële modules openen voor de gekozen administratie.</summary>
     [RelayCommand]
     private void OpenModuleViaSneltoets(string? nummer)
     {
@@ -597,7 +596,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 OpslaanCommand.NotifyCanExecuteChanged();
                 break;
             case nameof(TabbladViewModel.Onderdeel):
-                // Een onderdeel onder Meer… (besluit 269) moet zichtbaar worden; anders alleen markeren.
+                // Een onderdeel onder Meer… moet zichtbaar worden; anders alleen markeren.
                 BouwNavigatie();
                 break;
             case nameof(IPaginameldingen.Melding) when sender is IPaginameldingen { Melding: { Length: > 0 } melding }:
@@ -714,7 +713,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
         ZetStatus(Statussoort.Info, "Gereed");
         ShellLog.DatabaseGeopend(_logger, DatabaseNaam);
-        // Besluit 170: was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
+        // Was de startwizard met "Later verder" gesloten, dan aanbieden om daar verder te gaan.
         if (!_startwizardActief && await sessie.Startwizard.LaadAsync() is { KanHervatten: true, Stap: { } stap }
             && _dialogen.Bevestig("Startwizard", $"De startwizard is nog niet afgerond; u was gebleven bij de stap '{Stapnaam(stap)}'. Wilt u daar verder gaan?"))
         {
@@ -804,7 +803,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         ModuleMenu.Clear();
         foreach (var module in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
         {
-            // Financiën volgt de weergave (besluit 127); de overige modules houden hun naam.
+            // Financiën volgt de weergave; de overige modules houden hun naam.
             var definitie = module.Soort == ModuleSoort.Boekhouding ? module with { Titel = _boekhouding.Woorden["Boekhouding"] } : module;
             var sneltoets = $"Ctrl+{definitie.Sneltoetsnummer}";
             if (definitie.AlleenVoor is { } vast)

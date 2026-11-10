@@ -3,7 +3,7 @@ using BtwBoeker.App.ViewModels;
 
 namespace BtwBoeker.App.Tests;
 
-/// <summary>Besluit 234: een lijst in één keer vervangen geeft één melding aan de tabel, niet één per regel.</summary>
+/// <summary>Een lijst in één keer vervangen geeft één melding aan de tabel, niet één per regel.</summary>
 public sealed class VerzamelingTests
 {
     [Fact]

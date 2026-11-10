@@ -17,10 +17,10 @@ public sealed class Administratie
     public string Naam { get; private set; }
     public Kleur Accentkleur { get; private set; }
 
-    /// <summary>Besluit 97: € 10.</summary>
+    /// <summary>Standaard € 10.</summary>
     public const long StandaardZonderBonDrempel = 1000;
 
-    /// <summary>Besluit 214: vanaf dit bedrag (in centen) toont het filter <i>Zonder bon</i> een boeking zonder bijlage.</summary>
+    /// <summary>Vanaf dit bedrag (in centen) toont het filter <i>Zonder bon</i> een boeking zonder bijlage.</summary>
     public long ZonderBonDrempel { get; private set; } = StandaardZonderBonDrempel;
 
     public static Kleur Standaardkleur(AdministratieSoort soort) => soort switch

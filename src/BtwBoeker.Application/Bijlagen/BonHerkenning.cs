@@ -13,10 +13,10 @@ public interface IPdfTekstLezer
 public sealed record BonGegevens(DateOnly? Datum, Bedrag? Bedrag);
 
 /// <summary>
-/// Datum en totaalbedrag uit de tekst van een bon of factuur (besluit 96). De datum is de eerste geldige datum
+/// Datum en totaalbedrag uit de tekst van een bon of factuur. De datum is de eerste geldige datum
 /// (dag-maand-jaar, jjjj-mm-dd of "1 oktober 2026"); het bedrag komt van de regel "te betalen", anders de laatste
 /// regel met "totaal" (niet subtotaal, excl. of btw), anders het bedrag dat het grootst is zonder minteken. Een minteken
-/// vóór of achter het bedrag blijft behouden, zoals bij een creditnota (besluit 142).
+/// vóór of achter het bedrag blijft behouden, zoals bij een creditnota.
 /// </summary>
 public static partial class BonHerkenning
 {
@@ -81,7 +81,7 @@ public static partial class BonHerkenning
         return alle.Count == 0 ? null : alle.MaxBy(b => Math.Abs(b.Centen));
     }
 
-    /// <summary>Invoer in het postvak: zoals <see cref="Bedrag.TryParse"/>, maar een minteken vóór of achter mag (besluit 142).</summary>
+    /// <summary>Invoer in het postvak: zoals <see cref="Bedrag.TryParse"/>, maar een minteken vóór of achter mag.</summary>
     public static bool TryParseBedrag(string? invoer, out Bedrag bedrag)
     {
         var tekst = (invoer ?? string.Empty).Trim();

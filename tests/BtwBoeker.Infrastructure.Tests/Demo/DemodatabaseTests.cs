@@ -4,7 +4,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Infrastructure.Tests.Demo;
 
-/// <summary>Besluit 252: de demodatabase voor de schermafbeeldingen van de website bevat alleen verzonnen gegevens.</summary>
+/// <summary>De demodatabase voor de schermafbeeldingen van de website bevat alleen verzonnen gegevens.</summary>
 public sealed class DemodatabaseTests : IDisposable
 {
     private readonly string _map = Path.Combine(Path.GetTempPath(), "btw-boeker-demo-" + Guid.NewGuid().ToString("N"));

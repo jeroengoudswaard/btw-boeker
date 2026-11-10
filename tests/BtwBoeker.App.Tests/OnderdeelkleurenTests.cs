@@ -4,7 +4,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.Tests;
 
-/// <summary>Besluit 239: elk onderdeel een eigen kleur, leesbaar in licht én donker.</summary>
+/// <summary>Elk onderdeel een eigen kleur, leesbaar in licht én donker.</summary>
 public class OnderdeelkleurenTests
 {
     private static readonly Kleur LichteGrond = new(0xFF, 0xFF, 0xFF);

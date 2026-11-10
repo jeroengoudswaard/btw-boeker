@@ -3,7 +3,7 @@ using BtwBoeker.Application.Inrichting;
 
 namespace BtwBoeker.Infrastructure.Database;
 
-/// <summary>Eén rij met de voortgang van de startwizard (besluit 173).</summary>
+/// <summary>Eén rij met de voortgang van de startwizard.</summary>
 internal sealed class StartwizardRij
 {
     public const int VasteId = 1;

@@ -44,7 +44,7 @@ public sealed partial class PostRegelEditor : ObservableObject
 }
 
 /// <summary>
-/// Een journaalpost bewerken (concept) of bekijken (geboekt, besluit 71). Wijzigingen worden pas opgeslagen via het
+/// Een journaalpost bewerken (concept) of bekijken (geboekt). Wijzigingen worden pas opgeslagen via het
 /// tabblad (Ctrl+S voor concept, Ctrl+Enter voor boeken).
 /// </summary>
 public sealed partial class PostEditor : ObservableObject

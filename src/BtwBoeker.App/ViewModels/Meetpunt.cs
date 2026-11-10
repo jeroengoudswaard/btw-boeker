@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Besluit 234: meet hoe lang een handeling duurt en schrijft dat in het logbestand ("Duur Openen database: 812 ms").
+/// Meet hoe lang een handeling duurt en schrijft dat in het logbestand ("Duur Openen database: 812 ms").
 /// Alleen de naam van de handeling, nooit persoonsgegevens. Gebruik: <c>using var meting = Meetpunt.Start(logger, "…");</c>
 /// </summary>
 internal readonly struct Meetpunt(ILogger logger, string handeling) : IDisposable

@@ -5,13 +5,13 @@ using BtwBoeker.Infrastructure.Database;
 namespace BtwBoeker.Infrastructure.Tests.Prestaties;
 
 /// <summary>
-/// Besluit 236: verbindingen worden hergebruikt, zodat SQLite3MC de sleutel niet bij elke query opnieuw afleidt; na sluiten
+/// Verbindingen worden hergebruikt, zodat SQLite3MC de sleutel niet bij elke query opnieuw afleidt; na sluiten
 /// is het bestand weer vrij. De tijdsbudgetten zijn ruim (ook voor trage CI-machines) maar vangen een terugval naar
 /// "één nieuwe verbinding per query" (gemeten: 1,0 s per keer boekhouding laden, met pooling 0,1 s).
 /// </summary>
 public sealed class VerbindingTests : IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
 

@@ -4,7 +4,7 @@ using BtwBoeker.Application.Bijlagen;
 
 namespace BtwBoeker.Infrastructure.Pdf;
 
-/// <summary>Leest de tekst van een PDF met PdfPig (besluit 135), regel voor regel en volledig in het geheugen.</summary>
+/// <summary>Leest de tekst van een PDF met PdfPig, regel voor regel en volledig in het geheugen.</summary>
 public sealed class PdfPigTekstLezer : IPdfTekstLezer
 {
     /// <summary>Bonnen en facturen zijn kort; meer pagina's lezen is niet nodig.</summary>

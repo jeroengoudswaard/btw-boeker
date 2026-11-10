@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Bank;
 
-/// <summary>Een nieuwe eigen bankrekening: de grootboekrekening en de code van het bankdagboek (besluit 76).</summary>
+/// <summary>Een nieuwe eigen bankrekening: de grootboekrekening en de code van het bankdagboek.</summary>
 public sealed record NieuweBankrekening(int RekeningId, string Code, string Naam);
 
 public sealed record BankimportResultaat(int Nieuw, int Herkend, int Werkvoorraad);
@@ -18,8 +18,8 @@ public sealed record ConceptenGeboekt(int Aantal, IReadOnlyList<string> Fouten);
 public sealed record BoekingsregelInvoer(int? Id, string Naam, int RekeningId, BoekingsregelVoorwaarden Voorwaarden, string? Omschrijving, bool IsActief);
 
 /// <summary>
-/// Bankimport (CAMT.053) en verwerking: herkende transacties worden conceptposten (besluit 74), de rest blijft in de
-/// werkvoorraad (besluit 75). De import begint met een back-up en wordt in één transactie opgeslagen.
+/// Bankimport (CAMT.053) en verwerking: herkende transacties worden conceptposten, de rest blijft in de
+/// werkvoorraad. De import begint met een back-up en wordt in één transactie opgeslagen.
 /// </summary>
 public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
 {

@@ -17,7 +17,7 @@ public sealed record SjabloonRekening(int Nummer, string Naam, string? Rubriek, 
 public sealed record Rekeningsjabloon(
     string Naam, AdministratieSoort? Administratie, IReadOnlyList<SjabloonRubriek> Rubrieken, IReadOnlyList<SjabloonRekening> Rekeningen)
 {
-    /// <summary>Optioneel: de eigen jaarrekeningindeling (besluiten 116 en 263); leeg = de automatische indeling.</summary>
+    /// <summary>Optioneel: de eigen jaarrekeningindeling; leeg = de automatische indeling.</summary>
     public IReadOnlyList<SjabloonIndelingsregel> Jaarrekening { get; init; } = [];
 }
 
@@ -228,7 +228,7 @@ public static class Rekeningsjablonen
         public RekeningSoort Soort { get; set; }
         public RekeningRol Rol { get; set; }
 
-        /// <summary>Optioneel (besluit 152); ontbreekt het, dan geldt de standaard (vanaf 8000 baten).</summary>
+        /// <summary>Optioneel; ontbreekt het, dan geldt de standaard (vanaf 8000 baten).</summary>
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public ResultaatKant? Kant { get; set; }
     }

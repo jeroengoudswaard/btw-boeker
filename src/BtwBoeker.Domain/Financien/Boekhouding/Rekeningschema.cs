@@ -27,14 +27,14 @@ public enum RekeningRol
     /// <summary>Het resultaat wordt bij de jaarafsluiting hierheen geboekt (bijv. 600 Algemene reserve).</summary>
     Reserve = 1,
 
-    /// <summary>Tussenrekening voor overboekingen tussen eigen rekeningen (besluit 70).</summary>
+    /// <summary>Tussenrekening voor overboekingen tussen eigen rekeningen.</summary>
     Kruisposten = 2,
 
-    /// <summary>De kasrekening van het kasboek (besluit 65).</summary>
+    /// <summary>De kasrekening van het kasboek.</summary>
     Kas = 3,
 }
 
-/// <summary>Een groep rekeningen, zoals "Terreinkosten"; bepaalt de indeling van balans en W&amp;V (besluit 69).</summary>
+/// <summary>Een groep rekeningen, zoals "Huisvesting"; bepaalt de indeling van balans en W&amp;V.</summary>
 public sealed class Rubriek
 {
     public const int MaximaleNaamLengte = 100;
@@ -199,7 +199,7 @@ public sealed class Dagboek
     public AdministratieSoort Administratie { get; private set; }
     public DagboekSoort Soort { get; private set; }
 
-    /// <summary>De eigen bankrekening van een bankdagboek (besluit 76).</summary>
+    /// <summary>De eigen bankrekening van een bankdagboek.</summary>
     public Iban? Iban { get; private set; }
     public string Code { get; private set; }
     public string Naam { get; private set; }

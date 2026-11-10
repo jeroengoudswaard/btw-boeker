@@ -101,7 +101,7 @@ public sealed partial class SjablooninrichtingViewModel : ObservableObject
 
     public string Sjabloonnaam => _sjabloon.Naam;
 
-    /// <summary>Besluit 198: ook beginnen in een eerder jaar (tot 5 jaar terug), nooit in de toekomst.</summary>
+    /// <summary>Ook beginnen in een eerder jaar (tot 5 jaar terug), nooit in de toekomst.</summary>
     public IReadOnlyList<int> Beginjaren { get; }
 
     [ObservableProperty]
@@ -141,7 +141,7 @@ public sealed partial class SjablooninrichtingViewModel : ObservableObject
     public bool IsKlaar => Stap == InrichtStap.Klaar;
 
     /// <summary>
-    /// Besluit 244: vraagt vóór het boeken van de beginsaldi om bevestiging (titel, vraag); <c>false</c> laat alles staan.
+    /// Vraagt vóór het boeken van de beginsaldi om bevestiging (titel, vraag); <c>false</c> laat alles staan.
     /// Zonder bevestiging (bijvoorbeeld in tests) wordt direct geboekt.
     /// </summary>
     public Func<string, string, bool>? Bevestiging { get; set; }

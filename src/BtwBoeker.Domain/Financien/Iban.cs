@@ -4,7 +4,7 @@ using System.Text;
 namespace BtwBoeker.Domain.Financien;
 
 /// <summary>
-/// Een IBAN, opgeslagen zonder spaties en in hoofdletters (besluit 29). Een ongeldig controlegetal maakt de
+/// Een IBAN, opgeslagen zonder spaties en in hoofdletters. Een ongeldig controlegetal maakt de
 /// waarde niet onbruikbaar: SOL3 is leidend, de import geeft dan een waarschuwing.
 /// </summary>
 public readonly record struct Iban

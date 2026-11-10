@@ -13,19 +13,19 @@ namespace BtwBoeker.Infrastructure.Tests.Demo;
 internal static class Demodatabase
 {
     public const string Wachtwoord = "demo voorbeeldgroep";
-    public const string NaamVereniging = "Scouting De Voorbeeldgroep";
+    public const string NaamVereniging = "Vakantiehuis De Voorbeeld";
 
     private static readonly (int Nummer, string Naam, RekeningSoort Soort)[] Rekeningen =
     [
-        (600, "Algemene reserve", RekeningSoort.Balans),
+        (600, "Eigen vermogen", RekeningSoort.Balans),
         (1000, "Kas", RekeningSoort.Balans),
         (1100, "Bank", RekeningSoort.Balans),
-        (4000, "Afdracht Scouting Nederland", RekeningSoort.Resultaat),
-        (4100, "Opkomsten", RekeningSoort.Resultaat),
-        (4110, "Zomerkamp", RekeningSoort.Resultaat),
-        (4200, "Huur clubhuis", RekeningSoort.Resultaat),
+        (4000, "Parkbijdrage", RekeningSoort.Resultaat),
+        (4100, "Klein onderhoud", RekeningSoort.Resultaat),
+        (4110, "Groot onderhoud", RekeningSoort.Resultaat),
+        (4200, "Energie", RekeningSoort.Resultaat),
         (4310, "Bankkosten", RekeningSoort.Resultaat),
-        (8400, "Huuropbrengsten", RekeningSoort.Resultaat),
+        (8400, "Omzet verhuur", RekeningSoort.Resultaat),
     ];
 
     /// <summary>Maakt de database; alle posten vallen in het jaar van <paramref name="nu"/>.</summary>
@@ -72,15 +72,15 @@ internal static class Demodatabase
         for (var maand = 1; maand <= laatsteMaand; maand++)
         {
             var dag = new DateOnly(jaar, maand, 1);
-            await dienst.BoekAsync(ver, Post(dag.AddDays(4), "Huuropbrengsten", 1100, 8400, 22_000));
-            await dienst.BoekAsync(ver, Post(dag.AddDays(9), "Huur clubhuis", 4200, 1100, 15_000));
-            await dienst.BoekAsync(ver, Post(dag.AddDays(14), "Materiaal opkomsten", 4100, 1000, 2_350 + maand * 115));
+            await dienst.BoekAsync(ver, Post(dag.AddDays(4), "Omzet verhuur", 1100, 8400, 22_000));
+            await dienst.BoekAsync(ver, Post(dag.AddDays(9), "Energie", 4200, 1100, 15_000));
+            await dienst.BoekAsync(ver, Post(dag.AddDays(14), "Klein onderhoud", 4100, 1000, 2_350 + maand * 115));
         }
 
         await dienst.BoekAsync(ver, Post(new DateOnly(jaar, 1, 1), "Beginsaldo spaarpot", 1100, 600, 450_000));
-        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 3), 20), "Afdracht Scouting Nederland", 4000, 1100, 86_400));
+        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 3), 20), "Parkbijdrage", 4000, 1100, 86_400));
         await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 5), 12), "Oliebollenactie", 1000, 8400, 64_250));
-        await dienst.BewaarConceptAsync(ver, Post(new DateOnly(jaar, laatsteMaand, 25), "Zomerkamp: kampterrein", 4110, 1100, 120_000));
+        await dienst.BewaarConceptAsync(ver, Post(new DateOnly(jaar, laatsteMaand, 25), "Groot onderhoud: schilderwerk", 4110, 1100, 120_000));
     }
 
     private sealed class VasteTijd(DateTimeOffset nu) : TimeProvider

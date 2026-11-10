@@ -2,7 +2,7 @@ using BtwBoeker.Application.Weergaven;
 
 namespace BtwBoeker.Application.Tests.Weergaven;
 
-/// <summary>De woordenlijst voor de weergaven Expert en Eenvoudig (besluiten 127, 128 en 133).</summary>
+/// <summary>De woordenlijst voor de weergaven Expert en Eenvoudig.</summary>
 public sealed class WoordenlijstTests
 {
     [Fact]

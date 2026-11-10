@@ -148,7 +148,7 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// Besluit 168: één hoofdactie per pagina. Per subtabblad (TabItem) van de pagina's hooguit één accentknop, en in een
+    /// Één hoofdactie per pagina. Per subtabblad (TabItem) van de pagina's hooguit één accentknop, en in een
     /// pagina zonder subtabbladen hooguit één. Buiten de subtabbladen mag één accentknop staan (het startscherm van een lege
     /// boekhouding); <i>Opslaan</i> kiest zijn stijl met <c>HoofdactieStijl</c>.
     /// </summary>
@@ -197,7 +197,7 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// Besluit 236: verbindingen met de versleutelde database ontstaan alleen in DatabaseBeheer en DatabaseSessie (met pooling),
+    /// Verbindingen met de versleutelde database ontstaan alleen in DatabaseBeheer en DatabaseSessie (met pooling),
     /// en een sessie leegt bij sluiten zijn pool, zodat er geen bestandshandles open blijven.
     /// </summary>
     [Fact]
@@ -220,7 +220,7 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// Besluit 234: de momentopname van de boekhouding is geldig zolang de wijzigingsteller van de sessie gelijk blijft.
+    /// De momentopname van de boekhouding is geldig zolang de wijzigingsteller van de sessie gelijk blijft.
     /// <c>SaveChanges</c> verhoogt de teller vanzelf; een bulkbewerking (<c>ExecuteDelete</c>, <c>ExecuteUpdate</c>,
     /// <c>ExecuteSql</c>) gaat daar buitenom en moet de teller daarom zelf verhogen.
     /// </summary>
@@ -240,7 +240,7 @@ public class ArchitectuurTests
         Assert.True(fouten.Count == 0, "Bulkbewerking zonder Wijzigingen?.Verhoog() in: " + string.Join(", ", fouten));
     }
 
-    // ---- Ontwerpsysteem (besluit 240) ------------------------------------------------------------
+    // ---- Ontwerpsysteem ------------------------------------------------------------
 
     private static readonly double[] Lettergroottes = [12, 16, 24, 32];
     private static readonly double[] Pictogramgroottes = [10, 12, 16, 20, 24, 32, 48];
@@ -340,7 +340,7 @@ public class ArchitectuurTests
         Assert.True(fouten.Count == 0, "Test met Timeout is niet asynchroon: " + string.Join(", ", fouten));
     }
 
-    /// <summary>Besluit 168: elke hoofdlijst krijgt een leeg scherm met uitleg (en waar mogelijk één knop).</summary>
+    /// <summary>Elke hoofdlijst krijgt een leeg scherm met uitleg (en waar mogelijk één knop).</summary>
     [Theory]
     [InlineData("BoekhoudingView.xaml", "Posten")]
     [InlineData("BoekhoudingView.xaml", "Mutaties")]
@@ -363,7 +363,7 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// De jaarrekeningindeling is alleen weergave (besluiten 263–268): in de applicatielaag gebruiken alleen het model, de
+    /// De jaarrekeningindeling is alleen weergave: in de applicatielaag gebruiken alleen het model, de
     /// rekenaar, de dienst, de rapporten en het sjabloonbestand haar; grootboek, jaarafsluiting, bank en boekingen niet.
     /// </summary>
     [Fact]
@@ -383,7 +383,7 @@ public class ArchitectuurTests
         Assert.DoesNotContain("Jaarrekening", File.ReadAllText(Path.Combine(Repositorymap(), "src", "BtwBoeker.Application", "Boekhouding", "Grootboek.cs")), StringComparison.Ordinal);
     }
 
-    /// <summary>Elke tekst van de weergaven (besluit 127) die de XAML gebruikt, staat in de woordenlijst.</summary>
+    /// <summary>Elke tekst van de weergaven die de XAML gebruikt, staat in de woordenlijst.</summary>
     [Fact]
     public void Xaml_gebruikt_alleen_termen_uit_de_woordenlijst()
     {

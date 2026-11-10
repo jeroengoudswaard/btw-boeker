@@ -1,6 +1,6 @@
-# Een versie publiceren (besluiten 250–254)
+# Een versie publiceren
 
-Een versie van BTW-Boeker komt op de website via de workflow **Release** (`.github/workflows/release.yml`). Die bouwt op Windows het installatiebestand (MSI), bouwt de webapp voor GitHub Pages, maakt schermafbeeldingen met verzonnen gegevens en zet alles op https://jeroengoudswaard.github.io/btw-boeker/.
+Een versie van BTW-Boeker komt op de website via de workflow **Release** (`.github/workflows/release.yml`). Die bouwt op Windows het installatiebestand (MSI), maakt schermafbeeldingen met verzonnen gegevens en zet beide op de website. Publiceren naar de website staat uit tot er een BTW-Boeker-pagina is: zet dan de repository-variabele `WEBSITE_PUBLICEREN` op `true`.
 
 ## Eenmalig: het token voor de website
 
@@ -21,20 +21,20 @@ Het token komt nooit in Git en staat alleen in de geheimen van GitHub.
 
 ## Een versie uitbrengen
 
-1. Zorg dat `main` de versie bevat. Het versienummer staat in `Directory.Build.props` en `webapp/package.json`, de wijzigingen in `CHANGELOG.md`.
+1. Zorg dat `main` de versie bevat. Het versienummer staat in `Directory.Build.props`, de wijzigingen in `CHANGELOG.md`.
 2. Maak een tag en push hem:
 
    ```
    git checkout main
    git pull
-   git tag v0.15.0
-   git push origin v0.15.0
+   git tag v0.19.0
+   git push origin v0.19.0
    ```
 
-   Op GitHub kan het ook: **Releases › Draft a new release › Choose a tag** `v0.15.0` (*Create new tag on publish*).
-3. Volg de workflow onder **Actions › Release**. Na ±15 minuten staat de MSI op de release `btw-boeker` van de website, en de website wordt opnieuw gepubliceerd.
+   Op GitHub kan het ook: **Releases › Draft a new release › Choose a tag** `v0.19.0` (*Create new tag on publish*).
+3. Volg de workflow onder **Actions › Release**. Na ±15 minuten staat de MSI op de release `btw-boeker` van de website, met de versie en de schermafbeeldingen op de site bijgewerkt.
 
-De MSI heeft het versienummer in de naam (`BtwBoeker-0.19.0.msi`, besluit 274). De workflow zet het versielabel op de startpagina en de downloadknop van de website op de nieuwe versie (besluit 275, `.github/scripts/website-bijwerken.sh`), dus dat hoeft niet met de hand. Vindt het script het label of de knop niet, bijvoorbeeld na een herontwerp van de site, dan faalt de workflow zichtbaar.
+De MSI heeft het versienummer in de naam (`BtwBoeker-0.19.0.msi`). De workflow zet het versielabel op de startpagina en de downloadknop van de website op de nieuwe versie (`.github/scripts/website-bijwerken.sh`), dus dat hoeft niet met de hand. Vindt het script het label of de knop niet, bijvoorbeeld na een herontwerp van de site, dan faalt de workflow zichtbaar.
 
 Oudere versies blijven op de release staan, zodat u kunt teruggaan.
 
@@ -49,14 +49,13 @@ Oudere versies blijven op de release staan, zodat u kunt teruggaan.
   ```
 
   Zet de PNG's daarna in `btw-boeker/screens/` van de websiterepository.
-- **Codesigning:** de bèta is niet digitaal ondertekend (besluit 253). Windows SmartScreen meldt daarom "Onbekende uitgever"; de websitepagina legt uit hoe u verder gaat.
-- **De koppeling van de webapp met Supabase** (besluit 254) volgt later. Stel dan in de repository **btw-boeker** onder **Settings › Secrets and variables › Actions › Variables** de variabelen `SUPABASE_URL` en `SUPABASE_PUBLISHABLE_KEY` in (de publieke sleutel, nooit de `service_role`-sleutel). Voeg in Supabase onder **Authentication › URL Configuration** het adres `https://jeroengoudswaard.github.io/btw-boeker/app/` toe aan de toegestane adressen.
+- **Codesigning:** de bèta is niet digitaal ondertekend. Windows SmartScreen meldt daarom "Onbekende uitgever"; de websitepagina legt uit hoe u verder gaat.
 
 ## Zelf de MSI bouwen (Windows)
 
 ```
 dotnet publish src/BtwBoeker.App -c Release -r win-x64 --self-contained -o artifacts/publish
-dotnet build installer/BtwBoeker.Installer.wixproj -c Release -p:Versie=0.15.0 -p:PublicatieMap=%CD%\artifacts\publish
+dotnet build installer/BtwBoeker.Installer.wixproj -c Release -p:Versie=0.19.0 -p:PublicatieMap=%CD%\artifacts\publish
 ```
 
-De MSI staat daarna als `BtwBoeker-0.15.0.msi` in `installer/bin/x64/Release/`.
+De MSI staat daarna als `BtwBoeker-0.19.0.msi` in `installer/bin/x64/Release/`.

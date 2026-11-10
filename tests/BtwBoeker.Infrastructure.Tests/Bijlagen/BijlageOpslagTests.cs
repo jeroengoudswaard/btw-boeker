@@ -14,10 +14,10 @@ using BtwBoeker.Tests.Gedeeld;
 
 namespace BtwBoeker.Infrastructure.Tests.Bijlagen;
 
-/// <summary>Bijlagen in de echte, versleutelde database en het lezen van PDF-tekst (besluiten 84, 96 en 135). Gegevens zijn verzonnen.</summary>
+/// <summary>Bijlagen in de echte, versleutelde database en het lezen van PDF-tekst. Gegevens zijn verzonnen.</summary>
 public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();

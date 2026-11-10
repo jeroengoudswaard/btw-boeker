@@ -3,7 +3,7 @@ using BtwBoeker.Domain.Financien;
 
 namespace BtwBoeker.Application.Tests.Bijlagen;
 
-/// <summary>Datum en bedrag uit de tekst van een PDF (besluit 96). Alle teksten zijn verzonnen.</summary>
+/// <summary>Datum en bedrag uit de tekst van een PDF. Alle teksten zijn verzonnen.</summary>
 public sealed class BonHerkenningTests
 {
     [Fact]

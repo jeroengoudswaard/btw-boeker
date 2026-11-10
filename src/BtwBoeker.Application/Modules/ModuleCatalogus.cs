@@ -15,7 +15,7 @@ public enum ModuleSoort
 /// <param name="PerAdministratie">Hoort het tabblad bij de administratie (boekhouding), of bij de hele app?</param>
 /// <param name="Fase">Ontwikkelfase waarin de module functioneel wordt.</param>
 /// <param name="AlleenVoor">Als ingevuld: de module bestaat alleen voor deze administratie.</param>
-/// <param name="Omschrijving">Eén zin uitleg onder de titel van de pagina (besluit 242).</param>
+/// <param name="Omschrijving">Eén zin uitleg onder de titel van de pagina.</param>
 public sealed record ModuleDefinitie(
     ModuleSoort Soort,
     string Titel,

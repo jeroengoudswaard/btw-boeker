@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Jaarrekening volgens de eigen indeling en het venster Indeling bewerken (besluiten 263–268).</summary>
+/// <summary>Jaarrekening volgens de eigen indeling en het venster Indeling bewerken.</summary>
 public sealed class JaarrekeningViewModelTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();

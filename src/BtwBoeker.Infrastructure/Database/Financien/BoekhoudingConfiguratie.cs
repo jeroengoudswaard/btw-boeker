@@ -55,7 +55,7 @@ internal static class BoekhoudingConfiguratie
             b.Property(x => x.Id).ValueGeneratedNever();
             b.Property(x => x.Omschrijving).IsRequired().HasMaxLength(Journaalpost.MaximaleOmschrijvingLengte);
             b.HasOne(x => x.Dagboek).WithMany().HasForeignKey("DagboekId").IsRequired().OnDelete(DeleteBehavior.Restrict);
-            // Doorlopende nummering per dagboek per jaar; concepten hebben nog geen nummer (besluit 71).
+            // Doorlopende nummering per dagboek per jaar; concepten hebben nog geen nummer.
             b.HasIndex("DagboekId", nameof(Journaalpost.Jaar), nameof(Journaalpost.Volgnummer)).IsUnique().HasFilter("\"Volgnummer\" IS NOT NULL");
             b.HasIndex(x => new { x.Administratie, x.Jaar });
             b.HasMany(x => x.Regels).WithOne().HasForeignKey("PostId").IsRequired().OnDelete(DeleteBehavior.Cascade);

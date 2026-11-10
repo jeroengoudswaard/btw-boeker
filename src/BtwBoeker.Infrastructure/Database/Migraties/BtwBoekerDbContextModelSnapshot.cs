@@ -53,7 +53,7 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                         {
                             Id = 1,
                             Accentkleur = "#2E7D32",
-                            Naam = "Vereniging",
+                            Naam = "Mijn administratie",
                             Soort = 1
                         });
                 });

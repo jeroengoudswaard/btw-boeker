@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels;
 
-/// <summary>Soort melding in de statusregel (besluit 168).</summary>
+/// <summary>Soort melding in de statusregel.</summary>
 public enum Statussoort
 {
     Info,
@@ -18,7 +18,7 @@ public enum Statussoort
 }
 
 /// <summary>
-/// Navigatiebalk, statusregel, menubalk en startkaarten (v0.8.0, besluiten 168 en 177–183).
+/// Navigatiebalk, statusregel, menubalk en startkaarten.
 /// </summary>
 public sealed partial class ShellViewModel
 {
@@ -37,7 +37,7 @@ public sealed partial class ShellViewModel
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
     public partial AdministratieViewModel? GekozenAdministratie { get; set; }
 
-    /// <summary>Besluit 179: in Expert altijd; in Eenvoudig alleen tijdelijk na Alt.</summary>
+    /// <summary>In Expert altijd; in Eenvoudig alleen tijdelijk na Alt.</summary>
     public bool IsMenubalkZichtbaar => Weergave == Application.Instellingen.Weergavemodus.Expert || _menubalkTijdelijk;
 
     public void ToonMenubalkTijdelijk()
@@ -84,7 +84,7 @@ public sealed partial class ShellViewModel
         BouwModuleMenu();
     }
 
-    /// <summary>Besluit 273: klapt <i>Meer…</i> om; alleen op een bewuste actie (klik, Enter of Spatie).</summary>
+    /// <summary>Klapt <i>Meer…</i> om; alleen op een bewuste actie (klik, Enter of Spatie).</summary>
     [RelayCommand]
     private void MeerWisselen(NavigatieItem? item)
     {
@@ -105,7 +105,7 @@ public sealed partial class ShellViewModel
     {
         if (item.IsMeer)
         {
-            // Besluit 273: selecteren klapt niet om. WPF selecteert soms twee keer (bij focus en door de actie zelf), en
+            // Selecteren klapt niet om. WPF selecteert soms twee keer (bij focus en door de actie zelf), en
             // met de pijltjes kom je hier alleen langs. De selectie gaat terug naar de pagina die open is.
             SynchroniseerNavigatie();
             return;
@@ -247,7 +247,7 @@ public sealed partial class ShellViewModel
 
     /// <summary>
     /// De dagelijkse onderdelen, dan <i>Meer…</i> en, als die open is of de pagina daar staat, de onderdelen voor inrichting
-    /// (besluit 269).
+    ///.
     /// </summary>
     private List<NavigatieItem> Onderdelen(
         ModuleSoort module, string sleutel, IEnumerable<(int Onderdeel, string Titel)> dagelijks, IEnumerable<(int Onderdeel, string Titel)> meer,
@@ -278,7 +278,7 @@ public sealed partial class ShellViewModel
     /// <summary>Titels uit de woordenlijst bevatten een toegangstoets ("B_ank"); de navigatiebalk toont ze zonder.</summary>
     private static string Zonder_(string titel) => titel.Replace("_", string.Empty, StringComparison.Ordinal);
 
-    // ---- Startkaarten (besluit 183) ----------------------------------------------------------
+    // ---- Startkaarten ----------------------------------------------------------
 
     private IReadOnlyList<Startkaart> _kaarten = [];
     private int _kaartenRonde;
@@ -300,17 +300,17 @@ public sealed partial class ShellViewModel
         _overzicht.Kerncijfers.Clear();
         if (gegevens is not null && GekozenAdministratie is { } administratie)
         {
-            // Besluit 234: dezelfde geladen boekhouding als de kaarten, niet opnieuw laden.
+            // Dezelfde geladen boekhouding als de kaarten, niet opnieuw laden.
             foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(gegevens.Boekhouding, vandaag), vandaag.Year))
             {
                 _overzicht.Kerncijfers.Add(regel);
             }
         }
 
-        BouwNavigatie(); // tellers, en Openstaand verschijnt of verdwijnt (besluit 269)
+        BouwNavigatie(); // tellers, en Openstaand verschijnt of verdwijnt
     }
 
-    // ---- Tellers bijwerken na een opslag (besluit 277) ------------------------------------------
+    // ---- Tellers bijwerken na een opslag ------------------------------------------
 
     private static readonly TimeSpan TellerWachttijd = TimeSpan.FromMilliseconds(400);
     private SynchronizationContext? _uiContext;
@@ -349,7 +349,7 @@ public sealed partial class ShellViewModel
         }
     }
 
-    /// <summary>Besluit 220: de aantallen bij de regels van de navigatiebalk.</summary>
+    /// <summary>De aantallen bij de regels van de navigatiebalk.</summary>
     private void PasTellersToe()
     {
         var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten, GekozenAdministratie?.Soort) : new Dictionary<string, int>();

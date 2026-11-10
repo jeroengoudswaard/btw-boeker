@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien;
 namespace BtwBoeker.Infrastructure.Tests.Prestaties;
 
 /// <summary>
-/// Besluit 234: de boekhouding wordt als momentopname bewaard en pas opnieuw geladen als er sinds de vorige keer iets in de
+/// De boekhouding wordt als momentopname bewaard en pas opnieuw geladen als er sinds de vorige keer iets in de
 /// database is opgeslagen (door welke opslag dan ook). Zo laden Start, kerncijfers en de pagina Boekhouding niet steeds opnieuw.
 /// </summary>
 public sealed class MomentopnameTests : IDisposable
@@ -49,7 +49,7 @@ public sealed class MomentopnameTests : IDisposable
 
         var eerste = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
         var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);
-        vereniging.WijzigNaam("Scouting Proef");
+        vereniging.WijzigNaam("Vakantiehuis Proef");
         await sessie.Administraties.BewaarAsync(vereniging);
 
         Assert.NotSame(eerste, await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging));
@@ -67,14 +67,14 @@ public sealed class MomentopnameTests : IDisposable
         {
             afzender = s;
             Interlocked.Increment(ref aantal);
-        }; // besluit 277
+        };
 
         var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
         await sessie.Administraties.HaalAlleAsync();
         Assert.Equal(0, Volatile.Read(ref aantal));
 
         var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);
-        vereniging.WijzigNaam("Scouting Proef");
+        vereniging.WijzigNaam("Vakantiehuis Proef");
         await sessie.Administraties.BewaarAsync(vereniging);
         Assert.True(Volatile.Read(ref aantal) > 0);
         Assert.Same(sessie, afzender); // de shell herkent zo zijn eigen sessie

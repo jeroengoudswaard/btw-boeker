@@ -108,7 +108,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
         new(new DbContextOptionsBuilder<BtwBoekerDbContext>().UseSqlite(Verbindingstekst(pad, databasesleutel)).Options) { Wijzigingen = wijzigingen };
 
     /// <summary>
-    /// Besluit 236: verbindingen worden hergebruikt (pooling). Elke nieuwe versleutelde verbinding laat SQLite3MC de sleutel
+    /// Verbindingen worden hergebruikt (pooling). Elke nieuwe versleutelde verbinding laat SQLite3MC de sleutel
     /// opnieuw afleiden (tientallen milliseconden); zonder pooling gebeurde dat bij elke query. Wie een pool gebruikt, leegt
     /// hem ook weer (<see cref="LeegPool"/>), zodat er na sluiten geen bestandshandles open blijven.
     /// </summary>

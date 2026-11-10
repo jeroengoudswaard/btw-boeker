@@ -48,7 +48,7 @@ public interface IDialoogService
 
     string? KiesCsvDoel(string voorgesteldeNaam);
 
-    /// <summary>Waar de auditfile (XAF) heen moet (besluit 197).</summary>
+    /// <summary>Waar de auditfile (XAF) heen moet.</summary>
     string? KiesXafDoel(string voorgesteldeNaam);
 
     /// <summary>Een of meer CAMT.053-bankafschriften (.xml).</summary>
@@ -67,7 +67,7 @@ public interface IDialoogService
     /// <returns><c>true</c> als de administratie is ingericht.</returns>
     bool ToonSjablooninrichting(SjablooninrichtingViewModel wizard);
 
-    /// <returns><c>true</c> als de jaarrekeningindeling is opgeslagen (besluiten 263–268).</returns>
+    /// <returns><c>true</c> als de jaarrekeningindeling is opgeslagen.</returns>
     bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor);
 
     /// <summary>Eén of meer bonnen of facturen (PDF, JPG, PNG); leeg bij annuleren.</summary>
@@ -76,9 +76,9 @@ public interface IDialoogService
     /// <summary><i>Opslaan als…</i> voor een bijlage; <c>null</c> bij annuleren.</summary>
     string? KiesBijlageDoel(string voorgesteldeNaam);
 
-    /// <summary>Toont het voorbeeldvenster van een bijlage (besluit 86).</summary>
+    /// <summary>Toont het voorbeeldvenster van een bijlage.</summary>
     void ToonBijlage(BijlageVoorbeeldViewModel voorbeeld);
 
-    /// <summary>De startwizard (besluit 169); sluit via <i>Later verder</i>, <i>Voltooien</i> of ✕.</summary>
+    /// <summary>De startwizard; sluit via <i>Later verder</i>, <i>Voltooien</i> of ✕.</summary>
     void ToonStartwizard(ViewModels.Inrichting.StartwizardViewModel wizard);
 }

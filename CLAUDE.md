@@ -62,7 +62,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 17 | Bedragen | Altijd in hele centen (`Bedrag.Centen`); afronden op de helft naar boven (`MidpointRounding.AwayFromZero`) |
 | 18 | Installatie | MSI (WiX 5), self-contained win-x64, `BtwBoeker-<versie>.msi`, eigen UpgradeCode; geen codesigning in de bèta |
 | 19 | Website | De release-workflow publiceert alleen naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat. Er is nog geen BTW-Boeker-pagina; een eigen pagina op de website mag (besluit 24) |
-| 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests`. De Android-iconen in `assets/android/` horen bij Verenigd en blijven voorlopig staan |
+| 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests`. De Android-iconen van het oude product zijn verwijderd (besluit 31) |
 | 21 | Rekeningschema | Het schema uit e-Boekhouden (2026-11-10). De gebruiker levert een XAF-export; die wordt alleen lokaal gelezen (map `prive/`, nooit in Git) |
 | 22 | Inkomende stukken | De Landal-afrekening komt als PDF; daarnaast andere rekeningen, zoals voorschotnota's voor energie. De indeling volgt uit een voorbeeld-PDF van de gebruiker (lokaal, nooit in Git) |
 | 23 | Privégebruik | Het huisje wordt ook privé gebruikt; dat staat apart vermeld op de nota's (aanvulling op besluit 15) |
@@ -72,6 +72,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 27 | Jaarrekeningindeling | Blijft bestaan (keuze 3A) |
 | 28 | Ontwerp stap 2 | Goedgekeurd (2026-11-10): begroting, meerjarenplan, Excel-overname, historisch boekjaar en de standaardschema's Vereniging/Stichting verdwijnen; startwizard Welkom → Database → Rekeningschema (XAF) → Bank → Klaar; navigatie Start · Boekhouding · Instellingen. Eerst verwijderen met de suite groen, daarna de XAF-import. `.gitignore` bevat de extensies `.btwdb`, `.btwdb.sleutel`, `.btwbackup` en `.xaf` (keuze 4A; een sjabloon `.btwsjabloon` bevat geen gegevens en mag wel in Git; geanonimiseerde XAF-testbestanden krijgen de extensie `.xml`) |
 | 29 | Linux | Wens, geen prioriteit (2026-11-10). WPF draait alleen op Windows; de kern (Domain, Application, Infrastructure) is al platformonafhankelijk. Als het later toch moet: eerst een ontwerp voor Blazor Server lokaal (de app draait op de eigen pc, bediening in de browser; één gebruiker en het versleutelde bestand blijven), pas na stap 3 |
+| 30 | Standaardnaam administratie | *Mijn administratie* (keuze A, 2026-11-10). Een bestaande database met de oude standaardnaam krijgt die naam via de migratie *StandaardnaamAdministratie*; een zelf gekozen naam blijft |
+| 31 | Opruimen oude product | Alles van het oude product weg (2026-11-10): Android-iconen, `COPILOT.md`, Gmail-handleiding, SEPA-voorbeeld, webapp-job in de release-workflow, verwijzingen naar besluitnummers van het oude product in code en documentatie, scouting-namen in tests en de demodatabase. CHANGELOG begint bij de afsplitsing. `ProductnaamTests` bewaakt naam en domein; de mappen `prive/` en `voorbeelden/` leest geen test |
 
 ## Planning
 
@@ -99,8 +101,8 @@ Antwoorden op de open vragen (2026-11-10): rekeningschema uit e-Boekhouden (besl
   4. tweede administratie en wisselaar, startwizard Welkom → Database → Boekhouding → Bank → Klaar (migratie *EenAdministratie*: alleen een lege tweede administratie verdwijnt).
   - `ReikwijdteTests` bewaakt dat de onderdelen niet terugkomen; `MigratieTests` dat bestaande databases zonder verlies worden bijgewerkt.
   - Ook: app-icoon in programma, venster en taakbalk (`5f10014`; de test verbood het na het hernoemen) en in de titelbalk op 16 px (`13360d8`, keuze A).
-  - **Windows-test (2026-11-10):** na elk deel de volledige suite; laatste stand **506/506** geslaagd, build zonder waarschuwingen. Na deel 4 faalden in twee runs wisselende UI-tests (database niet geopend, *Startkaarten* en *Boekingsregels* niet gevonden); los gedraaid slaagden ze (5 en 2 keer), en de volgende volledige run was groen. Vermoedelijk invloed van ander gebruik van de pc tijdens de UI-tests; houd het in de gaten.
-  - Nog open: de standaardnaam van de administratie is "Vereniging" (zichtbaar in de venstertitel); de stap om die te wijzigen is met de startwizard vervallen.
+  - **Windows-test (2026-11-10):** na elk deel de volledige suite; laatste stand **506/506** geslaagd, build zonder waarschuwingen. Na deel 4 faalden in twee runs wisselende UI-tests (database niet geopend, *Startkaarten* en *Boekingsregels* niet gevonden); los gedraaid slaagden ze (5 en 2 keer), en de volgende volledige run was groen. Bevestigd door de gebruiker: de pc was tijdens die UI-tests in gebruik. Tijdens UI-tests niets met muis of toetsenbord doen.
+  - Standaardnaam: *Mijn administratie* (besluit 30).
 - **Ontwikkelomgeving:** .NET SDK 10, Visual Studio of VS Code; de gebruiker draait Windows-tests zelf.
 - **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`.
 - De historie van Verenigd (besluiten 1–278) staat in de repository van Verenigd en in `CHANGELOG.md`.

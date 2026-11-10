@@ -18,7 +18,7 @@
         FontFamily="{StaticResource Lettertype}"
         AutomationProperties.AutomationId="Hoofdvenster">
 
-    <!-- Besluit 221: eigen titelbalk; slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven van Windows. -->
+    <!-- Eigen titelbalk; slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven van Windows. -->
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="8" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
@@ -66,7 +66,7 @@
     </Window.InputBindings>
 
     <DockPanel x:Name="Wortel">
-        <!-- ===== Titelbalk (besluit 221) ===== -->
+        <!-- ===== Titelbalk ===== -->
         <DockPanel DockPanel.Dock="Top" Height="36">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
                 <Button Style="{StaticResource Vensterknop}" Content="&#xE921;" Click="Minimaliseren_Click" ToolTip="Minimaliseren"
@@ -84,7 +84,7 @@
         </DockPanel>
 
         <!-- ===== Menubalk ===== -->
-        <!-- Besluit 179: in Expert altijd zichtbaar; in Eenvoudig alleen na Alt (zoals Verkenner). -->
+        <!-- In Expert altijd zichtbaar; in Eenvoudig alleen na Alt (zoals Verkenner). -->
         <Menu x:Name="Menubalk" DockPanel.Dock="Top" AutomationProperties.AutomationId="Menubalk"
               Visibility="{Binding IsMenubalkZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
               IsKeyboardFocusWithinChanged="Menubalk_IsKeyboardFocusWithinChanged">
@@ -188,7 +188,7 @@
             <StatusBarItem Content="{Binding Boekjaartekst}"
                            Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
             <Separator />
-            <!-- Besluit 168: ✓ gelukt, ⚠ waarschuwing, ✕ fout; de tekst zegt wat er gebeurde. -->
+            <!-- ✓ gelukt, ⚠ waarschuwing, ✕ fout; de tekst zegt wat er gebeurde. -->
             <StatusBarItem AutomationProperties.AutomationId="Statusregel" AutomationProperties.LiveSetting="Polite">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Statusteken}" FontWeight="SemiBold" Margin="0,0,8,0">
@@ -213,7 +213,7 @@
             </StatusBarItem>
         </StatusBar>
 
-        <!-- ===== Navigatiebalk (besluiten 168, 178 en 181) ===== -->
+        <!-- ===== Navigatiebalk ===== -->
         <Border DockPanel.Dock="Left" Width="248" Background="Transparent">
             <DockPanel Margin="8,8,8,8">
                 <ListBox x:Name="Navigatiebalk" ItemsSource="{Binding Navigatie}" SelectedItem="{Binding GeselecteerdeNavigatie}"
@@ -242,7 +242,7 @@
                                     <TextBlock Text="{Binding Teller}" FontSize="12" FontWeight="SemiBold" TextAlignment="Center"
                                                Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                                 </Border>
-                                <!-- Besluit 239: het pictogram in de kleur van het onderdeel, op een zachte tint. -->
+                                <!-- Het pictogram in de kleur van het onderdeel, op een zachte tint. -->
                                 <Border x:Name="Tegel" Width="28" Height="28" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Center"
                                         Background="{Binding Module, Converter={StaticResource Onderdeeltint}}">
                                     <TextBlock x:Name="Glyph" FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" FontSize="16"
@@ -283,7 +283,7 @@
                 <ContentControl.ContentTemplate>
                     <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
                         <DockPanel>
-                            <!-- Besluiten 239 en 242: een band in de onderdeelkleur en dezelfde kop op elke pagina. -->
+                            <!-- Een band in de onderdeelkleur en dezelfde kop op elke pagina. -->
                             <Border DockPanel.Dock="Top" Height="4" CornerRadius="8,0,0,0"
                                     Background="{Binding Module.Soort, Converter={StaticResource Onderdeelkleur}}"
                                     Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}" />

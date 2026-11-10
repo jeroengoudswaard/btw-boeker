@@ -88,7 +88,7 @@
                 </DataGrid>
             </DockPanel>
 
-            <!-- ===== Beginsaldi (besluit 120) ===== -->
+            <!-- ===== Beginsaldi ===== -->
             <DockPanel Visibility="{Binding Stap, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Beginsaldi}">
                 <TextBlock DockPanel.Dock="Top" Text="{Binding Beginsaldititel}" Style="{StaticResource Sectietitel}" />
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
@@ -96,7 +96,7 @@
                     <ComboBox x:Name="BeginjaarKeuze" ItemsSource="{Binding Beginjaren}" SelectedItem="{Binding Beginjaar}" Width="90"
                               ToolTip="Het eerste boekjaar in BTW-Boeker; de beginsaldi gelden per 1 januari van dat jaar" AutomationProperties.AutomationId="InrichtenBeginjaar" />
                 </StackPanel>
-                <!-- Besluit 244: dit is definitief; daarna alleen nog memoriaalboekingen. -->
+                <!-- Dit is definitief; daarna alleen nog memoriaalboekingen. -->
                 <tg:Groepskader DockPanel.Dock="Top" Style="{StaticResource Kaart}" Margin="0,0,0,12"
                                 AutomationProperties.Name="Definitief" AutomationProperties.AutomationId="BeginsaldiDefinitief">
                     <DockPanel>
@@ -118,12 +118,12 @@
                     <StackPanel>
                         <TextBlock Text="Debet" FontWeight="SemiBold" />
                         <TextBlock Style="{StaticResource Toelichting}"
-                                   Text="Wat de vereniging heeft of nog krijgt: het saldo op de bank en in de kas, nog te ontvangen contributie of bedragen die al vooruit zijn betaald." />
+                                   Text="Wat u heeft of nog krijgt: het saldo op de bank en in de kas, nog te ontvangen bedragen of bedragen die al vooruit zijn betaald." />
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Credit" FontWeight="SemiBold" />
                         <TextBlock Style="{StaticResource Toelichting}"
-                                   Text="Waar dat tegenover staat: het eigen vermogen (de reserve) en wat de vereniging nog moet betalen, zoals openstaande rekeningen of vooruit ontvangen bedragen." />
+                                   Text="Waar dat tegenover staat: het eigen vermogen (de reserve) en wat u nog moet betalen, zoals openstaande rekeningen of vooruit ontvangen bedragen." />
                     </StackPanel>
                 </Grid>
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" Margin="0,0,0,8" TextWrapping="Wrap"

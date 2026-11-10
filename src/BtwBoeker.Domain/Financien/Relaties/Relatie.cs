@@ -5,8 +5,8 @@ public sealed record RelatieGegevens(
     bool IsDebiteur, bool IsCrediteur, string? Notitie);
 
 /// <summary>
-/// Een debiteur of crediteur zonder lidnummer, zoals een huurder of leverancier (besluiten 36 en 108). Gedeeld door beide
-/// administraties (besluit 105).
+/// Een debiteur of crediteur zonder lidnummer, zoals een huurder of leverancier. Gedeeld door beide
+/// administraties.
 /// </summary>
 public sealed class Relatie
 {
@@ -34,7 +34,7 @@ public sealed class Relatie
     public string? Email { get; private set; }
     public string? Telefoon { get; private set; }
 
-    /// <summary>Zonder spaties, in hoofdletters (besluit 29).</summary>
+    /// <summary>Zonder spaties, in hoofdletters.</summary>
     public string? Iban { get; private set; }
 
     public bool IsDebiteur { get; private set; }

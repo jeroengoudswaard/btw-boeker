@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Besluit 234: een <see cref="ObservableCollection{T}"/> die in één keer vervangen kan worden. <c>Clear()</c> en daarna
+/// Een <see cref="ObservableCollection{T}"/> die in één keer vervangen kan worden. <c>Clear()</c> en daarna
 /// regel voor regel <c>Add()</c> gaf de tabel op het scherm één melding per regel (bij 1.500 posten 1.500 keer
 /// opnieuw opbouwen op de UI-thread); <see cref="Vervang"/> geeft één melding.
 /// </summary>

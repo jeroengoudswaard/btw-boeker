@@ -21,7 +21,7 @@ public sealed class XafDienst(IDatabaseSessie sessie, TimeProvider tijd)
         return XafSchrijver.Schrijf(new XafInvoer(stand, jaar, naam, vandaag, softwareversie));
     }
 
-    /// <summary>Bijvoorbeeld <c>auditfile-scouting-de-voorbeeldgroep-2026.xaf</c>.</summary>
+    /// <summary>Bijvoorbeeld <c>auditfile-vakantiehuis-de-voorbeeld-2026.xaf</c>.</summary>
     public static string Bestandsnaam(string administratienaam, int jaar)
     {
         var naam = new StringBuilder();

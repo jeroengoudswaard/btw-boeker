@@ -4,7 +4,7 @@ using BtwBoeker.App.ViewModels.Boekhouding;
 
 namespace BtwBoeker.App.Views.Boekhouding;
 
-/// <summary>Venster <i>Indeling bewerken</i> van de jaarrekening (besluiten 263–268).</summary>
+/// <summary>Venster <i>Indeling bewerken</i> van de jaarrekening.</summary>
 public partial class JaarrekeningIndelingVenster : Window
 {
     private readonly JaarrekeningIndelingViewModel _viewModel;

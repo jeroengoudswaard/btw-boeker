@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Administraties;
 namespace BtwBoeker.App.Views.Thema;
 
 /// <summary>
-/// Besluit 216: de accentkleur volgt de gekozen administratie in plaats van de Windows-accentkleur. De sleutels zijn die
+/// De accentkleur volgt de gekozen administratie in plaats van de Windows-accentkleur. De sleutels zijn die
 /// van het Fluent-thema; ze worden op het venster gezet, zodat alles in het hoofdvenster ze overneemt.
 /// </summary>
 public static class Accentkleuren

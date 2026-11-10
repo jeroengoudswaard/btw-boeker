@@ -40,7 +40,7 @@ public sealed class BankImportViewModelTests : IDisposable
 
         betaal.GekozenRekening = wizard.Balansrekeningen.Single(r => r.Nummer == 1100);
         wizard.Rekeningen.Single(r => r.Iban == CamtVoorbeeld.Spaar).GekozenRekening = wizard.Balansrekeningen.Single(r => r.Nummer == 1150);
-        Assert.Empty(betaal.Meldingen); // beginsaldo € 799,50 = beginbalans 1100 (besluit 80)
+        Assert.Empty(betaal.Meldingen); // beginsaldo € 799,50 = beginbalans 1100
         Assert.True(wizard.VolgendeCommand.CanExecute(null));
 
         await wizard.VolgendeCommand.ExecuteAsync(null);

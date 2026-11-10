@@ -69,7 +69,7 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(2, vm.AantalConcept);
         Assert.Equal("Welpen ouder", vm.GeselecteerdeMutatie?.Tegenpartij); // door naar de volgende
 
-        // Besluit 278: de knop boekt alle bankrekeningen en toont dus ook dat aantal, ongeacht de gekozen rekening.
+        // De knop boekt alle bankrekeningen en toont dus ook dat aantal, ongeacht de gekozen rekening.
         Assert.Equal(3, vm.AantalConceptAlleRekeningen);
         Assert.EndsWith("(3)", vm.ConceptenBoekenTekst, StringComparison.Ordinal);
         vm.GekozenBankrekening = vm.Bankrekeningen.Single(d => d.Code != "RABO");
@@ -143,7 +143,7 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(2, vm.TeVerwerkenPerRekening[betaal.Id]);
         Assert.False(vm.TeVerwerkenPerRekening.ContainsKey(spaar.Id));
 
-        vm.GekozenBankrekening = spaar; // besluit 277: de keuze verandert de aantallen niet
+        vm.GekozenBankrekening = spaar; // De keuze verandert de aantallen niet
         Assert.Equal(2, vm.TeVerwerkenPerRekening[betaal.Id]);
 
         vm.GekozenBankrekening = betaal;
@@ -171,7 +171,7 @@ public sealed class BankViewModelTests : IDisposable
         halve.Naam = "Gemeente";
         halve.NaamBevat = "gemeente";
         VoegRekeningToe(vm);
-        Assert.True(vm.KanOpslaan); // besluit 276: was de vicieuze cirkel
+        Assert.True(vm.KanOpslaan); // Was de vicieuze cirkel
 
         Assert.False(await vm.BewaarAsync()); // de regel is nog niet opgeslagen, dus sluiten mag nog niet zomaar
 

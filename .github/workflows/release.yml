@@ -1,7 +1,8 @@
-# Besluiten 250–254: het installatiebestand (MSI), de webapp voor GitHub Pages en de schermafbeeldingen voor de website.
+# Het installatiebestand (MSI) en de schermafbeeldingen voor de website.
 #
-# - Bij een versietag (v0.15.0): bouwen, testen en publiceren naar de release "btw-boeker" in de websiterepository
-#   (jeroengoudswaard/jeroengoudswaard.github.io). Daarvoor is het geheim WEBSITE_TOKEN nodig (zie docs/PUBLICEREN.md).
+# - Bij een versietag (v0.19.0): bouwen, testen en (als WEBSITE_PUBLICEREN aan staat) publiceren naar de release
+#   "btw-boeker" in de websiterepository (jeroengoudswaard/jeroengoudswaard.github.io). Daarvoor is het geheim
+#   WEBSITE_TOKEN nodig (zie docs/PUBLICEREN.md).
 # - Bij een pull request dat het installatiebestand of deze workflow wijzigt, en met de hand: alleen bouwen, ter controle.
 name: Release
 
@@ -64,8 +65,8 @@ jobs:
           Get-ChildItem artifacts/uitvoer/release
 
       # FlaUI heeft een bureaublad nodig; op een GitHub-runner is dat niet gegarandeerd. Lukt het niet, dan gaat de release
-      # door zonder nieuwe schermafbeeldingen van de desktop (de website houdt dan de vorige).
-      - name: Schermafbeeldingen desktop (demodatabase, licht en donker)
+      # door zonder nieuwe schermafbeeldingen (de website houdt dan de vorige).
+      - name: Schermafbeeldingen (demodatabase, licht en donker)
         continue-on-error: true
         shell: pwsh
         env:
@@ -78,42 +79,8 @@ jobs:
           path: artifacts/uitvoer
           if-no-files-found: error
 
-  webapp:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          # Geen automatische cache: er staat geen lockbestand in de hoofdmap, en de release-workflow heeft geheimen.
-          package-manager-cache: false
-
-      - name: Bouwen voor GitHub Pages (/btw-boeker/app)
-        working-directory: webapp
-        env:
-          BASE_PATH: /btw-boeker/app
-          # Leeg zolang de Supabase-koppeling er niet is (besluit 254); daarna als repository-variabelen.
-          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
-          npm run build
-          mkdir -p uitvoer && (cd build && zip -qr ../uitvoer/btw-boeker-web.zip .)
-
-      - name: Schermafbeeldingen webapp (verzonnen gegevens)
-        working-directory: webapp
-        run: SCHERMEN=$PWD/uitvoer/schermen npx playwright test tests/schermen.spec.ts
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: webapp
-          path: webapp/uitvoer
-          if-no-files-found: error
-
   publiceren:
-    needs: [installatiebestand, webapp]
+    needs: [installatiebestand]
     # Publiceren naar de website staat uit tot er een BTW-Boeker-pagina is: zet dan de repository-variabele WEBSITE_PUBLICEREN op 'true'.
     if: vars.WEBSITE_PUBLICEREN == 'true' && github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publiceren)
     runs-on: ubuntu-latest
@@ -133,14 +100,13 @@ jobs:
         run: |
           set -euo pipefail
           ls -R uit
-          notities="BTW-Boeker ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit) en de webapp voor de leiding. Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
+          notities="BTW-Boeker ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit). Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
           if gh release view btw-boeker --repo "$WEBSITE" > /dev/null 2>&1; then
             gh release edit btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities"
           else
             gh release create btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities" --prerelease
           fi
-          gh release upload btw-boeker --repo "$WEBSITE" --clobber \
-            uit/installatiebestand/release/*.msi uit/webapp/btw-boeker-web.zip
+          gh release upload btw-boeker --repo "$WEBSITE" --clobber uit/installatiebestand/release/*.msi
 
       - name: Versie en schermafbeeldingen in de website zetten
         env:
@@ -149,13 +115,12 @@ jobs:
           set -euo pipefail
           git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${WEBSITE}.git" site
           mkdir -p site/btw-boeker/screens
-          cp uit/webapp/schermen/*.png site/btw-boeker/screens/
           if ls uit/installatiebestand/schermen/*.png > /dev/null 2>&1; then
             cp uit/installatiebestand/schermen/*.png site/btw-boeker/screens/
           else
-            echo "::warning::Geen schermafbeeldingen van de desktop (geen bureaublad op de runner?); de vorige blijven staan."
+            echo "::warning::Geen schermafbeeldingen (geen bureaublad op de runner?); de vorige blijven staan."
           fi
-          # Besluiten 274 en 275: het versielabel en de downloadknop; faalt zichtbaar als ze niet meer te vinden zijn.
+          # Het versielabel en de downloadknop; faalt zichtbaar als ze niet meer te vinden zijn.
           bash bron/.github/scripts/website-bijwerken.sh site "${GITHUB_REF_NAME#v}"
           cd site
           git config user.name "btw-boeker-release"
@@ -167,18 +132,3 @@ jobs:
             git commit -m "BTW-Boeker ${GITHUB_REF_NAME}: versie en schermafbeeldingen"
             git push
           fi
-
-      # Besluit 274: er is alleen nog een bestand met het versienummer. Pas na de push: de knop wijst dan al naar de nieuwe naam.
-      - name: Oude vaste link BtwBoeker.msi opruimen
-        env:
-          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
-        run: |
-          set -euo pipefail
-          if gh release view btw-boeker --repo "$WEBSITE" --json assets --jq '.assets[].name' | grep -qx 'BtwBoeker.msi'; then
-            gh release delete-asset btw-boeker BtwBoeker.msi --repo "$WEBSITE" --yes
-          fi
-
-      - name: Website opnieuw publiceren (webapp uitpakken)
-        env:
-          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
-        run: gh api "repos/${WEBSITE}/dispatches" -f event_type=app-released

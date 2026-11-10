@@ -39,7 +39,7 @@ public sealed record RegelInvoer(Grootboekrekening Rekening, string? Omschrijvin
 }
 
 /// <summary>
-/// Een journaalpost (besluit 71): <see cref="PostStatus.Concept"/> is nog te wijzigen; een geboekte post is onveranderlijk
+/// Een journaalpost: <see cref="PostStatus.Concept"/> is nog te wijzigen; een geboekte post is onveranderlijk
 /// en krijgt dan pas een doorlopend nummer per dagboek per jaar. Corrigeren gaat met een tegenboeking.
 /// </summary>
 public sealed class Journaalpost

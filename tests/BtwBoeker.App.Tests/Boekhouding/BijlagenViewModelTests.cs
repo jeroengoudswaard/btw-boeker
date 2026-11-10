@@ -7,7 +7,7 @@ using BtwBoeker.Domain.Financien;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Bijlagen bij een post, het postvak bonnen en het filter "Zonder bon" (besluiten 83–88, 96, 97, 135–138 en 140).</summary>
+/// <summary>Bijlagen bij een post, het postvak bonnen en het filter "Zonder bon".</summary>
 public sealed class BijlagenViewModelTests : IDisposable
 {
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;

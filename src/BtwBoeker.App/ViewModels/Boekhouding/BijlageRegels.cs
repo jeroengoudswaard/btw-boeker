@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.App.ViewModels.Boekhouding;
 
-/// <summary>Eén bijlage in het blok <i>Bijlagen</i> van een post (besluit 140).</summary>
+/// <summary>Eén bijlage in het blok <i>Bijlagen</i> van een post.</summary>
 public sealed record BijlageRegel(Bijlage Bijlage)
 {
     public Guid Id => Bijlage.Id;
@@ -32,7 +32,7 @@ public sealed record PostKeuze(Journaalpost Post, bool IsVoorstel)
 }
 
 /// <summary>
-/// Eén bon in het postvak (besluiten 85 en 96). Datum en bedrag zijn herkend of door de gebruiker ingevuld; bij elke
+/// Eén bon in het postvak. Datum en bedrag zijn herkend of door de gebruiker ingevuld; bij elke
 /// wijziging worden de voorgestelde posten opnieuw berekend.
 /// </summary>
 public sealed partial class BonRegel : ObservableObject
@@ -70,10 +70,10 @@ public sealed partial class BonRegel : ObservableObject
     public partial PostKeuze? GekozenPost { get; set; }
 
     /// <summary><c>null</c> als het veld leeg of ongeldig is.</summary>
-    /// <summary>Negatief bij een creditnota (besluit 142).</summary>
+    /// <summary>Negatief bij een creditnota.</summary>
     public Bedrag? Bedrag => Application.Bijlagen.BonHerkenning.TryParseBedrag(Bedragtekst, out var bedrag) ? bedrag : null;
 
-    /// <summary>Een creditnota: het bedrag wordt groen getoond (besluit 144).</summary>
+    /// <summary>Een creditnota: het bedrag wordt groen getoond.</summary>
     public bool IsNegatief => Bedrag is { Centen: < 0 };
 
     public string? Fout => Bedragtekst.Trim().Length > 0 && Bedrag is null ? "Vul een bedrag in zoals 23,45 (of -15,00 bij een creditnota)." : null;
@@ -99,7 +99,7 @@ public sealed partial class BonRegel : ObservableObject
     }
 }
 
-/// <summary>Het voorbeeldvenster van een bijlage (besluit 86): pagina's bekijken, zoomen en <i>Opslaan als…</i>.</summary>
+/// <summary>Het voorbeeldvenster van een bijlage: pagina's bekijken, zoomen en <i>Opslaan als…</i>.</summary>
 public sealed partial class BijlageVoorbeeldViewModel(string bestandsnaam, BijlageSoort soort, byte[] inhoud, IDialoogService dialogen) : ObservableObject
 {
     public const double MinimaleZoom = 0.25;
@@ -108,7 +108,7 @@ public sealed partial class BijlageVoorbeeldViewModel(string bestandsnaam, Bijla
     public string Bestandsnaam { get; } = bestandsnaam;
     public BijlageSoort Soort { get; } = soort;
 
-    /// <summary>Alleen in het geheugen; komt nooit onversleuteld op schijf behalve via <see cref="OpslaanAlsCommand"/> (besluit 135).</summary>
+    /// <summary>Alleen in het geheugen; komt nooit onversleuteld op schijf behalve via <see cref="OpslaanAlsCommand"/>.</summary>
     public byte[] Inhoud { get; } = inhoud;
 
     public bool IsPdf => Soort == BijlageSoort.Pdf;

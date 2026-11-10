@@ -6,10 +6,10 @@ using BtwBoeker.Infrastructure.Database;
 
 namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 
-/// <summary>Jaarrekeningindeling in de echte, versleutelde database (besluiten 263–268).</summary>
+/// <summary>Jaarrekeningindeling in de echte, versleutelde database.</summary>
 public sealed class JaarrekeningOpslagTests : IAsyncLifetime, IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();

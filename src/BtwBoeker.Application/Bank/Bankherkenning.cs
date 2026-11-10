@@ -12,8 +12,8 @@ public sealed record Herkenning(Grootboekrekening Rekening, string? Omschrijving
 public static class Bankherkenning
 {
     /// <summary>
-    /// Eerst een overboeking tussen eigen rekeningen via de rekening met de rol Kruisposten (besluit 70); anders wint de
-    /// eerste actieve boekingsregel die past (besluit 78). <c>null</c>: de transactie blijft in de werkvoorraad.
+    /// Eerst een overboeking tussen eigen rekeningen via de rekening met de rol Kruisposten; anders wint de
+    /// eerste actieve boekingsregel die past. <c>null</c>: de transactie blijft in de werkvoorraad.
     /// </summary>
     public static Herkenning? Bepaal(BoekhoudingStand stand, Bankmutatie mutatie)
     {

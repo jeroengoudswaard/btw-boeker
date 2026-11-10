@@ -2,7 +2,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.Domain.Financien.Boekhouding;
 
-/// <summary>De twee jaarstukken met een eigen indeling (besluit 265).</summary>
+/// <summary>De twee jaarstukken met een eigen indeling.</summary>
 public enum JaarrekeningRapport
 {
     Balans = 1,
@@ -13,7 +13,7 @@ public enum JaarrekeningRapport
 
 /// <summary>
 /// De vaste delen van een jaarstuk. Bij de balans bepaalt het saldo van een rekening het deel (debet = activa), bij baten
-/// en lasten de eigenschap <see cref="ResultaatKant"/> (besluit 152).
+/// en lasten de eigenschap <see cref="ResultaatKant"/>.
 /// </summary>
 public enum JaarrekeningAfdeling
 {
@@ -39,7 +39,7 @@ public enum IndelingsregelSoort
 public sealed record IndelingsregelInvoer(JaarrekeningAfdeling Afdeling, IndelingsregelSoort Soort, string Tekst, IReadOnlyList<Rubriek> Rubrieken);
 
 /// <summary>
-/// Een eigen indeling van de balans of de staat van baten en lasten (besluiten 69, 151 en 263–268): kopjes, regels die
+/// Een eigen indeling van de balans of de staat van baten en lasten: kopjes, regels die
 /// rubrieken bundelen en subtotalen. Alleen weergave; het rekeningschema en de boekingen veranderen niet. Een rubriek staat
 /// hooguit één keer in elk deel.
 /// </summary>

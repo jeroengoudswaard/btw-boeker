@@ -3,7 +3,7 @@ using BtwBoeker.Tests.Gedeeld;
 
 namespace BtwBoeker.App.Tests.UI;
 
-/// <summary>Het voorbeeld van een PDF via Windows zelf (besluit 135; alleen op Windows).</summary>
+/// <summary>Het voorbeeld van een PDF via Windows zelf.</summary>
 public sealed class BijlageVoorbeeldTests
 {
     [Fact]

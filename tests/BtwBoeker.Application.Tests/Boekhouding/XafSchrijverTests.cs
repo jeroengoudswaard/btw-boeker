@@ -6,7 +6,7 @@ using BtwBoeker.Domain.Financien.Relaties;
 
 namespace BtwBoeker.Application.Tests.Boekhouding;
 
-/// <summary>Besluiten 197 en 255–259: de auditfile financieel (XAF 3.2) van één administratie en één boekjaar.</summary>
+/// <summary>De auditfile financieel (XAF 3.2) van één administratie en één boekjaar.</summary>
 public class XafSchrijverTests
 {
     private static readonly XNamespace X = "http://www.auditfiles.nl/XAF/3.2";

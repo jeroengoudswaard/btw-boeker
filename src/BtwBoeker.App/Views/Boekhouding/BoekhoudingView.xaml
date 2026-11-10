@@ -59,7 +59,7 @@
         <DockPanel Visibility="{Binding IsIngericht, Converter={StaticResource BoolNaarZichtbaar}}">
             <!-- ===== Boekjaar en uitvoer ===== -->
             <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                <!-- Besluiten 269 en 270: de jaarkeuze alleen bij meer dan één boekjaar; afdrukken en exporteren alleen waar er iets af te drukken is. -->
+                <!-- De jaarkeuze alleen bij meer dan één boekjaar; afdrukken en exporteren alleen waar er iets af te drukken is. -->
                 <Label Content="_Boekjaar" Target="{Binding ElementName=Jaarkeuze}" VerticalAlignment="Center" Padding="0,0,8,0"
                        Visibility="{Binding HeeftMeerdereBoekjaren, Converter={StaticResource BoolNaarZichtbaar}}" />
                 <ComboBox x:Name="Jaarkeuze" ItemsSource="{Binding Boekjaren}" SelectedItem="{Binding Jaar}" Width="100" Margin="0,0,24,0"
@@ -90,7 +90,7 @@
             </WrapPanel>
 
             <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="BoekhoudingSubtabbladen">
-                <!-- Sinds v0.8.0 kiest de navigatiebalk het onderdeel (besluiten 178 en 181); de tabkoppen zijn verborgen. -->
+                <!-- Sinds v0.8.0 kiest de navigatiebalk het onderdeel; de tabkoppen zijn verborgen. -->
                 <TabControl.ItemContainerStyle>
                     <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
                         <Setter Property="Visibility" Value="Collapsed" />
@@ -110,7 +110,7 @@
                                         AutomationProperties.AutomationId="NieuwePost" />
                                 <TextBox x:Name="Zoekveld" Width="200" VerticalAlignment="Center" Text="{Binding Zoektekst, UpdateSourceTrigger=PropertyChanged}"
                                          ToolTip="Zoeken op nummer of omschrijving (Ctrl+F)" AutomationProperties.Name="Zoeken op nummer of omschrijving" />
-                                <!-- Besluit 270: het filter verschijnt als teller, alleen als er posten zonder bon zijn. -->
+                                <!-- Het filter verschijnt als teller, alleen als er posten zonder bon zijn. -->
                                 <ToggleButton Content="{Binding ZonderBonTekst}" IsChecked="{Binding AlleenZonderBon}" Margin="16,0,0,0" VerticalAlignment="Center"
                                               ToolTip="{DynamicResource T.Knop.ZonderBon}" Visibility="{Binding IsZonderBonZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                                               AutomationProperties.Name="Alleen boekingen zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
@@ -198,11 +198,11 @@
                                                 Visibility="{Binding IsAlleenLezen, Converter={StaticResource BoolNaarZichtbaar}}" />
                                     </StackPanel>
 
-                                    <!-- ===== Bijlagen (besluiten 83–86, 136 en 140) ===== -->
+                                    <!-- ===== Bijlagen ===== -->
                                     <tg:Groepspaneel Margin="0,16,0,0" AllowDrop="True" Background="Transparent" DragOver="Bijlagen_DragOver" Drop="Postbijlagen_Drop"
                                                      DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                      AutomationProperties.Name="{DynamicResource T.Bijlagen}" AutomationProperties.AutomationId="PostBijlagen">
-                                        <!-- Besluit 270: zonder bijlage alleen een link; het blok verschijnt zodra er een bijlage is. -->
+                                        <!-- Zonder bijlage alleen een link; het blok verschijnt zodra er een bijlage is. -->
                                         <Button Content="{DynamicResource T.Knop.BijlageToevoegen}" Command="{Binding BijlageToevoegenCommand}" HorizontalAlignment="Left"
                                                 Style="{StaticResource Linkknop}" ToolTip="PDF, JPG of PNG, maximaal 10 MB" AutomationProperties.AutomationId="BijlageToevoegen"
                                                 Visibility="{Binding Postbijlagen.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
@@ -293,18 +293,18 @@
                     </Grid>
                 </TabItem>
 
-                <!-- ===== Bank (besluiten 74–82) ===== -->
+                <!-- ===== Bank ===== -->
                 <TabItem Header="{DynamicResource T.Tab.Bank}" ToolTip="{DynamicResource U.Bank}" AutomationProperties.AutomationId="SubtabBank">
                     <DockPanel Margin="0,12,0,0">
                         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                            <!-- Besluit 269: de keuze alleen bij meer dan één bankrekening. -->
+                            <!-- De keuze alleen bij meer dan één bankrekening. -->
                             <Label Content="Bank_rekening" Target="{Binding ElementName=Bankkeuze}" VerticalAlignment="Center" Padding="0,0,8,0"
                                    Visibility="{Binding HeeftMeerdereBankrekeningen, Converter={StaticResource BoolNaarZichtbaar}}" />
                             <ComboBox x:Name="Bankkeuze" ItemsSource="{Binding Bankrekeningen}" SelectedItem="{Binding GekozenBankrekening}"
                                       Width="240" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="Bankrekeningkeuze"
                                       Visibility="{Binding HeeftMeerdereBankrekeningen, Converter={StaticResource BoolNaarZichtbaar}}">
                                 <ComboBox.ItemTemplate>
-                                    <!-- Besluit 277: het aantal te verwerken achter de naam, zodat het totaal in de navigatiebalk te verklaren is. -->
+                                    <!-- Het aantal te verwerken achter de naam, zodat het totaal in de navigatiebalk te verklaren is. -->
                                     <DataTemplate>
                                         <TextBlock>
                                             <TextBlock.Text>
@@ -321,7 +321,7 @@
                                        AutomationProperties.LiveSetting="Polite" />
                         </WrapPanel>
                         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                            <!-- Besluit 270: alleen wat nu kan, met het aantal; de hoofdactie is boeken zodra er concepten zijn. -->
+                            <!-- Alleen wat nu kan, met het aantal; de hoofdactie is boeken zodra er concepten zijn. -->
                             <Button Content="{Binding ConceptenBoekenTekst}" Command="{Binding ConceptenBoekenCommand}" Margin="0,0,8,0" VerticalAlignment="Center"
                                     Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                                     ToolTip="Ctrl+B" AutomationProperties.AutomationId="ConceptenBoeken"
@@ -424,7 +424,7 @@
                     </DockPanel>
                 </TabItem>
 
-                <!-- ===== Postvak bonnen (besluiten 85, 96 en 135) ===== -->
+                <!-- ===== Postvak bonnen ===== -->
                 <TabItem Header="{DynamicResource T.Tab.Postvak}" ToolTip="{DynamicResource U.Tab.Postvak}" AutomationProperties.AutomationId="SubtabPostvak">
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
@@ -455,7 +455,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Right" />
                                                 <Style.Triggers>
-                                                    <!-- Creditnota in groen; het minteken blijft (besluit 144). -->
+                                                    <!-- Creditnota in groen; het minteken blijft. -->
                                                     <DataTrigger Binding="{Binding IsNegatief}" Value="True">
                                                         <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
                                                     </DataTrigger>
@@ -520,7 +520,7 @@
                     <DockPanel Margin="0,12,0,0">
                         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
                             <Button Content="_Nieuwe regel" Command="{Binding NieuweRegelCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" Margin="0,0,8,0" AutomationProperties.AutomationId="NieuweBoekingsregel" />
-                            <!-- Besluit 270: verwijderen en verplaatsen alleen bij een gekozen regel. -->
+                            <!-- Verwijderen en verplaatsen alleen bij een gekozen regel. -->
                             <StackPanel Orientation="Horizontal" Visibility="{Binding GeselecteerdeRegel, Converter={StaticResource NietNullNaarZichtbaar}}">
                                 <Button Content="_Verwijderen..." Command="{Binding VerwijderRegelCommand}" Margin="0,0,24,0" />
                                 <Button FontFamily="{StaticResource Pictogrammen}" Content="&#xE70E;" Padding="8,4" Margin="0,0,4,0" Command="{Binding RegelOmhoogCommand}"
@@ -533,7 +533,7 @@
                         </WrapPanel>
                         <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
                                    Text="De eerste passende regel in deze volgorde wint. Lege voorwaarden doen niet mee. Overboekingen tussen eigen rekeningen gaan altijd via Kruisposten. Opslaan met Ctrl+S." />
-                        <!-- Besluit 276: een nieuwe rekening staat pas na opslaan in de keuzelijst. -->
+                        <!-- Een nieuwe rekening staat pas na opslaan in de keuzelijst. -->
                         <TextBlock DockPanel.Dock="Top" Text="{DynamicResource T.Melding.RekeningNietOpgeslagen}" TextWrapping="Wrap" Margin="0,0,0,12"
                                    Visibility="{Binding HeeftOnopgeslagenNieuweRekeningen, Converter={StaticResource BoolNaarZichtbaar}}"
                                    AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="RekeningNietOpgeslagen" />
@@ -641,7 +641,7 @@
                     </DockPanel>
                 </TabItem>
 
-                <!-- ===== Relaties (gedeeld door beide administraties, besluiten 105 en 108) ===== -->
+                <!-- ===== Relaties ===== -->
                 <TabItem Header="Re_laties" AutomationProperties.AutomationId="SubtabRelaties">
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
@@ -654,8 +654,8 @@
                                 <Button Content="Nieu_we relatie" Command="{Binding NieuweRelatieCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" AutomationProperties.AutomationId="NieuweRelatie" />
                             </WrapPanel>
                             <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
-                                       Text="Relaties (zoals huurders en sponsors) gelden voor beide administraties en staan los van de leden. Opslaan met Ctrl+S." />
-                            <g:LeegScherm DockPanel.Dock="Top" Lijst="Relaties" Titel="Nog geen relaties" Tekst="Relaties zijn huurders, sponsors en leveranciers; ze gelden voor beide administraties." Knoptekst="Nieuwe relatie" Opdracht="{Binding NieuweRelatieCommand}"
+                                       Text="Relaties zijn klanten en leveranciers, zoals een verhuurorganisatie of energieleverancier. Opslaan met Ctrl+S." />
+                            <g:LeegScherm DockPanel.Dock="Top" Lijst="Relaties" Titel="Nog geen relaties" Tekst="Relaties zijn klanten en leveranciers, zoals een verhuurorganisatie of energieleverancier." Knoptekst="Nieuwe relatie" Opdracht="{Binding NieuweRelatieCommand}"
                                            Visibility="{Binding Relaties.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                             <DataGrid ItemsSource="{Binding Relaties}" SelectedItem="{Binding GeselecteerdeRelatie}" AutoGenerateColumns="False" IsReadOnly="True"
                                       SelectionMode="Single" HeadersVisibility="Column" AutomationProperties.Name="Relaties"
@@ -734,7 +734,7 @@
                     <DockPanel Margin="0,12,0,0">
                         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
                             <Button Content="{DynamicResource T.Knop.NieuweRekening}" Command="{Binding NieuweRekeningCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" Margin="0,0,24,0" AutomationProperties.AutomationId="NieuweRekening" />
-                            <!-- Besluit 270: het invoerveld pas na een klik op + Rubriek. -->
+                            <!-- Het invoerveld pas na een klik op + Rubriek. -->
                             <Button Content="+ R_ubriek" Command="{Binding RubriekinvoerOpenenCommand}" Style="{StaticResource Linkknop}" VerticalAlignment="Center"
                                     AutomationProperties.AutomationId="RubriekinvoerOpenen"
                                     Visibility="{Binding IsRubriekinvoerOpen, Converter={StaticResource OnwaarNaarZichtbaar}}" />
@@ -864,7 +864,7 @@
                                        AutomationProperties.AutomationId="Conceptmelding"
                                        Visibility="{Binding Conceptmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
                         </StackPanel>
-                        <!-- Jaarrekening volgens de eigen indeling (besluiten 263–268) -->
+                        <!-- Jaarrekening volgens de eigen indeling -->
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12"
                                     Visibility="{Binding IsJaarrekening, Converter={StaticResource BoolNaarZichtbaar}}">
                             <CheckBox Content="_Rekeningen tonen" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding RekeningenTonen}"

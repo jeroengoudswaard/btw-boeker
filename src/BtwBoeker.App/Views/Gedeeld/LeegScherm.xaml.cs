@@ -5,7 +5,7 @@ using System.Windows.Input;
 namespace BtwBoeker.App.Views.Gedeeld;
 
 /// <summary>
-/// Een leeg scherm (besluit 168): uitleg en één knop, boven een lijst zonder regels. <see cref="Lijst"/> noemt de
+/// Een leeg scherm: uitleg en één knop, boven een lijst zonder regels. <see cref="Lijst"/> noemt de
 /// AutomationId van die lijst; een architectuurtest controleert dat elke hoofdlijst er een heeft.
 /// </summary>
 public partial class LeegScherm : UserControl

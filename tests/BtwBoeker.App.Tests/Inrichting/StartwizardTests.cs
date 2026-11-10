@@ -8,7 +8,7 @@ using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.Tests.Inrichting;
 
-/// <summary>De startwizard (besluiten 169–175): regisseur van de bestaande wizards en instellingen.</summary>
+/// <summary>De startwizard: regisseur van de bestaande wizards en instellingen.</summary>
 public sealed class StartwizardTests
 {
     private const string Pad = @"C:\Data\btw-boeker.btwdb";
@@ -122,7 +122,7 @@ public sealed class StartwizardTests
         {
             Assert.Equal(Startstap.Welkom, w.Huidig);
             await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.True(w.IsHuidigeStapKlaar); // "Al ingericht" (besluit 175)
+            Assert.True(w.IsHuidigeStapKlaar); // "Al ingericht"
 
             w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Klaar));
 

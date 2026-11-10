@@ -34,7 +34,7 @@ namespace BtwBoeker.App.Tests.UI;
 [Collection("UI")] // Nooit parallel: toetsenbord en muis zijn gedeeld.
 public sealed class AppUiTests : IDisposable
 {
-    private const string Wachtwoord = "scouting kampvuur 2026";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private const int Timeout = 180_000;
     private static readonly TimeSpan Wachttijd = TimeSpan.FromSeconds(20);
     private readonly string _datamap = Path.Combine(Path.GetTempPath(), "btw-boeker-ui", Guid.NewGuid().ToString("N"));
@@ -111,11 +111,11 @@ public sealed class AppUiTests : IDisposable
 
         VoerWachtwoordIn(venster); // het wachtwoordvenster verschijnt automatisch voor de laatst gebruikte database
 
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, Diagnose(venster));
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, Diagnose(venster));
         Zoek(venster, "AdministratieBand");
         Bewaar(venster, "03-boekhouding-vereniging");
 
@@ -136,7 +136,7 @@ public sealed class AppUiTests : IDisposable
         BewaarInstellingen(new GebruikersInstellingen { StartwizardGetoond = true });
         var venster = Start();
 
-        var maximaliseer = Zoek(venster, "VensterMaximaliseren").AsButton(); // besluit 221
+        var maximaliseer = Zoek(venster, "VensterMaximaliseren").AsButton(); // eigen titelbalk
         Zoek(venster, "VensterMinimaliseren");
         Zoek(venster, "VensterSluiten");
         // Keuze A: het app-icoon op 16 px (in schermpixels afhankelijk van de schaal); een ontbrekende resource laat het venster niet laden.
@@ -155,7 +155,7 @@ public sealed class AppUiTests : IDisposable
     }
 
     /// <summary>
-    /// Besluit 277, op een echte database: de teller volgt het regels toepassen zonder eerst naar Start te gaan, en de keuzelijst
+    /// Op een echte database: de teller volgt het regels toepassen zonder eerst naar Start te gaan, en de keuzelijst
     /// verklaart het verschil met het aantal van de gekozen rekening.
     /// </summary>
     [Fact(Timeout = Timeout)]
@@ -204,7 +204,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
@@ -250,7 +250,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
@@ -294,7 +294,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         Zoek(venster, "BoekhoudingTabblad");
@@ -304,10 +304,10 @@ public sealed class AppUiTests : IDisposable
 
         foreach (var onderdeel in new[] { "Journaal", "Bank", "Postvak", "Rapporten" })
         {
-            Zoek(venster, $"Nav_Boekhouding.{onderdeel}"); // besluit 178
+            Zoek(venster, $"Nav_Boekhouding.{onderdeel}");
         }
 
-        KlikOp(venster, "Nav_Boekhouding.Meer"); // besluit 269: inrichten onder Meer…
+        KlikOp(venster, "Nav_Boekhouding.Meer"); // Inrichten onder Meer…
         foreach (var onderdeel in new[] { "Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren" })
         {
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}");
@@ -359,7 +359,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
         var posten = Zoek(venster, "Journaalposten").AsGrid();
@@ -394,7 +394,7 @@ public sealed class AppUiTests : IDisposable
         Sluit(venster);
     }
 
-    /// <summary>Besluit 169: de eerste start opent de startwizard; ✕ werkt als "Later verder" en de wizard komt niet terug.</summary>
+    /// <summary>De eerste start opent de startwizard; ✕ werkt als "Later verder" en de wizard komt niet terug.</summary>
     [Fact(Timeout = Timeout)]
     public async Task Eerste_start_opent_de_startwizard_en_sluiten_werkt_als_later_verder()
     {
@@ -424,7 +424,7 @@ public sealed class AppUiTests : IDisposable
     private void BewaarInstellingen(GebruikersInstellingen instellingen) =>
         new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Bewaar(instellingen);
 
-    /// <summary>Besluit 179: in Eenvoudig is de menubalk weg; Alt toont hem tijdelijk. De wisselaar en de navigatiebalk staan links.</summary>
+    /// <summary>In Eenvoudig is de menubalk weg; Alt toont hem tijdelijk. De wisselaar en de navigatiebalk staan links.</summary>
     [Fact(Timeout = Timeout)]
     public async Task Eenvoudig_verbergt_de_menubalk_en_alt_toont_hem_tijdelijk()
     {
@@ -434,7 +434,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Zoek(venster, "Navigatiebalk");
         Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Administratiewisselaar"))); // besluit 26: geen wisselaar
@@ -462,7 +462,7 @@ public sealed class AppUiTests : IDisposable
     }
 
     /// <summary>
-    /// Besluit 252: schermafbeeldingen voor de website, uit een demodatabase met verzonnen gegevens, in licht en donker.
+    /// Schermafbeeldingen voor de website, uit een demodatabase met verzonnen gegevens, in licht en donker.
     /// Draait alleen als <c>BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN</c> naar een map wijst (de release-workflow zet dat).
     /// </summary>
     [Fact(Timeout = Timeout * 2)]
@@ -524,7 +524,7 @@ public sealed class AppUiTests : IDisposable
 
     private static void Kies(AutomationElement venster, string automationId) => Zoek(venster, automationId).AsListBoxItem().Select();
 
-    /// <summary>Een echte muisklik. <i>Meer…</i> klapt alleen om op een bewuste actie, niet op een selectie (besluit 273).</summary>
+    /// <summary>Een echte muisklik. <i>Meer…</i> klapt alleen om op een bewuste actie, niet op een selectie.</summary>
     private static void KlikOp(Window venster, string automationId)
     {
         venster.SetForeground();

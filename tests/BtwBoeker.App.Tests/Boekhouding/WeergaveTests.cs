@@ -7,7 +7,7 @@ using BtwBoeker.Application.Modules;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Weergaven Expert en Eenvoudig (besluiten 127–133): alleen de woorden veranderen, niet de gegevens.</summary>
+/// <summary>Weergaven Expert en Eenvoudig: alleen de woorden veranderen, niet de gegevens.</summary>
 public sealed class WeergaveTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();

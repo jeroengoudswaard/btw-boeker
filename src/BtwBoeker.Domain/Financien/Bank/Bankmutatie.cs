@@ -37,8 +37,8 @@ public sealed class Bankafschrift
 }
 
 /// <summary>
-/// Eén transactie van de bank (besluit 64). De koppeling met een journaalpost bepaalt de status: zonder post staat de
-/// transactie in de werkvoorraad (besluit 75), anders is ze concept of geboekt.
+/// Eén transactie van de bank. De koppeling met een journaalpost bepaalt de status: zonder post staat de
+/// transactie in de werkvoorraad, anders is ze concept of geboekt.
 /// </summary>
 public sealed class Bankmutatie
 {

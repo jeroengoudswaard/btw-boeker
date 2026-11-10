@@ -6,8 +6,8 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.Application.Bijlagen;
 
 /// <summary>
-/// Stelt bij een bon uit het postvak posten voor (besluit 85): precies hetzelfde bedrag, datum hooguit 7 dagen ernaast. Een
-/// creditnota (negatief bedrag) hoort bij een post waarbij hetzelfde bedrag op bank of kas binnenkomt (besluit 143).
+/// Stelt bij een bon uit het postvak posten voor: precies hetzelfde bedrag, datum hooguit 7 dagen ernaast. Een
+/// creditnota (negatief bedrag) hoort bij een post waarbij hetzelfde bedrag op bank of kas binnenkomt.
 /// </summary>
 public static class KoppelVoorsteller
 {
@@ -45,12 +45,12 @@ public static class KoppelVoorsteller
 }
 
 /// <summary>
-/// Zonder bon (besluiten 88, 97, 138 en 145): posten in een bank- of kasdagboek waarbij er geld van de bank of uit de kas
+/// Zonder bon: posten in een bank- of kasdagboek waarbij er geld van de bank of uit de kas
 /// gaat of erbij komt, boven de drempel, zonder bijlage. Concepten tellen mee.
 /// </summary>
 public static class ZonderBon
 {
-    /// <summary>Besluit 97: € 10.</summary>
+    /// <summary>Standaard € 10.</summary>
     public static Bedrag StandaardDrempel { get; } = new(1000);
 
     public static IReadOnlyList<Journaalpost> Posten(BoekhoudingStand stand, Bedrag drempel)

@@ -11,7 +11,7 @@ namespace BtwBoeker.Infrastructure.Tests;
 
 public sealed class DatabaseBeheerTests : IDisposable
 {
-    private const string Wachtwoord = "scouting is fantastisch";
+    private const string Wachtwoord = "zonnig vakantiehuis 2026";
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
 
@@ -100,6 +100,7 @@ public sealed class DatabaseBeheerTests : IDisposable
             a =>
             {
                 Assert.Equal(AdministratieSoort.Vereniging, a.Soort);
+                Assert.Equal("Mijn administratie", a.Naam); // keuze A (2026-11-10): een neutrale standaardnaam
                 Assert.Equal(Administratie.Standaardkleur(AdministratieSoort.Vereniging), a.Accentkleur);
             });
     }
@@ -134,7 +135,7 @@ public sealed class DatabaseBeheerTests : IDisposable
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
             var vereniging = (await sessie.Administraties.HaalAlleAsync())[0];
-            vereniging.WijzigNaam("Scoutinggroep Geheimnaam");
+            vereniging.WijzigNaam("Vakantiehuis Geheimnaam");
             await sessie.Administraties.BewaarAsync(vereniging);
         }
 
@@ -199,7 +200,7 @@ public sealed class DatabaseBeheerTests : IDisposable
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
             var vereniging = (await sessie.Administraties.HaalAlleAsync())[0];
-            vereniging.WijzigNaam("Scouting Teruggezet");
+            vereniging.WijzigNaam("Vakantiehuis Teruggezet");
             await sessie.Administraties.BewaarAsync(vereniging);
             await sessie.MaakBackupAsync(backup);
         }
@@ -207,7 +208,7 @@ public sealed class DatabaseBeheerTests : IDisposable
         await _beheer.HerstelBackupAsync(backup, hersteld);
 
         await using var herstelSessie = await _beheer.OpenAsync(hersteld, Wachtwoord);
-        Assert.Equal("Scouting Teruggezet", (await herstelSessie.Administraties.HaalAlleAsync())[0].Naam);
+        Assert.Equal("Vakantiehuis Teruggezet", (await herstelSessie.Administraties.HaalAlleAsync())[0].Naam);
     }
 
     [Fact]
