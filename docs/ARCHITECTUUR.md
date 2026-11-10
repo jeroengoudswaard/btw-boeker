@@ -118,7 +118,7 @@ IncassoStand (leden + financiën, alleen-lezen) ──► ContributieRekenaar �
   - `SepaTekst` zet tekst om naar de SEPA-tekenset.
   - `Bankwerkdagen` volgt de TARGET-kalender, met de paasdatum berekend.
   - `Bedrag` rekent in hele centen en heeft een eigen notatie, die op elk systeem gelijk is.
-- **Voorbeeldbestand.** `tests/BtwBoeker.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld. Bijwerken na een bewuste wijziging: draai de test met `VERENIGD_VOORBEELDEN_BIJWERKEN=1` en controleer het verschil voordat u het commit.
+- **Voorbeeldbestand.** `tests/BtwBoeker.Application.Tests/Incasso/Voorbeeld-pain008.xml` is een vast, nagekeken voorbeeld.
 
 ## Grootboek (fase 4a)
 

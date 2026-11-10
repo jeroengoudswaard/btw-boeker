@@ -28,7 +28,7 @@ namespace BtwBoeker.App.Tests.UI;
 /// Vereist een interactieve Windows-sessie. Filter: <c>dotnet test --filter Categorie=UI</c>.
 /// Typ of klik niet tijdens deze tests: FlaUI gebruikt het echte toetsenbord en de echte muis.
 /// Elke test heeft een harde time-out, zodat een vastgelopen venster de run niet blokkeert; het eigen app-proces wordt altijd afgesloten.
-/// Stel <c>VERENIGD_SCREENSHOTS</c> in op een map om schermafbeeldingen te bewaren.
+/// Stel <c>BTWBOEKER_SCREENSHOTS</c> in op een map om schermafbeeldingen te bewaren.
 /// </summary>
 [Trait("Categorie", "UI")]
 [Collection("UI")] // Nooit parallel: toetsenbord en muis zijn gedeeld.
@@ -470,13 +470,13 @@ public sealed class AppUiTests : IDisposable
 
     /// <summary>
     /// Besluit 252: schermafbeeldingen voor de website, uit een demodatabase met verzonnen gegevens, in licht en donker.
-    /// Draait alleen als <c>VERENIGD_WEBSITE_SCHERMAFBEELDINGEN</c> naar een map wijst (de release-workflow zet dat).
+    /// Draait alleen als <c>BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN</c> naar een map wijst (de release-workflow zet dat).
     /// </summary>
     [Fact(Timeout = Timeout * 2)]
     [Trait("Categorie", "Schermafbeeldingen")]
     public async Task Schermafbeeldingen_voor_de_website_uit_de_demodatabase()
     {
-        var uitvoer = Environment.GetEnvironmentVariable("VERENIGD_WEBSITE_SCHERMAFBEELDINGEN");
+        var uitvoer = Environment.GetEnvironmentVariable("BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN");
         if (string.IsNullOrWhiteSpace(uitvoer))
         {
             return;
@@ -615,7 +615,7 @@ public sealed class AppUiTests : IDisposable
 
     /// <summary>
     /// Zoals <see cref="Zoek"/>, maar bij falen altijd een schermafbeelding (in %TEMP%\btw-boeker-ui-fouten, of in
-    /// VERENIGD_SCREENSHOTS) en de diagnose plus een eventuele foutmelding van de pagina in de melding.
+    /// BTWBOEKER_SCREENSHOTS) en de diagnose plus een eventuele foutmelding van de pagina in de melding.
     /// </summary>
     private AutomationElement ZoekMetDiagnose(Window venster, string automationId, string? foutmeldingId = null)
     {
@@ -625,7 +625,7 @@ public sealed class AppUiTests : IDisposable
             return element;
         }
 
-        var map = Environment.GetEnvironmentVariable("VERENIGD_SCREENSHOTS") ?? Path.Combine(Path.GetTempPath(), "btw-boeker-ui-fouten"); // blijft na de test bestaan
+        var map = Environment.GetEnvironmentVariable("BTWBOEKER_SCREENSHOTS") ?? Path.Combine(Path.GetTempPath(), "btw-boeker-ui-fouten"); // blijft na de test bestaan
         var bestand = Path.Combine(map, $"fout-{automationId}-{DateTime.Now:HHmmss}.png");
         try
         {
@@ -696,7 +696,7 @@ public sealed class AppUiTests : IDisposable
 
     private static void Bewaar(AutomationElement element, string naam)
     {
-        var map = Environment.GetEnvironmentVariable("VERENIGD_SCREENSHOTS");
+        var map = Environment.GetEnvironmentVariable("BTWBOEKER_SCREENSHOTS");
         if (map is null)
         {
             return;

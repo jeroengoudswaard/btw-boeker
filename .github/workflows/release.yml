@@ -69,7 +69,7 @@ jobs:
         continue-on-error: true
         shell: pwsh
         env:
-          VERENIGD_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
+          BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN: ${{ github.workspace }}\artifacts\uitvoer\schermen
         run: dotnet test tests/BtwBoeker.App.Tests --no-build --configuration Release --filter "Categorie=Schermafbeeldingen" --blame-hang --blame-hang-timeout 4m
 
       - uses: actions/upload-artifact@v7

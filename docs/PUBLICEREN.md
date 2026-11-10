@@ -44,7 +44,7 @@ Oudere versies blijven op de release staan, zodat u kunt teruggaan.
 
   ```
   dotnet build -c Release
-  $env:VERENIGD_WEBSITE_SCHERMAFBEELDINGEN = "$PWD\schermen"
+  $env:BTWBOEKER_WEBSITE_SCHERMAFBEELDINGEN = "$PWD\schermen"
   dotnet test tests/BtwBoeker.App.Tests -c Release --no-build --filter "Categorie=Schermafbeeldingen"
   ```
 

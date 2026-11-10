@@ -33,7 +33,7 @@ dotnet test --filter "Categorie!=UI"           # unit- en integratietests (snel,
 dotnet test --filter "Categorie=UI"            # UI-tests: start de echte app; muis en toetsenbord niet gebruiken
 ```
 
-Bij de UI-tests bewaart `$env:VERENIGD_SCREENSHOTS = "C:\pad"` screenshots van elke stap.
+Bij de UI-tests bewaart `$env:BTWBOEKER_SCREENSHOTS = "C:\pad"` screenshots van elke stap.
 Typ of klik niet tijdens de UI-tests: FlaUI gebruikt het echte toetsenbord en de echte muis. Elke UI-test heeft een time-out van 3 minuten en sluit zijn eigen app-proces altijd af.
 
 ### Database-migraties
