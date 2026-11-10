@@ -71,6 +71,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 26 | Eén administratie | Het datamodel per administratie blijft bestaan, maar de app toont één administratie, zonder wisselaar (keuze 2A). Een tweede object blijft later mogelijk |
 | 27 | Jaarrekeningindeling | Blijft bestaan (keuze 3A) |
 | 28 | Ontwerp stap 2 | Goedgekeurd (2026-11-10): begroting, meerjarenplan, Excel-overname, historisch boekjaar en de standaardschema's Vereniging/Stichting verdwijnen; startwizard Welkom → Database → Rekeningschema (XAF) → Bank → Klaar; navigatie Start · Boekhouding · Instellingen. Eerst verwijderen met de suite groen, daarna de XAF-import. `.gitignore` bevat de extensies `.btwdb`, `.btwdb.sleutel`, `.btwbackup` en `.xaf` (keuze 4A; een sjabloon `.btwsjabloon` bevat geen gegevens en mag wel in Git; geanonimiseerde XAF-testbestanden krijgen de extensie `.xml`) |
+| 29 | Linux | Wens, geen prioriteit (2026-11-10). WPF draait alleen op Windows; de kern (Domain, Application, Infrastructure) is al platformonafhankelijk. Als het later toch moet: eerst een ontwerp voor Blazor Server lokaal (de app draait op de eigen pc, bediening in de browser; één gebruiker en het versleutelde bestand blijven), pas na stap 3 |
 
 ## Planning
 
@@ -78,6 +79,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Ontwerp goedgekeurd (besluit 28). 2a verwijderen: gereed. 2b XAF importeren (besluit 25): wacht op een XAF-export van de gebruiker in `prive/`.
 3. **Btw-integratie**, test-first: btw-code en prestatiedatum op journaalregels, opslag en migratie, btw-rekeningen en automatische boekingsregels, invoer in de posteditor, maandrapport en export.
 4. Documentatie (README, CHANGELOG, installatie) en validatie op Windows.
+5. (Later, geen prioriteit) Linux via Blazor Server lokaal (besluit 29): eerst een ontwerp en een schatting.
 
 Antwoorden op de open vragen (2026-11-10): rekeningschema uit e-Boekhouden (besluit 21), Landal-afrekening als PDF plus andere nota's (besluit 22), ook privégebruik (besluit 23). Nog te leveren door de gebruiker: een XAF-export uit e-Boekhouden en een voorbeeld-PDF van de Landal-afrekening en een energienota, in `prive/`.
 
