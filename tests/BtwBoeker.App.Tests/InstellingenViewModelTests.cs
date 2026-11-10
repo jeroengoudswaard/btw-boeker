@@ -28,13 +28,14 @@ public sealed class InstellingenViewModelTests
     public async Task Opslaan_werkt_gedeelde_administratie_bij()
     {
         var vm = Maak();
-        vm.Regels[1].KleurHex = "#6A1B9A";
-        vm.Regels[1].Naam = "Stichting Clubhuis";
+        Assert.Single(vm.Regels); // besluit 26: één administratie
+        vm.Regels[0].KleurHex = "#6A1B9A";
+        vm.Regels[0].Naam = "Vakantiehuisje";
 
         await vm.OpslaanCommand.ExecuteAsync(null);
 
-        Assert.Equal(Kleur.Parse("#6A1B9A"), _administraties[1].Accentkleur);
-        Assert.Equal("Stichting Clubhuis", _administraties[1].Naam);
+        Assert.Equal(Kleur.Parse("#6A1B9A"), _administraties[0].Accentkleur);
+        Assert.Equal("Vakantiehuisje", _administraties[0].Naam);
         Assert.Equal(1, _repository.AantalKeerBewaard);
         Assert.False(vm.HeeftOnopgeslagenWijzigingen);
     }
@@ -87,22 +88,21 @@ public sealed class InstellingenViewModelTests
     }
 
     [Fact]
-    public async Task Drempel_zonder_bon_is_per_administratie_in_te_stellen()
+    public async Task Drempel_zonder_bon_is_in_te_stellen()
     {
         var vm = Maak();
-        Assert.Equal("10,00", vm.Regels[1].Drempeltekst);
+        Assert.Equal("10,00", vm.Regels[0].Drempeltekst);
 
-        vm.Regels[1].Drempeltekst = "geen bedrag";
-        Assert.NotNull(vm.Regels[1].Fout);
+        vm.Regels[0].Drempeltekst = "geen bedrag";
+        Assert.NotNull(vm.Regels[0].Fout);
         Assert.False(vm.KanOpslaan);
 
-        vm.Regels[1].Drempeltekst = "25";
+        vm.Regels[0].Drempeltekst = "25";
         Assert.True(vm.KanOpslaan);
         await vm.OpslaanCommand.ExecuteAsync(null);
 
-        Assert.Equal(2500, _administraties[1].Model.ZonderBonDrempel);
-        Assert.Equal(Administratie.StandaardZonderBonDrempel, _administraties[0].Model.ZonderBonDrempel);
-        Assert.Equal("25,00", vm.Regels[1].Drempeltekst);
+        Assert.Equal(2500, _administraties[0].Model.ZonderBonDrempel);
+        Assert.Equal("25,00", vm.Regels[0].Drempeltekst);
         Assert.False(vm.HeeftOnopgeslagenWijzigingen);
     }
 }

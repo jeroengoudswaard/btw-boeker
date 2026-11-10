@@ -31,7 +31,7 @@ public sealed class JsonInstellingenOpslagTests : IDisposable
         {
             Thema = Thema.Donker,
             LaatsteDatabase = @"C:\Data\btw-boeker.btwdb",
-            LaatstePagina = new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Stichting, 1),
+            LaatstePagina = new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging, 1),
             StartwizardGetoond = true,
         };
 

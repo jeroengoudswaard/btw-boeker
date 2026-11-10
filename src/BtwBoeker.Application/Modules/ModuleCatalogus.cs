@@ -12,7 +12,7 @@ public enum ModuleSoort
 
 /// <param name="Pictogram">Codepunt uit het lettertype Segoe Fluent Icons.</param>
 /// <param name="Sneltoetsnummer">Cijfer voor Ctrl+1...6, of <c>null</c> als er geen sneltoets is.</param>
-/// <param name="PerAdministratie">Hoort het tabblad bij één administratie (Vereniging of Stichting)?</param>
+/// <param name="PerAdministratie">Hoort het tabblad bij de administratie (boekhouding), of bij de hele app?</param>
 /// <param name="Fase">Ontwikkelfase waarin de module functioneel wordt.</param>
 /// <param name="AlleenVoor">Als ingevuld: de module bestaat alleen voor deze administratie.</param>
 /// <param name="Omschrijving">Eén zin uitleg onder de titel van de pagina (besluit 242).</param>

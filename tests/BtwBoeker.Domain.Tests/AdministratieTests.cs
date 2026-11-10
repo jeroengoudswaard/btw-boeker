@@ -7,10 +7,10 @@ public class AdministratieTests
     [Fact]
     public void Nieuwe_administratie_heeft_opgegeven_eigenschappen()
     {
-        var a = new Administratie(AdministratieSoort.Stichting, "Stichting Scouting", Kleur.Parse("#1565C0"));
+        var a = new Administratie(AdministratieSoort.Vereniging, "Vakantiehuisje", Kleur.Parse("#1565C0"));
 
-        Assert.Equal(AdministratieSoort.Stichting, a.Soort);
-        Assert.Equal("Stichting Scouting", a.Naam);
+        Assert.Equal(AdministratieSoort.Vereniging, a.Soort);
+        Assert.Equal("Vakantiehuisje", a.Naam);
         Assert.Equal(Kleur.Parse("#1565C0"), a.Accentkleur);
     }
 
@@ -53,10 +53,10 @@ public class AdministratieTests
     }
 
     [Fact]
-    public void Standaardkleuren_zijn_groen_voor_vereniging_en_blauw_voor_stichting()
+    public void Standaardkleur_is_groen_en_een_onbekende_soort_wordt_geweigerd()
     {
         Assert.Equal(Kleur.Parse("#2E7D32"), Administratie.Standaardkleur(AdministratieSoort.Vereniging));
-        Assert.Equal(Kleur.Parse("#1565C0"), Administratie.Standaardkleur(AdministratieSoort.Stichting));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Administratie.Standaardkleur((AdministratieSoort)2));
     }
 
     [Fact]

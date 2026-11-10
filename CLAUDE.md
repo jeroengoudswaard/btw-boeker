@@ -75,7 +75,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 ## Planning
 
 1. **Hernoemen** van Verenigd naar BtwBoeker: gereed (2026-11-10), gebouwd en getest op Windows.
-2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Eerst een ontwerp ter goedkeuring.
+2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Ontwerp goedgekeurd (besluit 28). 2a verwijderen: gereed. 2b XAF importeren (besluit 25): wacht op een XAF-export van de gebruiker in `prive/`.
 3. **Btw-integratie**, test-first: btw-code en prestatiedatum op journaalregels, opslag en migratie, btw-rekeningen en automatische boekingsregels, invoer in de posteditor, maandrapport en export.
 4. Documentatie (README, CHANGELOG, installatie) en validatie op Windows.
 
@@ -90,6 +90,15 @@ Antwoorden op de open vragen (2026-11-10): rekeningschema uit e-Boekhouden (besl
   - Opgelost: namespace `BtwBoeker.Tests.Gedeeld`; de paden-test heet nu `Standaardpaden_staan_in_de_eigen_btwboeker_map`, en zijn twee `DoesNotContain("BTW-Boeker")`-regels zijn vervallen (ze spraken zichzelf tegen). Nieuwe test in `ProductnaamTests` verbiedt een koppelteken in namespace-, using- en methoderegels.
   - Ook gecorrigeerd: de snelkoppeling in `installer/Package.wxs` wees naar `BtwBoeker.exe`, maar de assemblynaam van de app is `BTW-Boeker`, dus het uitvoerbestand is `BTW-Boeker.exe`.
   - Daarna gebouwd en getest op Windows (zie hierboven).
+- **Stap 2a (verwijderen): gereed** (2026-11-10, branch `hernoemen-btwboeker`), in vier delen met elk een eigen commit:
+  1. begroting en meerjarenplan (`aad1699`, migratie *VerwijderBegrotingEnMeerjarenplan*);
+  2. Excel-overname en historisch boekjaar (`a18c78b`, migratie *VerwijderExcelHistorie*); de inrichtingsroute heet nu `Inrichtvoorstel`/`Inrichtrekening`;
+  3. ingebouwde standaardschema's en speltakken (`2d81f15`); de wizard heet `SjablooninrichtingViewModel`;
+  4. tweede administratie en wisselaar, startwizard Welkom → Database → Boekhouding → Bank → Klaar (migratie *EenAdministratie*: alleen een lege tweede administratie verdwijnt).
+  - `ReikwijdteTests` bewaakt dat de onderdelen niet terugkomen; `MigratieTests` dat bestaande databases zonder verlies worden bijgewerkt.
+  - Ook: app-icoon in programma, venster en taakbalk (`5f10014`; de test verbood het na het hernoemen) en in de titelbalk op 16 px (`13360d8`, keuze A).
+  - **Windows-test (2026-11-10):** na elk deel de volledige suite; laatste stand **506/506** geslaagd, build zonder waarschuwingen. Na deel 4 faalden in twee runs wisselende UI-tests (database niet geopend, *Startkaarten* en *Boekingsregels* niet gevonden); los gedraaid slaagden ze (5 en 2 keer), en de volgende volledige run was groen. Vermoedelijk invloed van ander gebruik van de pc tijdens de UI-tests; houd het in de gaten.
+  - Nog open: de standaardnaam van de administratie is "Vereniging" (zichtbaar in de venstertitel); de stap om die te wijzigen is met de startwizard vervallen.
 - **Ontwikkelomgeving:** .NET SDK 10, Visual Studio of VS Code; de gebruiker draait Windows-tests zelf.
 - **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`.
 - De historie van Verenigd (besluiten 1–278) staat in de repository van Verenigd en in `CHANGELOG.md`.

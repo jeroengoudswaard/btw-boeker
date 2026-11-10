@@ -168,7 +168,7 @@ public sealed class JaarrekeningTests
         Assert.Throws<ArgumentException>(() => indeling.Vervang([new(JaarrekeningAfdeling.Activa, IndelingsregelSoort.Kop, "Activa", [])]));
         Assert.Throws<ArgumentException>(() => indeling.Vervang([new(JaarrekeningAfdeling.Baten, IndelingsregelSoort.Kop, "  ", [])]));
         Assert.Throws<ArgumentException>(() => indeling.Vervang(
-            [new(JaarrekeningAfdeling.Baten, IndelingsregelSoort.Regel, "Stichting", [new Rubriek(AdministratieSoort.Stichting, "Gebouw", 1)])]));
+            [new(JaarrekeningAfdeling.Baten, IndelingsregelSoort.Regel, "Ander", [new Rubriek((AdministratieSoort)2, "Gebouw", 1)])]));
         Assert.Equal("Contributie", Assert.Single(indeling.Regels).Tekst);
 
         // Dezelfde rubriek bij baten én lasten mag (bijvoorbeeld Activiteiten).

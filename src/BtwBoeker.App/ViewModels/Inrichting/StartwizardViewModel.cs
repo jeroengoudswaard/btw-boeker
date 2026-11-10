@@ -61,7 +61,7 @@ public sealed record KlaarRegel(bool IsKlaar, string Tekst)
 }
 
 /// <summary>
-/// De startwizard: Welkom → Database → Administraties → Boekhouding → Bank → Klaar. Elke stap is over te slaan;
+/// De startwizard (besluit 28): Welkom → Database → Boekhouding → Bank → Klaar. Elke stap is over te slaan;
 /// het ✓ volgt uit de gegevens zelf; <i>Later verder</i> bewaart de stap
 /// in de database.
 /// </summary>
@@ -69,7 +69,6 @@ public sealed partial class StartwizardViewModel : ObservableObject
 {
     private readonly IStartwizardRegie _regie;
     private readonly TimeProvider _tijd;
-    private IDatabaseSessie? _geladenSessie;
 
     public StartwizardViewModel(IStartwizardRegie regie, TimeProvider tijd, Startstap begin)
     {
@@ -79,7 +78,6 @@ public sealed partial class StartwizardViewModel : ObservableObject
         [
             new(Startstap.Welkom, "Welkom"),
             new(Startstap.Database, "Database"),
-            new(Startstap.Administraties, "Administraties"),
             new(Startstap.Boekhouding, "Boekhouding"),
             new(Startstap.Bank, "Bank"),
             new(Startstap.Klaar, "Klaar"),
@@ -105,22 +103,8 @@ public sealed partial class StartwizardViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(VolgendeCommand), nameof(OverslaanCommand), nameof(GaNaarCommand))]
     public partial Inrichtingsstatus Status { get; private set; } = Inrichtingsstatus.Leeg;
 
-    /// <summary>Naam en accentkleur per administratie (stap Vereniging), dezelfde regels als Extra › Instellingen.</summary>
-    [ObservableProperty]
-    public partial IReadOnlyList<AdministratieInstellingRegel> Namen { get; private set; } = [];
-
-    [ObservableProperty]
-    public partial AdministratieSoort BoekhoudingVoor { get; set; } = AdministratieSoort.Vereniging;
-
-    public static IReadOnlyList<AdministratieSoort> BoekhoudingKeuzes { get; } = [AdministratieSoort.Vereniging, AdministratieSoort.Stichting];
-
-    /// <summary>Besluit 209: ook de Stichting heeft eigen bankrekeningen.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(KanBankInlezen))]
-    public partial AdministratieSoort BankVoor { get; set; } = AdministratieSoort.Vereniging;
-
-    /// <summary>Een bankafschrift kan pas als de boekhouding van die administratie is ingericht.</summary>
-    public bool KanBankInlezen => BankVoor == AdministratieSoort.Stichting ? Status.BoekhoudingStichting : Status.BoekhoudingVereniging;
+    /// <summary>Een bankafschrift kan pas als de boekhouding is ingericht.</summary>
+    public bool KanBankInlezen => Status.BoekhoudingIngericht;
 
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
@@ -141,11 +125,8 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public IReadOnlyList<KlaarRegel> Klaarregels =>
     [
         new(Status.DatabaseOpen, Status.DatabaseOpen ? "De database is aangemaakt of geopend." : "Er is nog geen database: kies Bestand › Nieuwe database."),
-        new(Status.NamenIngevuld, Status.NamenIngevuld ? "De administraties hebben een eigen naam en kleur." : "Pas de namen aan bij Instellingen."),
-        new(Status.BoekhoudingVereniging, Status.BoekhoudingVereniging ? "De boekhouding van de Vereniging is ingericht." : "De boekhouding van de Vereniging is nog leeg: open Modules › Boekhouding."),
-        new(Status.BankVereniging, Status.BankVereniging ? "Een bankrekening van de Vereniging is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
-        .. (Status.BoekhoudingStichting ? [new KlaarRegel(true, "De boekhouding van de Stichting is ingericht.")] : Array.Empty<KlaarRegel>()),
-        .. (Status.BankStichting ? [new KlaarRegel(true, "Een bankrekening van de Stichting is gekoppeld.")] : Array.Empty<KlaarRegel>()),
+        new(Status.BoekhoudingIngericht, Status.BoekhoudingIngericht ? "De boekhouding is ingericht." : "De boekhouding is nog leeg: open Modules › Boekhouding."),
+        new(Status.BankGekoppeld, Status.BankGekoppeld ? "Een bankrekening is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
     ];
 
     /// <summary>Laadt de status en de gegevens van de stappen.</summary>
@@ -168,7 +149,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private async Task OverslaanAsync()
     {
         Foutmelding = null;
-        await VernieuwAsync(gegevensOpnieuw: true); // ongedaan maken van niet-opgeslagen invoer
+        await VernieuwAsync();
         Huidig = Huidig + 1;
         MarkeerStappen();
     }
@@ -233,17 +214,17 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private Task OpenDatabaseAsync() => NaDatabaseAsync(_regie.OpenDatabaseAsync);
 
     [RelayCommand]
-    private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(BoekhoudingVoor, keuze));
+    private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(AdministratieSoort.Vereniging, keuze));
 
     [RelayCommand]
-    private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(BankVoor));
+    private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(AdministratieSoort.Vereniging));
 
     private async Task NaDatabaseAsync(Func<Task> actie)
     {
         await VoerUitAsync(actie);
         if (Status.DatabaseOpen && Huidig == Startstap.Database)
         {
-            Huidig = Startstap.Administraties;
+            Huidig = Startstap.Boekhouding;
             MarkeerStappen();
         }
     }
@@ -268,34 +249,13 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private async Task<bool> BewaarStapAsync()
     {
         Foutmelding = null;
-        if (Huidig == Startstap.Administraties && _regie.Sessie is { } sessie)
-        {
-            if (Namen.FirstOrDefault(n => n.Fout is not null) is { } fout)
-            {
-                Foutmelding = fout.Fout;
-                return false;
-            }
-
-            foreach (var regel in Namen.Where(n => n.IsGewijzigd))
-            {
-                await regel.BewaarAsync(sessie.Administraties);
-            }
-        }
-
         await VernieuwAsync();
         return true;
     }
 
-    private async Task VernieuwAsync(bool gegevensOpnieuw = false)
+    private async Task VernieuwAsync()
     {
         Status = await Inrichtingsstatus.BepaalAsync(_regie.Sessie);
-        var sessie = _regie.Sessie;
-        if (gegevensOpnieuw || !ReferenceEquals(sessie, _geladenSessie))
-        {
-            _geladenSessie = sessie;
-            Namen = sessie is null ? [] : [.. _regie.Administraties.Select(a => new AdministratieInstellingRegel(a))];
-        }
-
         MarkeerStappen();
     }
 

@@ -41,7 +41,7 @@ public sealed class KerncijfersTests
     [Fact]
     public void Een_niet_inggerichte_administratie_heeft_geen_boekhouding()
     {
-        var stand = new BoekhoudingStand(AdministratieSoort.Stichting, [], [], [], [], []);
+        var stand = new BoekhoudingStand(AdministratieSoort.Vereniging, [], [], [], [], []);
 
         var cijfers = Kerncijfers.Bepaal(stand, Vandaag);
 

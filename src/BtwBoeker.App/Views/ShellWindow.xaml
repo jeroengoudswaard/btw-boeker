@@ -213,29 +213,9 @@
             </StatusBarItem>
         </StatusBar>
 
-        <!-- ===== Navigatiebalk met administratiewisselaar (besluiten 168, 177, 178 en 181) ===== -->
+        <!-- ===== Navigatiebalk (besluiten 168, 178 en 181) ===== -->
         <Border DockPanel.Dock="Left" Width="248" Background="Transparent">
             <DockPanel Margin="8,8,8,8">
-                <StackPanel DockPanel.Dock="Top" Margin="4,0,4,16" Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}">
-                    <Label Content="_Administratie" Target="{Binding ElementName=Administratiewisselaar}" Padding="4,0,0,4" FontSize="12"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    <ComboBox x:Name="Administratiewisselaar" ItemsSource="{Binding Administraties}" SelectedItem="{Binding GekozenAdministratie}"
-                              HorizontalAlignment="Stretch" MinHeight="44"
-                              AutomationProperties.AutomationId="Administratiewisselaar" ToolTip="Geldt voor de hele app; de pagina blijft dezelfde">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:AdministratieViewModel}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
-                                             Fill="{Binding Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Naam}" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Soort}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
                 <ListBox x:Name="Navigatiebalk" ItemsSource="{Binding Navigatie}" SelectedItem="{Binding GeselecteerdeNavigatie}"
                          PreviewMouseLeftButtonDown="Navigatiebalk_PreviewMouseLeftButtonDown" PreviewKeyDown="Navigatiebalk_PreviewKeyDown"
                          BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"

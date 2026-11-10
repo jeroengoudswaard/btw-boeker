@@ -18,7 +18,7 @@ public sealed class StartTests
         [
             Kaart(Startkaartsoort.Bank, AdministratieSoort.Vereniging, 3),
             Kaart(Startkaartsoort.Postvak, AdministratieSoort.Vereniging, 2),
-            Kaart(Startkaartsoort.Bank, AdministratieSoort.Stichting, 7),
+            Kaart(Startkaartsoort.Bank, ((AdministratieSoort)2), 7), // telt niet mee
             Kaart(Startkaartsoort.Inrichting, null, 4),
         ];
 
@@ -28,7 +28,7 @@ public sealed class StartTests
         Assert.Equal(2, tellers["Boekhouding.Postvak"]);
         Assert.Equal(5, tellers["Boekhouding"]);
         Assert.False(tellers.ContainsKey("Start"));
-        Assert.Equal(7, Navigatietellers.Bepaal(kaarten, AdministratieSoort.Stichting)["Boekhouding.Bank"]);
+        Assert.Equal(7, Navigatietellers.Bepaal(kaarten, ((AdministratieSoort)2))["Boekhouding.Bank"]);
     }
 
     [Fact]

@@ -108,11 +108,6 @@ public sealed partial class SjablooninrichtingViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Beginsaldititel))]
     public partial int Beginjaar { get; set; }
 
-    /// <summary>Gevuld als het sjabloon voor de andere administratie bedoeld is.</summary>
-    public string? Waarschuwing => _sjabloon.Administratie is { } soort && soort != _administratie
-        ? $"Dit sjabloon is bedoeld voor de {soort}; controleer de rekeningen goed."
-        : null;
-
     public ObservableCollection<InrichtRekeningRegel> Rekeningen { get; } = [];
 
     public Verzameling<InrichtRekeningRegel> Balansrekeningen { get; } = [];

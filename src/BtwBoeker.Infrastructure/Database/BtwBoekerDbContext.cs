@@ -63,13 +63,6 @@ public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> opti
                     Soort = AdministratieSoort.Vereniging,
                     Naam = "Vereniging",
                     Accentkleur = Administratie.Standaardkleur(AdministratieSoort.Vereniging),
-                },
-                new
-                {
-                    Id = 2,
-                    Soort = AdministratieSoort.Stichting,
-                    Naam = "Stichting",
-                    Accentkleur = Administratie.Standaardkleur(AdministratieSoort.Stichting),
                 });
         });
 

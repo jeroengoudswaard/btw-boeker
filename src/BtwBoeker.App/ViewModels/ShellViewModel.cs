@@ -23,7 +23,7 @@ public sealed record ModuleVerzoek(ModuleSoort Module, AdministratieSoort? Admin
 }
 
 /// <summary>
-/// Hoofdvenster: database-sessie, navigatiebalk met administratiewisselaar (besluiten 168 en 177–183), menu's en statusregel.
+/// Hoofdvenster: database-sessie, navigatiebalk (besluiten 168 en 177–183), menu's en statusregel.
 /// De geopende pagina's blijven bewaard in <see cref="Tabbladen"/> (de naam stamt uit de tijd van de tabbladen).
 /// </summary>
 public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
@@ -126,7 +126,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    /// <summary>Besluit 177: de administratie uit de wisselaar bovenaan geldt voor de hele app.</summary>
+    /// <summary>Besluit 26: de ene administratie van de database geldt voor de hele app.</summary>
     public AdministratieViewModel? ActieveAdministratie => GekozenAdministratie;
 
     public string? ActieveAdministratieNaam => ActieveAdministratie?.Naam;
@@ -694,7 +694,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _instellingen = _instellingen with { LaatsteDatabase = sessie.Pad, LaatstePagina = laatste };
         _opslag.Bewaar(_instellingen);
 
-        // Besluit 177: de wisselaar begint bij de laatst gekozen administratie, anders de Vereniging.
+        // Besluit 26: de ene administratie (een oudere laatste keuze wordt genegeerd).
         KiesAdministratieZonderWisselen(laatste?.Administratie ?? AdministratieSoort.Vereniging);
         DatabaseNaam = Path.GetFileName(sessie.Pad);
         BouwModuleMenu();
@@ -722,11 +722,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    private static string Stapnaam(Startstap stap) => stap switch
-    {
-        Startstap.Administraties => "Vereniging",
-        _ => stap.ToString(),
-    };
+    private static string Stapnaam(Startstap stap) => stap.ToString();
 
     /// <returns><c>false</c> als de gebruiker het sluiten annuleert.</returns>
     private async Task<bool> SluitSessieAsync()

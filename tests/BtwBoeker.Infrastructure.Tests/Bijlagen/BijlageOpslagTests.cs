@@ -89,7 +89,7 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
         Assert.Equal(new DateOnly(2026, 10, 12), bijlage.Datum);
         Assert.Equal(new Bedrag(2345), bijlage.Bedrag);
         Assert.Equal(pdf, await _bijlagen.LaadInhoudAsync(Ver, bijlage.Id));
-        Assert.Empty((await _boekhouding.LaadAsync(AdministratieSoort.Stichting)).Bijlagen);
+        Assert.Empty((await _boekhouding.LaadAsync(((AdministratieSoort)2))).Bijlagen);
     }
 
     [Fact]

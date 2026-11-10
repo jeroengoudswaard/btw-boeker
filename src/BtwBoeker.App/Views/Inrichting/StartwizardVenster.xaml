@@ -92,34 +92,9 @@
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Administraties}">
-                    <TextBlock Style="{StaticResource Toelichting}" Text="Geef uw administraties een herkenbare naam en accentkleur." Margin="0,0,0,16" />
-                    <ItemsControl ItemsSource="{Binding Namen}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type rootvm:AdministratieInstellingRegel}">
-                                <StackPanel Margin="0,0,0,16">
-                                    <g:AdministratieKaart />
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Label Content="Naam" Target="{Binding ElementName=Naamveld}" VerticalAlignment="Center" />
-                                        <TextBox x:Name="Naamveld" Width="220" Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}"
-                                                 AutomationProperties.AutomationId="{Binding Soort, StringFormat=StartwizardNaam{0}}" />
-                                        <Label Content="Accentkleur" Margin="12,0,0,0" Target="{Binding ElementName=Kleurveld}" VerticalAlignment="Center" />
-                                        <TextBox x:Name="Kleurveld" Width="100" Text="{Binding KleurHex, UpdateSourceTrigger=PropertyChanged}"
-                                                 AutomationProperties.AutomationId="{Binding Soort, StringFormat=StartwizardKleur{0}}" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
-                                               Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Boekhouding}">
                     <TextBlock Style="{StaticResource Toelichting}" Text="Richt het rekeningschema in en vul de beginsaldi in. U kunt ook leeg beginnen en later gegevens importeren." Margin="0,0,0,16" />
-                    <ComboBox ItemsSource="{Binding Source={x:Static vm:StartwizardViewModel.BoekhoudingKeuzes}}" SelectedItem="{Binding BoekhoudingVoor}"
-                              Width="220" AutomationProperties.AutomationId="StartwizardBoekhoudingVoor" />
-                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                    <StackPanel Orientation="Horizontal">
                         <Button Content="Sjabloon..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Sjabloon}"
                                 AutomationProperties.AutomationId="StartwizardSjabloon" />
                         <Button Content="Leeg beginnen" Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Leeg}"
@@ -129,10 +104,8 @@
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Bank}">
                     <TextBlock Style="{StaticResource Toelichting}" Text="Lees een bankafschrift in om de beginstanden te controleren en transacties te verwerken." Margin="0,0,0,16" />
-                    <ComboBox ItemsSource="{Binding Source={x:Static vm:StartwizardViewModel.BoekhoudingKeuzes}}" SelectedItem="{Binding BankVoor}"
-                              Width="220" AutomationProperties.AutomationId="StartwizardBankVoor" />
                     <Button Content="Bankafschrift inlezen..." Command="{Binding BankInlezenCommand}" IsEnabled="{Binding KanBankInlezen}"
-                            Margin="0,16,0,0" AutomationProperties.AutomationId="StartwizardBankInlezen" />
+                            HorizontalAlignment="Left" AutomationProperties.AutomationId="StartwizardBankInlezen" />
                 </StackPanel>
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}">

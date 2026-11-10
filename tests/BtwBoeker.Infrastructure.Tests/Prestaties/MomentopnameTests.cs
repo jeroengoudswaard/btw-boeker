@@ -25,7 +25,7 @@ public sealed class MomentopnameTests : IDisposable
         var eerste = await dienst.LaadAsync(AdministratieSoort.Vereniging);
         var tweede = await dienst.LaadAsync(AdministratieSoort.Vereniging);
         Assert.Same(eerste, tweede);
-        Assert.NotSame(eerste, await dienst.LaadAsync(AdministratieSoort.Stichting));
+        Assert.NotSame(eerste, await dienst.LaadAsync(((AdministratieSoort)2)));
 
         var memoriaal = eerste.Dagboeken.Single(d => d.Code == "MEM");
         await dienst.BoekAsync(AdministratieSoort.Vereniging, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Na de momentopname",

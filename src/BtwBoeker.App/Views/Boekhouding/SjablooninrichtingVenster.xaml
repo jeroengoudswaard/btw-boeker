@@ -51,8 +51,6 @@
         <StackPanel DockPanel.Dock="Bottom" Margin="24,0,24,8">
             <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" AutomationProperties.LiveSetting="Assertive"
                        Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
-            <TextBlock Text="{Binding Waarschuwing}" Style="{StaticResource Foutmelding}"
-                       Visibility="{Binding Waarschuwing, Converter={StaticResource NietNullNaarZichtbaar}}" />
         </StackPanel>
 
         <Grid Margin="24,16">

@@ -18,7 +18,7 @@ public enum Statussoort
 }
 
 /// <summary>
-/// Navigatiebalk, administratiewisselaar, statusregel, menubalk en startkaarten (v0.8.0, besluiten 168 en 177–183).
+/// Navigatiebalk, statusregel, menubalk en startkaarten (v0.8.0, besluiten 168 en 177–183).
 /// </summary>
 public sealed partial class ShellViewModel
 {
@@ -32,7 +32,7 @@ public sealed partial class ShellViewModel
     [ObservableProperty]
     public partial NavigatieItem? GeselecteerdeNavigatie { get; set; }
 
-    /// <summary>Besluit 177: één wisselaar bovenaan voor de hele app.</summary>
+    /// <summary>De administratie van de database (besluit 26: er is er één); geldt voor de hele app.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
     public partial AdministratieViewModel? GekozenAdministratie { get; set; }
@@ -68,40 +68,7 @@ public sealed partial class ShellViewModel
         }
     }
 
-    /// <summary>Besluit 182: dezelfde pagina voor de andere administratie; bestaat die daar niet, dan naar Start.</summary>
-    partial void OnGekozenAdministratieChanged(AdministratieViewModel? value)
-    {
-        if (_synchroniseren || value is null)
-        {
-            return;
-        }
-
-        using var meting = Meetpunt.Start(_logger, "Wisselen van administratie");
-
-        BouwModuleMenu();
-        if (GeselecteerdTabblad is { Administratie: { } huidig } pagina && huidig.Soort != value.Soort)
-        {
-            var verzoek = new ModuleVerzoek(pagina.Module.Soort, value.Soort);
-            if (KanModuleOpenen(verzoek))
-            {
-                var onderdeel = pagina.Onderdeel;
-                OpenModule(verzoek);
-                if (GeselecteerdTabblad is { } nieuw && onderdeel is { } o)
-                {
-                    nieuw.Onderdeel = o;
-                }
-            }
-            else
-            {
-                OpenModule(new ModuleVerzoek(ModuleSoort.Overzicht, null));
-            }
-        }
-
-        BouwNavigatie();
-        _ = VernieuwStartkaartenAsync(); // kerncijfers en tellers horen bij de gekozen administratie
-    }
-
-    /// <summary>Zet de wisselaar zonder van pagina te wisselen (bij openen van een database of van een pagina).</summary>
+    /// <summary>Kiest de administratie zonder van pagina te wisselen (bij openen van een database of van een pagina).</summary>
     private void KiesAdministratieZonderWisselen(AdministratieSoort? soort)
     {
         _synchroniseren = true;
@@ -334,7 +301,7 @@ public sealed partial class ShellViewModel
         if (gegevens is not null && GekozenAdministratie is { } administratie)
         {
             // Besluit 234: dezelfde geladen boekhouding als de kaarten, niet opnieuw laden.
-            foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(gegevens.Boekhouding(administratie.Soort), vandaag), vandaag.Year))
+            foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(gegevens.Boekhouding, vandaag), vandaag.Year))
             {
                 _overzicht.Kerncijfers.Add(regel);
             }

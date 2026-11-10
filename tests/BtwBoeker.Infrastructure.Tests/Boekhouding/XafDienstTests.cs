@@ -50,7 +50,7 @@ public sealed class XafDienstTests : IDisposable
         await using var sessie = await Demodatabase.OpenAsync(pad);
 
         var fout = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Stichting, 2026, "0.1.0"));
+            () => new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(((AdministratieSoort)2), 2026, "0.1.0"));
         Assert.Contains("2026", fout.Message, StringComparison.Ordinal);
     }
 

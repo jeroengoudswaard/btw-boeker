@@ -59,6 +59,6 @@ public sealed class JaarrekeningOpslagTests : IAsyncLifetime, IDisposable
         stand = await _sessie.Boekhouding.LaadAsync(Ver);
         Assert.Empty(Assert.Single(stand.Jaarrekeningindelingen).Regels);
         Assert.True(Jaarrekeningrekenaar.Bereken(stand, JaarrekeningRapport.BatenEnLasten, 2026).IsAutomatisch);
-        Assert.Empty((await _sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting)).Jaarrekeningindelingen);
+        Assert.Empty((await _sessie.Boekhouding.LaadAsync(((AdministratieSoort)2))).Jaarrekeningindelingen);
     }
 }

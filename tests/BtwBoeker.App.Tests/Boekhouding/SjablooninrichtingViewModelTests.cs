@@ -142,13 +142,6 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
     }
 
     [Fact]
-    public void Een_sjabloon_voor_de_andere_administratie_geeft_een_waarschuwing()
-    {
-        Assert.Null(Wizard().Waarschuwing);
-        Assert.NotNull(Wizard(Testsjabloon.Verhuur(AdministratieSoort.Stichting)).Waarschuwing);
-    }
-
-    [Fact]
     public async Task Tabblad_richt_in_met_een_sjabloonbestand_en_exporteert_het_weer()
     {
         var vm = _omgeving.Maak();

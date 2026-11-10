@@ -55,13 +55,6 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                             Accentkleur = "#2E7D32",
                             Naam = "Vereniging",
                             Soort = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Accentkleur = "#1565C0",
-                            Naam = "Stichting",
-                            Soort = 2
                         });
                 });
 

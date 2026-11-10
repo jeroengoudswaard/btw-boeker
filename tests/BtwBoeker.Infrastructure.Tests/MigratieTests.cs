@@ -65,6 +65,40 @@ public sealed class MigratieTests : IDisposable
     }
 
     [Fact]
+    public async Task Een_lege_tweede_administratie_verdwijnt_en_de_wizard_gaat_verder_bij_boekhouding()
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync(Basis);
+            await oud.Database.ExecuteSqlRawAsync("INSERT INTO Startwizard (Id, Stap, IsAfgerond) VALUES (1, 'Administraties', 0)");
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        Assert.Equal([1], await nieuw.Administraties.Select(a => a.Id).ToListAsync());
+        Assert.Equal(BtwBoeker.Application.Inrichting.Startstap.Boekhouding, (await new StartwizardOpslag(Context).LaadAsync()).Stap);
+    }
+
+    [Fact]
+    public async Task Een_tweede_administratie_met_gegevens_blijft_bewaard_maar_wordt_niet_getoond()
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync(Basis);
+            await oud.Database.ExecuteSqlRawAsync("INSERT INTO Rubrieken (Administratie, Naam, Volgorde) VALUES (2, 'Gebouw', 1)");
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        Assert.Equal([1, 2], await nieuw.Administraties.Select(a => a.Id).OrderBy(i => i).ToListAsync());
+        Assert.Equal(1, await nieuw.Rubrieken.CountAsync());
+        var getoond = await new AdministratieRepository(Context).HaalAlleAsync();
+        Assert.Equal(BtwBoeker.Domain.Administraties.AdministratieSoort.Vereniging, Assert.Single(getoond).Soort);
+    }
+
+    [Fact]
     public async Task Historie_uit_excel_verdwijnt_en_gewone_boekjaren_blijven()
     {
         await using (var oud = Context())

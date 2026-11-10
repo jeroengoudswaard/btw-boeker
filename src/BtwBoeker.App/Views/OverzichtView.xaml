@@ -22,7 +22,7 @@
                 </Border>
                 <TextBlock Text="Welkom bij BTW-Boeker" Style="{StaticResource Welkomstitel}" AutomationProperties.HeadingLevel="Level1" />
                 <TextBlock Style="{StaticResource Toelichting}" TextAlignment="Center" Margin="0,8,0,32" MaxWidth="480"
-                           Text="Leden, contributie en boekhouding van de vereniging en de stichting, versleuteld in één bestand." />
+                           Text="Boekhouding, bank, facturen en bonnen, versleuteld in één bestand." />
 
                 <UniformGrid Columns="3" Margin="-8,0">
                     <Button Style="{StaticResource Hoofdtegel}" Margin="8,0" Command="{Binding Shell.NieuweDatabaseCommand}"

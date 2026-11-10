@@ -436,7 +436,8 @@ public sealed class AppUiTests : IDisposable
         VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Vereniging - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Zoek(venster, "Administratiewisselaar");
+        Zoek(venster, "Navigatiebalk");
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Administratiewisselaar"))); // besluit 26: geen wisselaar
         Zoek(venster, "Startkaarten");
         // Een ingeklapt element staat niet in de UI Automation-boom.
         Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")));

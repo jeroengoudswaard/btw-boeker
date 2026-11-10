@@ -54,7 +54,7 @@ public class ReikwijdteTests
         Assert.Empty(BestandenMet("Speltak", "vereniging.json", "stichting.json", "Standaardschema"));
     }
 
-    [Fact(Skip = "Stap 2a, deel 4: wordt aangezet zodra de wisselaar en de Stichting zijn verwijderd.")]
+    [Fact]
     public void Er_is_geen_tweede_administratie_en_geen_wisselaar()
     {
         Assert.Empty(BestandenMet("Stichting", "Wisselaar"));

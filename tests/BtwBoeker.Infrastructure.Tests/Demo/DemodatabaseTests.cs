@@ -30,8 +30,7 @@ public sealed class DemodatabaseTests : IDisposable
 
         await using var sessie = await Demodatabase.OpenAsync(pad);
         var administraties = await sessie.Administraties.HaalAlleAsync();
-        Assert.Contains(administraties, a => a.Naam == Demodatabase.NaamVereniging);
-        Assert.Contains(administraties, a => a.Naam == Demodatabase.NaamStichting);
+        Assert.Equal(Demodatabase.NaamVereniging, Assert.Single(administraties).Naam);
 
         var stand = await new BoekhoudingDienst(sessie, TimeProvider.System).LaadAsync(AdministratieSoort.Vereniging);
         Assert.True(stand.IsIngericht);

@@ -256,7 +256,6 @@ internal sealed class InMemoryAdministratieRepository : IAdministratieRepository
     public List<Administratie> Opgeslagen { get; } =
     [
         new(AdministratieSoort.Vereniging, "Scouting Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging)),
-        new(AdministratieSoort.Stichting, "Scouting Stichting", Administratie.Standaardkleur(AdministratieSoort.Stichting)),
     ];
 
     public int AantalKeerBewaard { get; private set; }

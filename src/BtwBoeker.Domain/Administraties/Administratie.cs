@@ -1,6 +1,6 @@
 namespace BtwBoeker.Domain.Administraties;
 
-/// <summary>Een afzonderlijke (boekhoudkundige) administratie: de Vereniging of de Stichting.</summary>
+/// <summary>Een (boekhoudkundige) administratie met een eigen naam, accentkleur en drempel voor <i>Zonder bon</i>.</summary>
 public sealed class Administratie
 {
     public const int MaximaleNaamLengte = 100;
@@ -26,7 +26,6 @@ public sealed class Administratie
     public static Kleur Standaardkleur(AdministratieSoort soort) => soort switch
     {
         AdministratieSoort.Vereniging => new Kleur(0x2E, 0x7D, 0x32),
-        AdministratieSoort.Stichting => new Kleur(0x15, 0x65, 0xC0),
         _ => throw new ArgumentOutOfRangeException(nameof(soort), soort, null),
     };
 

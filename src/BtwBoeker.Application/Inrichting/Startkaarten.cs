@@ -26,26 +26,24 @@ public sealed record Startkaart(Startkaartsoort Soort, AdministratieSoort? Admin
 /// </summary>
 public static class Startkaarten
 {
-    private const int AantalInrichtstappen = 6;
 
     public static IReadOnlyList<Startkaart> Bepaal(
-        Inrichtingsstatus status, Startwizardvoortgang voortgang, BoekhoudingStand vereniging, BoekhoudingStand stichting,
+        Inrichtingsstatus status, Startwizardvoortgang voortgang, BoekhoudingStand stand,
         DateOnly vandaag, IReadOnlyDictionary<AdministratieSoort, Bedrag>? drempels = null)
     {
         ArgumentNullException.ThrowIfNull(status);
         ArgumentNullException.ThrowIfNull(voortgang);
-        ArgumentNullException.ThrowIfNull(vereniging);
-        ArgumentNullException.ThrowIfNull(stichting);
+        ArgumentNullException.ThrowIfNull(stand);
         var kaarten = new List<Startkaart>();
 
         if (!voortgang.IsAfgerond && status.EersteOpenStap() is not null)
         {
+            var stappen = Enum.GetValues<Startstap>().Length;
             var klaar = Enum.GetValues<Startstap>().Count(status.IsKlaar);
-            kaarten.Add(new(Startkaartsoort.Inrichting, null, AantalInrichtstappen - klaar, "Inrichting afmaken",
-                Tekst($"{klaar} van {AantalInrichtstappen} stappen klaar"), "Startwizard openen"));
+            kaarten.Add(new(Startkaartsoort.Inrichting, null, stappen - klaar, "Inrichting afmaken",
+                Tekst($"{klaar} van {stappen} stappen klaar"), "Startwizard openen"));
         }
 
-        foreach (var stand in new[] { vereniging, stichting })
         {
             VoegToe(kaarten, stand, Startkaartsoort.Bank, stand.Bankmutaties.Count(m => Bankoverzicht.Status(stand, m) == MutatieStatus.TeVerwerken),
                 n => Enkelvoud(n, "banktransactie", "banktransacties") + " te verwerken", "Kies per transactie een rekening of maak een boekingsregel.", "Naar de bank");
@@ -66,19 +64,18 @@ public static class Startkaarten
         sessie is null ? [] : (await LaadAsync(sessie, vandaag, annulering).ConfigureAwait(false)).Kaarten;
 
     /// <summary>
-    /// Besluit 234: alles voor Start in één keer laden (boekhouding per administratie één keer, niet ook nog eens voor de
-    /// inrichtingsstatus en de kerncijfers). De kerncijfers rekenen met <see cref="Startgegevens.Boekhouding"/>.
+    /// Besluit 234: alles voor Start in één keer laden (de boekhouding één keer, niet ook nog eens voor de inrichtingsstatus
+    /// en de kerncijfers). De kerncijfers rekenen met <see cref="Startgegevens.Boekhouding"/>.
     /// </summary>
     public static async Task<Startgegevens> LaadAsync(IDatabaseSessie sessie, DateOnly vandaag, CancellationToken annulering = default)
     {
         ArgumentNullException.ThrowIfNull(sessie);
         var administraties = await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false);
         var voortgang = await sessie.Startwizard.LaadAsync(annulering).ConfigureAwait(false);
-        var vereniging = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
-        var stichting = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting, annulering).ConfigureAwait(false);
-        var status = Inrichtingsstatus.Bepaal(administraties, vereniging, stichting);
+        var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
+        var status = Inrichtingsstatus.Bepaal(stand);
         var drempels = administraties.ToDictionary(a => a.Soort, a => new Bedrag(a.ZonderBonDrempel));
-        return new Startgegevens(Bepaal(status, voortgang, vereniging, stichting, vandaag, drempels), vereniging, stichting);
+        return new Startgegevens(Bepaal(status, voortgang, stand, vandaag, drempels), stand);
     }
 
     private static void VoegToe(List<Startkaart> kaarten, BoekhoudingStand stand, Startkaartsoort soort, int aantal, Func<int, string> titel, string tekst, string knop)
@@ -95,9 +92,5 @@ public static class Startkaarten
     private static string Tekst(FormattableString tekst) => tekst.ToString(CultureInfo.InvariantCulture);
 }
 
-/// <summary>De kaarten van Start plus de geladen boekhoudingen, zodat de kerncijfers niet opnieuw hoeven te laden.</summary>
-public sealed record Startgegevens(IReadOnlyList<Startkaart> Kaarten, BoekhoudingStand Vereniging, BoekhoudingStand Stichting)
-{
-    public BoekhoudingStand Boekhouding(AdministratieSoort administratie) =>
-        administratie == AdministratieSoort.Stichting ? Stichting : Vereniging;
-}
+/// <summary>De kaarten van Start plus de geladen boekhouding, zodat de kerncijfers niet opnieuw hoeven te laden.</summary>
+public sealed record Startgegevens(IReadOnlyList<Startkaart> Kaarten, BoekhoudingStand Boekhouding);

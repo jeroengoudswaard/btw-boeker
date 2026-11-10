@@ -146,18 +146,18 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Start_vernieuwen_laadt_de_boekhouding_per_administratie_maar_een_keer()
+    public async Task Start_vernieuwen_laadt_de_boekhouding_maar_een_keer()
     {
         var shell = await OpenAsync();
         var boekhouding = (InMemoryBoekhoudingOpslag)_beheer.LaatsteSessie!.Boekhouding;
         await Task.Delay(50); // het vernieuwen na openen loopt op de achtergrond
         boekhouding.KeerGeladen = 0;
 
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting); // vernieuwt Start
+        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Overzicht, null)); // vernieuwt Start
         await Task.Delay(50);
 
-        // Kaarten, inrichtingsstatus en kerncijfers samen: Vereniging en Stichting elk één keer (was 5 keer).
-        Assert.Equal(2, boekhouding.KeerGeladen);
+        // Kaarten, inrichtingsstatus en kerncijfers samen: één keer laden.
+        Assert.Equal(1, boekhouding.KeerGeladen);
     }
 
     [Fact]
@@ -199,30 +199,14 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Wisselen_van_administratie_houdt_dezelfde_pagina_en_past_de_navigatie_aan()
-    {
-        var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
-        await Kies(shell, "Boekhouding.Bank");
-
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
-
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
-        Assert.Equal(BoekhoudingSubtab.Bank, boekhouding.Subtab);
-        Assert.Equal("Scouting Stichting", shell.ActieveAdministratieNaam);
-    }
-
-    [Fact]
     public async Task Sneltoets_opent_de_module_bij_de_gekozen_administratie_en_markeert_de_navigatie()
     {
         var shell = await OpenAsync();
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
 
         shell.OpenModuleViaSneltoetsCommand.Execute("1");
 
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
+        Assert.Equal(AdministratieSoort.Vereniging, boekhouding.Administratie!.Soort);
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
     }
 
@@ -230,16 +214,15 @@ public sealed class ShellNavigatieTests
     public async Task Laatste_pagina_en_administratie_worden_na_herstart_hersteld()
     {
         var shell = await OpenAsync();
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
         await Kies(shell, "Boekhouding");
         await Kies(shell, "Boekhouding.Rapporten");
         Assert.True(await shell.MagAfsluitenAsync());
 
-        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Stichting, (int)BoekhoudingSubtab.Rapporten), _instellingen.Instellingen.LaatstePagina);
+        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging, (int)BoekhoudingSubtab.Rapporten), _instellingen.Instellingen.LaatstePagina);
         var tweede = await OpenAsync();
 
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(tweede.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Stichting, tweede.GekozenAdministratie!.Soort);
+        Assert.Equal(AdministratieSoort.Vereniging, tweede.GekozenAdministratie!.Soort);
         Assert.Equal(BoekhoudingSubtab.Rapporten, boekhouding.Subtab);
     }
 
@@ -357,7 +340,7 @@ public sealed class ShellNavigatieTests
 
         await Wacht(() => opslag.KeerGeladen > 0);
         await Task.Delay(800);
-        Assert.Equal(2, opslag.KeerGeladen); // één keer per administratie, en het laden zelf meldt geen wijziging
+        Assert.Equal(1, opslag.KeerGeladen); // één keer, en het laden zelf meldt geen wijziging
     }
 
     [Fact]

@@ -14,7 +14,6 @@ internal static class Demodatabase
 {
     public const string Wachtwoord = "demo voorbeeldgroep";
     public const string NaamVereniging = "Scouting De Voorbeeldgroep";
-    public const string NaamStichting = "Stichting Het Voorbeeldhonk";
 
     private static readonly (int Nummer, string Naam, RekeningSoort Soort)[] Rekeningen =
     [
@@ -39,7 +38,7 @@ internal static class Demodatabase
 
         foreach (var administratie in await sessie.Administraties.HaalAlleAsync())
         {
-            administratie.WijzigNaam(administratie.Soort == AdministratieSoort.Vereniging ? NaamVereniging : NaamStichting);
+            administratie.WijzigNaam(NaamVereniging);
             await sessie.Administraties.BewaarAsync(administratie);
         }
 

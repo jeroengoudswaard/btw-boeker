@@ -13,9 +13,12 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Start**: het resultaat tot vandaag staat zonder vergelijking met een begroting.
 - **Excel-overname en historisch boekjaar** (besluiten 25 en 28): *Bestand › Importeren › Boekhouding uit Excel* en *Historie uit Excel*, de knop *Overnemen uit Excel* en de band *Historisch boekjaar*. Inrichten gaat met een sjabloon of leeg; XAF importeren volgt in stap 2b.
 - **Ingebouwde standaardschema's en speltakken** (besluit 28): de knop *Standaardschema gebruiken* en de wizardstap *Speltakken*. De wizard voor een sjabloonbestand heeft nu drie stappen: Rekeningen, Beginsaldi, Klaar. Sjablonen lezen en schrijven (`.btwsjabloon`) blijft.
+- **Tweede administratie en wisselaar** (besluit 26): de app toont één administratie; de keuzelijst *Administratie* in de navigatiebalk en de stap *Administraties* in de startwizard zijn weg. De startwizard: Welkom → Database → Boekhouding → Bank → Klaar.
 
 ### Gewijzigd
 - **Database**: de migratie *VerwijderBegrotingEnMeerjarenplan* verwijdert de tabellen van begroting en meerjarenplan uit een bestaande database. Rekeningschema, boekingen en jaarrekeningindeling blijven ongewijzigd (getest in `MigratieTests`).
+- **Database**: de migratie *EenAdministratie* verwijdert de tweede administratie alleen als die leeg is; met gegevens blijft hij bewaard maar verborgen. Een startwizard op de vervallen stap gaat verder bij *Boekhouding*.
+- **Titelbalk**: linksboven het app-icoon op 16 px in plaats van het woord "BTW".
 - **Database**: de migratie *VerwijderExcelHistorie* verwijdert de historische regels en totalen en een historisch boekjaar (dat had geen journaalposten); gewone boekjaren blijven.
 
 ## [0.18.1] - 2026-11-07: Opslaan, tellers en MSI met versienummer (besluiten 274–278)

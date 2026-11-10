@@ -55,7 +55,7 @@ public sealed class StartwizardTests
     }
 
     [Fact]
-    public async Task Database_aanmaken_namen_opslaan_en_later_verder()
+    public async Task Database_aanmaken_en_later_verder()
     {
         _dialogen.NieuwDatabasebestand = Pad;
         _dialogen.NieuwWachtwoord = Wachtwoord;
@@ -69,13 +69,10 @@ public sealed class StartwizardTests
             await w.NieuweDatabaseCommand.ExecuteAsync(null);
 
             Assert.True(w.Status.DatabaseOpen);
-            Assert.Equal(Startstap.Administraties, w.Huidig); // na het aanmaken direct door
+            Assert.Equal(Startstap.Boekhouding, w.Huidig); // na het aanmaken direct door
             Assert.NotNull(_dialogen.GetoondeHerstelsleutel);
-            var vereniging = w.Namen.Single(n => n.Soort == AdministratieSoort.Vereniging);
-            vereniging.Naam = "Scouting Voorbeeld";
-            await w.VolgendeCommand.ExecuteAsync(null);
-            Assert.Equal(Startstap.Boekhouding, w.Huidig);
             Assert.Equal("●", w.Stappen.Single(s => s.Stap == Startstap.Boekhouding).Teken);
+            Assert.DoesNotContain(w.Stappen, s => s.Titel == "Administraties");
 
             await w.LaterVerderCommand.ExecuteAsync(null);
             Assert.True(w.IsGesloten);
@@ -85,7 +82,6 @@ public sealed class StartwizardTests
         await shell.InitialiseerAsync();
 
         Assert.True(shell.IsDatabaseOpen);
-        Assert.Equal("Scouting Voorbeeld", shell.Administraties.Single(a => a.Soort == AdministratieSoort.Vereniging).Naam);
         Assert.Equal(new Startwizardvoortgang(Startstap.Boekhouding, false), _beheer.Startwizard.Voortgang);
         Assert.Empty(_dialogen.Bevestigingsvragen); // geen vraag om verder te gaan terwijl de wizard openstaat
     }
@@ -127,7 +123,6 @@ public sealed class StartwizardTests
             Assert.Equal(Startstap.Welkom, w.Huidig);
             await w.VolgendeCommand.ExecuteAsync(null);
             Assert.True(w.IsHuidigeStapKlaar); // "Al ingericht" (besluit 175)
-            Assert.True(w.Stappen.Single(s => s.Stap == Startstap.Administraties).IsKlaar); // fake heeft eigen namen
 
             w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Klaar));
 
@@ -154,35 +149,11 @@ public sealed class StartwizardTests
             await w.BoekhoudingInrichtenCommand.ExecuteAsync(Boekhoudingkeuze.Leeg);
 
             Assert.True(w.IsHuidigeStapKlaar);
-            Assert.True(w.Status.BoekhoudingVereniging);
+            Assert.True(w.Status.BoekhoudingIngericht);
         };
 
         await shell.StartwizardCommand.ExecuteAsync(null);
     }
 
-    [Fact]
-    public async Task Bankstap_kan_ook_voor_de_stichting()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        _dialogen.Startwizard = async w =>
-        {
-            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Boekhouding));
-            w.BoekhoudingVoor = AdministratieSoort.Stichting;
-            await w.BoekhoudingInrichtenCommand.ExecuteAsync(Boekhoudingkeuze.Leeg);
-            Assert.True(w.Status.BoekhoudingStichting);
-
-            w.GaNaarCommand.Execute(w.Stappen.Single(s => s.Stap == Startstap.Bank));
-            Assert.False(w.KanBankInlezen); // de Vereniging heeft nog geen boekhouding
-            w.BankVoor = AdministratieSoort.Stichting;
-            Assert.True(w.KanBankInlezen);
-            await w.BankInlezenCommand.ExecuteAsync(null);
-
-            Assert.Contains(w.Klaarregels, r => r.IsKlaar && r.Tekst.Contains("Stichting", StringComparison.Ordinal));
-        };
-
-        await shell.StartwizardCommand.ExecuteAsync(null);
-
-        Assert.Equal(AdministratieSoort.Stichting, Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad).Administratie?.Soort);
-    }
 
 }

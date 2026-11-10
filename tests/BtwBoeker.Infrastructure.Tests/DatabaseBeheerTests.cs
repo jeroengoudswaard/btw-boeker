@@ -101,11 +101,6 @@ public sealed class DatabaseBeheerTests : IDisposable
             {
                 Assert.Equal(AdministratieSoort.Vereniging, a.Soort);
                 Assert.Equal(Administratie.Standaardkleur(AdministratieSoort.Vereniging), a.Accentkleur);
-            },
-            a =>
-            {
-                Assert.Equal(AdministratieSoort.Stichting, a.Soort);
-                Assert.Equal(Administratie.Standaardkleur(AdministratieSoort.Stichting), a.Accentkleur);
             });
     }
 
@@ -156,16 +151,15 @@ public sealed class DatabaseBeheerTests : IDisposable
         await _beheer.MaakAanAsync(DbPad, Wachtwoord);
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var stichting = (await sessie.Administraties.HaalAlleAsync())[1];
-            stichting.WijzigAccentkleur(Kleur.Parse("#6A1B9A"));
-            await sessie.Administraties.BewaarAsync(stichting);
+            var administratie = Assert.Single(await sessie.Administraties.HaalAlleAsync());
+            administratie.WijzigAccentkleur(Kleur.Parse("#6A1B9A"));
+            await sessie.Administraties.BewaarAsync(administratie);
         }
 
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var administraties = await sessie.Administraties.HaalAlleAsync();
-            Assert.Equal(2, administraties.Count);
-            Assert.Equal(Kleur.Parse("#6A1B9A"), administraties[1].Accentkleur);
+            var administratie = Assert.Single(await sessie.Administraties.HaalAlleAsync());
+            Assert.Equal(Kleur.Parse("#6A1B9A"), administratie.Accentkleur);
         }
     }
 
@@ -176,7 +170,7 @@ public sealed class DatabaseBeheerTests : IDisposable
 
         await using (var sessie = await _beheer.OpenMetHerstelsleutelAsync(DbPad, herstel, "mijn nieuwe wachtwoord"))
         {
-            Assert.Equal(2, (await sessie.Administraties.HaalAlleAsync()).Count);
+            Assert.Single(await sessie.Administraties.HaalAlleAsync());
         }
 
         await Assert.ThrowsAsync<OngeldigeSleutelException>(() => _beheer.OpenAsync(DbPad, Wachtwoord));

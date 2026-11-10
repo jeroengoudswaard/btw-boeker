@@ -195,38 +195,11 @@ public sealed class ShellViewModelTests
     // ---- Tabbladen -------------------------------------------------------------------------
 
     [Fact]
-    public async Task Zelfde_module_voor_beide_administraties_geeft_twee_herkenbare_tabbladen()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
-
-        Assert.Equal(3, shell.Tabbladen.Count);
-        Assert.Equal("Boekhouding · Scouting Vereniging", shell.Tabbladen[1].Titel);
-        Assert.Equal("Boekhouding · Scouting Stichting", shell.Tabbladen[2].Titel);
-        Assert.NotEqual(shell.Tabbladen[1].Administratie!.Accentkleur, shell.Tabbladen[2].Administratie!.Accentkleur);
-    }
-
-    [Fact]
     public async Task Financiele_module_zonder_administratie_wordt_geweigerd()
     {
         var shell = await MaakShellMetOpenDatabase();
 
         Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Boekhouding, null)));
-    }
-
-    [Fact]
-    public async Task Sneltoets_gebruikt_administratie_van_actief_tabblad()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
-
-        shell.OpenModuleViaSneltoetsCommand.Execute("1");
-
-        var boekhouding = Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
-        Assert.Single(shell.Tabbladen, t => t.Module.Soort == ModuleSoort.Boekhouding);
     }
 
     [Fact]
@@ -304,7 +277,7 @@ public sealed class ShellViewModelTests
     public async Task Laatste_pagina_wordt_bewaard_bij_sluiten_en_hersteld_bij_openen()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
+        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
@@ -314,8 +287,8 @@ public sealed class ShellViewModelTests
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Equal("Boekhouding · Scouting Stichting", shell.GeselecteerdTabblad!.Titel);
-        Assert.Equal(AdministratieSoort.Stichting, shell.GekozenAdministratie!.Soort);
+        Assert.Equal("Boekhouding · Scouting Vereniging", shell.GeselecteerdTabblad!.Titel);
+        Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
     }
 
     [Fact]
@@ -374,11 +347,11 @@ public sealed class ShellViewModelTests
     public async Task Statusbalk_toont_database_administratie_en_boekjaar()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
+        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
 
         Assert.Equal("btw-boeker.btwdb", shell.DatabaseNaam);
-        Assert.Equal("Scouting Stichting", shell.ActieveAdministratieNaam);
+        Assert.Equal("Scouting Vereniging", shell.ActieveAdministratieNaam);
         Assert.Equal("Boekjaar 2026", shell.Boekjaartekst);
-        Assert.Contains("Scouting Stichting", shell.Venstertitel, StringComparison.Ordinal);
+        Assert.Contains("Scouting Vereniging", shell.Venstertitel, StringComparison.Ordinal);
     }
 }

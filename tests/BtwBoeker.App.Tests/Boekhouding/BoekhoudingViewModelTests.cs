@@ -228,15 +228,16 @@ public sealed class BoekhoudingViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Stichting_heeft_eigen_lege_boekhouding()
+    public async Task Een_andere_administratie_heeft_een_eigen_lege_boekhouding()
     {
+        // Besluit 26: het model blijft per administratie, ook al toont de app er één.
         await _omgeving.OpenIngerichtAsync();
-        var stichting = new ViewModels.AdministratieViewModel(new Administratie(AdministratieSoort.Stichting, "Stichting", Administratie.Standaardkleur(AdministratieSoort.Stichting)));
+        var ander = new ViewModels.AdministratieViewModel(new Administratie((AdministratieSoort)2, "Tweede huisje", Kleur.Parse("#1565C0")));
 
-        var vm = _omgeving.Maak(stichting);
+        var vm = _omgeving.Maak(ander);
         await vm.VernieuwCommand.ExecuteAsync(null);
 
         Assert.False(vm.IsIngericht);
-        Assert.Equal("Boekhouding · Stichting", vm.Titel);
+        Assert.Equal("Boekhouding · Tweede huisje", vm.Titel);
     }
 }

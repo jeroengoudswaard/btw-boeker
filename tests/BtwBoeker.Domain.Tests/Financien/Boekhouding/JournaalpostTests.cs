@@ -58,7 +58,7 @@ public class JournaalpostTests
     {
         var oud = new Grootboekrekening(Ver, 4999, "Oud", RekeningSoort.Resultaat, null);
         oud.Deactiveer();
-        var stichting = new Grootboekrekening(AdministratieSoort.Stichting, 4000, "Stichting", RekeningSoort.Resultaat, null);
+        var stichting = new Grootboekrekening((AdministratieSoort)2, 4000, "Andere administratie", RekeningSoort.Resultaat, null);
 
         Assert.Contains(Post((oud, 100, 0), (Verzekering, 0, 100)).Controleer(), f => f.Contains("inactief", StringComparison.Ordinal));
         Assert.Contains(Post((stichting, 100, 0), (Verzekering, 0, 100)).Controleer(), f => f.Contains("administratie", StringComparison.Ordinal));

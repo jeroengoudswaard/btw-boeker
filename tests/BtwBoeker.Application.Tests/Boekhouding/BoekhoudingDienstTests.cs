@@ -277,9 +277,9 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         var leeg = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new FakeSessie(leeg);
 
-        await new BoekhoudingDienst(sessie, new VasteTijd(new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero))).RichtInAsync(AdministratieSoort.Stichting);
+        await new BoekhoudingDienst(sessie, new VasteTijd(new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero))).RichtInAsync((AdministratieSoort)2);
 
-        Assert.Contains(leeg.Dagboeken, d => d.Code == "MEM" && d.Administratie == AdministratieSoort.Stichting);
+        Assert.Contains(leeg.Dagboeken, d => d.Code == "MEM" && d.Administratie == (AdministratieSoort)2);
         Assert.Equal(2026, Assert.Single(leeg.Boekjaren).Jaar);
     }
 

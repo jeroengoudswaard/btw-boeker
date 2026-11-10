@@ -9,7 +9,6 @@ public enum Startstap
 {
     Welkom,
     Database,
-    Administraties,
     Boekhouding,
     Bank,
     Klaar,
@@ -29,24 +28,15 @@ public interface IStartwizardOpslag
     Task BewaarAsync(Startwizardvoortgang voortgang, CancellationToken annulering = default);
 }
 
-public sealed record Inrichtingsstatus(
-    bool DatabaseOpen,
-    bool NamenIngevuld,
-    bool BoekhoudingVereniging,
-    bool BoekhoudingStichting,
-    bool BankVereniging,
-    bool BankStichting = false)
+public sealed record Inrichtingsstatus(bool DatabaseOpen, bool BoekhoudingIngericht, bool BankGekoppeld)
 {
-    public const string Standaardnaam = "Vereniging";
-
-    public static Inrichtingsstatus Leeg { get; } = new(false, false, false, false, false);
+    public static Inrichtingsstatus Leeg { get; } = new(false, false, false);
 
     public bool IsKlaar(Startstap stap) => stap switch
     {
         Startstap.Database => DatabaseOpen,
-        Startstap.Administraties => NamenIngevuld,
-        Startstap.Boekhouding => BoekhoudingVereniging,
-        Startstap.Bank => BankVereniging,
+        Startstap.Boekhouding => BoekhoudingIngericht,
+        Startstap.Bank => BankGekoppeld,
         _ => false,
     };
 
@@ -54,20 +44,10 @@ public sealed record Inrichtingsstatus(
         Enum.GetValues<Startstap>().Where(s => s is not (Startstap.Welkom or Startstap.Klaar))
             .Cast<Startstap?>().FirstOrDefault(s => !IsKlaar(s!.Value));
 
-    public static Inrichtingsstatus Bepaal(
-        IReadOnlyList<Administratie> administraties, BoekhoudingStand vereniging, BoekhoudingStand stichting)
+    public static Inrichtingsstatus Bepaal(BoekhoudingStand stand)
     {
-        ArgumentNullException.ThrowIfNull(administraties);
-        ArgumentNullException.ThrowIfNull(vereniging);
-        ArgumentNullException.ThrowIfNull(stichting);
-        var naam = administraties.FirstOrDefault(a => a.Soort == AdministratieSoort.Vereniging)?.Naam;
-        return new Inrichtingsstatus(
-            DatabaseOpen: true,
-            NamenIngevuld: naam is not null && !string.Equals(naam, Standaardnaam, StringComparison.Ordinal),
-            BoekhoudingVereniging: IsIngericht(vereniging),
-            BoekhoudingStichting: IsIngericht(stichting),
-            BankVereniging: HeeftBank(vereniging),
-            BankStichting: HeeftBank(stichting));
+        ArgumentNullException.ThrowIfNull(stand);
+        return new Inrichtingsstatus(DatabaseOpen: true, BoekhoudingIngericht: IsIngericht(stand), BankGekoppeld: HeeftBank(stand));
     }
 
     private static bool IsIngericht(BoekhoudingStand stand) => stand.IsIngericht || stand.Dagboeken.Count > 0;
@@ -81,9 +61,6 @@ public sealed record Inrichtingsstatus(
             return Leeg;
         }
 
-        var administraties = await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false);
-        var vereniging = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false);
-        var stichting = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Stichting, annulering).ConfigureAwait(false);
-        return Bepaal(administraties, vereniging, stichting);
+        return Bepaal(await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false));
     }
 }
