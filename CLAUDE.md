@@ -61,26 +61,35 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 16 | Buiten beeld | Geen buitenlandse platformkosten, geen verleggingsregeling en geen EU-transacties. Een all-in prijs wordt niet automatisch gesplitst |
 | 17 | Bedragen | Altijd in hele centen (`Bedrag.Centen`); afronden op de helft naar boven (`MidpointRounding.AwayFromZero`) |
 | 18 | Installatie | MSI (WiX 5), self-contained win-x64, `BtwBoeker-<versie>.msi`, eigen UpgradeCode; geen codesigning in de bèta |
-| 19 | Website | De release-workflow publiceert alleen naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat. Er is nog geen BTW-Boeker-pagina |
+| 19 | Website | De release-workflow publiceert alleen naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat. Er is nog geen BTW-Boeker-pagina; een eigen pagina op de website mag (besluit 24) |
 | 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests`. De Android-iconen in `assets/android/` horen bij Verenigd en blijven voorlopig staan |
+| 21 | Rekeningschema | Het schema uit e-Boekhouden (2026-11-10). De gebruiker levert een XAF-export; die wordt alleen lokaal gelezen (map `prive/`, nooit in Git) |
+| 22 | Inkomende stukken | De Landal-afrekening komt als PDF; daarnaast andere rekeningen, zoals voorschotnota's voor energie. De indeling volgt uit een voorbeeld-PDF van de gebruiker (lokaal, nooit in Git) |
+| 23 | Privégebruik | Het huisje wordt ook privé gebruikt; dat staat apart vermeld op de nota's (aanvulling op besluit 15) |
+| 24 | Websitepagina | Er mag een eigen pagina voor BTW-Boeker op de website komen; inhoud en moment volgen in stap 4 |
+| 25 | XAF importeren | Een XAF-bestand (uit e-Boekhouden) wordt volledig overgenomen: rekeningschema, beginsaldi (`openingBalance`) en alle boekingen van het jaar (keuze 1C). Inlezen gebeurt XXE-veilig en wordt gecontroleerd tegen het XSD. Vervangt de Excel-overname, het historisch boekjaar en de ingebouwde standaardschema's |
+| 26 | Eén administratie | Het datamodel per administratie blijft bestaan, maar de app toont één administratie, zonder wisselaar (keuze 2A). Een tweede object blijft later mogelijk |
+| 27 | Jaarrekeningindeling | Blijft bestaan (keuze 3A) |
+| 28 | Ontwerp stap 2 | Goedgekeurd (2026-11-10): begroting, meerjarenplan, Excel-overname, historisch boekjaar en de standaardschema's Vereniging/Stichting verdwijnen; startwizard Welkom → Database → Rekeningschema (XAF) → Bank → Klaar; navigatie Start · Boekhouding · Instellingen. Eerst verwijderen met de suite groen, daarna de XAF-import. `.gitignore` bevat de extensies `.btwdb`, `.btwdb.sleutel`, `.btwbackup` en `.xaf` (keuze 4A; een sjabloon `.btwsjabloon` bevat geen gegevens en mag wel in Git; geanonimiseerde XAF-testbestanden krijgen de extensie `.xml`) |
 
 ## Planning
 
-1. **Hernoemen** van Verenigd naar BtwBoeker: uitgevoerd (2026-11-09); bouwfouten opgelost, nog te bouwen en te testen op Windows.
+1. **Hernoemen** van Verenigd naar BtwBoeker: gereed (2026-11-10), gebouwd en getest op Windows.
 2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Eerst een ontwerp ter goedkeuring.
 3. **Btw-integratie**, test-first: btw-code en prestatiedatum op journaalregels, opslag en migratie, btw-rekeningen en automatische boekingsregels, invoer in de posteditor, maandrapport en export.
 4. Documentatie (README, CHANGELOG, installatie) en validatie op Windows.
 
-Nog open vragen voor stap 2 en 3: welk rekeningschema (voorstel van circa 25 rekeningen, of dat uit e-Boekhouden), de indeling van de Landal-afrekening en of het huisje ook privé wordt gebruikt.
+Antwoorden op de open vragen (2026-11-10): rekeningschema uit e-Boekhouden (besluit 21), Landal-afrekening als PDF plus andere nota's (besluit 22), ook privégebruik (besluit 23). Nog te leveren door de gebruiker: een XAF-export uit e-Boekhouden en een voorbeeld-PDF van de Landal-afrekening en een energienota, in `prive/`.
 
 ## Stand van zaken (bijwerken na elke sessie)
 
-- **Stap 1 (hernoemen): uitgevoerd; opgelost na de eerste Windows-build, wacht op een nieuwe build en testrun.** 273 bestanden aangepast.
+- **Stap 1 (hernoemen): gereed.** 273 bestanden aangepast.
+- **Windows-test (2026-11-10, Windows 11, branch `hernoemen-btwboeker`):** build zonder waarschuwingen. Eerste run 584/586: `ProductnaamTests` vond (1) lokale `bin`/`obj`-restanten in mappen `Verenigd.*` van de oude checkout (verwijderd; geen fout in Git) en (2) de omgevingsvariabelen `VERENIGD_SCREENSHOTS` en `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN`. Die heten nu `BTWBOEKER_*` (commit `2ba9443`). Daarna **586/586 geslaagd** (Domain 117, Application 195, Architectuur 30, Infrastructure 62, App 182), met `--blame-hang --blame-hang-timeout 4m`.
 - **Eerste build op Windows (2026-11-09, branch `hernoemen-btwboeker`):** 0 waarschuwingen en 57 compilefouten in `BtwBoeker.Infrastructure.Tests` en `BtwBoeker.App.Tests`; de overige projecten bouwden.
   - Oorzaak: de zoek-en-vervangslag zette "Verenigd" ook in namen om naar "BTW-Boeker"; het koppelteken is ongeldig in een C#-namespace of -methodenaam. Het ging om `BTW-Boeker.Tests.Gedeeld` (4 bestanden) en de methode `Standaardpaden_zijn_gescheiden_van_BTW-Boeker`.
   - Opgelost: namespace `BtwBoeker.Tests.Gedeeld`; de paden-test heet nu `Standaardpaden_staan_in_de_eigen_btwboeker_map`, en zijn twee `DoesNotContain("BTW-Boeker")`-regels zijn vervallen (ze spraken zichzelf tegen). Nieuwe test in `ProductnaamTests` verbiedt een koppelteken in namespace-, using- en methoderegels.
   - Ook gecorrigeerd: de snelkoppeling in `installer/Package.wxs` wees naar `BtwBoeker.exe`, maar de assemblynaam van de app is `BTW-Boeker`, dus het uitvoerbestand is `BTW-Boeker.exe`.
-  - Nog niet opnieuw gebouwd of getest (in de cloudsessie is NuGet geblokkeerd). **Nog op Windows te doen:** `dotnet build BtwBoeker.slnx` en de volledige suite, inclusief `ProductnaamTests`.
+  - Daarna gebouwd en getest op Windows (zie hierboven).
 - **Ontwikkelomgeving:** .NET SDK 10, Visual Studio of VS Code; de gebruiker draait Windows-tests zelf.
 - **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`.
 - De historie van Verenigd (besluiten 1–278) staat in de repository van Verenigd en in `CHANGELOG.md`.

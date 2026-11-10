@@ -482,6 +482,10 @@ $RECYCLE.BIN/
 *.swp
 
 # ---- BTW-Boeker: NOOIT echte gegevens in Git (AVG) ----
+*.btwdb
+*.btwdb.sleutel
+*.btwbackup
+*.xaf
 *.vdb
 *.vdb.sleutel
 *.vbak
