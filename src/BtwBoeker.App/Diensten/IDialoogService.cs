@@ -65,7 +65,7 @@ public interface IDialoogService
     string? KiesSjabloonDoel(string voorgesteldeNaam);
 
     /// <returns><c>true</c> als de administratie is ingericht.</returns>
-    bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard);
+    bool ToonSjablooninrichting(SjablooninrichtingViewModel wizard);
 
     /// <returns><c>true</c> als de jaarrekeningindeling is opgeslagen (besluiten 263–268).</returns>
     bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor);

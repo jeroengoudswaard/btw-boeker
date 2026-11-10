@@ -106,7 +106,7 @@ internal sealed class WpfDialoogService : IDialoogService
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
-    public bool ToonStandaardinrichting(StandaardinrichtingViewModel wizard) => ToonModaal(new StandaardinrichtingVenster(wizard));
+    public bool ToonSjablooninrichting(SjablooninrichtingViewModel wizard) => ToonModaal(new SjablooninrichtingVenster(wizard));
 
     public bool ToonJaarrekeningIndeling(JaarrekeningIndelingViewModel editor) => ToonModaal(new JaarrekeningIndelingVenster(editor));
 

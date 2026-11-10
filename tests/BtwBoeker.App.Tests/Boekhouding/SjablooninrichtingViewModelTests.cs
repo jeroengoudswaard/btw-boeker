@@ -1,11 +1,12 @@
 using BtwBoeker.App.ViewModels.Boekhouding;
 using BtwBoeker.Application.Boekhouding;
+using BtwBoeker.Application.Tests.Boekhouding;
 using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.Tests.Boekhouding;
 
-/// <summary>Standaardinrichting en sjablonen (besluiten 114–120).</summary>
-public sealed class StandaardinrichtingViewModelTests : IDisposable
+/// <summary>Inrichten met een rekeningschema-sjabloon: rekeningen, beginsaldi en klaar.</summary>
+public sealed class SjablooninrichtingViewModelTests : IDisposable
 {
     private readonly BoekhoudingTestomgeving _omgeving = new();
     private readonly List<string> _bestanden = [];
@@ -22,8 +23,8 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
 
     private BoekhoudingDienst Dienst => new(_omgeving.Sessie, _omgeving.Tijd);
 
-    private StandaardinrichtingViewModel Wizard(AdministratieSoort soort = AdministratieSoort.Vereniging, Rekeningsjabloon? sjabloon = null) =>
-        new(Dienst, soort, sjabloon ?? Rekeningsjablonen.Standaard(soort), 2026);
+    private SjablooninrichtingViewModel Wizard(Rekeningsjabloon? sjabloon = null) =>
+        new(Dienst, AdministratieSoort.Vereniging, sjabloon ?? Testsjabloon.Verhuur(), 2026);
 
     private string Bestand(string inhoud)
     {
@@ -46,7 +47,6 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
             return antwoord;
         };
         await wizard.VolgendeCommand.ExecuteAsync(null);
-        await wizard.VolgendeCommand.ExecuteAsync(null);
         Assert.Equal(InrichtStap.Beginsaldi, wizard.Stap);
 
         await wizard.VolgendeCommand.ExecuteAsync(null);
@@ -63,28 +63,18 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Vereniging_inrichten_met_speltakken_keuzes_en_beginsaldi()
+    public async Task Inrichten_met_keuzes_namen_en_een_bewust_geboekt_verschil()
     {
         var wizard = Wizard();
 
-        Assert.True(wizard.HeeftSpeltakken);
-        Assert.Equal(InrichtStap.Speltakken, wizard.Stap);
-        Assert.Equal(["Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts"], wizard.Speltakken.Select(s => s.Naam));
-        wizard.Speltakken[0].IsGekozen = false;
-        wizard.NieuweSpeltak = "Stam";
-        wizard.SpeltakToevoegenCommand.Execute(null);
-        Assert.Equal(string.Empty, wizard.NieuweSpeltak);
-        await wizard.VolgendeCommand.ExecuteAsync(null);
-
         Assert.Equal(InrichtStap.Rekeningen, wizard.Stap);
-        Assert.Equal("Contributie Welpen", wizard.Rekeningen.Single(r => r.Nummer == 8010).Naam);
-        Assert.Equal("Contributie Stam", wizard.Rekeningen.Single(r => r.Nummer == 8050).Naam);
+        Assert.False(wizard.VorigeCommand.CanExecute(null));
         var reserve = wizard.Rekeningen.Single(r => r.Nummer == 600);
         Assert.True(reserve.IsVerplicht);
         reserve.IsGekozen = false;
         Assert.True(reserve.IsGekozen);
         wizard.Rekeningen.Single(r => r.Nummer == 4120).IsGekozen = false;
-        wizard.Rekeningen.Single(r => r.Nummer == 4100).Naam = "Opkomsten";
+        wizard.Rekeningen.Single(r => r.Nummer == 4100).Naam = "Klein onderhoud";
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.Equal(InrichtStap.Beginsaldi, wizard.Stap);
@@ -104,7 +94,7 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
         Assert.Equal(wizard.Rekeningen.Count(r => r.IsGekozen) + 1, stand.Rekeningen.Count); // + 1299
         Assert.DoesNotContain(stand.Rekeningen, r => r.Nummer == 4120);
-        Assert.Equal("Opkomsten", stand.Rekeningen.Single(r => r.Nummer == 4100).Naam);
+        Assert.Equal("Klein onderhoud", stand.Rekeningen.Single(r => r.Nummer == 4100).Naam);
         Assert.Contains(stand.Dagboeken, d => d.Code == "VRK");
         Assert.Contains("1299", wizard.Samenvatting, StringComparison.Ordinal);
     }
@@ -113,7 +103,7 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
     [Fact]
     public async Task Beginjaar_is_te_kiezen_en_bepaalt_boekjaar_en_openingsbalans()
     {
-        var wizard = Wizard(AdministratieSoort.Stichting);
+        var wizard = Wizard();
 
         Assert.Equal(2026, wizard.Beginjaar);
         Assert.Contains(2025, wizard.Beginjaren);
@@ -121,12 +111,12 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         wizard.Beginjaar = 2025;
         Assert.Equal("Beginsaldi per 01-01-2025", wizard.Beginsaldititel);
         await wizard.VolgendeCommand.ExecuteAsync(null);
-        wizard.Balansrekeningen[0].Debettekst = "100";
-        wizard.Balansrekeningen[1].Credittekst = "100";
+        wizard.Balansrekeningen.Single(r => r.Nummer == 1100).Debettekst = "100";
+        wizard.Balansrekeningen.Single(r => r.Nummer == 600).Credittekst = "100";
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.True(wizard.IsKlaar, wizard.Foutmelding);
-        var stand = await Dienst.LaadAsync(AdministratieSoort.Stichting);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
         Assert.NotNull(stand.Boekjaar(2025));
         Assert.Null(stand.Boekjaar(2026));
         Assert.Contains(stand.Posten, p => p.Datum == new DateOnly(2025, 1, 1));
@@ -134,13 +124,9 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Stichting_begint_bij_de_rekeningen_en_een_ongeldig_bedrag_houdt_tegen()
+    public async Task Een_ongeldig_bedrag_houdt_tegen_en_zonder_beginsaldi_is_er_geen_openingspost()
     {
-        var wizard = Wizard(AdministratieSoort.Stichting);
-
-        Assert.False(wizard.HeeftSpeltakken);
-        Assert.Equal(InrichtStap.Rekeningen, wizard.Stap);
-        Assert.False(wizard.VorigeCommand.CanExecute(null));
+        var wizard = Wizard();
         await wizard.VolgendeCommand.ExecuteAsync(null);
         var bank = wizard.Balansrekeningen.Single(r => r.Nummer == 1100);
         bank.Debettekst = "abc";
@@ -150,8 +136,8 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.True(wizard.IsKlaar);
-        var stand = await Dienst.LaadAsync(AdministratieSoort.Stichting);
-        Assert.Contains(stand.Rekeningen, r => r.Nummer == 200);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
+        Assert.Contains(stand.Rekeningen, r => r.Nummer == 1100);
         Assert.Empty(stand.Posten);
     }
 
@@ -159,16 +145,17 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
     public void Een_sjabloon_voor_de_andere_administratie_geeft_een_waarschuwing()
     {
         Assert.Null(Wizard().Waarschuwing);
-        Assert.Contains("Stichting", Wizard(AdministratieSoort.Vereniging, Rekeningsjablonen.Standaard(AdministratieSoort.Stichting)).Waarschuwing, StringComparison.Ordinal);
+        Assert.NotNull(Wizard(Testsjabloon.Verhuur(AdministratieSoort.Stichting)).Waarschuwing);
     }
 
     [Fact]
-    public async Task Tabblad_richt_in_met_standaardschema_en_exporteert_het_als_sjabloon()
+    public async Task Tabblad_richt_in_met_een_sjabloonbestand_en_exporteert_het_weer()
     {
         var vm = _omgeving.Maak();
         await vm.VernieuwCommand.ExecuteAsync(null);
         Assert.True(vm.IsLeeg);
-        _omgeving.Dialogen.Standaardinrichting = async wizard =>
+        _omgeving.Dialogen.Sjabloonbestand = Bestand(Rekeningsjablonen.Schrijf(Testsjabloon.Verhuur()));
+        _omgeving.Dialogen.Sjablooninrichting = async wizard =>
         {
             while (!wizard.IsKlaar && wizard.VolgendeCommand.CanExecute(null))
             {
@@ -178,10 +165,10 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
             return wizard.IsKlaar;
         };
 
-        await vm.StandaardInrichtenCommand.ExecuteAsync(null);
+        await vm.SjabloonInlezenCommand.ExecuteAsync(null);
 
         Assert.True(vm.IsIngericht);
-        Assert.Contains(vm.Rekeningkeuzes, r => r.Naam == "Contributie Bevers");
+        Assert.Contains(vm.Rekeningkeuzes, r => r.Naam == "Verhuur");
         var doel = Bestand(string.Empty);
         _omgeving.Dialogen.SjabloonDoel = doel;
         await vm.ExporteerSjabloonCommand.ExecuteAsync(null);
@@ -191,7 +178,7 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Tabblad_leest_een_sjabloonbestand_en_meldt_een_ongeldig_bestand()
+    public async Task Tabblad_meldt_een_ongeldig_sjabloonbestand()
     {
         var vm = _omgeving.Maak();
         await vm.VernieuwCommand.ExecuteAsync(null);
@@ -201,16 +188,16 @@ public sealed class StandaardinrichtingViewModelTests : IDisposable
         Assert.Contains("geen rekeningschema-sjabloon", vm.Foutmelding, StringComparison.Ordinal);
         Assert.False(vm.IsIngericht);
 
-        StandaardinrichtingViewModel? getoond = null;
-        _omgeving.Dialogen.Standaardinrichting = wizard =>
+        SjablooninrichtingViewModel? getoond = null;
+        _omgeving.Dialogen.Sjablooninrichting = wizard =>
         {
             getoond = wizard;
             return Task.FromResult(false);
         };
-        _omgeving.Dialogen.Sjabloonbestand = Bestand(Rekeningsjablonen.Schrijf(Rekeningsjablonen.Standaard(AdministratieSoort.Stichting)));
+        _omgeving.Dialogen.Sjabloonbestand = Bestand(Rekeningsjablonen.Schrijf(Testsjabloon.Verhuur()));
         await vm.SjabloonInlezenCommand.ExecuteAsync(null);
         Assert.NotNull(getoond);
-        Assert.Equal("Standaardschema Stichting (scouting)", getoond.Sjabloonnaam);
+        Assert.Equal(Testsjabloon.Naam, getoond.Sjabloonnaam);
         Assert.False(vm.IsIngericht);
     }
 }

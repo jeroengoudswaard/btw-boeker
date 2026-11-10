@@ -4,11 +4,11 @@ using BtwBoeker.App.ViewModels.Boekhouding;
 
 namespace BtwBoeker.App.Views.Boekhouding;
 
-public partial class StandaardinrichtingVenster : Window
+public partial class SjablooninrichtingVenster : Window
 {
-    private readonly StandaardinrichtingViewModel _viewModel;
+    private readonly SjablooninrichtingViewModel _viewModel;
 
-    public StandaardinrichtingVenster(StandaardinrichtingViewModel viewModel)
+    public SjablooninrichtingVenster(SjablooninrichtingViewModel viewModel)
     {
         InitializeComponent();
         DataContext = _viewModel = viewModel;
@@ -31,7 +31,7 @@ public partial class StandaardinrichtingVenster : Window
 
     private void ViewModelGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(StandaardinrichtingViewModel.Stap))
+        if (e.PropertyName == nameof(SjablooninrichtingViewModel.Stap))
         {
             MarkeerStap();
         }
@@ -39,7 +39,7 @@ public partial class StandaardinrichtingVenster : Window
 
     private void MarkeerStap()
     {
-        var stappen = new[] { Stap1, Stap2, Stap3, Stap4 };
+        var stappen = new[] { Stap1, Stap2, Stap3 };
         for (var i = 0; i < stappen.Length; i++)
         {
             var actief = i == (int)_viewModel.Stap;

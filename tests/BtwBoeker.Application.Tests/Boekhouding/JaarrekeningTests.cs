@@ -222,7 +222,6 @@ public sealed class JaarrekeningTests
         Assert.Equal(2, terug.Jaarrekening.Count);
         Assert.Equal(["Contributie", "Activiteiten"], terug.Jaarrekening[1].Rubrieken);
         Assert.Contains("\"jaarrekening\"", tekst, StringComparison.Ordinal);
-        Assert.Empty(Rekeningsjablonen.Standaard(AdministratieSoort.Vereniging).Jaarrekening);
         var fout = terug with
         {
             Jaarrekening = [new(JaarrekeningRapport.BatenEnLasten, JaarrekeningAfdeling.Baten, IndelingsregelSoort.Regel, "X", ["Bestaat niet"])],

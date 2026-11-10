@@ -120,10 +120,8 @@
                     <ComboBox ItemsSource="{Binding Source={x:Static vm:StartwizardViewModel.BoekhoudingKeuzes}}" SelectedItem="{Binding BoekhoudingVoor}"
                               Width="220" AutomationProperties.AutomationId="StartwizardBoekhoudingVoor" />
                     <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                        <Button Content="Standaardschema..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Standaard}"
-                                AutomationProperties.AutomationId="StartwizardStandaard" />
                         <Button Content="Sjabloon..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Sjabloon}"
-                                Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardSjabloon" />
+                                AutomationProperties.AutomationId="StartwizardSjabloon" />
                         <Button Content="Leeg beginnen" Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Leeg}"
                                 Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardLeeg" />
                     </StackPanel>

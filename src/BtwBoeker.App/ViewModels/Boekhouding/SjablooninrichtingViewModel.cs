@@ -12,18 +12,9 @@ namespace BtwBoeker.App.ViewModels.Boekhouding;
 
 public enum InrichtStap
 {
-    Speltakken,
     Rekeningen,
     Beginsaldi,
     Klaar,
-}
-
-public sealed partial class SpeltakKeuze(string naam) : ObservableObject
-{
-    public string Naam { get; } = naam;
-
-    [ObservableProperty]
-    public partial bool IsGekozen { get; set; } = true;
 }
 
 /// <summary>Eén rekening uit het sjabloon: aan of uit, naam aan te passen en (bij een balansrekening) een beginsaldo.</summary>
@@ -86,17 +77,16 @@ public sealed partial class InrichtRekeningRegel : ObservableObject
 }
 
 /// <summary>
-/// Inrichten met een sjabloon (besluiten 114–120): 1 speltakken (alleen als het sjabloon contributierekeningen per speltak
-/// kent), 2 rekeningen aan/uit en namen, 3 beginsaldi met de controle debet = credit (een verschil alleen bewust op een
-/// tussenrekening, besluit 73), 4 klaar. Het inrichten zelf loopt via BoekhoudingDienst.ImporteerAsync.
+/// Inrichten met een rekeningschema-sjabloon: 1 rekeningen aan/uit en namen, 2 beginsaldi met de controle debet = credit
+/// (een verschil alleen bewust op een tussenrekening), 3 klaar. Het inrichten zelf loopt via BoekhoudingDienst.ImporteerAsync.
 /// </summary>
-public sealed partial class StandaardinrichtingViewModel : ObservableObject
+public sealed partial class SjablooninrichtingViewModel : ObservableObject
 {
     private readonly BoekhoudingDienst _dienst;
     private readonly AdministratieSoort _administratie;
     private readonly Rekeningsjabloon _sjabloon;
 
-    public StandaardinrichtingViewModel(BoekhoudingDienst dienst, AdministratieSoort administratie, Rekeningsjabloon sjabloon, int beginjaar)
+    public SjablooninrichtingViewModel(BoekhoudingDienst dienst, AdministratieSoort administratie, Rekeningsjabloon sjabloon, int beginjaar)
     {
         ArgumentNullException.ThrowIfNull(sjabloon);
         _dienst = dienst;
@@ -104,18 +94,9 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
         _sjabloon = sjabloon;
         Beginjaren = [.. Enumerable.Range(beginjaar - 5, 6)];
         Beginjaar = beginjaar;
-        foreach (var naam in sjabloon.Speltakken?.Standaard ?? [])
-        {
-            Speltakken.Add(new SpeltakKeuze(naam));
-        }
-
         VolgendeCommand = new AsyncRelayCommand(VolgendeAsync, KanVolgende);
         VorigeCommand = new RelayCommand(Vorige, KanVorige);
-        if (!HeeftSpeltakken)
-        {
-            VulRekeningen();
-            Stap = InrichtStap.Rekeningen;
-        }
+        VulRekeningen();
     }
 
     public string Sjabloonnaam => _sjabloon.Naam;
@@ -127,14 +108,10 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Beginsaldititel))]
     public partial int Beginjaar { get; set; }
 
-    public bool HeeftSpeltakken => _sjabloon.Speltakken is not null;
-
     /// <summary>Gevuld als het sjabloon voor de andere administratie bedoeld is.</summary>
     public string? Waarschuwing => _sjabloon.Administratie is { } soort && soort != _administratie
         ? $"Dit sjabloon is bedoeld voor de {soort}; controleer de rekeningen goed."
         : null;
-
-    public ObservableCollection<SpeltakKeuze> Speltakken { get; } = [];
 
     public ObservableCollection<InrichtRekeningRegel> Rekeningen { get; } = [];
 
@@ -147,9 +124,6 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Volgendetekst), nameof(IsKlaar))]
     public partial InrichtStap Stap { get; private set; }
-
-    [ObservableProperty]
-    public partial string NieuweSpeltak { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool IsBezig { get; private set; }
@@ -203,27 +177,14 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
 
     private Inrichtvoorstel Voorstel => Rekeningsjablonen.Voorstel([.. Rekeningen.Where(r => r.Fout is null).Select(r => r.Gekozen)], Beginjaar);
 
-    [RelayCommand]
-    private void SpeltakToevoegen()
-    {
-        var naam = NieuweSpeltak.Trim();
-        if (naam.Length > 0 && !Speltakken.Any(s => string.Equals(s.Naam, naam, StringComparison.OrdinalIgnoreCase)))
-        {
-            Speltakken.Add(new SpeltakKeuze(naam));
-        }
-
-        NieuweSpeltak = string.Empty;
-    }
-
     private bool KanVolgende() => !IsBezig && Stap switch
     {
-        InrichtStap.Speltakken => true,
         InrichtStap.Rekeningen => Rekeningfout is null,
         InrichtStap.Beginsaldi => Rekeningfout is null && (IsInEvenwicht || (VerschilBewustBoeken && Verschilfout is null)),
         _ => false,
     };
 
-    private bool KanVorige() => !IsBezig && (Stap == InrichtStap.Beginsaldi || (Stap == InrichtStap.Rekeningen && HeeftSpeltakken));
+    private bool KanVorige() => !IsBezig && Stap == InrichtStap.Beginsaldi;
 
     private async Task VolgendeAsync()
     {
@@ -234,10 +195,6 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
         {
             switch (Stap)
             {
-                case InrichtStap.Speltakken:
-                    VulRekeningen();
-                    Stap = InrichtStap.Rekeningen;
-                    break;
                 case InrichtStap.Rekeningen:
                     Balansrekeningen.Vervang(Rekeningen.Where(r => r.IsGekozen && r.IsBalans));
 
@@ -269,29 +226,16 @@ public sealed partial class StandaardinrichtingViewModel : ObservableObject
 
     private void Vorige()
     {
-        Stap = Stap == InrichtStap.Beginsaldi ? InrichtStap.Rekeningen : InrichtStap.Speltakken;
+        Stap = InrichtStap.Rekeningen;
         Foutmelding = null;
         Vernieuw();
     }
 
-    /// <summary>Bouwt de rekeningen opnieuw op; eerder gemaakte keuzes en bedragen blijven per nummer behouden.</summary>
     private void VulRekeningen()
     {
-        var vorige = Rekeningen.ToDictionary(r => r.Nummer);
-        foreach (var regel in Rekeningen)
-        {
-            regel.PropertyChanged -= RegelGewijzigd;
-        }
-
-        Rekeningen.Clear();
-        foreach (var bron in Rekeningsjablonen.Rekeningen(_sjabloon, Speltakken.Where(s => s.IsGekozen).Select(s => s.Naam)))
+        foreach (var bron in Rekeningsjablonen.Rekeningen(_sjabloon))
         {
             var regel = new InrichtRekeningRegel(bron);
-            if (vorige.TryGetValue(bron.Nummer, out var oud) && oud.Bron.Naam == bron.Naam)
-            {
-                (regel.Naam, regel.IsGekozen, regel.Debettekst, regel.Credittekst) = (oud.Naam, oud.IsGekozen, oud.Debettekst, oud.Credittekst);
-            }
-
             regel.PropertyChanged += RegelGewijzigd;
             Rekeningen.Add(regel);
         }

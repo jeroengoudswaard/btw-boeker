@@ -408,7 +408,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     Task IStartwizardRegie.RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze) =>
         InBoekhoudingAsync(administratie, boekhouding => keuze switch
         {
-            Boekhoudingkeuze.Standaard => boekhouding.StandaardInrichtenCommand.ExecuteAsync(null),
             Boekhoudingkeuze.Sjabloon => boekhouding.SjabloonInlezenCommand.ExecuteAsync(null),
             _ => boekhouding.LeegBeginnenCommand.ExecuteAsync(null),
         });

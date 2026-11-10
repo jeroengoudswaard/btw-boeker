@@ -38,7 +38,5 @@ public sealed class KantTests
 
         Assert.Equal(ResultaatKant.Baten, terug.Rekeningen.Single(r => r.Nummer == 4115).Kant);
         Assert.Null(terug.Rekeningen.Single(r => r.Nummer == 1100).Kant);
-        // De ingebouwde sjablonen hebben geen kant: dan geldt de standaard (vanaf 8000 baten).
-        Assert.All(Rekeningsjablonen.Standaard(AdministratieSoort.Vereniging).Rekeningen, r => Assert.Null(r.Kant));
     }
 }

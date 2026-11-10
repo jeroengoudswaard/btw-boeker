@@ -48,7 +48,7 @@ public class ReikwijdteTests
         Assert.Empty(BestandenMet("Historie", "Historisch", "Voorblad", "BoekhoudingImport", "WerkbladLezer"));
     }
 
-    [Fact(Skip = "Stap 2a, deel 3: wordt aangezet zodra de standaardschema's zijn verwijderd.")]
+    [Fact]
     public void Ingebouwde_standaardschemas_en_speltakken_bestaan_niet()
     {
         Assert.Empty(BestandenMet("Speltak", "vereniging.json", "stichting.json", "Standaardschema"));

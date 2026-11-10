@@ -5,12 +5,10 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Boekhouding;
 
-/// <summary>Standaardinrichting en sjablonen (besluiten 114–120).</summary>
+/// <summary>Rekeningschema-sjablonen: lezen, schrijven, inrichten en exporteren.</summary>
 public sealed class RekeningsjabloonTests
 {
     private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
-    private const AdministratieSoort Sti = AdministratieSoort.Stichting;
-    private static readonly int[] VasteRekeningen = [1100, 1150, 1300, 1310, 1400, 1600, 1700, 4000, 8400];
 
     private static string Minimaal(string rekeningen, string formaat = "btw-boeker-rekeningschema", int versie = 1, string rubrieken = """[{"naam":"Vermogen"}]""") =>
         $$"""{"formaat":"{{formaat}}","versie":{{versie}},"naam":"Test","rubrieken":{{rubrieken}},"rekeningen":[{{rekeningen}}]}""";
@@ -18,57 +16,24 @@ public sealed class RekeningsjabloonTests
     private const string Reserve = """{"nummer":600,"naam":"Algemene reserve","rubriek":"Vermogen","soort":"Balans","rol":"Reserve"}""";
 
     [Fact]
-    public void Standaardschema_vereniging_bevat_de_vaste_rekeningen_en_speltakken()
+    public void Rekeningen_volgen_de_volgorde_van_de_rubrieken_met_nul_bedragen()
     {
-        var sjabloon = Rekeningsjablonen.Standaard(Ver);
+        var sjabloon = Testsjabloon.Verhuur() with { Rubrieken = [new("Opbrengsten"), new("Kosten"), new("Liquide middelen"), new("Vermogen")] };
 
-        Assert.Equal(Ver, sjabloon.Administratie);
-        Assert.Equal(RekeningRol.Reserve, sjabloon.Rekeningen.Single(r => r.Nummer == 600).Rol);
-        Assert.Equal(RekeningRol.Kas, sjabloon.Rekeningen.Single(r => r.Nummer == 1000).Rol);
-        Assert.Equal(RekeningRol.Kruisposten, sjabloon.Rekeningen.Single(r => r.Nummer == 1298).Rol);
-        Assert.All(VasteRekeningen, n => Assert.Contains(sjabloon.Rekeningen, r => r.Nummer == n));
-        Assert.Equal(["Bevers", "Welpen", "Scouts", "Explorers", "Roverscouts"], sjabloon.Speltakken!.Standaard);
-        Assert.Equal("Vermogen", sjabloon.Rubrieken[0].Naam);
-        Assert.InRange(sjabloon.Rekeningen.Count, 20, 35);
-    }
+        var rekeningen = Rekeningsjablonen.Rekeningen(sjabloon);
 
-    [Fact]
-    public void Standaardschema_stichting_heeft_gebouw_en_afschrijvingen_maar_geen_kas_of_contributie()
-    {
-        var sjabloon = Rekeningsjablonen.Standaard(Sti);
-
-        Assert.Equal(Sti, sjabloon.Administratie);
-        Assert.Contains(sjabloon.Rekeningen, r => r.Nummer == 200 && r.Soort == RekeningSoort.Balans);
-        Assert.Contains(sjabloon.Rekeningen, r => r.Nummer == 4400 && r.Soort == RekeningSoort.Resultaat);
-        Assert.Contains(sjabloon.Rekeningen, r => r.Nummer == 8100);
-        Assert.DoesNotContain(sjabloon.Rekeningen, r => r.Rol == RekeningRol.Kas);
-        Assert.Null(sjabloon.Speltakken);
-    }
-
-    [Fact]
-    public void Speltakken_worden_contributierekeningen_in_de_volgorde_van_het_sjabloon()
-    {
-        var rekeningen = Rekeningsjablonen.Rekeningen(Rekeningsjablonen.Standaard(Ver), ["Welpen", " Scouts ", "welpen", ""]);
-
-        var contributie = rekeningen.Where(r => r.Rubriek == "Contributie").ToList();
-        Assert.Equal([(8010, "Contributie Welpen"), (8020, "Contributie Scouts")], contributie.Select(r => (r.Nummer, r.Naam)));
-        Assert.All(contributie, r => Assert.Equal(RekeningSoort.Resultaat, r.Soort));
-        Assert.Equal("Vermogen", rekeningen[0].Rubriek);
+        Assert.Equal([8000, 4100, 4120, 1000, 1100, 600], rekeningen.Select(r => r.Nummer));
         Assert.All(rekeningen, r => Assert.Equal(Bedrag.Nul, r.Debet));
-        Assert.Equal(rekeningen.Count, rekeningen.Select(r => r.Nummer).Distinct().Count());
+        Assert.Equal(ResultaatKant.Baten, rekeningen[0].VoorgesteldeKant);
     }
 
     [Fact]
     public void Schrijven_en_lezen_levert_hetzelfde_sjabloon()
     {
-        foreach (var soort in new[] { Ver, Sti })
-        {
-            var sjabloon = Rekeningsjablonen.Standaard(soort);
-            var tekst = Rekeningsjablonen.Schrijf(sjabloon);
+        var tekst = Rekeningsjablonen.Schrijf(Testsjabloon.Verhuur());
 
-            Assert.Contains("\"formaat\": \"btw-boeker-rekeningschema\"", tekst, StringComparison.Ordinal);
-            Assert.Equal(tekst, Rekeningsjablonen.Schrijf(Rekeningsjablonen.Lees(tekst)));
-        }
+        Assert.Contains("\"formaat\": \"btw-boeker-rekeningschema\"", tekst, StringComparison.Ordinal);
+        Assert.Equal(tekst, Rekeningsjablonen.Schrijf(Rekeningsjablonen.Lees(tekst)));
     }
 
     [Theory]
@@ -109,7 +74,7 @@ public sealed class RekeningsjabloonTests
         var data = new BoekhoudingTestdata(ingericht: false);
         await using var sessie = new BoekhoudingDienstTests.FakeSessie(data);
         var dienst = new BoekhoudingDienst(sessie, new BoekhoudingDienstTests.VasteTijd(new DateTimeOffset(2026, 6, 1, 10, 0, 0, TimeSpan.Zero)));
-        var rekeningen = Rekeningsjablonen.Rekeningen(Rekeningsjablonen.Standaard(Ver), ["Welpen"])
+        var rekeningen = Rekeningsjablonen.Rekeningen(Testsjabloon.Verhuur())
             .Select(r => r.Nummer switch
             {
                 1100 => r with { Debet = new Bedrag(120000) },
@@ -125,23 +90,22 @@ public sealed class RekeningsjabloonTests
         Assert.Equal(["MEM", "KAS", "VRK"], stand.Dagboeken.OrderBy(d => d.Soort).Select(d => d.Code));
         Assert.Equal(2026, Assert.Single(stand.Boekjaren).Jaar);
         var opening = Assert.Single(stand.Posten);
-        Assert.Contains("standaardinrichting", opening.Omschrijving, StringComparison.Ordinal);
+        Assert.Contains("sjabloon", opening.Omschrijving, StringComparison.Ordinal);
         Assert.Equal(120000, Grootboek.Saldo(stand, stand.Rekeningen.Single(r => r.Nummer == 1100), 2026));
         Assert.Equal("Vermogen", stand.Rubrieken.OrderBy(r => r.Volgorde).First().Naam);
 
         var export = Rekeningsjablonen.Lees(Rekeningsjablonen.Schrijf(Rekeningsjablonen.UitStand(stand, "Onze groep")));
         Assert.Equal("Onze groep", export.Naam);
         Assert.Equal(Ver, export.Administratie);
-        Assert.Null(export.Speltakken);
         Assert.Equal(stand.Rekeningen.Select(r => r.Nummer).Order(), export.Rekeningen.Select(r => r.Nummer).Order());
-        Assert.Equal("Contributie Welpen", export.Rekeningen.Single(r => r.Nummer == 8010).Naam);
+        Assert.Equal(ResultaatKant.Baten, export.Rekeningen.Single(r => r.Nummer == 8000).Kant);
         Assert.Equal(stand.Rubrieken.Count, export.Rubrieken.Count);
     }
 
     [Fact]
     public void Voorstel_zonder_beginsaldi_maakt_geen_openingspost_nodig()
     {
-        var voorstel = Rekeningsjablonen.Voorstel(Rekeningsjablonen.Rekeningen(Rekeningsjablonen.Standaard(Sti), []), 2027);
+        var voorstel = Rekeningsjablonen.Voorstel(Rekeningsjablonen.Rekeningen(Testsjabloon.Verhuur()), 2027);
 
         Assert.Equal(2027, voorstel.Beginjaar);
         Assert.True(voorstel.IsInEvenwicht);

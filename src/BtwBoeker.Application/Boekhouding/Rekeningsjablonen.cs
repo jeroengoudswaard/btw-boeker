@@ -10,16 +10,12 @@ public sealed record SjabloonRubriek(string Naam);
 
 public sealed record SjabloonRekening(int Nummer, string Naam, string? Rubriek, RekeningSoort Soort, RekeningRol Rol = RekeningRol.Geen, ResultaatKant? Kant = null);
 
-/// <summary>Eén contributierekening per speltak: <c>Vanaf</c>, <c>Vanaf + Stap</c>, …; <c>{speltak}</c> in de naam wordt ingevuld.</summary>
-public sealed record SjabloonSpeltakken(string Rubriek, int Vanaf, int Stap, string Naam, IReadOnlyList<string> Standaard);
-
 /// <summary>
-/// Een rekeningschema zonder bedragen of persoonsgegevens, om een administratie mee in te richten of te delen met andere
-/// groepen (besluiten 114–117). Het formaat heeft een versie.
+/// Een rekeningschema zonder bedragen of persoonsgegevens, om een administratie mee in te richten of te delen. Het
+/// formaat heeft een versie.
 /// </summary>
 public sealed record Rekeningsjabloon(
-    string Naam, AdministratieSoort? Administratie, IReadOnlyList<SjabloonRubriek> Rubrieken, IReadOnlyList<SjabloonRekening> Rekeningen,
-    SjabloonSpeltakken? Speltakken = null)
+    string Naam, AdministratieSoort? Administratie, IReadOnlyList<SjabloonRubriek> Rubrieken, IReadOnlyList<SjabloonRekening> Rekeningen)
 {
     /// <summary>Optioneel: de eigen jaarrekeningindeling (besluiten 116 en 263); leeg = de automatische indeling.</summary>
     public IReadOnlyList<SjabloonIndelingsregel> Jaarrekening { get; init; } = [];
@@ -39,16 +35,6 @@ public static class Rekeningsjablonen
         Converters = { new JsonStringEnumConverter() },
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
-
-    /// <summary>Het ingebouwde standaardschema (besluit 118).</summary>
-    public static Rekeningsjabloon Standaard(AdministratieSoort administratie)
-    {
-        var naam = $"sjabloon-{(administratie == AdministratieSoort.Stichting ? "stichting" : "vereniging")}.json";
-        using var stroom = typeof(Rekeningsjablonen).Assembly.GetManifestResourceStream(naam)
-            ?? throw new InvalidOperationException($"Het ingebouwde sjabloon {naam} ontbreekt.");
-        using var lezer = new StreamReader(stroom);
-        return Lees(lezer.ReadToEnd());
-    }
 
     /// <exception cref="InvalidOperationException">Geen (geldig) sjabloon; de melding zegt wat er mis is.</exception>
     public static Rekeningsjabloon Lees(string tekst)
@@ -78,8 +64,7 @@ public static class Rekeningsjablonen
             bestand.Administratie,
             [.. (bestand.Rubrieken ?? []).Select(r => new SjabloonRubriek(r.Naam?.Trim() ?? string.Empty))],
             [.. (bestand.Rekeningen ?? []).Select(r => new SjabloonRekening(r.Nummer, r.Naam?.Trim() ?? string.Empty,
-                string.IsNullOrWhiteSpace(r.Rubriek) ? null : r.Rubriek.Trim(), r.Soort, r.Rol, r.Kant))],
-            bestand.Speltakken)
+                string.IsNullOrWhiteSpace(r.Rubriek) ? null : r.Rubriek.Trim(), r.Soort, r.Rol, r.Kant))])
         {
             Jaarrekening = [.. (bestand.Jaarrekening ?? []).Select(r => new SjabloonIndelingsregel(r.Rapport, r.Afdeling, r.Soort, r.Tekst?.Trim() ?? string.Empty,
                 [.. (r.Rubrieken ?? []).Select(n => n?.Trim() ?? string.Empty)]))],
@@ -99,7 +84,6 @@ public static class Rekeningsjablonen
             Administratie = sjabloon.Administratie,
             Rubrieken = [.. sjabloon.Rubrieken.Select(r => new BestandRubriek { Naam = r.Naam })],
             Rekeningen = [.. sjabloon.Rekeningen.Select(r => new BestandRekening { Nummer = r.Nummer, Naam = r.Naam, Rubriek = r.Rubriek, Soort = r.Soort, Rol = r.Rol, Kant = r.Kant })],
-            Speltakken = sjabloon.Speltakken,
             Jaarrekening = sjabloon.Jaarrekening.Count == 0 ? null : [.. sjabloon.Jaarrekening.Select(r => new BestandIndelingsregel
             {
                 Rapport = r.Rapport, Afdeling = r.Afdeling, Soort = r.Soort, Tekst = r.Tekst, Rubrieken = r.Rubrieken.Count == 0 ? null : [.. r.Rubrieken],
@@ -129,40 +113,19 @@ public static class Rekeningsjablonen
         };
     }
 
-    /// <summary>
-    /// De rekeningen om in te richten, in de volgorde van de rubrieken in het sjabloon, met een contributierekening per
-    /// gekozen speltak (dubbele en lege namen worden overgeslagen). Alle bedragen zijn nul.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Een speltakrekening valt samen met een bestaand nummer of buiten het bereik.</exception>
-    public static IReadOnlyList<Inrichtrekening> Rekeningen(Rekeningsjabloon sjabloon, IEnumerable<string> speltakken)
+    /// <summary>De rekeningen om in te richten, in de volgorde van de rubrieken in het sjabloon. Alle bedragen zijn nul.</summary>
+    public static IReadOnlyList<Inrichtrekening> Rekeningen(Rekeningsjabloon sjabloon)
     {
         ArgumentNullException.ThrowIfNull(sjabloon);
-        ArgumentNullException.ThrowIfNull(speltakken);
-        var alle = sjabloon.Rekeningen.ToList();
-        if (sjabloon.Speltakken is { } regel)
-        {
-            var namen = speltakken.Select(s => s?.Trim() ?? string.Empty).Where(s => s.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            for (var i = 0; i < namen.Count; i++)
-            {
-                var nummer = regel.Vanaf + (i * regel.Stap);
-                if (nummer > 99999 || alle.Exists(r => r.Nummer == nummer))
-                {
-                    throw new InvalidOperationException($"Voor speltak {namen[i]} is geen vrij rekeningnummer ({nummer}); kies minder speltakken.");
-                }
-
-                alle.Add(new SjabloonRekening(nummer, Kort(regel.Naam.Replace("{speltak}", namen[i], StringComparison.Ordinal)), regel.Rubriek, RekeningSoort.Resultaat));
-            }
-        }
-
         var volgorde = sjabloon.Rubrieken.Select(r => r.Naam).ToList();
-        return [.. alle
+        return [.. sjabloon.Rekeningen
             .OrderBy(r => r.Rubriek is null ? int.MaxValue : volgorde.IndexOf(r.Rubriek)).ThenBy(r => r.Nummer)
             .Select(r => new Inrichtrekening(r.Nummer, r.Naam, r.Rubriek, r.Soort, r.Rol, false, Bedrag.Nul, Bedrag.Nul) { Kant = r.Kant })];
     }
 
     /// <summary>Het voorstel voor <see cref="BoekhoudingDienst.ImporteerAsync"/>.</summary>
     public static Inrichtvoorstel Voorstel(IReadOnlyList<Inrichtrekening> rekeningen, int beginjaar) =>
-        new(beginjaar - 1, rekeningen, []) { Herkomst = "standaardinrichting", MetVerkoopboek = true };
+        new(beginjaar - 1, rekeningen, []) { Herkomst = "sjabloon", MetVerkoopboek = true };
 
     private static void Controleer(Rekeningsjabloon sjabloon)
     {
@@ -230,15 +193,7 @@ public static class Rekeningsjablonen
                 throw new InvalidOperationException($"De jaarrekeningregel \"{regel.Tekst}\" is ongeldig of verwijst naar een onbekende rubriek.");
             }
         }
-
-        if (sjabloon.Speltakken is { } s
-            && (s.Vanaf is < 1 or > 99999 || s.Stap < 1 || !s.Naam.Contains("{speltak}", StringComparison.Ordinal) || !rubrieken.Contains(s.Rubriek)))
-        {
-            throw new InvalidOperationException("De regel voor de speltakrekeningen is ongeldig.");
-        }
     }
-
-    private static string Kort(string naam) => naam.Length > Grootboekrekening.MaximaleNaamLengte ? naam[..Grootboekrekening.MaximaleNaamLengte] : naam;
 
     private sealed class Bestand
     {
@@ -248,7 +203,6 @@ public static class Rekeningsjablonen
         public AdministratieSoort? Administratie { get; set; }
         public List<BestandRubriek>? Rubrieken { get; set; }
         public List<BestandRekening>? Rekeningen { get; set; }
-        public SjabloonSpeltakken? Speltakken { get; set; }
         public List<BestandIndelingsregel>? Jaarrekening { get; set; }
     }
 

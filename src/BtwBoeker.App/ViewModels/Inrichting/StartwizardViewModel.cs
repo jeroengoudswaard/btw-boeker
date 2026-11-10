@@ -10,7 +10,6 @@ namespace BtwBoeker.App.ViewModels.Inrichting;
 /// <summary>De routes van een lege boekhouding, zoals op de startkaart van het tabblad Boekhouding.</summary>
 public enum Boekhoudingkeuze
 {
-    Standaard,
     Sjabloon,
     Leeg,
 }

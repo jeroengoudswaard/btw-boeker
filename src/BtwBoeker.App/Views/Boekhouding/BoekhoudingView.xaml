@@ -46,13 +46,11 @@
             <StackPanel>
                 <TextBlock Text="Deze administratie heeft nog geen boekhouding" Style="{StaticResource Sectietitel}" />
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
-                           Text="Begin met het standaardschema, met een rekeningschema-sjabloon of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
+                           Text="Begin met een rekeningschema-sjabloon of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
                 <WrapPanel>
-                    <Button Content="_Standaardschema gebruiken..." Command="{Binding StandaardInrichtenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
-                            Margin="0,0,8,8" ToolTip="Een compact rekeningschema met rubrieken, aan te passen vóór het inrichten"
-                            AutomationProperties.AutomationId="StandaardInrichten" />
-                    <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Margin="0,0,8,8"
-                            ToolTip="Een rekeningschema-sjabloon (.btwsjabloon) van een andere groep" AutomationProperties.AutomationId="SjabloonInlezen" />
+                    <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
+                            Margin="0,0,8,8" ToolTip="Een rekeningschema-sjabloon (.btwsjabloon), bijvoorbeeld geëxporteerd uit een andere administratie"
+                            AutomationProperties.AutomationId="SjabloonInlezen" />
                     <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" Margin="0,0,8,8" AutomationProperties.AutomationId="LeegBeginnen" />
                 </WrapPanel>
             </StackPanel>

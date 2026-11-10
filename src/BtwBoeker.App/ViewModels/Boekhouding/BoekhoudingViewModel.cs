@@ -412,10 +412,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             await LaadAsync(null);
         }, "De boekhouding kon niet worden ingericht.");
 
-    /// <summary>Inrichten met het ingebouwde standaardschema van deze administratie (besluiten 114 en 118).</summary>
-    [RelayCommand]
-    private Task StandaardInrichtenAsync() => RichtInMetSjabloonAsync(() => Rekeningsjablonen.Standaard(Soort));
-
     /// <summary>Bestand › Importeren › Rekeningschema-sjabloon (besluit 116).</summary>
     [RelayCommand]
     private Task SjabloonInlezenAsync()
@@ -438,12 +434,12 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             return;
         }
 
-        StandaardinrichtingViewModel wizard;
+        SjablooninrichtingViewModel wizard;
         Rekeningsjabloon gelezen;
         try
         {
             gelezen = sjabloon();
-            wizard = new StandaardinrichtingViewModel(_dienst, Soort, gelezen, Vandaag.Year) { Bevestiging = _dialogen.Bevestig };
+            wizard = new SjablooninrichtingViewModel(_dienst, Soort, gelezen, Vandaag.Year) { Bevestiging = _dialogen.Bevestig };
         }
         catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
         {
@@ -452,7 +448,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         Foutmelding = null;
-        if (!_dialogen.ToonStandaardinrichting(wizard) || !wizard.IsKlaar)
+        if (!_dialogen.ToonSjablooninrichting(wizard) || !wizard.IsKlaar)
         {
             return;
         }

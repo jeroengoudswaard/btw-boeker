@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="..\BtwBoeker.Application.Tests\Bank\CamtVoorbeeld.cs" Link="Boekhouding\CamtVoorbeeld.cs" />
     <Compile Include="..\BtwBoeker.Application.Tests\Boekhouding\Testvoorstel.cs" Link="Boekhouding\Testvoorstel.cs" />
+    <Compile Include="..\BtwBoeker.Application.Tests\Boekhouding\Testsjabloon.cs" Link="Boekhouding\Testsjabloon.cs" />
     <Compile Include="..\BtwBoeker.Infrastructure.Tests\Bijlagen\Testpdf.cs" Link="UI\Testpdf.cs" />
     <Compile Include="..\BtwBoeker.Infrastructure.Tests\Demo\Demodatabase.cs" Link="UI\Demodatabase.cs" />
   </ItemGroup>

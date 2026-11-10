@@ -64,7 +64,7 @@ internal sealed class FakeDialoogService : IDialoogService
     public string? Sjabloonbestand { get; set; }
     public string? SjabloonDoel { get; set; }
     public string? SjabloonVoorstel { get; private set; }
-    public Func<ViewModels.Boekhouding.StandaardinrichtingViewModel, Task<bool>>? Standaardinrichting { get; set; }
+    public Func<ViewModels.Boekhouding.SjablooninrichtingViewModel, Task<bool>>? Sjablooninrichting { get; set; }
 
     public string? KiesSjabloonbestand() => Sjabloonbestand;
 
@@ -85,8 +85,8 @@ internal sealed class FakeDialoogService : IDialoogService
         return IndelingActie(editor);
     }
 
-    public bool ToonStandaardinrichting(ViewModels.Boekhouding.StandaardinrichtingViewModel wizard) =>
-        Standaardinrichting is not null && Standaardinrichting(wizard).GetAwaiter().GetResult();
+    public bool ToonSjablooninrichting(ViewModels.Boekhouding.SjablooninrichtingViewModel wizard) =>
+        Sjablooninrichting is not null && Sjablooninrichting(wizard).GetAwaiter().GetResult();
 
     public string? KiesXmlDoel(string voorgesteldeNaam) => XmlDoel;
 
