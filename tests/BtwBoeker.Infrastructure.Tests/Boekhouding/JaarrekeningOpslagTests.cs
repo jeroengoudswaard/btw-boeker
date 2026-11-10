@@ -4,7 +4,7 @@ using BtwBoeker.Domain.Administraties;
 using BtwBoeker.Domain.Financien.Boekhouding;
 using BtwBoeker.Infrastructure.Database;
 
-namespace BtwBoeker.Infrastructure.Tests.Begrotingen;
+namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 
 /// <summary>Jaarrekeningindeling in de echte, versleutelde database (besluiten 263–268).</summary>
 public sealed class JaarrekeningOpslagTests : IAsyncLifetime, IDisposable

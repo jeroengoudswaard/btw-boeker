@@ -15,7 +15,7 @@ public sealed record SjabloonSpeltakken(string Rubriek, int Vanaf, int Stap, str
 
 /// <summary>
 /// Een rekeningschema zonder bedragen of persoonsgegevens, om een administratie mee in te richten of te delen met andere
-/// groepen (besluiten 114–117). In fase 5 komt de begrotingsindeling erbij; daarom heeft het formaat een versie.
+/// groepen (besluiten 114–117). Het formaat heeft een versie.
 /// </summary>
 public sealed record Rekeningsjabloon(
     string Naam, AdministratieSoort? Administratie, IReadOnlyList<SjabloonRubriek> Rubrieken, IReadOnlyList<SjabloonRekening> Rekeningen,

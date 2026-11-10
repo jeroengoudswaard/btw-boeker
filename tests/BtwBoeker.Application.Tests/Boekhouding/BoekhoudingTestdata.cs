@@ -2,7 +2,6 @@ using BtwBoeker.Application.Boekhouding;
 using BtwBoeker.Domain.Administraties;
 using BtwBoeker.Domain.Financien;
 using BtwBoeker.Domain.Financien.Bank;
-using BtwBoeker.Domain.Financien.Begrotingen;
 using BtwBoeker.Domain.Financien.Bijlagen;
 using BtwBoeker.Domain.Financien.Relaties;
 using BtwBoeker.Domain.Financien.Boekhouding;
@@ -49,8 +48,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public List<HistorischeRegel> HistorischeRegels { get; } = [];
     public List<HistorischTotaal> HistorischeTotalen { get; } = [];
     public List<Bijlage> Bijlagen { get; } = [];
-    public List<Begroting> Begrotingen { get; } = [];
-    public List<Meerjarenplan> Meerjarenplannen { get; } = [];
     public List<Jaarrekeningindeling> Jaarrekeningindelingen { get; } = [];
     public Dictionary<Guid, byte[]> Bijlageinhoud { get; } = [];
 
@@ -71,8 +68,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
         HistorischeRegels = HistorischeRegels.ToList(),
         HistorischeTotalen = HistorischeTotalen.ToList(),
         Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
-        Begrotingen = Begrotingen.ToList(),
-        Meerjarenplannen = Meerjarenplannen.ToList(),
         Jaarrekeningindelingen = Jaarrekeningindelingen.ToList(),
     };
 
@@ -142,8 +137,6 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
                 case HistorischeRegel regel: HistorischeRegels.Add(MetId(regel)); break;
                 case HistorischTotaal totaal: HistorischeTotalen.Add(MetId(totaal)); break;
                 case Bijlage bijlage: Bijlagen.Add(bijlage); break;
-                case Begroting begroting: Begrotingen.Add(MetId(begroting)); break;
-                case Meerjarenplan plan: Meerjarenplannen.Add(MetId(plan)); break;
                 case Jaarrekeningindeling indeling: Jaarrekeningindelingen.Add(MetId(indeling)); break;
                 case BijlageInhoud inhoud: Bijlageinhoud[inhoud.BijlageId] = inhoud.Gegevens; break;
                 default: throw new NotSupportedException(item.GetType().Name);

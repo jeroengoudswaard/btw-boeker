@@ -319,8 +319,6 @@ public sealed class AppUiTests : IDisposable
             Zoek(venster, $"Nav_Boekhouding.{onderdeel}");
         }
 
-        Zoek(venster, "Nav_Begroting");
-
         Zoek(venster, "NieuwePost").AsButton().Invoke();
         Zoek(venster, "PostEditor");
         Zoek(venster, "PostOmschrijving");

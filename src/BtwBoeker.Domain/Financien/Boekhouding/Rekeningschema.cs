@@ -11,7 +11,7 @@ public enum RekeningSoort
 }
 
 /// <summary>Bijzondere rol van een rekening, nodig voor automatische boekingen.</summary>
-/// <summary>Of een resultaatrekening baten of lasten bevat (besluit 152); nodig voor de begroting, die nog geen saldo heeft.</summary>
+/// <summary>Of een resultaatrekening baten of lasten bevat; bepaalt de plaats in de jaarrekening, ook zonder saldo.</summary>
 public enum ResultaatKant
 {
     /// <summary>Balansrekening.</summary>

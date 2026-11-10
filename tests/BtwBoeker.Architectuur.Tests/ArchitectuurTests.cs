@@ -368,30 +368,6 @@ public class ArchitectuurTests
     }
 
     /// <summary>
-    /// De begroting telt nooit mee in het grootboek (fase 5a): in de applicatielaag gebruiken alleen het model, de
-    /// begrotingsonderdelen en de rapporten haar; grootboek, jaarafsluiting, bank en boekhoudingdienst niet.
-    /// </summary>
-    [Fact]
-    public void Begroting_en_meerjarenplan_worden_niet_gebruikt_door_grootboek_jaarafsluiting_of_bank()
-    {
-        // Kerncijfers (Start) en de jaarrekening (kolom begroot, besluit 266) lezen de begroting alleen.
-        string[] toegestaan = ["BoekhoudingModel.cs", "Rapporten.cs", "Kerncijfers.cs", "Jaarrekeningrekenaar.cs"];
-        var overtredingen = Directory
-            .EnumerateFiles(Path.Combine(Repositorymap(), "src", "BtwBoeker.Application"), "*.cs", SearchOption.AllDirectories)
-            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}Begrotingen{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            .Where(f => !toegestaan.Contains(Path.GetFileName(f)))
-            .Where(f => File.ReadAllText(f) is var tekst
-                && (tekst.Contains("Financien.Begrotingen", StringComparison.Ordinal) || tekst.Contains("Application.Begrotingen", StringComparison.Ordinal)
-                    || tekst.Contains("Begrotingsrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Begrotingen", StringComparison.Ordinal)
-                    || tekst.Contains("Meerjarenrekenaar", StringComparison.Ordinal) || tekst.Contains("stand.Meerjarenplannen", StringComparison.Ordinal)))
-            .Select(Path.GetFileName)
-            .ToList();
-
-        Assert.Empty(overtredingen);
-    }
-
-    /// <summary>
     /// De jaarrekeningindeling is alleen weergave (besluiten 263–268): in de applicatielaag gebruiken alleen het model, de
     /// rekenaar, de dienst, de rapporten en het sjabloonbestand haar; grootboek, jaarafsluiting, bank en boekingen niet.
     /// </summary>

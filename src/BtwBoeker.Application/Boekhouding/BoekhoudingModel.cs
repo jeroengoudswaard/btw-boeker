@@ -1,7 +1,6 @@
 using BtwBoeker.Domain.Administraties;
 using BtwBoeker.Domain.Financien;
 using BtwBoeker.Domain.Financien.Bank;
-using BtwBoeker.Domain.Financien.Begrotingen;
 using BtwBoeker.Domain.Financien.Bijlagen;
 using BtwBoeker.Domain.Financien.Relaties;
 using BtwBoeker.Domain.Financien.Boekhouding;
@@ -34,12 +33,6 @@ public sealed record BoekhoudingStand(
 
     /// <summary>De bijlagen zonder inhoud (besluit 84); de inhoud via <see cref="IBoekhoudingRepository.LaadBijlageInhoudAsync"/>.</summary>
     public IReadOnlyList<Bijlage> Bijlagen { get; init; } = [];
-
-    /// <summary>Alle versies van alle begrotingen (besluit 149); nooit onderdeel van het grootboek.</summary>
-    public IReadOnlyList<Begroting> Begrotingen { get; init; } = [];
-
-    /// <summary>Alle versies van alle meerjarenplannen (besluiten 159–164); nooit onderdeel van het grootboek.</summary>
-    public IReadOnlyList<Meerjarenplan> Meerjarenplannen { get; init; } = [];
 
     /// <summary>Eigen indelingen van balans en baten en lasten (besluiten 263–268); zonder indeling geldt de automatische.</summary>
     public IReadOnlyList<Jaarrekeningindeling> Jaarrekeningindelingen { get; init; } = [];
@@ -153,7 +146,7 @@ public sealed record Grootboekkaart(Grootboekrekening Rekening, DateOnly Van, Da
 /// <summary>Een rapport als tabel, voor afdrukken en export (besluit 67). Cellen zijn tekst of <see cref="Bedrag"/>.</summary>
 public sealed record RapportTabel(string Titel, string? Subtitel, IReadOnlyList<RapportKolom> Kolommen, IReadOnlyList<RapportRij> Rijen)
 {
-    /// <summary>Liggend afdrukken met kleinere letters, voor brede tabellen zoals het meerjarenplan (besluit 165).</summary>
+    /// <summary>Liggend afdrukken met kleinere letters, voor brede tabellen.</summary>
     public bool IsLiggend { get; init; }
 }
 

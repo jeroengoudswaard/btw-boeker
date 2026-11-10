@@ -1,7 +1,6 @@
 using BtwBoeker.Application.Boekhouding;
 using BtwBoeker.Domain.Administraties;
 using BtwBoeker.Domain.Financien;
-using BtwBoeker.Domain.Financien.Begrotingen;
 using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Application.Tests.Boekhouding;
@@ -47,8 +46,6 @@ public sealed class JaarrekeningTests
         Assert.Equal(["Terreinkosten", "Activiteiten"], jr.Deel(JaarrekeningAfdeling.Lasten).Regels.Select(r => r.Tekst));
         Assert.Equal(new Bedrag(90000), jr.Deel(JaarrekeningAfdeling.Baten).VorigJaar);
         Assert.Empty(jr.NietIngedeeld);
-        Assert.False(jr.MetBegroting);
-        Assert.All(jr.Delen.SelectMany(d => d.Regels), r => Assert.Null(r.Begroot));
     }
 
     [Fact]
@@ -140,39 +137,6 @@ public sealed class JaarrekeningTests
     }
 
     [Fact]
-    public void Begroot_komt_uit_de_geldende_begroting()
-    {
-        Boekingen();
-        var begroting = new Begroting(BoekhoudingTestdata.Ver, 2026, Nu);
-        begroting.ZetBedrag(_data.Welpen, new Bedrag(120000), null);
-        begroting.ZetBedrag(_data.Energie, new Bedrag(40000), null);
-        _data.Begrotingen.Add(begroting);
-
-        var jr = Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2026);
-
-        Assert.True(jr.MetBegroting);
-        Assert.Equal(new Bedrag(120000), jr.Deel(JaarrekeningAfdeling.Baten).Begroot);
-        Assert.Equal(new Bedrag(40000), jr.Deel(JaarrekeningAfdeling.Lasten).Begroot);
-        Assert.Equal(120000 - 40000, jr.Resultaat(d => d.Begroot));
-        Assert.False(Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.Balans, 2026).MetBegroting);
-    }
-
-    [Fact]
-    public void Zonder_begroting_komt_begroot_uit_het_meerjarenplan()
-    {
-        Boekingen();
-        var plan = new Meerjarenplan(BoekhoudingTestdata.Ver, 2025, Nu);
-        plan.ZetBedrag(_data.Energie, 2026, new Bedrag(35000));
-        _data.Meerjarenplannen.Add(plan);
-
-        var jr = Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2026);
-
-        Assert.True(jr.MetBegroting);
-        Assert.Equal(new Bedrag(35000), jr.Deel(JaarrekeningAfdeling.Lasten).Begroot);
-        Assert.False(Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2040).MetBegroting);
-    }
-
-    [Fact]
     public void Historisch_vorig_jaar_komt_uit_het_voorblad()
     {
         _data.Boekjaren.RemoveAll(b => b.Jaar == 2025);
@@ -186,20 +150,17 @@ public sealed class JaarrekeningTests
     }
 
     [Fact]
-    public void Rapport_heeft_kolom_begroot_alleen_bij_baten_en_lasten_met_begroting()
+    public void Rapport_heeft_kolommen_dit_jaar_en_vorig_jaar_met_of_zonder_rekeningen()
     {
         Boekingen();
         var zonder = Rapporten.Jaarrekening(Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2026), "Vereniging", metRekeningen: false);
         Assert.Equal(["Omschrijving", "Werkelijk 2026", "Werkelijk 2025"], zonder.Kolommen.Select(k => k.Naam));
 
-        var begroting = new Begroting(BoekhoudingTestdata.Ver, 2026, Nu);
-        begroting.ZetBedrag(_data.Welpen, new Bedrag(120000), null);
-        _data.Begrotingen.Add(begroting);
         var met = Rapporten.Jaarrekening(Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.BatenEnLasten, 2026), "Vereniging", metRekeningen: true);
-        Assert.Equal(["Omschrijving", "Werkelijk 2026", "Begroot 2026", "Werkelijk 2025"], met.Kolommen.Select(k => k.Naam));
+        Assert.Equal(["Omschrijving", "Werkelijk 2026", "Werkelijk 2025"], met.Kolommen.Select(k => k.Naam));
         Assert.True(met.Rijen.Count > zonder.Rijen.Count);
         Assert.Contains(met.Rijen, r => (string)r.Cellen[0]! == "Resultaat (baten min lasten)");
-        Assert.All(met.Rijen, r => Assert.Equal(4, r.Cellen.Count));
+        Assert.All(met.Rijen, r => Assert.Equal(3, r.Cellen.Count));
 
         var balans = Rapporten.Jaarrekening(Jaarrekeningrekenaar.Bereken(_data.Stand, JaarrekeningRapport.Balans, 2026), "Vereniging", metRekeningen: true);
         Assert.Equal(["Omschrijving", "31-12-2026", "31-12-2025"], balans.Kolommen.Select(k => k.Naam));

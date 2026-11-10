@@ -102,13 +102,6 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
         // Zonder inhoud: die wordt pas geladen bij bekijken of exporteren.
         var bijlagen = await context.Bijlagen.Where(b => b.Administratie == administratie).OrderBy(b => b.ToegevoegdUtc)
             .ToListAsync(annulering).ConfigureAwait(false);
-        var begrotingen = await context.Begrotingen.Include(b => b.Regels).ThenInclude(r => r.Rekening)
-            .Where(b => b.Administratie == administratie).OrderBy(b => b.Jaar).ThenBy(b => b.Versie)
-            .AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
-        var meerjarenplannen = await context.Meerjarenplannen.Include(p => p.Posten).ThenInclude(p => p.Rekening)
-            .Include(p => p.Posten).ThenInclude(p => p.Bedragen)
-            .Where(p => p.Administratie == administratie).OrderBy(p => p.Startjaar).ThenBy(p => p.Versie)
-            .AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
         var indelingen = await context.Jaarrekeningindelingen.Include(i => i.Regels).ThenInclude(r => r.Rubrieken)
             .Where(i => i.Administratie == administratie).AsSplitQuery().ToListAsync(annulering).ConfigureAwait(false);
         return new BoekhoudingStand(administratie, rubrieken, rekeningen, dagboeken, boekjaren,
@@ -121,8 +114,6 @@ internal sealed class BoekhoudingRepository(Func<BtwBoekerDbContext> maakContext
             HistorischeRegels = historischeRegels,
             HistorischeTotalen = historischeTotalen,
             Bijlagen = bijlagen,
-            Begrotingen = begrotingen,
-            Meerjarenplannen = meerjarenplannen,
             Jaarrekeningindelingen = indelingen,
         };
     }

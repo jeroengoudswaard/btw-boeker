@@ -16,7 +16,7 @@ internal sealed class WpfAfdrukDienst : IAfdrukDienst
         var dialoog = new PrintDialog();
         if (tabel.IsLiggend)
         {
-            // Besluit 165: brede tabellen (meerjarenplan) liggend; de gebruiker kan dat in het afdrukvenster nog wijzigen.
+            // Brede tabellen liggend; de gebruiker kan dat in het afdrukvenster nog wijzigen.
             dialoog.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
         }
 

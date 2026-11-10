@@ -4,6 +4,14 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Verwijderd
+- **Begroting en meerjarenplan** (besluiten 6 en 28): de pagina *Begroting* (Ctrl+5), het subtabblad *Meerjarenplan*, het rapport *Begroting en werkelijk* en de afdruk voor de ALV. Ctrl+2 tot en met Ctrl+6 zijn vervallen; Ctrl+1 opent de boekhouding.
+- **Kolom *begroot* in de jaarrekening**: de jaarrekening toont dit jaar en vorig jaar (besluit 27).
+- **Start**: het resultaat tot vandaag staat zonder vergelijking met een begroting.
+
+### Gewijzigd
+- **Database**: de migratie *VerwijderBegrotingEnMeerjarenplan* verwijdert de tabellen van begroting en meerjarenplan uit een bestaande database. Rekeningschema, boekingen en jaarrekeningindeling blijven ongewijzigd (getest in `MigratieTests`).
+
 ## [0.18.1] - 2026-11-07: Opslaan, tellers en MSI met versienummer (besluiten 274–278)
 
 ### Opgelost

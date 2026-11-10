@@ -93,8 +93,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public bool HeeftMeerdereBoekjaren => Boekjaren.Count > 1;
 
     /// <summary>Besluit 270: afdrukken en exporteren alleen waar er iets af te drukken is.</summary>
-    public bool HeeftUitvoer => Subtab is BoekhoudingSubtab.Rapporten or BoekhoudingSubtab.Grootboekkaart
-        or BoekhoudingSubtab.Begroting or BoekhoudingSubtab.Meerjarenplan;
+    public bool HeeftUitvoer => Subtab is BoekhoudingSubtab.Rapporten or BoekhoudingSubtab.Grootboekkaart;
 
     /// <summary>Het aantal posten zonder bon in het gekozen jaar (besluiten 145 en 270); 0 = het filter is niet zichtbaar.</summary>
     public int AantalZonderBon => _allePosten.Count(p => p.DatumWaarde.Year == Jaar && _zonderBon.Contains(p.Id));
@@ -110,7 +109,7 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     public IReadOnlyList<Rapportkeuze> Rapportkeuzes =>
         [new(Rapportsoort.Saldibalans, Woorden["Saldibalans"]), new(Rapportsoort.Balans, Woorden["Balans"]), new(Rapportsoort.WinstEnVerlies, Woorden["WinstEnVerlies"]),
-            new(Rapportsoort.Begroting, Woorden["Rapport.Begroting"]), new(Rapportsoort.JaarrekeningBalans, Woorden["Rapport.JaarrekeningBalans"]),
+            new(Rapportsoort.JaarrekeningBalans, Woorden["Rapport.JaarrekeningBalans"]),
             new(Rapportsoort.JaarrekeningBatenLasten, Woorden["Rapport.JaarrekeningBatenLasten"])];
 
     [ObservableProperty]
@@ -232,27 +231,22 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         $"{Posten.Count} {(Posten.Count == 1 ? "post" : "posten")} · {Posten.Count(p => p.IsConcept)} concept");
 
     public override bool HeeftOnopgeslagenWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || RelatiesGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd) || RelatiesGewijzigd;
 
     /// <summary>Besluit 276: een halve boekingsregel blokkeert de rest niet; hij blijft staan tot hij klopt.</summary>
     private bool HeeftBewaarbareWijzigingen =>
-        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || RelatiesGewijzigd || BegrotingGewijzigd || MeerjarenplanGewijzigd;
+        Editor?.IsGewijzigd == true || Rekeningen.Any(r => r.IsGewijzigd) || Boekingsregels.Any(r => r.IsGewijzigd && r.Fout is null) || RelatiesGewijzigd;
 
     public override bool KanOpslaan =>
         HeeftBewaarbareWijzigingen && !IsBezig
         && (Editor is not { IsGewijzigd: true } || Editor.Fouten.Count == 0)
         && Rekeningen.Where(r => r.IsGewijzigd).All(r => r.Fout is null)
-        && RelatiesGeldig
-        && BegrotingGeldig
-        && MeerjarenplanGeldig;
+        && RelatiesGeldig;
 
     /// <summary>Wat Ctrl+P afdrukt en de export wegschrijft: de grootboekkaart of het gekozen rapport.</summary>
     public RapportTabel? Afdruktabel => Subtab switch
     {
         BoekhoudingSubtab.Grootboekkaart when KaartTabel is not null => KaartTabel,
-        // De begroting voor de ALV (besluit 155), altijd in Expert-termen (besluit 131).
-        BoekhoudingSubtab.Begroting when _stand is not null && HeeftBegroting => Rapporten.BegrotingAlv(_stand, Begrotingsjaar, Administratienaam),
-        BoekhoudingSubtab.Meerjarenplan when HeeftMeerjarenplan => MeerjarenAfdruk(),
         _ => Rapport,
     };
 
@@ -283,8 +277,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             }
 
             await BewaarRegelsAsync();
-            await BewaarBegrotingAsync();
-            await BewaarMeerjarenplanAsync();
             await BewaarRelatiesAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
@@ -386,8 +378,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         LaadBank();
         LaadRelaties();
         LaadBijlagen();
-        LaadBegroting(GekozenBegrotingsversie?.Id);
-        LaadMeerjarenplan(GekozenMeerjarenversie?.Id);
     }
 
     private void PasPostfilterToe(Guid? selectie)
@@ -839,18 +829,14 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         OnPropertyChanged(nameof(HeeftUitvoer));
         OnPropertyChanged(nameof(Afdruktabel));
         OnPropertyChanged(nameof(Onderdeel));
-        OnPropertyChanged(nameof(IsOpslaanHoofdactie));
     }
-
-    /// <summary>Besluit 168: op de begroting en het meerjarenplan is opslaan de hoofdactie (blauwe knop); elders een gewone knop.</summary>
-    public bool IsOpslaanHoofdactie =>
-        (Subtab == BoekhoudingSubtab.Begroting && HeeftBegroting) || (Subtab == BoekhoudingSubtab.Meerjarenplan && HeeftMeerjarenplan);
 
     /// <summary>Het onderdeel in de navigatiebalk (besluit 178).</summary>
     public override int? Onderdeel
     {
         get => (int)Subtab;
-        set => Subtab = value is { } i ? (BoekhoudingSubtab)i : BoekhoudingSubtab.Journaal;
+        // Een onbekend nummer (bijvoorbeeld van een vervallen onderdeel, bewaard als laatste pagina) opent het Journaal.
+        set => Subtab = value is { } i && Enum.IsDefined((BoekhoudingSubtab)i) ? (BoekhoudingSubtab)i : BoekhoudingSubtab.Journaal;
     }
 
     private void BerekenKaart()
@@ -907,10 +893,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         }
 
         ZetKaartkoppen();
-        if (_stand is not null)
-        {
-            BerekenBegrotingstotalen();
-        }
     }
 
     private void BerekenRapport()
@@ -926,7 +908,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
             Rapportsoort.JaarrekeningBatenLasten => Jaarrekeningtabel(_stand, JaarrekeningRapport.BatenEnLasten),
             Rapportsoort.Balans => Rapporten.Balans(Grootboek.Balans(_stand, Jaar), Administratienaam),
             Rapportsoort.WinstEnVerlies => Rapporten.WinstEnVerlies(Grootboek.WinstEnVerlies(_stand, Jaar), Administratienaam),
-            Rapportsoort.Begroting => Rapporten.Begroting(Application.Begrotingen.Begrotingsrekenaar.Overzicht(_stand, Jaar, Vandaag), Administratienaam),
             _ => Rapporten.Saldibalans(Grootboek.Saldibalans(_stand, Jaar), Administratienaam),
         };
         OnPropertyChanged(nameof(Afdruktabel));
@@ -1107,7 +1088,5 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
         HeropenBoekjaarCommand.NotifyCanExecuteChanged();
         BankCommandsVernieuwen();
         BijlageCommandsVernieuwen();
-        BegrotingCommandsVernieuwen();
-        MeerjarenCommandsVernieuwen();
     }
 }

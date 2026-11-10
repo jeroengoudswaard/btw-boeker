@@ -24,7 +24,7 @@ public static class Grootboek
 
     /// <summary>
     /// Saldo (debet positief) van een resultaatrekening in het jaar, zonder de afsluitpost; bij een historisch jaar uit het
-    /// Voorblad. Voor de begroting (besluit 148).
+    /// Voorblad.
     /// </summary>
     public static long Resultaat(BoekhoudingStand stand, Grootboekrekening rekening, int jaar, DateOnly? totEnMet = null) =>
         stand.IsHistorisch(jaar) ? Totaal(stand, rekening, jaar)?.Saldo ?? 0 : Regels(stand, rekening, jaar)

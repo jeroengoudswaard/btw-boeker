@@ -36,7 +36,6 @@ public sealed class KerncijfersTests
         Assert.Equal(Grootboek.Saldo(data.Stand, data.Bank, 2026), bank.Saldo.Centen);
         Assert.Null(bank.Datum); // nog geen afschrift ingelezen: het saldo volgens het grootboek
         Assert.Equal(-2500, cijfers.Resultaat.Centen); // een tekort
-        Assert.Null(cijfers.BegrootNaarRato); // geen vastgestelde begroting
     }
 
     [Fact]

@@ -39,8 +39,6 @@ public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> opti
     public DbSet<Domain.Financien.Bank.Boekingsregel> Boekingsregels => Set<Domain.Financien.Bank.Boekingsregel>();
     public DbSet<Domain.Financien.Relaties.Relatie> Relaties => Set<Domain.Financien.Relaties.Relatie>();
     public DbSet<Domain.Financien.Bijlagen.Bijlage> Bijlagen => Set<Domain.Financien.Bijlagen.Bijlage>();
-    public DbSet<Domain.Financien.Begrotingen.Begroting> Begrotingen => Set<Domain.Financien.Begrotingen.Begroting>();
-    public DbSet<Domain.Financien.Begrotingen.Meerjarenplan> Meerjarenplannen => Set<Domain.Financien.Begrotingen.Meerjarenplan>();
     public DbSet<Jaarrekeningindeling> Jaarrekeningindelingen => Set<Jaarrekeningindeling>();
     public DbSet<Domain.Financien.Bijlagen.BijlageInhoud> BijlageInhoud => Set<Domain.Financien.Bijlagen.BijlageInhoud>();
     internal DbSet<StartwizardRij> Startwizard => Set<StartwizardRij>();
@@ -80,7 +78,7 @@ public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> opti
         BoekhoudingConfiguratie.Configureer(modelBuilder);
         RelatieConfiguratie.Configureer(modelBuilder);
         BijlageConfiguratie.Configureer(modelBuilder);
-        BegrotingConfiguratie.Configureer(modelBuilder);
+        JaarrekeningConfiguratie.Configureer(modelBuilder);
         modelBuilder.Entity<StartwizardRij>(b =>
         {
             b.ToTable("Startwizard");

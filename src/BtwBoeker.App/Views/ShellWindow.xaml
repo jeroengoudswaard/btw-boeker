@@ -63,11 +63,6 @@
         <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding VorigePaginaCommand}" />
         <KeyBinding Key="OemComma" Modifiers="Ctrl" Command="{Binding OpenModuleCommand}" CommandParameter="{x:Static vm:ModuleVerzoek.Instellingen}" />
         <KeyBinding Gesture="Ctrl+D1" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="1" />
-        <KeyBinding Gesture="Ctrl+D2" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="2" />
-        <KeyBinding Gesture="Ctrl+D3" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="3" />
-        <KeyBinding Gesture="Ctrl+D4" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="4" />
-        <KeyBinding Gesture="Ctrl+D5" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="5" />
-        <KeyBinding Gesture="Ctrl+D6" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="6" />
     </Window.InputBindings>
 
     <DockPanel x:Name="Wortel">

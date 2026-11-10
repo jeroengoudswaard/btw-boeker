@@ -354,8 +354,6 @@ internal sealed class InMemoryBoekhoudingOpslag : BtwBoeker.Application.Boekhoud
             HistorischeRegels = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischeRegel>()],
             HistorischeTotalen = [.. lijst.OfType<Domain.Financien.Boekhouding.HistorischTotaal>()],
             Bijlagen = [.. lijst.OfType<Domain.Financien.Bijlagen.Bijlage>().OrderBy(b => b.ToegevoegdUtc)],
-            Begrotingen = [.. lijst.OfType<Domain.Financien.Begrotingen.Begroting>().OrderBy(b => b.Jaar).ThenBy(b => b.Versie)],
-            Meerjarenplannen = [.. lijst.OfType<Domain.Financien.Begrotingen.Meerjarenplan>().OrderBy(p => p.Startjaar).ThenBy(p => p.Versie)],
             Jaarrekeningindelingen = [.. lijst.OfType<Domain.Financien.Boekhouding.Jaarrekeningindeling>()],
         };
     }

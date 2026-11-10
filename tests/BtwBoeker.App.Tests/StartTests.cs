@@ -36,7 +36,7 @@ public sealed class StartTests
     {
         var cijfers = new Kerncijfers(
             [new Rekeningstand("Betaalrekening", new Bedrag(123456), new DateOnly(2026, 10, 30)), new Rekeningstand("Spaarrekening", new Bedrag(500000), null)],
-            new Bedrag(-2500), new Bedrag(1000), HeeftBoekhouding: true);
+            new Bedrag(-2500), HeeftBoekhouding: true);
 
         var regels = OverzichtViewModel.Kerncijferregels(cijfers, 2026);
 
@@ -45,7 +45,7 @@ public sealed class StartTests
         Assert.Equal("afschrift van 30-10-2026", regels[0].Toelichting);
         Assert.Equal("volgens het grootboek", regels[1].Toelichting);
         Assert.Equal("-€ 25,00", regels[2].Waarde);
-        Assert.Equal("begroot naar rato € 10,00", regels[2].Toelichting);
+        Assert.Equal("alleen geboekte posten", regels[2].Toelichting);
         Assert.Empty(OverzichtViewModel.Kerncijferregels(cijfers with { HeeftBoekhouding = false }, 2026));
     }
 }

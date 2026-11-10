@@ -27,7 +27,6 @@ public static class Onderdeelkleuren
     public static Kleur Voor(ModuleSoort module) => module switch
     {
         ModuleSoort.Boekhouding => Indigo,
-        ModuleSoort.Begroting => Violet,
         _ => Grijs,
     };
 

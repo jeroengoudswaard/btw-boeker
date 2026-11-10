@@ -222,24 +222,11 @@ public sealed class ShellViewModelTests
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Stichting));
 
-        shell.OpenModuleViaSneltoetsCommand.Execute("2"); // bij de Stichting: het meerjarenplan
+        shell.OpenModuleViaSneltoetsCommand.Execute("1");
 
         var boekhouding = Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
-        Assert.Equal(ViewModels.Boekhouding.BoekhoudingSubtab.Meerjarenplan, boekhouding.Subtab);
         Assert.Single(shell.Tabbladen, t => t.Module.Soort == ModuleSoort.Boekhouding);
-    }
-
-    [Fact]
-    public async Task Module_begroting_opent_boekhouding_op_het_subtabblad_begroting()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Begroting, AdministratieSoort.Vereniging));
-
-        var boekhouding = Assert.IsType<ViewModels.Boekhouding.BoekhoudingViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(ViewModels.Boekhouding.BoekhoudingSubtab.Begroting, boekhouding.Subtab);
-        Assert.DoesNotContain(shell.Tabbladen, t => t.Module.Soort == ModuleSoort.Begroting);
     }
 
     [Fact]

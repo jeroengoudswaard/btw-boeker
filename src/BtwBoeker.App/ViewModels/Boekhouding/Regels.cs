@@ -12,10 +12,7 @@ public enum Rapportsoort
     Balans,
     WinstEnVerlies,
 
-    /// <summary>Begroot tegenover werkelijk (fase 5a).</summary>
-    Begroting,
-
-    /// <summary>De balans volgens de eigen jaarrekeningindeling (besluiten 263–268).</summary>
+    /// <summary>De balans volgens de eigen jaarrekeningindeling (besluit 27).</summary>
     JaarrekeningBalans,
 
     /// <summary>De staat van baten en lasten volgens de eigen jaarrekeningindeling.</summary>
@@ -24,7 +21,9 @@ public enum Rapportsoort
 
 public sealed record Rapportkeuze(Rapportsoort Soort, string Naam);
 
-/// <summary>Subtabbladen van het tabblad Boekhouding.</summary>
+/// <summary>
+/// Subtabbladen van het tabblad Boekhouding, in de volgorde van de tabbladen: de waarde is de index in de TabControl.
+/// </summary>
 public enum BoekhoudingSubtab
 {
     Journaal,
@@ -35,8 +34,6 @@ public enum BoekhoudingSubtab
     Rekeningschema,
     Grootboekkaart,
     Rapporten,
-    Begroting,
-    Meerjarenplan,
     Boekjaren,
 }
 

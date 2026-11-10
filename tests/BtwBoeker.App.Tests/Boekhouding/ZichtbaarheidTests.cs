@@ -19,7 +19,7 @@ public sealed class ZichtbaarheidTests : IDisposable
         vm.Subtab = BoekhoudingSubtab.Bank;
         Assert.False(vm.HeeftUitvoer);
 
-        foreach (var subtab in new[] { BoekhoudingSubtab.Rapporten, BoekhoudingSubtab.Grootboekkaart, BoekhoudingSubtab.Begroting })
+        foreach (var subtab in new[] { BoekhoudingSubtab.Rapporten, BoekhoudingSubtab.Grootboekkaart })
         {
             vm.Subtab = subtab;
             Assert.True(vm.HeeftUitvoer);

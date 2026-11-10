@@ -86,7 +86,7 @@ public sealed partial class ShellViewModel
             {
                 var onderdeel = pagina.Onderdeel;
                 OpenModule(verzoek);
-                if (GeselecteerdTabblad is { } nieuw && onderdeel is { } o && !(nieuw is BoekhoudingViewModel && IsAlleenStichting(o)))
+                if (GeselecteerdTabblad is { } nieuw && onderdeel is { } o)
                 {
                     nieuw.Onderdeel = o;
                 }
@@ -178,8 +178,6 @@ public sealed partial class ShellViewModel
                 items.AddRange(Boekhoudingonderdelen());
             }
 
-            var stichting = GekozenAdministratie?.Soort == AdministratieSoort.Stichting;
-            items.Add(Module(ModuleSoort.Begroting, "Begroting", Zonder_(_boekhouding.Woorden[stichting ? "Tab.Meerjarenplan" : "Tab.Begroting"])));
             if (open != ModuleSoort.Boekhouding)
             {
                 _meerOpen.Clear(); // een andere module: Meer… begint weer ingeklapt
@@ -243,8 +241,6 @@ public sealed partial class ShellViewModel
         NavigatieItem? gekozen = pagina switch
         {
             null or OverzichtViewModel => Navigatie.FirstOrDefault(),
-            BoekhoudingViewModel { Subtab: BoekhoudingSubtab.Begroting or BoekhoudingSubtab.Meerjarenplan } =>
-                Navigatie.FirstOrDefault(n => n.Module == ModuleSoort.Begroting),
             _ => Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsMeer && n.Onderdeel == pagina.Onderdeel)
                 ?? Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsSubitem),
         };
@@ -311,8 +307,6 @@ public sealed partial class ShellViewModel
 
     private static NavigatieItem Module(ModuleSoort soort, string sleutel, string titel, bool heeftOnderdelen = false, bool uitgeklapt = false) =>
         new(sleutel, titel, ModuleCatalogus.Geef(soort).Pictogram, soort, null) { HeeftOnderdelen = heeftOnderdelen, IsUitgeklapt = uitgeklapt };
-
-    private static bool IsAlleenStichting(int onderdeel) => onderdeel == (int)BoekhoudingSubtab.Meerjarenplan;
 
     /// <summary>Titels uit de woordenlijst bevatten een toegangstoets ("B_ank"); de navigatiebalk toont ze zonder.</summary>
     private static string Zonder_(string titel) => titel.Replace("_", string.Empty, StringComparison.Ordinal);

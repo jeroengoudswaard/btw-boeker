@@ -6,7 +6,6 @@ public enum ModuleSoort
 {
     Overzicht = 0,
     Boekhouding = 3,
-    Begroting = 4,
     Instellingen = 6,
 
 }
@@ -36,8 +35,6 @@ public static class ModuleCatalogus
             Omschrijving: "De stand van zaken en wat er te doen is."),
         new(ModuleSoort.Boekhouding, "Boekhouding", "", 1, PerAdministratie: true, KanSluiten: true, Fase: 4,
             Omschrijving: "Boekingen, bank, bonnen en overzichten van het jaar."),
-        new(ModuleSoort.Begroting, "Begroting", "", 2, PerAdministratie: true, KanSluiten: true, Fase: 5,
-            Omschrijving: "Wat u verwacht uit te geven en te ontvangen, naast wat er werkelijk gebeurt."),
         new(ModuleSoort.Instellingen, "Instellingen", "", null, PerAdministratie: false, KanSluiten: true, Fase: 1,
             Omschrijving: "Administraties en algemene instellingen."),
     ];

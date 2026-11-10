@@ -1,10 +1,9 @@
 using BtwBoeker.Application.Boekhouding;
-using BtwBoeker.Application.Tests.Boekhouding;
 using BtwBoeker.Domain.Administraties;
 using BtwBoeker.Domain.Financien;
 using BtwBoeker.Domain.Financien.Boekhouding;
 
-namespace BtwBoeker.Application.Tests.Begrotingen;
+namespace BtwBoeker.Application.Tests.Boekhouding;
 
 /// <summary>Baten of lasten per resultaatrekening (besluit 152).</summary>
 public sealed class KantTests

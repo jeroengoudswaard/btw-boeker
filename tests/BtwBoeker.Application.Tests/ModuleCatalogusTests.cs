@@ -14,19 +14,17 @@ public class ModuleCatalogusTests
     }
 
     [Fact]
-    public void Sneltoetsnummers_zijn_uniek_en_lopen_van_1_tot_2()
+    public void Alleen_boekhouding_heeft_een_sneltoets()
     {
         var nummers = ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null).Select(m => m.Sneltoetsnummer!.Value).ToList();
 
-        Assert.Equal([1, 2], nummers.Order());
+        Assert.Equal([1], nummers);
     }
 
-    [Theory]
-    [InlineData(ModuleSoort.Boekhouding)]
-    [InlineData(ModuleSoort.Begroting)]
-    public void Financiele_modules_horen_bij_een_administratie(ModuleSoort soort)
+    [Fact]
+    public void Boekhouding_hoort_bij_een_administratie()
     {
-        Assert.True(ModuleCatalogus.Geef(soort).PerAdministratie);
+        Assert.True(ModuleCatalogus.Geef(ModuleSoort.Boekhouding).PerAdministratie);
     }
 
     [Theory]
@@ -37,12 +35,10 @@ public class ModuleCatalogusTests
         Assert.False(ModuleCatalogus.Geef(soort).PerAdministratie);
     }
 
-    [Theory]
-    [InlineData(ModuleSoort.Boekhouding)]
-    [InlineData(ModuleSoort.Begroting)]
-    public void Boekhouding_en_begroting_zijn_voor_beide_administraties(ModuleSoort soort)
+    [Fact]
+    public void Boekhouding_is_niet_beperkt_tot_een_soort_administratie()
     {
-        Assert.Null(ModuleCatalogus.Geef(soort).AlleenVoor);
+        Assert.Null(ModuleCatalogus.Geef(ModuleSoort.Boekhouding).AlleenVoor);
     }
 
     [Fact]

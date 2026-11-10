@@ -59,7 +59,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
 
-        Assert.Equal(["Start", "Boekhouding", "Begroting", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
+        Assert.Equal(["Start", "Boekhouding", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
         Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
         Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
         Assert.IsType<OverzichtViewModel>(shell.GeselecteerdTabblad);
@@ -168,7 +168,6 @@ public sealed class ShellNavigatieTests
         await Kies(shell, "Boekhouding"); // uitklappen en naar het huidige onderdeel (Journaal)
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         Assert.True(Item(shell, "Boekhouding.Bank").IsSubitem);
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Begroting"); // alleen de gekozen module is uitgeklapt
 
         await Kies(shell, "Boekhouding.Bank");
 
@@ -211,8 +210,6 @@ public sealed class ShellNavigatieTests
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         Assert.Equal(AdministratieSoort.Stichting, boekhouding.Administratie!.Soort);
         Assert.Equal(BoekhoudingSubtab.Bank, boekhouding.Subtab);
-        Assert.Equal("Meerjarenplan", Item(shell, "Begroting").Titel); // besluit 163
-        Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Begroting"); // de begroting staat als eigen item
         Assert.Equal("Scouting Stichting", shell.ActieveAdministratieNaam);
     }
 
@@ -263,12 +260,11 @@ public sealed class ShellNavigatieTests
     public async Task Statusregel_toont_melding_en_fout_van_de_pagina_met_een_teken()
     {
         var shell = await OpenAsync();
-        shell.GekozenAdministratie = shell.Administraties.Single(a => a.Soort == AdministratieSoort.Stichting);
         await Kies(shell, "Boekhouding");
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
 
-        await boekhouding.MeerjarenplanMakenCommand.ExecuteAsync(null);
+        await boekhouding.ConceptenBoekenCommand.ExecuteAsync(null); // geen concepten: een melding
 
         Assert.Equal(Statussoort.Gelukt, shell.Statussoort);
         Assert.Equal("✓", shell.Statusteken);

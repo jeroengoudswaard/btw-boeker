@@ -529,18 +529,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             KiesAdministratieZonderWisselen(gevraagd);
         }
 
-        // Besluiten 157 en 163: Modules › Begroting (Ctrl+5) opent Boekhouding op de begroting, bij de Stichting op het meerjarenplan.
-        if (verzoek.Module == ModuleSoort.Begroting)
-        {
-            OpenModule(verzoek with { Module = ModuleSoort.Boekhouding });
-            if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
-            {
-                boekhouding.Subtab = verzoek.Administratie == AdministratieSoort.Stichting ? BoekhoudingSubtab.Meerjarenplan : BoekhoudingSubtab.Begroting;
-            }
-
-            return;
-        }
-
         var bestaand = Tabbladen.FirstOrDefault(t => t.Module.Soort == verzoek.Module && t.Administratie?.Soort == verzoek.Administratie);
         if (bestaand is not null)
         {
@@ -588,7 +576,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             && (verzoek.Administratie is null || Administraties.Any(a => a.Soort == verzoek.Administratie));
     }
 
-    /// <summary>Ctrl+1...6. Financiële modules openen voor de gekozen administratie (besluit 177; anders de Vereniging).</summary>
+    /// <summary>Ctrl+1 (Boekhouding). Financiële modules openen voor de gekozen administratie (besluit 177; anders de Vereniging).</summary>
     [RelayCommand]
     private void OpenModuleViaSneltoets(string? nummer)
     {

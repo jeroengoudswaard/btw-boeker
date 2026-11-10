@@ -39,7 +39,7 @@ public sealed class OverzichtViewModel(ShellViewModel shell)
                 b.Datum is { } datum ? $"afschrift van {datum.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture)}" : "volgens het grootboek"))
             .ToList();
         regels.Add(new Kerncijferregel(string.Create(CultureInfo.InvariantCulture, $"Resultaat {jaar} t/m vandaag"), cijfers.Resultaat.ToString(),
-            cijfers.BegrootNaarRato is { } rato ? $"begroot naar rato {rato}" : "geen vastgestelde begroting"));
+            "alleen geboekte posten"));
         return regels;
     }
 }
