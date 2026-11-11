@@ -504,6 +504,123 @@ public sealed class AppUiTests : IDisposable
     }
 
     /// <summary>
+    /// Snelheidsmeting in de echte app op een demodatabase met vijf jaar verzonnen verhuur (<see cref="Meerjarendemo"/>).
+    /// Doorloopt twee keer alle pagina's en onderdelen, sluit de app en zet de tijden uit het logbestand ("Duur …") in
+    /// een tabel: de eerste keer en het gemiddelde daarna. Draait alleen als <c>BTWBOEKER_SNELHEID</c> naar een map wijst.
+    /// </summary>
+    [Fact(Timeout = Timeout * 3)]
+    [Trait("Categorie", "Snelheid")]
+    public async Task Snelheidsmeting_met_een_meerjarige_demodatabase()
+    {
+        var uitvoer = Environment.GetEnvironmentVariable("BTWBOEKER_SNELHEID");
+        if (string.IsNullOrWhiteSpace(uitvoer))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(uitvoer);
+        var db = Path.Combine(_datamap, "meerjarig.btwdb");
+        var opbouw = Stopwatch.StartNew();
+        var (posten, transacties) = await Meerjarendemo.MaakAsync(db, DateTimeOffset.Now);
+        opbouw.Stop();
+
+        BewaarInstellingen(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
+        var venster = Start();
+        VoerWachtwoordIn(venster, Meerjarendemo.Wachtwoord);
+        Assert.True(Retry.WhileFalse(() => venster.Title.StartsWith(Meerjarendemo.Administratienaam, StringComparison.Ordinal), Wachttijd).Result, venster.Title);
+        Zoek(venster, "Startkaarten");
+        var gewijzigdNa = new List<string>(); // alleen bekijken mag Boekhouding niet als gewijzigd markeren
+
+        for (var ronde = 0; ronde < 2; ronde++)
+        {
+            Stap(venster, "Nav_Boekhouding"); // opent op het laatst gekozen onderdeel
+            Stap(venster, "Nav_Boekhouding.Journaal", "Journaalposten");
+            ControleerOngewijzigd(venster, "Journaal", gewijzigdNa);
+            Stap(venster, "Nav_Boekhouding.Bank");
+            ControleerOngewijzigd(venster, "Bank", gewijzigdNa);
+            Stap(venster, "Nav_Boekhouding.Postvak");
+            ControleerOngewijzigd(venster, "Postvak", gewijzigdNa);
+            Stap(venster, "Nav_Boekhouding.Rapporten", "Rapportkeuze");
+            var rapporten = Zoek(venster, "Rapportkeuze").AsComboBox();
+            for (var i = 0; i < rapporten.Items.Length; i++)
+            {
+                rapporten.Select(i);
+                Thread.Sleep(800); // het overzicht wordt op de achtergrond gemaakt
+                ControleerOngewijzigd(venster, $"rapport {i}", gewijzigdNa);
+            }
+
+            rapporten.Collapse();
+            Keyboard.Type(VirtualKeyShort.ESCAPE);
+            if (venster.FindFirstDescendant(c => c.ByAutomationId("Nav_Boekhouding.Rekeningschema")) is null)
+            {
+                KlikOp(venster, "Nav_Boekhouding.Meer");
+            }
+
+            ZoekMetDiagnose(venster, "Nav_Boekhouding.Boekingsregels");
+
+            foreach (var onderdeel in new[] { "Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren" })
+            {
+                Stap(venster, "Nav_Boekhouding." + onderdeel);
+                ControleerOngewijzigd(venster, onderdeel, gewijzigdNa);
+            }
+
+            Stap(venster, "Nav_Instellingen", "Instellingen");
+            Stap(venster, "Nav_Start", "Startkaarten");
+        }
+
+        // Het sluiten zelf ook meten (pagina's opruimen, sessie sluiten); hooguit 90 s wachten.
+        EindigMenumodus(venster);
+        var sluiten = Stopwatch.StartNew();
+        venster.Close();
+        var gesloten = Retry.WhileFalse(() => _app!.HasExited, TimeSpan.FromSeconds(90)).Result;
+        sluiten.Stop();
+        var openDialogen = string.Empty;
+        if (!gesloten)
+        {
+            openDialogen = string.Join(", ", venster.ModalWindows.Select(d => $"'{d.Title}': {d.FindFirstDescendant(c => c.ByControlType(ControlType.Text))?.Name}"));
+            Capture.Element(venster).ToFile(Path.Combine(uitvoer, "snelheid-niet-gesloten.png"));
+            _app!.Kill();
+        }
+
+        var logs = Directory.GetFiles(Path.Combine(_datamap, "logs"), "*.log");
+        var stempel = $"{DateTime.Now:yyyy-MM-dd-HHmm}";
+        var rapport = Snelheidsrapport.Maak(logs, posten, transacties, opbouw.Elapsed)
+            + Environment.NewLine + (gesloten
+                ? $"Afsluiten van de app (venster sluiten tot proces weg): {sluiten.ElapsedMilliseconds} ms.{Environment.NewLine}"
+                : $"Afsluiten: de app was na 90 s nog niet afgesloten.{Environment.NewLine}");
+        await File.WriteAllTextAsync(Path.Combine(uitvoer, $"snelheid-{stempel}.md"), rapport);
+        foreach (var log in logs)
+        {
+            File.Copy(log, Path.Combine(uitvoer, $"snelheid-{stempel}-{Path.GetFileName(log)}"), overwrite: true); // alleen verzonnen gegevens
+        }
+
+        Assert.True(gewijzigdNa.Count == 0, "Alleen bekijken markeerde Boekhouding als gewijzigd na: " + string.Join(", ", gewijzigdNa));
+        Assert.True(gesloten, $"De app sloot niet binnen 90 s af. Open dialogen: {openDialogen}");
+        Assert.Contains("Openen database", rapport, StringComparison.Ordinal);
+    }
+
+    /// <summary>De melding Niet-opgeslagen wijzigingen van Boekhouding staat er alleen bij een echte wijziging.</summary>
+    private static void ControleerOngewijzigd(Window venster, string stap, List<string> gewijzigdNa)
+    {
+        if (gewijzigdNa.Count == 0 && venster.FindFirstDescendant(c => c.ByAutomationId("BoekhoudingOnopgeslagen")) is not null)
+        {
+            gewijzigdNa.Add(stap);
+        }
+    }
+
+    /// <summary>Kiest een regel in de navigatiebalk en wacht tot de pagina er is en het laden is uitgelopen.</summary>
+    private static void Stap(Window venster, string navigatie, string? wachtOp = null)
+    {
+        Kies(venster, navigatie);
+        if (wachtOp is not null)
+        {
+            Zoek(venster, wachtOp);
+        }
+
+        Thread.Sleep(1000); // laden gebeurt op de achtergrond; de meting zelf komt uit het logbestand
+    }
+
+    /// <summary>
     /// Een vaste grootte van 1440×900 linksboven in het werkgebied, als het scherm groot genoeg is; gemaximaliseerd viel de
     /// rechterkant op een breed scherm buiten de opname. Op een klein scherm (de GitHub-runner heeft 1024×768) gemaximaliseerd,
     /// zodat het venster altijd binnen het scherm valt.

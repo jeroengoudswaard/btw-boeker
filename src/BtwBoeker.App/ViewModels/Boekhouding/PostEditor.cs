@@ -12,6 +12,12 @@ namespace BtwBoeker.App.ViewModels.Boekhouding;
 /// <summary>Eén regel in de journaalpost-editor.</summary>
 public sealed partial class PostRegelEditor : ObservableObject
 {
+    /// <summary>
+    /// De keuzelijst van de eigen editor. De weergave bindt hieraan in plaats van aan de editor erboven, zodat lijst en
+    /// keuze tegelijk wisselen: een hergebruikte rij met de lijst van de vorige post maakte de rekening anders leeg.
+    /// </summary>
+    public IReadOnlyList<Grootboekrekening> Rekeningen { get; init; } = [];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fout), nameof(IsLeeg))]
     public partial Grootboekrekening? GekozenRekening { get; set; }
@@ -69,8 +75,8 @@ public sealed partial class PostEditor : ObservableObject
         Regels.CollectionChanged += RegelsGewijzigd;
         if (post is null)
         {
-            Regels.Add(new PostRegelEditor());
-            Regels.Add(new PostRegelEditor());
+            Regels.Add(new PostRegelEditor { Rekeningen = Rekeningen });
+            Regels.Add(new PostRegelEditor { Rekeningen = Rekeningen });
         }
         else
         {
@@ -78,6 +84,7 @@ public sealed partial class PostEditor : ObservableObject
             {
                 Regels.Add(new PostRegelEditor
                 {
+                    Rekeningen = Rekeningen,
                     GekozenRekening = Rekeningen.FirstOrDefault(r => r.Id == regel.Rekening.Id) ?? regel.Rekening,
                     Omschrijving = regel.Omschrijving,
                     Debettekst = regel.Debet == Bedrag.Nul ? string.Empty : Weergave.Invoer(regel.Debet),
@@ -87,7 +94,7 @@ public sealed partial class PostEditor : ObservableObject
         }
 
         _origineel = Momentopname();
-        NieuweRegelCommand = new RelayCommand(() => Regels.Add(new PostRegelEditor()), () => !IsAlleenLezen);
+        NieuweRegelCommand = new RelayCommand(() => Regels.Add(new PostRegelEditor { Rekeningen = Rekeningen }), () => !IsAlleenLezen);
         VerwijderRegelCommand = new RelayCommand<PostRegelEditor>(r => Regels.Remove(r!), r => !IsAlleenLezen && r is not null);
     }
 

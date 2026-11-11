@@ -4,6 +4,13 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Opgelost
+- **Afsluiten na alleen bekijken**: met een paar boekingsregels vroeg de app bij het sluiten of de wijzigingen in *Boekhouding* opgeslagen moesten worden, ook als er niets was gewijzigd. Een keuzelijst in de tabel maakte de rekening van een regel leeg zodra die in beeld kwam. De keuzelijsten in de tabellen (boekingsregels, rekeningschema, posteditor) kiezen nu uit een lijst op de rij zelf.
+- **Versienummer**: het programma meldde zich in het logbestand en onder *Help › Over BTW-Boeker* als 0.1.0; het volgt nu de versie van de release.
+
+### Toegevoegd
+- **Snelheidsmeting** in de echte app op een demodatabase met vijf jaar verzonnen verhuur (zie de README). Eerste meting: database openen 1,4 s, eerste keer Start 0,6 s, Boekhouding laden 60 ms, overzichten 6–25 ms, daarna vrijwel alles onder 5 ms; afsluiten 0,1 s.
+
 ### Gewijzigd
 - **Accentkleur**: de app volgt de accentkleur van Windows. De eigen accentkleur per administratie is weg, ook uit *Instellingen*; de migratie *VerwijderAccentkleur* haalt de kolom uit een bestaande database en laat naam en drempel staan.
 - **Instellingen**: één kaart *Administratie* met de naam en de drempel voor *Zonder bon*.

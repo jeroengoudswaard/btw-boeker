@@ -28,7 +28,7 @@
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Button DockPanel.Dock="Right" Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}"
                     ToolTip="Concept en rekeningen opslaan (Ctrl+S)" AutomationProperties.AutomationId="BoekhoudingOpslaan" />
-            <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0"
+            <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0" AutomationProperties.AutomationId="BoekhoudingOnopgeslagen"
                        Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0" AutomationProperties.LiveSetting="Assertive"
@@ -249,7 +249,7 @@
                                         <DataGridTemplateColumn Header="Rekening" Width="2*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
-                                                    <ComboBox ItemsSource="{Binding DataContext.Rekeningen, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    <ComboBox ItemsSource="{Binding Rekeningen}"
                                                               SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}"
                                                               IsTextSearchEnabled="True" AutomationProperties.Name="Rekening" />
                                                 </DataTemplate>
@@ -615,7 +615,7 @@
                                 <DataGridTemplateColumn Header="Rekening" Width="2*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate DataType="{x:Type vm:BoekingsregelRegel}">
-                                            <ComboBox ItemsSource="{Binding DataContext.Toewijsrekeningen, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            <ComboBox ItemsSource="{Binding Rekeningen}"
                                                       SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}" IsTextSearchEnabled="True"
                                                       AutomationProperties.Name="Rekening" />
                                         </DataTemplate>
@@ -768,7 +768,7 @@
                                 <DataGridTemplateColumn Header="{DynamicResource T.Rubriek}" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate DataType="{x:Type vm:RekeningRegel}">
-                                            <ComboBox ItemsSource="{Binding DataContext.Rubrieken, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            <ComboBox ItemsSource="{Binding Rubrieken}"
                                                       SelectedItem="{Binding GekozenRubriek, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Naam"
                                                       AutomationProperties.Name="Rubriek" />
                                         </DataTemplate>

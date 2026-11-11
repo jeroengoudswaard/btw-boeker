@@ -9,7 +9,6 @@
     <RootNamespace>BtwBoeker.App</RootNamespace>
     <Company>BTW-Boeker</Company>
     <Product>BTW-Boeker</Product>
-    <Version>0.1.0</Version>
     <!-- Besluit 20: eigen icoon voor programma, venster en taakbalk (gemaakt met assets/bron/maak-icoon.py) -->
     <ApplicationIcon>Assets\BtwBoeker.ico</ApplicationIcon>
     <!-- WPF Fluent ThemeMode is nog als experimenteel gemarkeerd -->
