@@ -15,7 +15,7 @@ fi
 startpagina="$site/index.html"
 pagina="$site/btw-boeker/index.html"
 label='(<h3>BTW-Boeker <span class="tag">)v[0-9][0-9.]*'
-knop='(releases/download/btw-boeker/)BTW-Boeker(-[0-9.]+)?\.msi'
+knop='(releases/download/btw-boeker/)BtwBoeker(-[0-9.]+)?\.msi'
 
 grep -Eq "$label" "$startpagina" || { echo "::error::Versielabel van BTW-Boeker niet gevonden in $startpagina"; exit 1; }
 grep -Eq "$knop" "$pagina" || { echo "::error::Downloadknop van BTW-Boeker niet gevonden in $pagina"; exit 1; }
