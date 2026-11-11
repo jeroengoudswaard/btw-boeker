@@ -12,7 +12,7 @@ namespace BtwBoeker.Infrastructure.Tests.Demo;
 /// </summary>
 internal static class Demodatabase
 {
-    public const string Wachtwoord = "demo voorbeeldgroep";
+    public const string Wachtwoord = "demo vakantiehuis";
     public const string NaamVereniging = "Vakantiehuis De Voorbeeld";
 
     private static readonly (int Nummer, string Naam, RekeningSoort Soort)[] Rekeningen =
@@ -77,9 +77,9 @@ internal static class Demodatabase
             await dienst.BoekAsync(ver, Post(dag.AddDays(14), "Klein onderhoud", 4100, 1000, 2_350 + maand * 115));
         }
 
-        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, 1, 1), "Beginsaldo spaarpot", 1100, 600, 450_000));
+        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, 1, 1), "Beginsaldo bank", 1100, 600, 450_000));
         await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 3), 20), "Parkbijdrage", 4000, 1100, 86_400));
-        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 5), 12), "Oliebollenactie", 1000, 8400, 64_250));
+        await dienst.BoekAsync(ver, Post(new DateOnly(jaar, Math.Min(laatsteMaand, 5), 12), "Verhuur, contant betaald", 1000, 8400, 64_250));
         await dienst.BewaarConceptAsync(ver, Post(new DateOnly(jaar, laatsteMaand, 25), "Groot onderhoud: schilderwerk", 4110, 1100, 120_000));
     }
 

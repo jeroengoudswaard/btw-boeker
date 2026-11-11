@@ -476,7 +476,7 @@ public sealed class AppUiTests : IDisposable
         }
 
         Directory.CreateDirectory(uitvoer);
-        var db = Path.Combine(_datamap, "voorbeeldgroep.btwdb");
+        var db = Path.Combine(_datamap, "vakantiehuis.btwdb");
         await Demodatabase.MaakAsync(db, DateTimeOffset.Now);
 
         foreach (var (thema, naam) in new[] { (Thema.Licht, "licht"), (Thema.Donker, "donker") })
@@ -485,7 +485,7 @@ public sealed class AppUiTests : IDisposable
             var venster = Start();
             VoerWachtwoordIn(venster, Demodatabase.Wachtwoord);
             Assert.True(
-                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - voorbeeldgroep.btwdb - BTW-Boeker", Wachttijd).Result,
+                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - vakantiehuis.btwdb - BTW-Boeker", Wachttijd).Result,
                 venster.Title);
             ZetVenstergrootte(venster);
 
@@ -504,11 +504,22 @@ public sealed class AppUiTests : IDisposable
     }
 
     /// <summary>
-    /// Gemaximaliseerd, zodat het venster altijd binnen het scherm valt. Op de GitHub-runner is het scherm 1024×768: een
-    /// vaste grootte van 1280×800 viel daar rechts buiten beeld en onder de taakbalk (release v0.15.0).
+    /// Een vaste grootte van 1440×900 linksboven in het werkgebied, als het scherm groot genoeg is; gemaximaliseerd viel de
+    /// rechterkant op een breed scherm buiten de opname. Op een klein scherm (de GitHub-runner heeft 1024×768) gemaximaliseerd,
+    /// zodat het venster altijd binnen het scherm valt.
     /// </summary>
     private static void ZetVenstergrootte(Window venster)
     {
+        var werkgebied = System.Windows.SystemParameters.WorkArea;
+        if (werkgebied.Width >= 1440 && werkgebied.Height >= 900 && venster.Patterns.Window.IsSupported && venster.Patterns.Transform.IsSupported)
+        {
+            venster.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Normal);
+            Retry.WhileFalse(() => venster.Patterns.Window.Pattern.WindowVisualState.Value == WindowVisualState.Normal, Wachttijd);
+            venster.Patterns.Transform.Pattern.Move(werkgebied.Left, werkgebied.Top);
+            venster.Patterns.Transform.Pattern.Resize(1440, 900);
+            return;
+        }
+
         if (venster.Patterns.Window.IsSupported)
         {
             venster.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);

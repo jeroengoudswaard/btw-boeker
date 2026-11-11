@@ -4,7 +4,12 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.19.0] - 2026-11-10: Eerste versie van BTW-Boeker
+
 ### Opgelost
+- **Start**: een kaart met werk (bijvoorbeeld "1 conceptpost te boeken") toonde de interne naam van de administratie ("Vereniging"); die regel is weg.
+- **Schermafbeeldingen voor de website**: vaste venstergrootte 1440×900 op een groot scherm (gemaximaliseerd viel de rechterkant buiten de opname); de demodatabase heet `vakantiehuis.btwdb` en bevat geen resten van het oude product meer.
+- **Release-script**: het script dat de downloadknop op de website bijwerkt, zocht naar `BTW-Boeker-<versie>.msi` in plaats van `BtwBoeker-<versie>.msi`; de test ervan draait nu ook in de CI.
 - **App-icoon** (besluit 20): het programma, het venster en de taakbalk toonden het standaardicoon van Windows; alleen de snelkoppeling uit de MSI had het eigen icoon. `BTW-Boeker.exe` heeft nu `BtwBoeker.ico` (groene tegel met huisje en BTW).
 
 ### Verwijderd

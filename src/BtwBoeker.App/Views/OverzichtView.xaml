@@ -123,8 +123,6 @@
                                     </Border>
                                     <StackPanel>
                                         <TextBlock Text="{Binding Titel}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                        <TextBlock Text="{Binding Administratie}" Style="{StaticResource Toelichting}" FontSize="12"
-                                                   Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
                                         <TextBlock Text="{Binding Tekst}" Style="{StaticResource Toelichting}" Margin="0,8,0,0" />
                                     </StackPanel>
                                 </DockPanel>
