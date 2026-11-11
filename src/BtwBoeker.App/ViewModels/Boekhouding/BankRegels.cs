@@ -74,6 +74,12 @@ public sealed partial class BoekingsregelRegel : ObservableObject
 
     public bool IsNieuw => Id is null;
 
+    /// <summary>
+    /// De keuzelijst voor <see cref="GekozenRekening"/>. De weergave bindt hieraan en niet via de pagina: die wordt pas
+    /// gevonden als de cel in beeld komt, en een keuzelijst zonder items maakte de rekening leeg.
+    /// </summary>
+    public IReadOnlyList<Grootboekrekening> Rekeningen { get; set; } = [];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
     public partial string Naam { get; set; }

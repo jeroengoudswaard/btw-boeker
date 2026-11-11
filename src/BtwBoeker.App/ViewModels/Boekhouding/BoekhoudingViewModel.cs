@@ -339,7 +339,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
         }
 
         KoppelRekeningen(false);
-        Rekeningen.Vervang((Rekeningkeuzes).Select(rekening => new RekeningRegel(rekening, Rubrieken.FirstOrDefault(r => r.Id == rekening.Rubriek?.Id), Grootboek.Saldo(_stand, rekening, Jaar))));
+        Rekeningen.Vervang((Rekeningkeuzes).Select(rekening => new RekeningRegel(rekening, Rubrieken.FirstOrDefault(r => r.Id == rekening.Rubriek?.Id), Grootboek.Saldo(_stand, rekening, Jaar)) { Rubrieken = Rubrieken }));
 
         KoppelRekeningen(true);
 
@@ -686,7 +686,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
             return;
         }
 
-        var regel = new RekeningRegel(null, null, 0);
+        var regel = new RekeningRegel(null, null, 0) { Rubrieken = Rubrieken };
         regel.PropertyChanged += RekeningGewijzigd;
         Rekeningen.Add(regel);
         GeselecteerdeRekening = regel;

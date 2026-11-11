@@ -83,6 +83,9 @@ public sealed partial class RekeningRegel : ObservableObject
 
     public string Saldotekst { get; }
 
+    /// <summary>De keuzelijst voor <see cref="GekozenRubriek"/>; zie <see cref="BoekingsregelRegel.Rekeningen"/>.</summary>
+    public IReadOnlyList<Rubriek> Rubrieken { get; set; } = [];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout), nameof(Nummer))]
     public partial string Nummertekst { get; set; }

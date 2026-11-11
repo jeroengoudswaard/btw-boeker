@@ -34,6 +34,14 @@ dotnet test --filter "Categorie=UI"            # UI-tests: start de echte app; m
 Bij de UI-tests bewaart `$env:BTWBOEKER_SCREENSHOTS = "C:\pad"` screenshots van elke stap.
 Typ of klik niet tijdens de UI-tests: FlaUI gebruikt het echte toetsenbord en de echte muis. Elke UI-test heeft een time-out van 3 minuten en sluit zijn eigen app-proces altijd af.
 
+### Snelheidsmeting
+De meting start de echte app op een demodatabase met vijf jaar verzonnen verhuur (`Meerjarendemo`, ongeveer 360 posten en 360 banktransacties), loopt twee keer langs alle pagina's en rapporten en zet de tijden uit het logbestand in een tabel (`snelheid-<datum>.md`, met een kopie van het logbestand). Ze controleert ook dat alleen bekijken niets als gewijzigd markeert en dat de app daarna gewoon afsluit. Ongeveer een minuut; muis en toetsenbord niet gebruiken.
+```powershell
+dotnet build
+$env:BTWBOEKER_SNELHEID = "C:\pad\naar\uitvoer"
+dotnet test tests/BtwBoeker.App.Tests --no-build --filter "Categorie=Snelheid"
+```
+
 ### Database-migraties
 ```powershell
 dotnet tool restore

@@ -317,6 +317,7 @@ public sealed partial class BoekhoudingViewModel
 
     private void VoegRegelToe(BoekingsregelRegel regel)
     {
+        regel.Rekeningen = Toewijsrekeningen;
         regel.PropertyChanged += RegelGewijzigd;
         Boekingsregels.Add(regel);
         GeselecteerdeRegel = regel;
@@ -403,6 +404,7 @@ public sealed partial class BoekhoudingViewModel
     private void VoegGeladenRegelToe(BoekingsregelRegel rij)
     {
         // Een behouden regel wijst nog naar een object uit de vorige stand; de keuzelijst toont alleen objecten uit zijn eigen lijst.
+        rij.Rekeningen = Toewijsrekeningen;
         if (rij.GekozenRekening is { } rekening && Toewijsrekeningen.FirstOrDefault(r => r.Id == rekening.Id) is { } actueel)
         {
             rij.GekozenRekening = actueel;
