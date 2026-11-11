@@ -6,5 +6,5 @@ namespace BtwBoeker.Domain.Administraties;
 /// </summary>
 public enum AdministratieSoort
 {
-    Vereniging = 1,
+    Standaard = 1,
 }

@@ -29,7 +29,7 @@ public sealed class XafExportViewModelTests : IDisposable
         var inhoud = await File.ReadAllBytesAsync(_doel);
         Assert.Empty(XafSchrijver.Valideer(inhoud));
         Assert.Contains("<openingBalance>", System.Text.Encoding.UTF8.GetString(inhoud), StringComparison.Ordinal);
-        Assert.Equal(XafDienst.Bestandsnaam(BoekhoudingTestomgeving.Vereniging.Naam, vm.Jaar), _omgeving.Dialogen.XafVoorstel);
+        Assert.Equal(XafDienst.Bestandsnaam(BoekhoudingTestomgeving.Administratie.Naam, vm.Jaar), _omgeving.Dialogen.XafVoorstel);
         Assert.Matches("^[✓⚠] Auditfile 2026", vm.Melding);
         Assert.Contains("auditfile", vm.Melding, StringComparison.OrdinalIgnoreCase);
     }

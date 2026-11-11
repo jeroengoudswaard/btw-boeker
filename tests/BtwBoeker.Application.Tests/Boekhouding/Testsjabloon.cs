@@ -12,7 +12,7 @@ internal static class Testsjabloon
 {
     public const string Naam = "Testschema verhuur";
 
-    public static Rekeningsjabloon Verhuur(AdministratieSoort? administratie = AdministratieSoort.Vereniging) => new(Naam, administratie,
+    public static Rekeningsjabloon Verhuur(AdministratieSoort? administratie = AdministratieSoort.Standaard) => new(Naam, administratie,
         [new("Vermogen"), new("Liquide middelen"), new("Kosten"), new("Opbrengsten")],
         [
             new(600, "Eigen vermogen", "Vermogen", RekeningSoort.Balans, RekeningRol.Reserve),

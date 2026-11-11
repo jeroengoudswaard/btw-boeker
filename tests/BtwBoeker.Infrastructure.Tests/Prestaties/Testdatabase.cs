@@ -22,30 +22,30 @@ internal static class Testdatabase
         (1000, "Kas", RekeningSoort.Balans),
         (1100, "Bank", RekeningSoort.Balans),
         (1150, "Spaarrekening", RekeningSoort.Balans),
-        (1300, "Debiteuren contributie", RekeningSoort.Balans),
+        (1300, "Debiteuren huur", RekeningSoort.Balans),
         (4000, "Parkbijdrage", RekeningSoort.Resultaat),
         (4100, "Klein onderhoud", RekeningSoort.Resultaat),
-        (4110, "Kampen", RekeningSoort.Resultaat),
+        (4110, "Schoonmaak", RekeningSoort.Resultaat),
         (4200, "Huur", RekeningSoort.Resultaat),
         (4210, "Energie", RekeningSoort.Resultaat),
         (4300, "Bestuur", RekeningSoort.Resultaat),
         (4310, "Bankkosten", RekeningSoort.Resultaat),
-        (8010, "Contributie Bevers", RekeningSoort.Resultaat),
-        (8020, "Contributie Welpen", RekeningSoort.Resultaat),
-        (8030, "Contributie Scouts", RekeningSoort.Resultaat),
-        (8040, "Contributie Explorers", RekeningSoort.Resultaat),
+        (8010, "Verhuur voorjaar", RekeningSoort.Resultaat),
+        (8020, "Verhuur huisje", RekeningSoort.Resultaat),
+        (8030, "Verhuur najaar", RekeningSoort.Resultaat),
+        (8040, "Verhuur winter", RekeningSoort.Resultaat),
         (8400, "Acties", RekeningSoort.Resultaat),
         (8500, "Subsidies", RekeningSoort.Resultaat),
     ];
 
-    /// <summary>Maakt de database aan en vult de Vereniging met <paramref name="posten"/> geboekte posten (2025 en 2026).</summary>
+    /// <summary>Maakt de database aan en vult de administratie met <paramref name="posten"/> geboekte posten (2025 en 2026).</summary>
     public static async Task MaakAsync(string pad, int posten)
     {
         var beheer = new DatabaseBeheer();
         await beheer.MaakAanAsync(pad, Wachtwoord);
         await using var sessie = await beheer.OpenAsync(pad, Wachtwoord);
         var dienst = new BoekhoudingDienst(sessie, new VasteTijd(Nu));
-        const AdministratieSoort ver = AdministratieSoort.Vereniging;
+        const AdministratieSoort ver = AdministratieSoort.Standaard;
 
         await dienst.RichtInAsync(ver);
         await dienst.OpenBoekjaarAsync(ver, 2025);

@@ -1,5 +1,4 @@
 using BtwBoeker.Application.Inrichting;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels;
 
@@ -16,11 +15,11 @@ public static class Navigatietellers
         [Startkaartsoort.Postvak] = "Boekhouding.Postvak",
     };
 
-    public static IReadOnlyDictionary<string, int> Bepaal(IEnumerable<Startkaart> kaarten, AdministratieSoort? administratie)
+    public static IReadOnlyDictionary<string, int> Bepaal(IEnumerable<Startkaart> kaarten)
     {
         ArgumentNullException.ThrowIfNull(kaarten);
         var tellers = new Dictionary<string, int>(StringComparer.Ordinal);
-        foreach (var kaart in kaarten.Where(k => k.Administratie == administratie && k.Aantal > 0))
+        foreach (var kaart in kaarten.Where(k => k.Aantal > 0))
         {
             if (!Onderdelen.TryGetValue(kaart.Soort, out var sleutel))
             {

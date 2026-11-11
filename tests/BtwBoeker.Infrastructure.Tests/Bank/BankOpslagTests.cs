@@ -15,7 +15,7 @@ namespace BtwBoeker.Infrastructure.Tests.Bank;
 public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
 {
     private const string Wachtwoord = "zonnig vakantiehuis 2026";
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
     private IDatabaseSessie _sessie = null!;
@@ -30,10 +30,10 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
         var tijd = TimeProvider.System;
         _boekhouding = new BoekhoudingDienst(_sessie, tijd);
         _bank = new BankDienst(_sessie, tijd);
-        await _boekhouding.RichtInAsync(Ver);
-        if ((await _boekhouding.LaadAsync(Ver)).Boekjaar(2026) is null)
+        await _boekhouding.RichtInAsync(Adm);
+        if ((await _boekhouding.LaadAsync(Adm)).Boekjaar(2026) is null)
         {
-            await _boekhouding.OpenBoekjaarAsync(Ver, 2026);
+            await _boekhouding.OpenBoekjaarAsync(Adm, 2026);
         }
 
         foreach (var (nummer, naam, soort, rol) in new[]
@@ -44,7 +44,7 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
             (4115, "Energie", RekeningSoort.Resultaat, RekeningRol.Geen),
         })
         {
-            await _boekhouding.BewaarRekeningAsync(Ver, new RekeningInvoer(null, nummer, naam, null, soort, rol, true));
+            await _boekhouding.BewaarRekeningAsync(Adm, new RekeningInvoer(null, nummer, naam, null, soort, rol, true));
         }
     }
 
@@ -52,7 +52,7 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
 
     public void Dispose() => _map.Dispose();
 
-    private async Task<int> Rekening(int nummer) => (await _boekhouding.LaadAsync(Ver)).Rekeningen.Single(r => r.Nummer == nummer).Id;
+    private async Task<int> Rekening(int nummer) => (await _boekhouding.LaadAsync(Adm)).Rekeningen.Single(r => r.Nummer == nummer).Id;
 
     private static CamtBestand Bestand(string iban, params VbTransactie[] t) =>
         Camt053Lezer.Lees(CamtVoorbeeld.Stroom(CamtVoorbeeld.Xml(iban, "08", new VbAfschrift(new DateOnly(2026, 3, 2), 0, t))));
@@ -66,24 +66,24 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
                 new VbTransactie(-10000, "ICDT", "ESCT", "544", Ref: "S1", TegenIban: CamtVoorbeeld.Spaar, Naam: "Eigen spaar", NtryRef: "2")),
             Bestand(CamtVoorbeeld.Spaar, new VbTransactie(10000, Ref: "S2", TegenIban: CamtVoorbeeld.Betaal, Naam: "Eigen betaal")),
         };
-        var voorstel = BankimportPlanner.Plan(await _boekhouding.LaadAsync(Ver), bestanden);
+        var voorstel = BankimportPlanner.Plan(await _boekhouding.LaadAsync(Adm), bestanden);
         var nieuw = new Dictionary<string, NieuweBankrekening>
         {
             [CamtVoorbeeld.Betaal] = new(await Rekening(1100), "RABO", "Rabobank betaalrekening"),
             [CamtVoorbeeld.Spaar] = new(await Rekening(1110), "RSPA", "Rabobank spaarrekening"),
         };
-        return await _bank.ImporteerAsync(Ver, voorstel, nieuw);
+        return await _bank.ImporteerAsync(Adm, voorstel, nieuw);
     }
 
     [Fact]
     public async Task Import_herkenning_en_boeken_worden_bewaard_en_sluiten_aan()
     {
-        await _bank.BewaarRegelAsync(Ver, new BoekingsregelInvoer(null, "Energie", await Rekening(4115), new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true));
+        await _bank.BewaarRegelAsync(Adm, new BoekingsregelInvoer(null, "Energie", await Rekening(4115), new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true));
 
         var resultaat = await ImporteerAsync();
 
         Assert.Equal(new BankimportResultaat(3, 3, 0), resultaat);
-        var stand = await _boekhouding.LaadAsync(Ver);
+        var stand = await _boekhouding.LaadAsync(Adm);
         var rabo = stand.Dagboeken.Single(d => d.Code == "RABO");
         Assert.Equal(CamtVoorbeeld.Betaal, rabo.Iban?.Waarde);
         Assert.Equal(2, stand.Bankafschriften.Count);
@@ -92,9 +92,9 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
         Assert.Equal("PMNT-ICDT-ESCT", stand.Bankmutaties.Single(m => m.Tegennaam == "Energie BV").Code.Iso);
         Assert.Single(stand.Boekingsregels);
 
-        var geboekt = await _bank.BoekConceptenAsync(Ver, null);
+        var geboekt = await _bank.BoekConceptenAsync(Adm, null);
         Assert.Equal(3, geboekt.Aantal);
-        stand = await _boekhouding.LaadAsync(Ver);
+        stand = await _boekhouding.LaadAsync(Adm);
         Assert.True(Bankoverzicht.Saldi(stand, rabo).IsAangesloten);
         Assert.Equal(0, Grootboek.Saldo(stand, stand.Rekeningen.Single(r => r.Nummer == 1298), 2026));
 
@@ -106,11 +106,11 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
     {
         await ImporteerAsync();
 
-        var fout = await Assert.ThrowsAnyAsync<Exception>(() => _sessie.Boekhouding.PasToeAsync(Ver, stand =>
+        var fout = await Assert.ThrowsAnyAsync<Exception>(() => _sessie.Boekhouding.PasToeAsync(Adm, stand =>
         {
             var bestaand = stand.Bankmutaties[0];
             var wijziging = new BoekhoudingWijziging<bool>(true);
-            wijziging.Toevoegen.Add(new Bankmutatie(Ver, bestaand.Dagboek, bestaand.Sleutel, bestaand.Boekdatum, bestaand.Bedrag, bestaand.IsBij,
+            wijziging.Toevoegen.Add(new Bankmutatie(Adm, bestaand.Dagboek, bestaand.Sleutel, bestaand.Boekdatum, bestaand.Bedrag, bestaand.IsBij,
                 bestaand.Code, null, null, null, null, null, null));
             return wijziging;
         }));
@@ -121,12 +121,12 @@ public sealed class BankOpslagTests : IAsyncLifetime, IDisposable
     public async Task Concept_verwijderen_zet_de_transactie_terug_in_de_werkvoorraad()
     {
         await ImporteerAsync();
-        var stand = await _boekhouding.LaadAsync(Ver);
+        var stand = await _boekhouding.LaadAsync(Adm);
         var mutatie = stand.Bankmutaties.Single(m => m.Tegennaam == "Eigen spaar");
 
-        await _boekhouding.VerwijderConceptAsync(Ver, mutatie.PostId!.Value);
+        await _boekhouding.VerwijderConceptAsync(Adm, mutatie.PostId!.Value);
 
-        stand = await _boekhouding.LaadAsync(Ver);
+        stand = await _boekhouding.LaadAsync(Adm);
         Assert.Null(stand.Bankmutaties.Single(m => m.Id == mutatie.Id).PostId);
     }
 }

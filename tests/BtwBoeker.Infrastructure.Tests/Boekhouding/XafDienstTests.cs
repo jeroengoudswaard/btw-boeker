@@ -31,13 +31,13 @@ public sealed class XafDienstTests : IDisposable
         await Demodatabase.MaakAsync(pad, Nu);
         await using var sessie = await Demodatabase.OpenAsync(pad);
 
-        var resultaat = await new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Vereniging, 2026, "0.1.0");
+        var resultaat = await new XafDienst(sessie, new VasteTijd(Nu)).MaakAsync(AdministratieSoort.Standaard, 2026, "0.1.0");
 
         Assert.Empty(XafSchrijver.Valideer(resultaat.Inhoud));
         Assert.True(resultaat.AantalPosten >= 20);
         Assert.Equal(1, resultaat.OvergeslagenConcepten);
         var xml = Encoding.UTF8.GetString(resultaat.Inhoud);
-        Assert.Contains(Demodatabase.NaamVereniging, xml, StringComparison.Ordinal);
+        Assert.Contains(Demodatabase.Administratienaam, xml, StringComparison.Ordinal);
         Assert.DoesNotContain("<bankAccNr>", xml, StringComparison.Ordinal);
         Assert.Contains("<dateCreated>2026-11-04</dateCreated>", xml, StringComparison.Ordinal);
     }

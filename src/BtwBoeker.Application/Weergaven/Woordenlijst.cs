@@ -7,7 +7,7 @@ namespace BtwBoeker.Application.Weergaven;
 public sealed record Term(string Sleutel, string Expert, string Eenvoudig, string? Uitleg = null);
 
 /// <summary>
-/// De woordenlijst voor het tabblad Financiën. Alleen visueel: de database, afdrukken en
+/// De woordenlijst voor Boekhouding (in de weergave Eenvoudig: Financiën). Alleen visueel: de database, afdrukken en
 /// export blijven formeel. De XAML gebruikt de sleutels als <c>{DynamicResource T.Sleutel}</c> en
 /// <c>{DynamicResource U.Sleutel}</c>; een architectuurtest bewaakt dat elke sleutel hier staat.
 /// </summary>

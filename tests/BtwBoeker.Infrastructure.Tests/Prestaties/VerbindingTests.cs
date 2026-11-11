@@ -26,8 +26,8 @@ public sealed class VerbindingTests : IDisposable
 
         await using (var sessie = await _beheer.OpenAsync(pad, Wachtwoord))
         {
-            await sessie.Administraties.HaalAlleAsync();
-            await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+            await sessie.Administraties.HaalAsync();
+            await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         }
 
         AssertVrij(pad);
@@ -56,12 +56,12 @@ public sealed class VerbindingTests : IDisposable
         var pad = _map.Bestand("snel.btwdb");
         await _beheer.MaakAanAsync(pad, Wachtwoord);
         await using var sessie = await _beheer.OpenAsync(pad, Wachtwoord);
-        await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging); // opwarmen
+        await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard); // opwarmen
 
         var klok = Stopwatch.StartNew();
         for (var i = 0; i < 10; i++)
         {
-            await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+            await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         }
 
         Assert.True(klok.ElapsedMilliseconds < 4000, $"10x boekhouding laden duurde {klok.ElapsedMilliseconds} ms (budget 4000 ms; zonder pooling ±10.000 ms).");

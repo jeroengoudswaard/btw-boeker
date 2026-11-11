@@ -23,11 +23,6 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Accentkleur")
-                        .IsRequired()
-                        .HasMaxLength(7)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Naam")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -52,7 +47,6 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                         new
                         {
                             Id = 1,
-                            Accentkleur = "#2E7D32",
                             Naam = "Mijn administratie",
                             Soort = 1
                         });

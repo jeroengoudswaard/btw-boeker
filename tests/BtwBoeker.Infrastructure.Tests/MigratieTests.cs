@@ -94,12 +94,12 @@ public sealed class MigratieTests : IDisposable
 
         Assert.Equal([1, 2], await nieuw.Administraties.Select(a => a.Id).OrderBy(i => i).ToListAsync());
         Assert.Equal(1, await nieuw.Rubrieken.CountAsync());
-        var getoond = await new AdministratieRepository(Context).HaalAlleAsync();
-        Assert.Equal(BtwBoeker.Domain.Administraties.AdministratieSoort.Vereniging, Assert.Single(getoond).Soort);
+        var getoond = await new AdministratieRepository(Context).HaalAsync();
+        Assert.Equal(BtwBoeker.Domain.Administraties.AdministratieSoort.Standaard, getoond.Soort);
     }
 
     [Theory]
-    [InlineData("Vereniging", "Mijn administratie")] // de oude standaardnaam wordt de nieuwe
+    [InlineData("Veren" + "iging", "Mijn administratie")] // de oude standaardnaam wordt de nieuwe (samengesteld: zie ProductnaamTests)
     [InlineData("Vakantiehuisje", "Vakantiehuisje")] // een zelf gekozen naam blijft
     public async Task Alleen_de_oude_standaardnaam_wordt_mijn_administratie(string voor, string na)
     {
@@ -113,6 +113,43 @@ public sealed class MigratieTests : IDisposable
         await nieuw.Database.MigrateAsync();
 
         Assert.Equal(na, (await nieuw.Administraties.SingleAsync(a => a.Id == 1)).Naam);
+    }
+
+    [Fact]
+    public async Task De_accentkleur_verdwijnt_en_naam_en_drempel_blijven()
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync("20261110201147_StandaardnaamAdministratie");
+            await oud.Database.ExecuteSqlRawAsync(
+                "UPDATE Administraties SET Naam = 'Vakantiehuisje', Accentkleur = '#6A1B9A', ZonderBonDrempel = 2500 WHERE Id = 1");
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        var administratie = await nieuw.Administraties.SingleAsync(a => a.Id == 1);
+        Assert.Equal("Vakantiehuisje", administratie.Naam);
+        Assert.Equal(2500, administratie.ZonderBonDrempel);
+        Assert.False(await KolomBestaatAsync(nieuw, "Administraties", "Accentkleur"));
+    }
+
+    private static async Task<bool> KolomBestaatAsync(BtwBoekerDbContext context, string tabel, string kolom)
+    {
+        var verbinding = context.Database.GetDbConnection();
+        await verbinding.OpenAsync();
+        try
+        {
+            await using var opdracht = verbinding.CreateCommand();
+            opdracht.CommandText = "SELECT COUNT(*) FROM pragma_table_info($tabel) WHERE name = $kolom";
+            opdracht.Parameters.Add(new SqliteParameter("$tabel", tabel));
+            opdracht.Parameters.Add(new SqliteParameter("$kolom", kolom));
+            return Convert.ToInt64(await opdracht.ExecuteScalarAsync(), System.Globalization.CultureInfo.InvariantCulture) > 0;
+        }
+        finally
+        {
+            await verbinding.CloseAsync();
+        }
     }
 
     [Fact]

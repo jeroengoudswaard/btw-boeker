@@ -13,7 +13,7 @@ namespace BtwBoeker.Infrastructure.Tests.Demo;
 internal static class Demodatabase
 {
     public const string Wachtwoord = "demo vakantiehuis";
-    public const string NaamVereniging = "Vakantiehuis De Voorbeeld";
+    public const string Administratienaam = "Vakantiehuis De Voorbeeld";
 
     private static readonly (int Nummer, string Naam, RekeningSoort Soort)[] Rekeningen =
     [
@@ -36,11 +36,9 @@ internal static class Demodatabase
         await beheer.MaakAanAsync(pad, Wachtwoord);
         await using var sessie = await beheer.OpenAsync(pad, Wachtwoord);
 
-        foreach (var administratie in await sessie.Administraties.HaalAlleAsync())
-        {
-            administratie.WijzigNaam(NaamVereniging);
-            await sessie.Administraties.BewaarAsync(administratie);
-        }
+        var administratie = await sessie.Administraties.HaalAsync();
+        administratie.WijzigNaam(Administratienaam);
+        await sessie.Administraties.BewaarAsync(administratie);
 
         await VulBoekhoudingAsync(sessie, tijd, nu);
     }
@@ -49,7 +47,7 @@ internal static class Demodatabase
 
     private static async Task VulBoekhoudingAsync(IDatabaseSessie sessie, TimeProvider tijd, DateTimeOffset nu)
     {
-        const AdministratieSoort ver = AdministratieSoort.Vereniging;
+        const AdministratieSoort ver = AdministratieSoort.Standaard;
         var dienst = new BoekhoudingDienst(sessie, tijd);
         await dienst.RichtInAsync(ver);
         var id = new Dictionary<int, int>();

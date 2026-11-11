@@ -7,8 +7,8 @@ using BtwBoeker.Domain.Financien.Bijlagen;
 namespace BtwBoeker.App.ViewModels.Boekhouding;
 
 /// <summary>
-/// Bijlagen bij een post, het subtabblad <i>Postvak bonnen</i> en het filter <i>Zonder bon</i> (stap 4c-3, besluiten
-/// 83–88, 96, 97 en 135–140). Toevoegen en verwijderen mag ook bij een geboekte post; de boeking verandert niet.
+/// Bijlagen bij een post, het subtabblad <i>Postvak bonnen</i> en het filter <i>Zonder bon</i>. Toevoegen en
+/// verwijderen mag ook bij een geboekte post; de boeking verandert niet.
 /// </summary>
 public sealed partial class BoekhoudingViewModel
 {
@@ -56,7 +56,7 @@ public sealed partial class BoekhoudingViewModel
 
     /// <summary>De drempel van de eigen administratie.</summary>
     private void BerekenZonderBon() =>
-        _zonderBon = [.. ZonderBon.Posten(_stand!, new Domain.Financien.Bedrag(Administratie?.Model.ZonderBonDrempel ?? Domain.Administraties.Administratie.StandaardZonderBonDrempel)).Select(p => p.Id)];
+        _zonderBon = [.. ZonderBon.Posten(_stand!, new Domain.Financien.Bedrag(Administratie.Model.ZonderBonDrempel)).Select(p => p.Id)];
 
     private void LaadPostbijlagen()
     {

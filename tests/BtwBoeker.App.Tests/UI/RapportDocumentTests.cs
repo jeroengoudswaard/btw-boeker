@@ -10,7 +10,7 @@ namespace BtwBoeker.App.Tests.UI;
 /// <summary>De layout van een rapport op het scherm (alleen op Windows, WPF). Een getoond venster is nodig voor de layout.</summary>
 public sealed class RapportDocumentTests
 {
-    private static RapportTabel Saldibalans() => new("Saldibalans 2026", "Vereniging",
+    private static RapportTabel Saldibalans() => new("Saldibalans 2026", "Mijn administratie",
         [new("Rekening", false), new("Debet", true), new("Credit", true), new("Saldo debet", true), new("Saldo credit", true)],
         [new RapportRij(["600 Algemene reserve", Bedrag.Nul, new Bedrag(1582164), null, new Bedrag(1582164)], false, false)]);
 

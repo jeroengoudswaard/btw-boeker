@@ -15,8 +15,7 @@ public sealed class XafDienst(IDatabaseSessie sessie, TimeProvider tijd)
     public async Task<XafResultaat> MaakAsync(AdministratieSoort administratie, int jaar, string softwareversie, CancellationToken annulering = default)
     {
         var stand = await sessie.Boekhouding.LaadAsync(administratie, annulering).ConfigureAwait(false);
-        var naam = (await sessie.Administraties.HaalAlleAsync(annulering).ConfigureAwait(false))
-            .FirstOrDefault(a => a.Soort == administratie)?.Naam ?? administratie.ToString();
+        var naam = (await sessie.Administraties.HaalAsync(annulering).ConfigureAwait(false)).Naam;
         var vandaag = DateOnly.FromDateTime(tijd.GetLocalNow().DateTime);
         return XafSchrijver.Schrijf(new XafInvoer(stand, jaar, naam, vandaag, softwareversie));
     }

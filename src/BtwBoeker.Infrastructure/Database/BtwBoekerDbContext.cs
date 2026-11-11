@@ -51,19 +51,8 @@ public sealed class BtwBoekerDbContext(DbContextOptions<BtwBoekerDbContext> opti
             b.HasIndex(a => a.Soort).IsUnique();
             b.Property(a => a.Naam).IsRequired().HasMaxLength(Administratie.MaximaleNaamLengte);
             b.Property(a => a.ZonderBonDrempel).HasDefaultValue(Administratie.StandaardZonderBonDrempel).HasSentinel(-1L);
-            b.Property(a => a.Accentkleur)
-                .IsRequired()
-                .HasMaxLength(7)
-                .HasConversion(k => k.ToString(), s => Kleur.Parse(s));
 
-            b.HasData(
-                new
-                {
-                    Id = 1,
-                    Soort = AdministratieSoort.Vereniging,
-                    Naam = "Mijn administratie",
-                    Accentkleur = Administratie.Standaardkleur(AdministratieSoort.Vereniging),
-                });
+            b.HasData(new { Id = 1, Soort = AdministratieSoort.Standaard, Naam = Administratie.Standaardnaam });
         });
 
         BoekhoudingConfiguratie.Configureer(modelBuilder);

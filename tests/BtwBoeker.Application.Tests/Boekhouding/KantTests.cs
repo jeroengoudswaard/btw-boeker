@@ -21,7 +21,7 @@ public sealed class KantTests
         var data = new BoekhoudingTestdata();
         var dienst = new BoekhoudingDienst(new BoekhoudingDienstTests.FakeSessie(data), new BoekhoudingDienstTests.VasteTijd(new DateTimeOffset(2026, 10, 29, 9, 0, 0, TimeSpan.Zero)));
 
-        var id = await dienst.BewaarRekeningAsync(AdministratieSoort.Vereniging,
+        var id = await dienst.BewaarRekeningAsync(AdministratieSoort.Standaard,
             new RekeningInvoer(null, 4900, "Verhuur materiaal", null, RekeningSoort.Resultaat, RekeningRol.Geen, true, ResultaatKant.Baten));
 
         Assert.Equal(ResultaatKant.Baten, data.Rekeningen.Single(r => r.Id == id).Kant);

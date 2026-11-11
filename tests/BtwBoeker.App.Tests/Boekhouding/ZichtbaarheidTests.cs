@@ -74,10 +74,10 @@ public sealed class ZichtbaarheidTests : IDisposable
 
         vm.RubriekinvoerOpenenCommand.Execute(null);
         Assert.True(vm.IsRubriekinvoerOpen);
-        vm.NieuweRubriekNaam = "Kampen";
+        vm.NieuweRubriekNaam = "Schoonmaak";
         await vm.NieuweRubriekCommand.ExecuteAsync(null);
 
         Assert.False(vm.IsRubriekinvoerOpen);
-        Assert.Contains(vm.Rubrieken, r => r.Naam == "Kampen");
+        Assert.Contains(vm.Rubrieken, r => r.Naam == "Schoonmaak");
     }
 }

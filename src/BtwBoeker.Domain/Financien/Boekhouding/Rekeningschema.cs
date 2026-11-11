@@ -214,7 +214,7 @@ public enum BoekjaarStatus
     Afgesloten = 2,
 }
 
-/// <summary>Een boekjaar (kalenderjaar, besluit 15). In een afgesloten jaar wordt niets geboekt.</summary>
+/// <summary>Een boekjaar (kalenderjaar). In een afgesloten jaar wordt niets geboekt.</summary>
 public sealed class Boekjaar
 {
     public Boekjaar(AdministratieSoort administratie, int jaar)

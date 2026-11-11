@@ -17,7 +17,7 @@ public class BankherkenningTests
     }
 
     private Bankmutatie Mutatie(string? tegenIban = CamtVoorbeeld.Tegen, string? naam = "Energie BV", bool bij = false) =>
-        new(BoekhoudingTestdata.Ver, _rabo, Guid.NewGuid().ToString(), new DateOnly(2026, 2, 1), new Bedrag(4500), bij,
+        new(BoekhoudingTestdata.Adm, _rabo, Guid.NewGuid().ToString(), new DateOnly(2026, 2, 1), new Bedrag(4500), bij,
             new BankTransactiecode("PMNT", "ICDT", "ESCT", "520", "RABOBANK"), tegenIban, naam, "Factuur", null, null, null);
 
     [Fact]
@@ -36,11 +36,11 @@ public class BankherkenningTests
     [Fact]
     public void Eerste_passende_actieve_regel_wint()
     {
-        var uit = new Boekingsregel(BoekhoudingTestdata.Ver, "Uit", _data.Welpen, new BoekingsregelVoorwaarden(NaamBevat: "Energie"), volgorde: 1);
+        var uit = new Boekingsregel(BoekhoudingTestdata.Adm, "Uit", _data.Huur, new BoekingsregelVoorwaarden(NaamBevat: "Energie"), volgorde: 1);
         uit.Deactiveer();
         _data.Boekingsregels.Add(uit);
-        _data.Boekingsregels.Add(new Boekingsregel(BoekhoudingTestdata.Ver, "Energie", _data.Energie, new BoekingsregelVoorwaarden(NaamBevat: "energie"), "Energie", 2));
-        _data.Boekingsregels.Add(new Boekingsregel(BoekhoudingTestdata.Ver, "Alles af", _data.Welpen, new BoekingsregelVoorwaarden(Richting: Richting.Af), volgorde: 3));
+        _data.Boekingsregels.Add(new Boekingsregel(BoekhoudingTestdata.Adm, "Energie", _data.Energie, new BoekingsregelVoorwaarden(NaamBevat: "energie"), "Energie", 2));
+        _data.Boekingsregels.Add(new Boekingsregel(BoekhoudingTestdata.Adm, "Alles af", _data.Huur, new BoekingsregelVoorwaarden(Richting: Richting.Af), volgorde: 3));
 
         var herkenning = Bankherkenning.Bepaal(_data.Stand, Mutatie());
 

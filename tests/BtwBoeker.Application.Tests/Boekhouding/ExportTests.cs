@@ -8,7 +8,7 @@ public class ExportTests
     [Fact]
     public void Csv_met_nederlandse_bedragen_en_puntkomma()
     {
-        var tabel = new RapportTabel("Saldibalans 2026", "Vereniging",
+        var tabel = new RapportTabel("Saldibalans 2026", "Mijn administratie",
             [new RapportKolom("Rekening", false), new RapportKolom("Debet", true)],
             [new RapportRij(["1100 Bank; hoofd", new Bedrag(123456)], false, false), new RapportRij(["Totaal", new Bedrag(123456)], false, true)]);
 

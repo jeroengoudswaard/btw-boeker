@@ -1,4 +1,4 @@
-namespace Verenigd.Architectuur.Tests;
+namespace BtwBoeker.Architectuur.Tests;
 
 /// <summary>
 /// Bewaakt de productnaam: BTW-Boeker is een eigen product en draagt geen resten van de oude naam,
@@ -11,15 +11,16 @@ public class ProductnaamTests
 
     private static readonly string[] OudeExtensies = [".v" + "db", ".v" + "bak", ".vs" + "jabloon"];
 
-    // Bewust samengesteld, zodat dit bestand het woord zelf niet bevat.
-    private static readonly string OudDomein = "scout" + "ing";
-
-    // CLAUDE.md beschrijft de herkomst van het product.
-    private static readonly string[] Uitzonderingen =
+    // Woorden uit het domein van het oude product (een ledenadministratie). Bewust samengesteld, zodat dit bestand
+    // zichzelf ook controleert en de woorden toch niet bevat.
+    private static readonly string[] OudDomein =
     [
-        "CLAUDE.md",
-        "ProductnaamTests.cs",
+        "scout" + "ing", "veren" + "iging", "sticht" + "ing", "contri" + "butie", "wel" + "pen", "spel" + "tak",
     ];
+
+    // Migraties beschrijven de historie van het databaseschema; ze moeten de oude standaardnamen herkennen om een
+    // bestaande database bij te werken (zie MigratieTests).
+    private static readonly string Migraties = Path.Combine("src", "BtwBoeker.Infrastructure", "Database", "Migraties");
 
     // prive/ en voorbeelden/ bevatten echte gegevens en worden nooit gelezen.
     private static readonly string[] Genegeerdemappen = [".git", "bin", "obj", "node_modules", "artifacts", "TestResults", ".vs", "prive", "privé", "voorbeelden"];
@@ -67,9 +68,7 @@ public class ProductnaamTests
     private static IEnumerable<string> Gecontroleerd()
     {
         var wortel = Opslagplaats();
-        return Bestanden(wortel)
-            .Where(b => !Uitzonderingen.Contains(Path.GetFileName(b), StringComparer.OrdinalIgnoreCase))
-            .Select(b => Path.GetRelativePath(wortel, b));
+        return Bestanden(wortel).Select(b => Path.GetRelativePath(wortel, b));
     }
 
     [Fact]
@@ -99,14 +98,21 @@ public class ProductnaamTests
         Assert.Empty(gevonden);
     }
 
-    /// <summary>BTW-Boeker is geen ledenadministratie meer: teksten, tests en documentatie noemen het oude domein niet.</summary>
+    /// <summary>
+    /// BTW-Boeker is geen ledenadministratie: code, tests, testgegevens en documentatie noemen het oude domein niet.
+    /// </summary>
     [Fact]
     public void Geen_tekstbestand_noemt_het_oude_domein()
     {
         var wortel = Opslagplaats();
         var gevonden = Gecontroleerd()
+            .Where(p => !p.StartsWith(Migraties, StringComparison.OrdinalIgnoreCase))
             .Where(p => Tekstextensies.Contains(Path.GetExtension(p), StringComparer.OrdinalIgnoreCase))
-            .Where(p => File.ReadAllText(Path.Combine(wortel, p)).Contains(OudDomein, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(p =>
+            {
+                var tekst = File.ReadAllText(Path.Combine(wortel, p));
+                return OudDomein.Where(w => tekst.Contains(w, StringComparison.OrdinalIgnoreCase)).Select(w => $"{p}: {w}");
+            })
             .ToList();
 
         Assert.Empty(gevonden);

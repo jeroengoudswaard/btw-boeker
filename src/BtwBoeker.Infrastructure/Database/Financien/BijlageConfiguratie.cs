@@ -6,7 +6,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Infrastructure.Database.Financien;
 
-/// <summary>Bijlagen bij journaalposten (stap 4c-3). De inhoud staat in een eigen tabel, zodat lijsten licht blijven.</summary>
+/// <summary>Bijlagen bij journaalposten. De inhoud staat in een eigen tabel, zodat lijsten licht blijven.</summary>
 internal static class BijlageConfiguratie
 {
     private static readonly ValueConverter<Bedrag, long> BedragConverter = new(b => b.Centen, c => new Bedrag(c));

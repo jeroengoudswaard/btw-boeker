@@ -24,7 +24,7 @@ public sealed class BijlagenTests
 
     private Journaalpost Post(Dagboek dagboek, DateOnly datum, string omschrijving, (Grootboekrekening R, long D, long C) a, (Grootboekrekening R, long D, long C) b, bool boeken = true)
     {
-        var post = new Journaalpost(BoekhoudingTestdata.Ver, dagboek, datum, omschrijving);
+        var post = new Journaalpost(BoekhoudingTestdata.Adm, dagboek, datum, omschrijving);
         post.Wijzig(dagboek, datum, omschrijving,
             [new RegelInvoer(a.R, null, new Bedrag(a.D), new Bedrag(a.C)), new RegelInvoer(b.R, null, new Bedrag(b.D), new Bedrag(b.C))]);
         if (boeken)
@@ -45,7 +45,7 @@ public sealed class BijlagenTests
         var dichtbij = Kasuitgave(new DateOnly(2026, 10, 13), 2345);
         Kasuitgave(new DateOnly(2026, 10, 12), 2346);
         Kasuitgave(new DateOnly(2026, 10, 20), 2345);
-        var bijlage = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);
+        var bijlage = new Bijlage(BoekhoudingTestdata.Adm, "bon.pdf", Pdf(), Nu);
         bijlage.ZetGegevens(new DateOnly(2026, 10, 12), new Bedrag(2345));
 
         var voorstel = KoppelVoorsteller.Voorstellen(_data.Stand, bijlage);
@@ -60,7 +60,7 @@ public sealed class BijlagenTests
         Post(bankboek, new DateOnly(2026, 10, 10), "Gamma", (_data.Energie, 1500, 0), (_data.Bank, 0, 1500)); // uitgave van 15,00
         var retour = Post(bankboek, new DateOnly(2026, 10, 11), "Gamma retour", (_data.Bank, 1500, 0), (_data.Energie, 0, 1500));
         Post(_data.Memoriaal, new DateOnly(2026, 10, 11), "Memoriaal", (_data.Energie, 1500, 0), (_data.Reserve, 0, 1500));
-        var creditnota = new Bijlage(BoekhoudingTestdata.Ver, "creditnota.pdf", Pdf(), Nu);
+        var creditnota = new Bijlage(BoekhoudingTestdata.Adm, "creditnota.pdf", Pdf(), Nu);
         creditnota.ZetGegevens(new DateOnly(2026, 10, 12), new Bedrag(-1500));
 
         Assert.Equal([retour], KoppelVoorsteller.Voorstellen(_data.Stand, creditnota));
@@ -70,7 +70,7 @@ public sealed class BijlagenTests
     public void Zonder_datum_of_bedrag_is_er_geen_voorstel()
     {
         Kasuitgave(new DateOnly(2026, 10, 12), 2345);
-        var bijlage = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);
+        var bijlage = new Bijlage(BoekhoudingTestdata.Adm, "bon.pdf", Pdf(), Nu);
         bijlage.ZetGegevens(null, new Bedrag(2345));
 
         Assert.Empty(KoppelVoorsteller.Voorstellen(_data.Stand, bijlage));
@@ -81,10 +81,10 @@ public sealed class BijlagenTests
     {
         var metBon = Kasuitgave(new DateOnly(2026, 10, 12), 2345);
         var zonderBon = Kasuitgave(new DateOnly(2026, 10, 14), 2345);
-        var bestaand = new Bijlage(BoekhoudingTestdata.Ver, "oud.pdf", Pdf("oud"), Nu);
+        var bestaand = new Bijlage(BoekhoudingTestdata.Adm, "oud.pdf", Pdf("oud"), Nu);
         bestaand.KoppelAan(metBon.Id);
         _data.Bijlagen.Add(bestaand);
-        var bijlage = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);
+        var bijlage = new Bijlage(BoekhoudingTestdata.Adm, "bon.pdf", Pdf(), Nu);
         bijlage.ZetGegevens(new DateOnly(2026, 10, 12), new Bedrag(2345));
 
         Assert.Equal([zonderBon, metBon], KoppelVoorsteller.Voorstellen(_data.Stand, bijlage));
@@ -99,10 +99,10 @@ public sealed class BijlagenTests
         var groteKas = Kasuitgave(new DateOnly(2026, 10, 1), 2500);
         Kasuitgave(new DateOnly(2026, 10, 2), 1000); // precies de drempel: niet erboven
         var bankUit = Post(bankboek, new DateOnly(2026, 10, 3), "Gamma", (_data.Energie, 5000, 0), (_data.Bank, 0, 5000));
-        var ontvangst = Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Welpen, 0, 9000)); // geld erbij
+        var ontvangst = Post(bankboek, new DateOnly(2026, 10, 4), "Ontvangst", (_data.Bank, 9000, 0), (_data.Huur, 0, 9000)); // geld erbij
         Post(_data.Memoriaal, new DateOnly(2026, 10, 5), "Memoriaal", (_data.Energie, 7000, 0), (_data.Reserve, 0, 7000)); // geen bank of kas
         var metBon = Kasuitgave(new DateOnly(2026, 10, 6), 3000);
-        var bon = new Bijlage(BoekhoudingTestdata.Ver, "bon.pdf", Pdf(), Nu);
+        var bon = new Bijlage(BoekhoudingTestdata.Adm, "bon.pdf", Pdf(), Nu);
         bon.KoppelAan(metBon.Id);
         _data.Bijlagen.Add(bon);
         var concept = Kasuitgave(new DateOnly(2026, 10, 7), 4000, boeken: false);
@@ -120,7 +120,7 @@ public sealed class BijlagenTests
     {
         _lezer.Tekst = "Datum 12-10-2026\nTotaal 23,45";
 
-        var resultaat = await Dienst().VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("bon.pdf", Pdf())], postId: null);
+        var resultaat = await Dienst().VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("bon.pdf", Pdf())], postId: null);
 
         var bijlage = Assert.Single(resultaat.Toegevoegd);
         Assert.Empty(resultaat.Overgeslagen);
@@ -128,7 +128,7 @@ public sealed class BijlagenTests
         Assert.Equal(new DateOnly(2026, 10, 12), bijlage.Datum);
         Assert.Equal(new Bedrag(2345), bijlage.Bedrag);
         Assert.Equal(Pdf(), _data.Bijlageinhoud[bijlage.Id]);
-        Assert.Equal(Pdf(), await Dienst().LaadInhoudAsync(BoekhoudingTestdata.Ver, bijlage.Id));
+        Assert.Equal(Pdf(), await Dienst().LaadInhoudAsync(BoekhoudingTestdata.Adm, bijlage.Id));
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public sealed class BijlagenTests
     {
         _lezer.Fout = true;
 
-        var resultaat = await Dienst().VoegToeAsync(BoekhoudingTestdata.Ver,
+        var resultaat = await Dienst().VoegToeAsync(BoekhoudingTestdata.Adm,
             [new BijlageBestand("scan.pdf", Pdf()), new BijlageBestand("foto.jpg", [0xFF, 0xD8, 0xFF, 1])], postId: null);
 
         Assert.Equal(2, resultaat.Toegevoegd.Count);
@@ -148,9 +148,9 @@ public sealed class BijlagenTests
     public async Task Ongeldige_en_dubbele_bestanden_worden_overgeslagen_met_een_reden()
     {
         var dienst = Dienst();
-        await dienst.VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("bon.pdf", Pdf())], postId: null);
+        await dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("bon.pdf", Pdf())], postId: null);
 
-        var resultaat = await dienst.VoegToeAsync(BoekhoudingTestdata.Ver,
+        var resultaat = await dienst.VoegToeAsync(BoekhoudingTestdata.Adm,
             [new BijlageBestand("kopie.pdf", Pdf()), new BijlageBestand("notitie.txt", Encoding.ASCII.GetBytes("tekst"))], postId: null);
 
         Assert.Empty(resultaat.Toegevoegd);
@@ -166,17 +166,17 @@ public sealed class BijlagenTests
         var post = Kasuitgave(new DateOnly(2026, 10, 12), 2345);
         var dienst = Dienst();
 
-        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("bon.pdf", Pdf())], post.Id)).Toegevoegd);
+        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("bon.pdf", Pdf())], post.Id)).Toegevoegd);
         Assert.Equal(post.Id, bijlage.PostId);
         Assert.True(post.IsGeboekt);
 
-        await dienst.OntkoppelAsync(BoekhoudingTestdata.Ver, bijlage.Id);
+        await dienst.OntkoppelAsync(BoekhoudingTestdata.Adm, bijlage.Id);
         Assert.True(_data.Bijlagen.Single().IsInPostvak);
 
-        await dienst.KoppelAsync(BoekhoudingTestdata.Ver, bijlage.Id, post.Id);
+        await dienst.KoppelAsync(BoekhoudingTestdata.Adm, bijlage.Id, post.Id);
         Assert.Equal(post.Id, _data.Bijlagen.Single().PostId);
 
-        await dienst.VerwijderAsync(BoekhoudingTestdata.Ver, bijlage.Id);
+        await dienst.VerwijderAsync(BoekhoudingTestdata.Adm, bijlage.Id);
         Assert.Empty(_data.Bijlagen);
         Assert.Empty(_data.Bijlageinhoud);
     }
@@ -185,20 +185,20 @@ public sealed class BijlagenTests
     public async Task Koppelen_aan_een_onbekende_post_kan_niet()
     {
         var dienst = Dienst();
-        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("bon.pdf", Pdf())], null)).Toegevoegd);
+        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("bon.pdf", Pdf())], null)).Toegevoegd);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => dienst.KoppelAsync(BoekhoudingTestdata.Ver, bijlage.Id, Guid.NewGuid()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => dienst.KoppelAsync(BoekhoudingTestdata.Adm, bijlage.Id, Guid.NewGuid()));
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            dienst.VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("x.pdf", Pdf("x"))], Guid.NewGuid()));
+            dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("x.pdf", Pdf("x"))], Guid.NewGuid()));
     }
 
     [Fact]
     public async Task Datum_en_bedrag_kunnen_worden_ingevuld()
     {
         var dienst = Dienst();
-        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Ver, [new BijlageBestand("foto.png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])], null)).Toegevoegd);
+        var bijlage = Assert.Single((await dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("foto.png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])], null)).Toegevoegd);
 
-        await dienst.WijzigGegevensAsync(BoekhoudingTestdata.Ver, bijlage.Id, new DateOnly(2026, 10, 1), new Bedrag(999));
+        await dienst.WijzigGegevensAsync(BoekhoudingTestdata.Adm, bijlage.Id, new DateOnly(2026, 10, 1), new Bedrag(999));
 
         Assert.Equal(new DateOnly(2026, 10, 1), _data.Bijlagen.Single().Datum);
         Assert.Equal(new Bedrag(999), _data.Bijlagen.Single().Bedrag);

@@ -6,17 +6,17 @@ namespace BtwBoeker.Domain.Tests.Financien.Boekhouding;
 
 public class JournaalpostTests
 {
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private static readonly DateTime Nu = new(2026, 12, 31, 10, 0, 0, DateTimeKind.Utc);
-    private static readonly Rubriek Tussen = new(Ver, "Tussenrekeningen", 1);
-    private static readonly Grootboekrekening Vooruit = new(Ver, 1400, "Vooruitbetaald", RekeningSoort.Balans, Tussen);
-    private static readonly Grootboekrekening Verzekering = new(Ver, 4140, "Verzekering", RekeningSoort.Resultaat, null);
-    private static readonly Grootboekrekening Kas = new(Ver, 1000, "Kas", RekeningSoort.Balans, null, RekeningRol.Kas);
-    private static readonly Dagboek Memoriaal = new(Ver, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null);
+    private static readonly Rubriek Tussen = new(Adm, "Tussenrekeningen", 1);
+    private static readonly Grootboekrekening Vooruit = new(Adm, 1400, "Vooruitbetaald", RekeningSoort.Balans, Tussen);
+    private static readonly Grootboekrekening Verzekering = new(Adm, 4140, "Verzekering", RekeningSoort.Resultaat, null);
+    private static readonly Grootboekrekening Kas = new(Adm, 1000, "Kas", RekeningSoort.Balans, null, RekeningRol.Kas);
+    private static readonly Dagboek Memoriaal = new(Adm, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null);
 
     private static Journaalpost Post(params (Grootboekrekening Rekening, long Debet, long Credit)[] regels)
     {
-        var post = new Journaalpost(Ver, Memoriaal, new DateOnly(2026, 12, 31), "Verzekering 2027");
+        var post = new Journaalpost(Adm, Memoriaal, new DateOnly(2026, 12, 31), "Verzekering 2027");
         post.Wijzig(Memoriaal, new DateOnly(2026, 12, 31), "Verzekering 2027",
             regels.Select(r => new RegelInvoer(r.Rekening, null, new Bedrag(r.Debet), new Bedrag(r.Credit))));
         return post;
@@ -56,19 +56,19 @@ public class JournaalpostTests
     [Fact]
     public void Inactieve_rekening_of_andere_administratie_wordt_gemeld()
     {
-        var oud = new Grootboekrekening(Ver, 4999, "Oud", RekeningSoort.Resultaat, null);
+        var oud = new Grootboekrekening(Adm, 4999, "Oud", RekeningSoort.Resultaat, null);
         oud.Deactiveer();
-        var stichting = new Grootboekrekening((AdministratieSoort)2, 4000, "Andere administratie", RekeningSoort.Resultaat, null);
+        var andere = new Grootboekrekening((AdministratieSoort)2, 4000, "Andere administratie", RekeningSoort.Resultaat, null);
 
         Assert.Contains(Post((oud, 100, 0), (Verzekering, 0, 100)).Controleer(), f => f.Contains("inactief", StringComparison.Ordinal));
-        Assert.Contains(Post((stichting, 100, 0), (Verzekering, 0, 100)).Controleer(), f => f.Contains("administratie", StringComparison.Ordinal));
+        Assert.Contains(Post((andere, 100, 0), (Verzekering, 0, 100)).Controleer(), f => f.Contains("administratie", StringComparison.Ordinal));
     }
 
     [Fact]
     public void Kasboekpost_moet_de_kasrekening_bevatten()
     {
-        var kasboek = new Dagboek(Ver, DagboekSoort.Kas, "KAS", "Kas", Kas);
-        var post = new Journaalpost(Ver, kasboek, new DateOnly(2026, 11, 28), "Omzet borrel");
+        var kasboek = new Dagboek(Adm, DagboekSoort.Kas, "KAS", "Kas", Kas);
+        var post = new Journaalpost(Adm, kasboek, new DateOnly(2026, 11, 28), "Omzet borrel");
         post.Wijzig(kasboek, new DateOnly(2026, 11, 28), "Omzet borrel",
             [new RegelInvoer(Vooruit, null, new Bedrag(100), Bedrag.Nul), new RegelInvoer(Verzekering, null, Bedrag.Nul, new Bedrag(100))]);
 

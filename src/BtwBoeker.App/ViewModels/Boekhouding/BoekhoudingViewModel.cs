@@ -14,10 +14,10 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.App.ViewModels.Boekhouding;
 
 /// <summary>
-/// Tabblad Boekhouding van één administratie (stap 4a) met de subtabbladen Journaal, Rekeningschema, Grootboekkaart,
-/// Rapporten en Boekjaren. Geboekte posten zijn onveranderlijk; corrigeren gaat via tegenboeken.
+/// De pagina Boekhouding met de subtabbladen Journaal, Bank, Postvak, Rapporten en (onder Meer…) de inrichting.
+/// Geboekte posten zijn onveranderlijk; corrigeren gaat via tegenboeken.
 /// </summary>
-public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameldingen
+public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldingen
 {
     private readonly IDatabaseSessie _sessie;
     private readonly IDialoogService _dialogen;
@@ -32,8 +32,9 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     public BoekhoudingViewModel(
         IDatabaseSessie sessie, IDialoogService dialogen, TimeProvider tijd, AdministratieViewModel administratie,
         BoekhoudingHulpmiddelen hulpmiddelen, ILogger logger)
-        : base(ModuleCatalogus.Geef(ModuleSoort.Boekhouding), administratie)
+        : base(ModuleCatalogus.Geef(ModuleSoort.Boekhouding))
     {
+        Administratie = administratie;
         _sessie = sessie;
         _dialogen = dialogen;
         _tijd = tijd;
@@ -54,7 +55,10 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     /// <summary>De woorden van de gekozen weergave; alleen visueel.</summary>
     public Woordenboek Woorden => _hulpmiddelen.Woorden;
 
-    protected override string Moduletitel => Woorden["Boekhouding"];
+    /// <summary>De administratie van de app (besluit 26: er is er één).</summary>
+    public AdministratieViewModel Administratie { get; }
+
+    public override string Titel => Woorden["Boekhouding"];
 
     public IAsyncRelayCommand VernieuwCommand { get; }
 
@@ -242,9 +246,9 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
 
     private DateOnly Vandaag => DateOnly.FromDateTime(_tijd.GetLocalNow().DateTime);
 
-    private Domain.Administraties.AdministratieSoort Soort => Administratie!.Soort;
+    private Domain.Administraties.AdministratieSoort Soort => Administratie.Soort;
 
-    private string Administratienaam => Administratie!.Naam;
+    private string Administratienaam => Administratie.Naam;
 
     /// <summary>
     /// Ctrl+S: het concept en gewijzigde rekeningen opslaan. Onwaar als er iets niet is opgeslagen, zoals een halve boekingsregel
@@ -791,7 +795,6 @@ public sealed partial class BoekhoudingViewModel : TabbladViewModel, IPaginameld
     private void WoordenGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(Titel));
-        OnPropertyChanged(nameof(Paginatitel));
         OnPropertyChanged(nameof(Rapportkeuzes));
         if (_stand is not null)
         {

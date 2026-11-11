@@ -20,7 +20,7 @@ public sealed class BankViewModelTests : IDisposable
             _omgeving.CamtBestand(CamtVoorbeeld.Betaal, new VbAfschrift(new DateOnly(2026, 2, 2), 79950,
                 new VbTransactie(-4500, "ICDT", "ESCT", "520", Ref: "E1", Naam: "Energie BV"),
                 new VbTransactie(-10000, "ICDT", "ESCT", "544", Ref: "S1", TegenIban: CamtVoorbeeld.Spaar, Naam: "Eigen spaar", NtryRef: "2"),
-                new VbTransactie(2500, Ref: "W1", Naam: "Welpen ouder", NtryRef: "3"))),
+                new VbTransactie(2500, Ref: "W1", Naam: "Huurder Jansen", NtryRef: "3"))),
             _omgeving.CamtBestand(CamtVoorbeeld.Spaar, new VbAfschrift(new DateOnly(2026, 2, 2), 0,
                 new VbTransactie(10000, Ref: "S2", TegenIban: CamtVoorbeeld.Betaal, Naam: "Eigen betaal"))),
         ];
@@ -45,7 +45,7 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(2, vm.Bankrekeningen.Count);
         Assert.Equal("RABO", vm.GekozenBankrekening?.Code);
         Assert.Equal(MutatieFilter.TeVerwerken, vm.Bankfilter);
-        Assert.Equal(2, vm.AantalTeVerwerken); // energie en welpen; de overboeking naar spaar is herkend
+        Assert.Equal(2, vm.AantalTeVerwerken); // energie en huurder; de overboeking naar spaar is herkend
         Assert.Equal(2, vm.Mutaties.Count);
         Assert.Equal(1, vm.AantalConcept);
 
@@ -67,7 +67,7 @@ public sealed class BankViewModelTests : IDisposable
 
         Assert.Equal(1, vm.AantalTeVerwerken);
         Assert.Equal(2, vm.AantalConcept);
-        Assert.Equal("Welpen ouder", vm.GeselecteerdeMutatie?.Tegenpartij); // door naar de volgende
+        Assert.Equal("Huurder Jansen", vm.GeselecteerdeMutatie?.Tegenpartij); // door naar de volgende
 
         // De knop boekt alle bankrekeningen en toont dus ook dat aantal, ongeacht de gekozen rekening.
         Assert.Equal(3, vm.AantalConceptAlleRekeningen);
@@ -90,7 +90,7 @@ public sealed class BankViewModelTests : IDisposable
     public async Task Regel_maken_van_een_boeking_en_toepassen()
     {
         var vm = await OpenMetImportAsync();
-        vm.GeselecteerdeMutatie = vm.Mutaties.Single(m => m.Tegenpartij == "Welpen ouder");
+        vm.GeselecteerdeMutatie = vm.Mutaties.Single(m => m.Tegenpartij == "Huurder Jansen");
         vm.ToewijsRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 8020);
 
         vm.RegelMakenCommand.Execute(null);
@@ -101,7 +101,7 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(CamtVoorbeeld.Tegen, regel.TegenIban);
         Assert.Equal(Richting.Bij, regel.Richting);
         Assert.Equal(8020, regel.GekozenRekening?.Nummer);
-        regel.Naam = "Contributie welpen";
+        regel.Naam = "Huur van gasten";
         Assert.True(vm.HeeftOnopgeslagenWijzigingen);
 
         Assert.True(await vm.BewaarAsync());
@@ -124,14 +124,14 @@ public sealed class BankViewModelTests : IDisposable
         leeg.NaamBevat = "energie";
         vm.NieuweRegelCommand.Execute(null);
         var tweede = vm.Boekingsregels.Single(r => r.IsNieuw && r.NaamBevat is null);
-        tweede.NaamBevat = "welpen";
+        tweede.NaamBevat = "huurder";
         tweede.GekozenRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 8020);
         Assert.True(await vm.BewaarAsync());
-        Assert.Equal(["energie", "welpen"], vm.Boekingsregels.Select(r => r.NaamBevat));
+        Assert.Equal(["energie", "huurder"], vm.Boekingsregels.Select(r => r.NaamBevat));
 
         vm.GeselecteerdeRegel = vm.Boekingsregels[1];
         await vm.RegelOmhoogCommand.ExecuteAsync(null);
-        Assert.Equal(["welpen", "energie"], vm.Boekingsregels.Select(r => r.NaamBevat));
+        Assert.Equal(["huurder", "energie"], vm.Boekingsregels.Select(r => r.NaamBevat));
     }
 
     [Fact]
@@ -202,11 +202,11 @@ public sealed class BankViewModelTests : IDisposable
         vm.NieuweRegelCommand.Execute(null);
         vm.Boekingsregels.Single(r => r.NaamBevat is null).NaamBevat = "gemeente";
         vm.NieuweRegelCommand.Execute(null);
-        vm.Boekingsregels.Single(r => r.NaamBevat is null).NaamBevat = "welpen";
+        vm.Boekingsregels.Single(r => r.NaamBevat is null).NaamBevat = "huurder";
 
         Assert.False(await vm.BewaarAsync());
 
-        Assert.Equal(["energie", "gemeente", "welpen"], vm.Boekingsregels.Select(r => r.NaamBevat));
+        Assert.Equal(["energie", "gemeente", "huurder"], vm.Boekingsregels.Select(r => r.NaamBevat));
         Assert.Equal([false, true, true], vm.Boekingsregels.Select(r => r.IsNieuw));
         Assert.Contains("2 boekingsregels nog niet", vm.Waarschuwing, StringComparison.Ordinal);
     }
@@ -270,7 +270,7 @@ public sealed class BankViewModelTests : IDisposable
     {
         var vm = await OpenMetImportAsync();
         vm.Bankfilter = MutatieFilter.TeVerwerken;
-        foreach (var (naam, nummer) in new[] { ("Energie BV", 4115), ("Welpen ouder", 8020) })
+        foreach (var (naam, nummer) in new[] { ("Energie BV", 4115), ("Huurder Jansen", 8020) })
         {
             vm.GeselecteerdeMutatie = vm.Mutaties.Single(m => m.Tegenpartij == naam);
             vm.ToewijsRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == nummer);

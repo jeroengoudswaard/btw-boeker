@@ -8,7 +8,7 @@ namespace BtwBoeker.Application.Tests.Inrichting;
 /// <summary>Het ✓ per stap van de startwizard volgt uit de gegevens zelf (Welkom → Database → Boekhouding → Bank → Klaar).</summary>
 public sealed class InrichtingsstatusTests
 {
-    private static BoekhoudingStand Leeg() => new(AdministratieSoort.Vereniging, [], [], [], [], []);
+    private static BoekhoudingStand Leeg() => new(AdministratieSoort.Standaard, [], [], [], [], []);
 
     [Fact]
     public void Zonder_database_is_niets_klaar()

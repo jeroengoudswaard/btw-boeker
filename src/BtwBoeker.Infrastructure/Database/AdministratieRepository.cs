@@ -6,12 +6,12 @@ namespace BtwBoeker.Infrastructure.Database;
 
 internal sealed class AdministratieRepository(Func<BtwBoekerDbContext> maakContext) : IAdministratieRepository
 {
-    public async Task<IReadOnlyList<Administratie>> HaalAlleAsync(CancellationToken annulering = default)
+    public async Task<Administratie> HaalAsync(CancellationToken annulering = default)
     {
         await using var context = maakContext();
         // Besluit 26: de app toont één administratie; een andere rij (met gegevens uit een oudere versie) blijft bewaard maar verborgen.
-        return await context.Administraties.AsNoTracking().Where(a => a.Soort == AdministratieSoort.Vereniging)
-            .ToListAsync(annulering).ConfigureAwait(false);
+        return await context.Administraties.AsNoTracking().SingleAsync(a => a.Soort == AdministratieSoort.Standaard, annulering)
+            .ConfigureAwait(false);
     }
 
     public async Task BewaarAsync(Administratie administratie, CancellationToken annulering = default)

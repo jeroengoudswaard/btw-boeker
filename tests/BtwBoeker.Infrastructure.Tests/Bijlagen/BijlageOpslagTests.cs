@@ -18,7 +18,7 @@ namespace BtwBoeker.Infrastructure.Tests.Bijlagen;
 public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
 {
     private const string Wachtwoord = "zonnig vakantiehuis 2026";
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
     private IDatabaseSessie _sessie = null!;
@@ -40,24 +40,24 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
 
     private async Task<Guid> ConceptAsync(bool boeken = false)
     {
-        if (!(await _boekhouding.LaadAsync(Ver)).IsIngericht)
+        if (!(await _boekhouding.LaadAsync(Adm)).IsIngericht)
         {
-            await _boekhouding.ImporteerAsync(Ver, Application.Tests.Boekhouding.Testvoorstel.Maak(2026,
+            await _boekhouding.ImporteerAsync(Adm, Application.Tests.Boekhouding.Testvoorstel.Maak(2026,
                 Application.Tests.Boekhouding.Testvoorstel.Balans(600, "Algemene Reserve", "Vermogen", credit: 100, rol: Domain.Financien.Boekhouding.RekeningRol.Reserve),
                 Application.Tests.Boekhouding.Testvoorstel.Balans(1100, "Bank", "Kas Bank", debet: 100),
                 Application.Tests.Boekhouding.Testvoorstel.Resultaat(4115, "Energie", "Kosten")));
         }
 
-        var stand = await _boekhouding.LaadAsync(Ver);
+        var stand = await _boekhouding.LaadAsync(Adm);
         var invoer = new PostInvoer(null, stand.Dagboeken.Single(d => d.Code == "MEM").Id, new DateOnly(2026, 10, 12), "Gamma",
         [
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4115).Id, null, new Bedrag(2345), Bedrag.Nul),
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, null, Bedrag.Nul, new Bedrag(2345)),
         ]);
-        var id = await _boekhouding.BewaarConceptAsync(Ver, invoer);
+        var id = await _boekhouding.BewaarConceptAsync(Adm, invoer);
         if (boeken)
         {
-            await _boekhouding.BoekAsync(Ver, invoer with { Id = id });
+            await _boekhouding.BoekAsync(Adm, invoer with { Id = id });
         }
 
         return id;
@@ -80,15 +80,15 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     {
         var pdf = Testpdf.Maak("Datum 12-10-2026", "Totaal 23,45");
 
-        var resultaat = await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", pdf)], postId: null);
+        var resultaat = await _bijlagen.VoegToeAsync(Adm, [new BijlageBestand("bon.pdf", pdf)], postId: null);
 
-        var stand = await _boekhouding.LaadAsync(Ver);
+        var stand = await _boekhouding.LaadAsync(Adm);
         var bijlage = Assert.Single(stand.Bijlagen);
         Assert.Equal(Assert.Single(resultaat.Toegevoegd).Id, bijlage.Id);
         Assert.True(bijlage.IsInPostvak);
         Assert.Equal(new DateOnly(2026, 10, 12), bijlage.Datum);
         Assert.Equal(new Bedrag(2345), bijlage.Bedrag);
-        Assert.Equal(pdf, await _bijlagen.LaadInhoudAsync(Ver, bijlage.Id));
+        Assert.Equal(pdf, await _bijlagen.LaadInhoudAsync(Adm, bijlage.Id));
         Assert.Empty((await _boekhouding.LaadAsync(((AdministratieSoort)2))).Bijlagen);
     }
 
@@ -96,12 +96,12 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     public async Task Koppelen_aan_een_geboekte_post_en_verwijderen_ruimt_de_inhoud_op()
     {
         var post = await ConceptAsync(boeken: true);
-        var bijlage = Assert.Single((await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", Testpdf.Maak("bon"))], post)).Toegevoegd);
-        Assert.Equal(bijlage.Id, Assert.Single((await _boekhouding.LaadAsync(Ver)).BijlagenVan(post)).Id);
+        var bijlage = Assert.Single((await _bijlagen.VoegToeAsync(Adm, [new BijlageBestand("bon.pdf", Testpdf.Maak("bon"))], post)).Toegevoegd);
+        Assert.Equal(bijlage.Id, Assert.Single((await _boekhouding.LaadAsync(Adm)).BijlagenVan(post)).Id);
 
-        await _bijlagen.VerwijderAsync(Ver, bijlage.Id);
+        await _bijlagen.VerwijderAsync(Adm, bijlage.Id);
 
-        Assert.Empty((await _boekhouding.LaadAsync(Ver)).Bijlagen);
+        Assert.Empty((await _boekhouding.LaadAsync(Adm)).Bijlagen);
         Assert.Null(await _sessie.Boekhouding.LaadBijlageInhoudAsync(bijlage.Id));
     }
 
@@ -109,18 +109,18 @@ public sealed class BijlageOpslagTests : IAsyncLifetime, IDisposable
     public async Task Een_verwijderd_concept_zet_zijn_bijlage_terug_in_het_postvak()
     {
         var post = await ConceptAsync();
-        await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 7])], post);
+        await _bijlagen.VoegToeAsync(Adm, [new BijlageBestand("bon.png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 7])], post);
 
-        await _boekhouding.VerwijderConceptAsync(Ver, post);
+        await _boekhouding.VerwijderConceptAsync(Adm, post);
 
-        Assert.True(Assert.Single((await _boekhouding.LaadAsync(Ver)).Bijlagen).IsInPostvak);
+        Assert.True(Assert.Single((await _boekhouding.LaadAsync(Adm)).Bijlagen).IsInPostvak);
     }
 
     [Fact]
     public async Task Bijlagen_gaan_mee_in_de_backup()
     {
         var pdf = Testpdf.Maak("bewaren");
-        var id = Assert.Single((await _bijlagen.VoegToeAsync(Ver, [new BijlageBestand("bon.pdf", pdf)], null)).Toegevoegd).Id;
+        var id = Assert.Single((await _bijlagen.VoegToeAsync(Adm, [new BijlageBestand("bon.pdf", pdf)], null)).Toegevoegd).Id;
         var backup = _map.Bestand("backup.btwbackup");
         await _sessie.MaakBackupAsync(backup);
         var hersteld = _map.Bestand("hersteld.btwdb");

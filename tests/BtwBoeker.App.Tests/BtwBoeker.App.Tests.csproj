@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <!-- Windows 10 versie 2004 of nieuwer: Windows.Data.Pdf voor het voorbeeld van PDF-bijlagen (besluit 135) -->
+    <!-- Windows 10 versie 2004 of nieuwer: Windows.Data.Pdf voor het voorbeeld van PDF-bijlagen -->
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>

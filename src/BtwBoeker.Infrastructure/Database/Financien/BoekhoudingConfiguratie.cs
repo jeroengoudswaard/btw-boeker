@@ -6,7 +6,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.Infrastructure.Database.Financien;
 
-/// <summary>Tabellen van het grootboek (fase 4a), per administratie.</summary>
+/// <summary>Tabellen van het grootboek, per administratie.</summary>
 internal static class BoekhoudingConfiguratie
 {
     public static void Configureer(ModelBuilder modelBuilder)
@@ -85,7 +85,7 @@ internal static class BoekhoudingConfiguratie
     private static readonly ValueConverter<Iban, string> IbanConverter = new(i => i.Waarde, s => Iban.Maak(s));
     private static readonly ValueConverter<Bedrag, long> BedragConverter = new(b => b.Centen, c => new Bedrag(c));
 
-    /// <summary>Tabellen van de bankimport (fase 4b).</summary>
+    /// <summary>Tabellen van de bankimport.</summary>
     private static void ConfigureerBank(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Bankafschrift>(b =>

@@ -38,7 +38,7 @@ public sealed class ShellNavigatieTests
     private static async Task Kies(ShellViewModel shell, string sleutel)
     {
         shell.GeselecteerdeNavigatie = Item(shell, sleutel);
-        if (shell.GeselecteerdTabblad is BoekhoudingViewModel { VernieuwCommand.ExecutionTask: { } laden })
+        if (shell.GeselecteerdePagina is BoekhoudingViewModel { VernieuwCommand.ExecutionTask: { } laden })
         {
             await laden;
         }
@@ -51,18 +51,18 @@ public sealed class ShellNavigatieTests
         await shell.InitialiseerAsync();
 
         Assert.Equal(["Start"], shell.Navigatie.Select(n => n.Sleutel));
-        Assert.Null(shell.GekozenAdministratie);
+        Assert.Null(shell.Administratie);
     }
 
     [Fact]
-    public async Task Na_openen_staan_de_modules_met_ingeklapte_onderdelen_en_is_de_vereniging_gekozen()
+    public async Task Na_openen_staan_de_modules_met_ingeklapte_onderdelen_en_is_de_administratie_geladen()
     {
         var shell = await OpenAsync();
 
         Assert.Equal(["Start", "Boekhouding", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
-        Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
+        Assert.Equal(AdministratieSoort.Standaard, shell.Administratie!.Soort);
         Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
-        Assert.IsType<OverzichtViewModel>(shell.GeselecteerdTabblad);
+        Assert.IsType<OverzichtViewModel>(shell.GeselecteerdePagina);
     }
 
     [Fact]
@@ -77,12 +77,12 @@ public sealed class ShellNavigatieTests
         var meer = Item(shell, "Boekhouding.Meer");
         Assert.True(meer.IsMeer);
         Assert.False(meer.IsUitgeklapt);
-        var pagina = shell.GeselecteerdTabblad;
+        var pagina = shell.GeselecteerdePagina;
 
         shell.MeerWisselenCommand.Execute(meer); // uitklappen, zonder van pagina te wisselen
 
         Assert.True(meer.IsUitgeklapt);
-        Assert.Same(pagina, shell.GeselecteerdTabblad);
+        Assert.Same(pagina, shell.GeselecteerdePagina);
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         Assert.True(Item(shell, "Boekhouding.Rekeningschema").IsDiep);
         Assert.Equal(["Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren"],
@@ -97,7 +97,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         await Kies(shell, "Boekhouding");
-        var pagina = shell.GeselecteerdTabblad;
+        var pagina = shell.GeselecteerdePagina;
         var meer = Item(shell, "Boekhouding.Meer");
 
         // WPF selecteert soms twee keer (bij focus en door de actie zelf); pijltjes mogen niets omklappen.
@@ -107,7 +107,7 @@ public sealed class ShellNavigatieTests
 
             Assert.False(meer.IsUitgeklapt);
             Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Boekingsregels");
-            Assert.Same(pagina, shell.GeselecteerdTabblad);
+            Assert.Same(pagina, shell.GeselecteerdePagina);
             Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
         }
     }
@@ -137,7 +137,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         await Kies(shell, "Boekhouding");
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
 
         boekhouding.Subtab = BoekhoudingSubtab.Rekeningschema; // bijvoorbeeld via het menu
 
@@ -153,7 +153,7 @@ public sealed class ShellNavigatieTests
         await Task.Delay(50); // het vernieuwen na openen loopt op de achtergrond
         boekhouding.KeerGeladen = 0;
 
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Overzicht, null)); // vernieuwt Start
+        shell.OpenModuleCommand.Execute(ModuleSoort.Overzicht); // vernieuwt Start
         await Task.Delay(50);
 
         // Kaarten, inrichtingsstatus en kerncijfers samen: één keer laden.
@@ -171,9 +171,9 @@ public sealed class ShellNavigatieTests
 
         await Kies(shell, "Boekhouding.Bank");
 
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         Assert.Equal(BoekhoudingSubtab.Bank, boekhouding.Subtab);
-        Assert.Equal(AdministratieSoort.Vereniging, boekhouding.Administratie!.Soort);
+        Assert.Equal(AdministratieSoort.Standaard, boekhouding.Administratie!.Soort);
         Assert.Equal("Bank", Item(shell, "Boekhouding.Bank").Titel); // zonder toegangstoets
     }
 
@@ -205,8 +205,8 @@ public sealed class ShellNavigatieTests
 
         shell.OpenModuleViaSneltoetsCommand.Execute("1");
 
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Vereniging, boekhouding.Administratie!.Soort);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
+        Assert.Equal(AdministratieSoort.Standaard, boekhouding.Administratie!.Soort);
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
     }
 
@@ -218,11 +218,11 @@ public sealed class ShellNavigatieTests
         await Kies(shell, "Boekhouding.Rapporten");
         Assert.True(await shell.MagAfsluitenAsync());
 
-        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging, (int)BoekhoudingSubtab.Rapporten), _instellingen.Instellingen.LaatstePagina);
+        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, (int)BoekhoudingSubtab.Rapporten), _instellingen.Instellingen.LaatstePagina);
         var tweede = await OpenAsync();
 
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(tweede.GeselecteerdTabblad);
-        Assert.Equal(AdministratieSoort.Vereniging, tweede.GekozenAdministratie!.Soort);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(tweede.GeselecteerdePagina);
+        Assert.Equal(AdministratieSoort.Standaard, tweede.Administratie!.Soort);
         Assert.Equal(BoekhoudingSubtab.Rapporten, boekhouding.Subtab);
     }
 
@@ -244,7 +244,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         await Kies(shell, "Boekhouding");
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
 
         await boekhouding.ConceptenBoekenCommand.ExecuteAsync(null); // geen concepten: een melding
@@ -259,7 +259,7 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
         await Kies(shell, "Boekhouding");
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
         boekhouding.NieuweRegelCommand.Execute(null);
         boekhouding.NieuweRekeningCommand.Execute(null);
@@ -288,7 +288,7 @@ public sealed class ShellNavigatieTests
     private static async Task<BoekhoudingViewModel> OpenLegeBoekhoudingMetRekening(ShellViewModel shell)
     {
         await Kies(shell, "Boekhouding");
-        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
         boekhouding.NieuweRekeningCommand.Execute(null);
         var rekening = boekhouding.Rekeningen.Single(r => r.IsNieuw);
@@ -320,7 +320,7 @@ public sealed class ShellNavigatieTests
 
         await Wacht(() => Item(shell, "Boekhouding.Journaal").Teller == 1);
         Assert.Equal(1, Item(shell, "Boekhouding").Teller);
-        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad); // de pagina blijft staan
+        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina); // de pagina blijft staan
     }
 
     [Fact]

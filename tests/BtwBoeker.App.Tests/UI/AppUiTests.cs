@@ -114,10 +114,10 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
-        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, Diagnose(venster));
-        Zoek(venster, "AdministratieBand");
-        Bewaar(venster, "03-boekhouding-vereniging");
+        Zoek(venster, "StatusAdministratie");
+        Bewaar(venster, "03-boekhouding");
 
         Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
         Zoek(venster, "InstellingenOpslaan");
@@ -166,24 +166,24 @@ public sealed class AppUiTests : IDisposable
         await beheer.MaakAanAsync(db, Wachtwoord);
         await using (var sessie = await beheer.OpenAsync(db, Wachtwoord))
         {
-            const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+            const AdministratieSoort Adm = AdministratieSoort.Standaard;
             var boekhouding = new BoekhoudingDienst(sessie, TimeProvider.System);
             var bank = new BankDienst(sessie, TimeProvider.System);
-            await boekhouding.RichtInAsync(Ver);
-            if ((await boekhouding.LaadAsync(Ver)).Boekjaar(2026) is null)
+            await boekhouding.RichtInAsync(Adm);
+            if ((await boekhouding.LaadAsync(Adm)).Boekjaar(2026) is null)
             {
-                await boekhouding.OpenBoekjaarAsync(Ver, 2026);
+                await boekhouding.OpenBoekjaarAsync(Adm, 2026);
             }
 
             foreach (var (nummer, naam, soort) in new[] { (1100, "Betaal", RekeningSoort.Balans), (1110, "Spaar", RekeningSoort.Balans), (4115, "Energie", RekeningSoort.Resultaat) })
             {
-                await boekhouding.BewaarRekeningAsync(Ver, new RekeningInvoer(null, nummer, naam, null, soort, RekeningRol.Geen, true));
+                await boekhouding.BewaarRekeningAsync(Adm, new RekeningInvoer(null, nummer, naam, null, soort, RekeningRol.Geen, true));
             }
 
             static CamtBestand Bestand(string iban, params VbTransactie[] t) =>
                 Camt053Lezer.Lees(CamtVoorbeeld.Stroom(CamtVoorbeeld.Xml(iban, "08", new VbAfschrift(new DateOnly(2026, 3, 2), 0, t))));
 
-            var stand = await boekhouding.LaadAsync(Ver);
+            var stand = await boekhouding.LaadAsync(Adm);
             CamtBestand[] bestanden =
             [
                 Bestand(CamtVoorbeeld.Betaal,
@@ -191,12 +191,12 @@ public sealed class AppUiTests : IDisposable
                     new VbTransactie(-1000, "ICDT", "ESCT", "520", Ref: "W1", Naam: "Waterbedrijf", NtryRef: "2")),
                 Bestand(CamtVoorbeeld.Spaar, new VbTransactie(500, Ref: "R1", Naam: "Rente")),
             ];
-            await bank.ImporteerAsync(Ver, BankimportPlanner.Plan(stand, bestanden), new Dictionary<string, NieuweBankrekening>
+            await bank.ImporteerAsync(Adm, BankimportPlanner.Plan(stand, bestanden), new Dictionary<string, NieuweBankrekening>
             {
                 [CamtVoorbeeld.Betaal] = new(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, "RABO", "Betaalrekening"),
                 [CamtVoorbeeld.Spaar] = new(stand.Rekeningen.Single(r => r.Nummer == 1110).Id, "RSPA", "Spaarrekening"),
             });
-            await bank.BewaarRegelAsync(Ver, new BoekingsregelInvoer(
+            await bank.BewaarRegelAsync(Adm, new BoekingsregelInvoer(
                 null, "Energie", stand.Rekeningen.Single(r => r.Nummer == 4115).Id, new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true));
         }
 
@@ -206,7 +206,7 @@ public sealed class AppUiTests : IDisposable
         VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
         Kies(venster, "Nav_Boekhouding.Bank");
 
@@ -252,7 +252,7 @@ public sealed class AppUiTests : IDisposable
         VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
         var rapporten = Zoek(venster, "Nav_Boekhouding.Rapporten");
         Assert.True(Retry.WhileFalse(
@@ -296,7 +296,7 @@ public sealed class AppUiTests : IDisposable
         VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
         Zoek(venster, "SjabloonInlezen");
         Bewaar(venster, "10-boekhouding-leeg");
@@ -340,7 +340,7 @@ public sealed class AppUiTests : IDisposable
         await using (var sessie = await new DatabaseBeheer().OpenAsync(db, Wachtwoord))
         {
             var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
-            var ver = Domain.Administraties.AdministratieSoort.Vereniging;
+            var ver = Domain.Administraties.AdministratieSoort.Standaard;
             await dienst.RichtInAsync(ver);
             var energie = await dienst.BewaarRekeningAsync(ver, new RekeningInvoer(null, 4115, "Energie", null, Domain.Financien.Boekhouding.RekeningSoort.Resultaat, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
             var bank = await dienst.BewaarRekeningAsync(ver, new RekeningInvoer(null, 1100, "Bank", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
@@ -361,7 +361,7 @@ public sealed class AppUiTests : IDisposable
         VoerWachtwoordIn(venster);
         Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
 
-        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding (Vereniging)
+        Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         var posten = Zoek(venster, "Journaalposten").AsGrid();
         Assert.True(Retry.WhileFalse(() => posten.RowCount == 1, Wachttijd).Result, "De post staat niet in het Journaal.");
         posten.Rows[0].Select();
@@ -485,7 +485,7 @@ public sealed class AppUiTests : IDisposable
             var venster = Start();
             VoerWachtwoordIn(venster, Demodatabase.Wachtwoord);
             Assert.True(
-                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.NaamVereniging} - vakantiehuis.btwdb - BTW-Boeker", Wachttijd).Result,
+                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.Administratienaam} - vakantiehuis.btwdb - BTW-Boeker", Wachttijd).Result,
                 venster.Title);
             ZetVenstergrootte(venster);
 

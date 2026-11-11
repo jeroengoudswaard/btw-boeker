@@ -11,7 +11,7 @@ namespace BtwBoeker.Application.Tests.Boekhouding;
 /// <summary>Een kleine, verzonnen administratie in de opbouw van het huidige rekeningschema.</summary>
 internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
 {
-    public const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    public const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private static readonly DateTime Nu = new(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
     private int _id = 1;
 
@@ -24,16 +24,16 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
 
         var vermogen = Rubriek("Vermogen");
         var kasbank = Rubriek("Kas Bank");
-        var baten = Rubriek("Contributie");
-        var kosten = Rubriek("Terreinkosten");
+        var baten = Rubriek("Verhuur");
+        var kosten = Rubriek("Parkkosten");
         Reserve = Rekening(600, "Eigen vermogen", RekeningSoort.Balans, vermogen, RekeningRol.Reserve);
         Kas = Rekening(1000, "Kas", RekeningSoort.Balans, kasbank, RekeningRol.Kas);
         Bank = Rekening(1100, "Bank", RekeningSoort.Balans, kasbank);
         Energie = Rekening(4115, "Energie", RekeningSoort.Resultaat, kosten);
-        Welpen = Rekening(8020, "Opbrengsten", RekeningSoort.Resultaat, baten);
-        Memoriaal = Dagboek(new Dagboek(Ver, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null));
-        Kasboek = Dagboek(new Dagboek(Ver, DagboekSoort.Kas, "KAS", "Kas", Kas));
-        Boekjaren.Add(new Boekjaar(Ver, 2026));
+        Huur = Rekening(8020, "Opbrengsten", RekeningSoort.Resultaat, baten);
+        Memoriaal = Dagboek(new Dagboek(Adm, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null));
+        Kasboek = Dagboek(new Dagboek(Adm, DagboekSoort.Kas, "KAS", "Kas", Kas));
+        Boekjaren.Add(new Boekjaar(Adm, 2026));
     }
 
     public List<Rubriek> Rubrieken { get; } = [];
@@ -53,34 +53,34 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
     public Grootboekrekening Kas { get; } = null!;
     public Grootboekrekening Bank { get; } = null!;
     public Grootboekrekening Energie { get; } = null!;
-    public Grootboekrekening Welpen { get; } = null!;
+    public Grootboekrekening Huur { get; } = null!;
     public Dagboek Memoriaal { get; } = null!;
     public Dagboek Kasboek { get; } = null!;
 
-    public BoekhoudingStand Stand => new(Ver, Rubrieken.ToList(), Rekeningen.ToList(), Dagboeken.ToList(), Boekjaren.ToList(), Posten.ToList())
+    public BoekhoudingStand Stand => new(Adm, Rubrieken.ToList(), Rekeningen.ToList(), Dagboeken.ToList(), Boekjaren.ToList(), Posten.ToList())
     {
         Bankafschriften = Bankafschriften.ToList(),
         Bankmutaties = Bankmutaties.ToList(),
         Boekingsregels = Boekingsregels.OrderBy(r => r.Volgorde).ToList(),
         Relaties = Relaties.ToList(),
-        Bijlagen = Bijlagen.Where(b => b.Administratie == Ver).ToList(),
+        Bijlagen = Bijlagen.Where(b => b.Administratie == Adm).ToList(),
         Jaarrekeningindelingen = Jaarrekeningindelingen.ToList(),
     };
 
     /// <summary>Een bankdagboek op <see cref="Bank"/> (of een andere rekening) voor een eigen IBAN.</summary>
     public Dagboek Bankdagboek(string code, string iban, Grootboekrekening? rekening = null) =>
-        Dagboek(new Dagboek(Ver, DagboekSoort.Bank, code, code, rekening ?? Bank, Iban.Maak(iban)));
+        Dagboek(new Dagboek(Adm, DagboekSoort.Bank, code, code, rekening ?? Bank, Iban.Maak(iban)));
 
     public Rubriek Rubriek(string naam)
     {
-        var rubriek = MetId(new Rubriek(Ver, naam, Rubrieken.Count + 1));
+        var rubriek = MetId(new Rubriek(Adm, naam, Rubrieken.Count + 1));
         Rubrieken.Add(rubriek);
         return rubriek;
     }
 
     public Grootboekrekening Rekening(int nummer, string naam, RekeningSoort soort, Rubriek? rubriek, RekeningRol rol = RekeningRol.Geen)
     {
-        var rekening = MetId(new Grootboekrekening(Ver, nummer, naam, soort, rubriek, rol));
+        var rekening = MetId(new Grootboekrekening(Adm, nummer, naam, soort, rubriek, rol));
         Rekeningen.Add(rekening);
         return rekening;
     }
@@ -91,7 +91,7 @@ internal sealed class BoekhoudingTestdata : IBoekhoudingRepository
 
     public Journaalpost Geboekt(DateOnly datum, string omschrijving, PostSoort soort, params (Grootboekrekening Rekening, long Debet, long Credit)[] regels)
     {
-        var post = new Journaalpost(Ver, Memoriaal, datum, omschrijving, soort);
+        var post = new Journaalpost(Adm, Memoriaal, datum, omschrijving, soort);
         post.Wijzig(Memoriaal, datum, omschrijving, regels.Select(r => new RegelInvoer(r.Rekening, null, new Bedrag(r.Debet), new Bedrag(r.Credit))));
         post.Boek(Posten.Count(p => p.IsGeboekt) + 1, Nu);
         Posten.Add(post);

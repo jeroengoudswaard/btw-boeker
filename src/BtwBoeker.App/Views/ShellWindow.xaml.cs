@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using BtwBoeker.App.Diensten;
 using BtwBoeker.App.ViewModels;
-using BtwBoeker.App.Views.Thema;
 
 namespace BtwBoeker.App.Views;
 
@@ -18,38 +17,6 @@ public partial class ShellWindow : Window
     {
         InitializeComponent();
         DataContext = _viewModel = viewModel;
-        _viewModel.PropertyChanged += ViewModelGewijzigd;
-        Accentkleuren.PasToe(Resources, _viewModel.GekozenAdministratie?.Accentkleur);
-    }
-
-    /// <summary>De accentkleur (knoppen, streepje, tellers) volgt de gekozen administratie.</summary>
-    private void ViewModelGewijzigd(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ShellViewModel.GekozenAdministratie))
-        {
-            if (_gevolgd is not null)
-            {
-                _gevolgd.PropertyChanged -= AdministratieGewijzigd;
-            }
-
-            _gevolgd = _viewModel.GekozenAdministratie;
-            if (_gevolgd is not null)
-            {
-                _gevolgd.PropertyChanged += AdministratieGewijzigd;
-            }
-
-            Accentkleuren.PasToe(Resources, _gevolgd?.Accentkleur);
-        }
-    }
-
-    private AdministratieViewModel? _gevolgd;
-
-    private void AdministratieGewijzigd(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(AdministratieViewModel.Accentkleur))
-        {
-            Accentkleuren.PasToe(Resources, _gevolgd?.Accentkleur);
-        }
     }
 
     /// <summary>Een gemaximaliseerd venster met eigen titelbalk valt anders buiten het scherm; het pictogram wisselt.</summary>
@@ -107,7 +74,7 @@ public partial class ShellWindow : Window
     {
         base.OnActivated(e);
 
-        // Zonder toetsenbordfocus in het venster werken de sneltoetsen (Ctrl+1...6, Ctrl+Tab) niet.
+        // Zonder toetsenbordfocus in het venster werken de sneltoetsen (Ctrl+1, Ctrl+Tab) niet.
         if (!IsKeyboardFocusWithin && !Navigatiebalk.Focus())
         {
             MoveFocus(new TraversalRequest(FocusNavigationDirection.First));

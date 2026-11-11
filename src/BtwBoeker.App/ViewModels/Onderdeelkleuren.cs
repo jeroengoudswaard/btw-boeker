@@ -1,13 +1,12 @@
 using BtwBoeker.Application.Inrichting;
 using BtwBoeker.Application.Modules;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
 /// Elk onderdeel een eigen kleur, alleen in het pictogram (op een zachte tint) en in de dunne band boven de
 /// pagina. Eén palet voor licht en donker: elke kleur haalt minstens 3 : 1 op de tint en op de grond van beide thema's.
-/// De accentkleur van de administratie blijft voor knoppen, selectie en tellers.
+/// De accentkleur van Windows blijft voor knoppen, selectie en tellers.
 /// </summary>
 public static class Onderdeelkleuren
 {

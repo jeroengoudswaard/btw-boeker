@@ -134,7 +134,7 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
   - Stijlen: `Paginavlak`, `Navigatieregel`, `Teller`, `Kerncijfertitel`/`Kerncijferwaarde`, `Vensterknop` en `Sluitknop`.
   - Lettertypen: `Lettertype` en `Koplettertype`.
   - Alle kleuren zijn DynamicResources van het Fluent-thema, zodat licht en donker vanzelf werken.
-- **Accentkleur per administratie:** `Views/Thema/Accentkleuren.PasToe` zet de Fluent-sleutels (`AccentFillColor*Brush`, `AccentButton*`, `TextOnAccentFillColorPrimaryBrush`) op het hoofdvenster wanneer de gekozen administratie of haar kleur wijzigt. Zonder database gelden de Windows-kleuren.
+- **Accentkleur:** die van Windows (de Fluent-sleutels `AccentFillColor*Brush` en `AccentButton*`); de app zet er geen eigen kleur overheen.
 - **Titelbalk:** `WindowChrome` (CaptionHeight 36) met eigen knoppen via `SystemCommands`; `ShellWindow.OnStateChanged` corrigeert de marge van een gemaximaliseerd venster en wisselt Maximaliseren en Herstellen. De AutomationIds `VensterMinimaliseren`, `VensterMaximaliseren` en `VensterSluiten` zijn voor de UI-tests.
 - **Kerncijfers:** `Application/Inrichting/Kerncijfers.cs` (bankrekeningen via `Bankoverzicht.Saldi`, resultaat via `Grootboek.Resultaat`). `OverzichtViewModel.Kerncijferregels` maakt er titel, bedrag en toelichting van.
 - **Tellers:** `ViewModels/Navigatietellers.Bepaal` vertaalt de startkaarten naar sleutels van de navigatiebalk (`Boekhouding.Bank`, …) en telt per module op. `NavigatieItem.Teller` wordt gezet na het bouwen van de navigatie en na elke vernieuwing van de startkaarten.
@@ -182,7 +182,7 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 
 ## Inrichten en één administratie
 
-- **Eén administratie.** Het datamodel is per administratie (kolom `Administratie` in elke financiële tabel), zodat later een tweede object mogelijk is; de app toont er één (`AdministratieSoort.Vereniging = 1`, getoond als *Mijn administratie* tot de gebruiker hem een naam geeft). De migratie *EenAdministratie* verwijdert een tweede administratie alleen als die leeg is.
+- **Eén administratie.** Het datamodel is per administratie (kolom `Administratie` in elke financiële tabel), zodat later een tweede object mogelijk is; de app toont er één (`AdministratieSoort.Standaard = 1`, getoond als *Mijn administratie* tot de gebruiker hem een naam geeft). Navigatie, menu en pagina's kennen geen administratie: `ShellViewModel.Administratie` is de ene administratie van de geopende database, `OpenModule` krijgt alleen een `ModuleSoort`, en alleen `BoekhoudingViewModel` en `InstellingenViewModel` krijgen de administratie mee. De migratie *EenAdministratie* verwijdert een tweede administratie alleen als die leeg is. De accentkleur is die van Windows.
 - **Inrichten** gaat via één route: `BoekhoudingDienst.ImporteerAsync(Inrichtvoorstel)`. Een voorstel bevat rekeningen (`Inrichtrekening`) met beginsaldi; de dienst maakt rubrieken, rekeningen, dagboeken (memoriaal, kas, verkoop), het beginjaar en de openingsbalans, na een back-up. Bronnen: een rekeningschema-sjabloon (`.btwsjabloon`, wizard `SjablooninrichtingViewModel`) of leeg beginnen; het inlezen van een XAF-bestand volgt.
 - **Startwizard:** Welkom → Database → Boekhouding → Bank → Klaar; de voortgang staat in de tabel `Startwizard`.
 - **Reikwijdte:** `ReikwijdteTests` bewaakt dat onderdelen van het oude product (begroting, Excel-overname, standaardschema's, tweede administratie) niet terugkomen; `MigratieTests` dat bestaande databases zonder verlies worden bijgewerkt.

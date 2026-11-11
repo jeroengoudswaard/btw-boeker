@@ -24,7 +24,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
     private BoekhoudingDienst Dienst => new(_omgeving.Sessie, _omgeving.Tijd);
 
     private SjablooninrichtingViewModel Wizard(Rekeningsjabloon? sjabloon = null) =>
-        new(Dienst, AdministratieSoort.Vereniging, sjabloon ?? Testsjabloon.Verhuur(), 2026);
+        new(Dienst, AdministratieSoort.Standaard, sjabloon ?? Testsjabloon.Verhuur(), 2026);
 
     private string Bestand(string inhoud)
     {
@@ -55,7 +55,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         Assert.Contains("2026", vraag, StringComparison.Ordinal);
         Assert.Contains(wizard.TotaalDebettekst, vraag, StringComparison.Ordinal);
         Assert.Contains("memoriaal", vraag, StringComparison.OrdinalIgnoreCase);
-        Assert.Empty((await Dienst.LaadAsync(AdministratieSoort.Vereniging)).Rekeningen);
+        Assert.Empty((await Dienst.LaadAsync(AdministratieSoort.Standaard)).Rekeningen);
 
         antwoord = true;
         await wizard.VolgendeCommand.ExecuteAsync(null);
@@ -91,7 +91,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.True(wizard.IsKlaar, wizard.Foutmelding);
-        var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Standaard);
         Assert.Equal(wizard.Rekeningen.Count(r => r.IsGekozen) + 1, stand.Rekeningen.Count); // + 1299
         Assert.DoesNotContain(stand.Rekeningen, r => r.Nummer == 4120);
         Assert.Equal("Klein onderhoud", stand.Rekeningen.Single(r => r.Nummer == 4100).Naam);
@@ -116,7 +116,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.True(wizard.IsKlaar, wizard.Foutmelding);
-        var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Standaard);
         Assert.NotNull(stand.Boekjaar(2025));
         Assert.Null(stand.Boekjaar(2026));
         Assert.Contains(stand.Posten, p => p.Datum == new DateOnly(2025, 1, 1));
@@ -136,7 +136,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         await wizard.VolgendeCommand.ExecuteAsync(null);
 
         Assert.True(wizard.IsKlaar);
-        var stand = await Dienst.LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await Dienst.LaadAsync(AdministratieSoort.Standaard);
         Assert.Contains(stand.Rekeningen, r => r.Nummer == 1100);
         Assert.Empty(stand.Posten);
     }
@@ -167,7 +167,7 @@ public sealed class SjablooninrichtingViewModelTests : IDisposable
         await vm.ExporteerSjabloonCommand.ExecuteAsync(null);
         var export = Rekeningsjablonen.Lees(await File.ReadAllTextAsync(doel));
         Assert.Equal(vm.Rekeningkeuzes.Count, export.Rekeningen.Count);
-        Assert.Contains("rekeningschema-vereniging", _omgeving.Dialogen.SjabloonVoorstel, StringComparison.Ordinal);
+        Assert.Contains("rekeningschema-mijn-administratie", _omgeving.Dialogen.SjabloonVoorstel, StringComparison.Ordinal);
     }
 
     [Fact]

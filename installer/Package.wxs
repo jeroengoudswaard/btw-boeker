@@ -30,7 +30,7 @@
       <Component Id="Snelkoppeling">
         <Shortcut Id="SnelkoppelingStartmenu"
                   Name="BTW-Boeker"
-                  Description="Leden, contributie en boekhouding"
+                  Description="Boekhouding en btw voor de verhuur van een vakantiewoning"
                   Target="[INSTALLFOLDER]BTW-Boeker.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="BtwBoeker.ico" />

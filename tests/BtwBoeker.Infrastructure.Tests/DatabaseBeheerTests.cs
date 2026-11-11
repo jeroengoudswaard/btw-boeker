@@ -88,21 +88,16 @@ public sealed class DatabaseBeheerTests : IDisposable
     }
 
     [Fact]
-    public async Task Nieuwe_database_bevat_vereniging_en_stichting()
+    public async Task Nieuwe_database_bevat_een_administratie_met_de_standaardnaam()
     {
         await _beheer.MaakAanAsync(DbPad, Wachtwoord);
 
         await using var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord);
-        var administraties = await sessie.Administraties.HaalAlleAsync();
+        var administratie = await sessie.Administraties.HaalAsync();
 
-        Assert.Collection(
-            administraties,
-            a =>
-            {
-                Assert.Equal(AdministratieSoort.Vereniging, a.Soort);
-                Assert.Equal("Mijn administratie", a.Naam); // keuze A (2026-11-10): een neutrale standaardnaam
-                Assert.Equal(Administratie.Standaardkleur(AdministratieSoort.Vereniging), a.Accentkleur);
-            });
+        Assert.Equal(AdministratieSoort.Standaard, administratie.Soort);
+        Assert.Equal("Mijn administratie", administratie.Naam); // besluit 30: een neutrale standaardnaam
+        Assert.Equal(Administratie.StandaardZonderBonDrempel, administratie.ZonderBonDrempel);
     }
 
     [Fact]
@@ -134,9 +129,9 @@ public sealed class DatabaseBeheerTests : IDisposable
         await _beheer.MaakAanAsync(DbPad, Wachtwoord);
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var vereniging = (await sessie.Administraties.HaalAlleAsync())[0];
-            vereniging.WijzigNaam("Vakantiehuis Geheimnaam");
-            await sessie.Administraties.BewaarAsync(vereniging);
+            var administratie = await sessie.Administraties.HaalAsync();
+            administratie.WijzigNaam("Vakantiehuis Geheimnaam");
+            await sessie.Administraties.BewaarAsync(administratie);
         }
 
         var ruw = Encoding.Latin1.GetString(await File.ReadAllBytesAsync(DbPad));
@@ -152,15 +147,15 @@ public sealed class DatabaseBeheerTests : IDisposable
         await _beheer.MaakAanAsync(DbPad, Wachtwoord);
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var administratie = Assert.Single(await sessie.Administraties.HaalAlleAsync());
-            administratie.WijzigAccentkleur(Kleur.Parse("#6A1B9A"));
+            var administratie = await sessie.Administraties.HaalAsync();
+            administratie.WijzigZonderBonDrempel(2500);
             await sessie.Administraties.BewaarAsync(administratie);
         }
 
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var administratie = Assert.Single(await sessie.Administraties.HaalAlleAsync());
-            Assert.Equal(Kleur.Parse("#6A1B9A"), administratie.Accentkleur);
+            var administratie = await sessie.Administraties.HaalAsync();
+            Assert.Equal(2500, administratie.ZonderBonDrempel);
         }
     }
 
@@ -171,7 +166,7 @@ public sealed class DatabaseBeheerTests : IDisposable
 
         await using (var sessie = await _beheer.OpenMetHerstelsleutelAsync(DbPad, herstel, "mijn nieuwe wachtwoord"))
         {
-            Assert.Single(await sessie.Administraties.HaalAlleAsync());
+            Assert.NotNull(await sessie.Administraties.HaalAsync());
         }
 
         await Assert.ThrowsAsync<OngeldigeSleutelException>(() => _beheer.OpenAsync(DbPad, Wachtwoord));
@@ -199,16 +194,16 @@ public sealed class DatabaseBeheerTests : IDisposable
         await _beheer.MaakAanAsync(DbPad, Wachtwoord);
         await using (var sessie = await _beheer.OpenAsync(DbPad, Wachtwoord))
         {
-            var vereniging = (await sessie.Administraties.HaalAlleAsync())[0];
-            vereniging.WijzigNaam("Vakantiehuis Teruggezet");
-            await sessie.Administraties.BewaarAsync(vereniging);
+            var administratie = await sessie.Administraties.HaalAsync();
+            administratie.WijzigNaam("Vakantiehuis Teruggezet");
+            await sessie.Administraties.BewaarAsync(administratie);
             await sessie.MaakBackupAsync(backup);
         }
 
         await _beheer.HerstelBackupAsync(backup, hersteld);
 
         await using var herstelSessie = await _beheer.OpenAsync(hersteld, Wachtwoord);
-        Assert.Equal("Vakantiehuis Teruggezet", (await herstelSessie.Administraties.HaalAlleAsync())[0].Naam);
+        Assert.Equal("Vakantiehuis Teruggezet", (await herstelSessie.Administraties.HaalAsync()).Naam);
     }
 
     [Fact]

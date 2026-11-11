@@ -1,8 +1,11 @@
 <UserControl x:Class="BtwBoeker.App.Views.InstellingenView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:g="clr-namespace:BtwBoeker.App.Views.Gedeeld"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:InstellingenViewModel}"
              AutomationProperties.AutomationId="Instellingen">
     <DockPanel>
         <Border DockPanel.Dock="Bottom" Padding="48,12" BorderThickness="0,1,0,0"
@@ -19,24 +22,36 @@
                    Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="32,24" MaxWidth="760" HorizontalAlignment="Left">
-                <TextBlock Text="Administraties" Style="{StaticResource Paginatitel}" />
+                <TextBlock Text="Administratie" Style="{StaticResource Sectietitel}" />
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                           Text="Stel per administratie de naam, accentkleur en drempel voor boekingen zonder bon in." />
-                <ItemsControl ItemsSource="{Binding Regels}" Focusable="False">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:AdministratieInstellingRegel}">
-                            <StackPanel Margin="0,0,0,16">
-                                <g:AdministratieKaart />
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <Label Content="Drempel 'zonder bon' (€)" Target="{Binding ElementName=Drempelveld}" VerticalAlignment="Center" Padding="0,0,8,0" />
-                                    <TextBox x:Name="Drempelveld" Width="100" Text="{Binding Drempeltekst, UpdateSourceTrigger=PropertyChanged}"
-                                             ToolTip="Uitgaven en ontvangsten van bank of kas vanaf dit bedrag zonder bijlage komen in het filter en op de startpagina"
-                                             AutomationProperties.AutomationId="{Binding Soort, StringFormat=Drempel{0}}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                           Text="De naam staat in de titelbalk en op afdrukken; de drempel bepaalt welke boekingen zonder bon worden gemeld." />
+                <Border Style="{StaticResource Kaart}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Label Content="_Naam" Target="{Binding ElementName=Naamveld}" VerticalAlignment="Center" />
+                        <TextBox x:Name="Naamveld" Grid.Column="1" Margin="0,0,0,8"
+                                 Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.AutomationId="AdministratieNaam" />
+
+                        <Label Grid.Row="1" Content="_Drempel 'zonder bon' (€)" Target="{Binding ElementName=Drempelveld}" VerticalAlignment="Center" />
+                        <TextBox x:Name="Drempelveld" Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                 Text="{Binding Drempeltekst, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Uitgaven en ontvangsten van bank of kas vanaf dit bedrag zonder bijlage komen in het filter en op de startpagina"
+                                 AutomationProperties.AutomationId="DrempelZonderBon" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
+                                   Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                    </Grid>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </DockPanel>

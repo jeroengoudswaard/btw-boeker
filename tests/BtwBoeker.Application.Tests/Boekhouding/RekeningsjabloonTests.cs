@@ -8,7 +8,7 @@ namespace BtwBoeker.Application.Tests.Boekhouding;
 /// <summary>Rekeningschema-sjablonen: lezen, schrijven, inrichten en exporteren.</summary>
 public sealed class RekeningsjabloonTests
 {
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
 
     private static string Minimaal(string rekeningen, string formaat = "btw-boeker-rekeningschema", int versie = 1, string rubrieken = """[{"naam":"Vermogen"}]""") =>
         $$"""{"formaat":"{{formaat}}","versie":{{versie}},"naam":"Test","rubrieken":{{rubrieken}},"rekeningen":[{{rekeningen}}]}""";
@@ -83,9 +83,9 @@ public sealed class RekeningsjabloonTests
                 _ => r,
             }).ToList();
 
-        await dienst.ImporteerAsync(Ver, Rekeningsjablonen.Voorstel(rekeningen, 2026));
+        await dienst.ImporteerAsync(Adm, Rekeningsjablonen.Voorstel(rekeningen, 2026));
 
-        var stand = await dienst.LaadAsync(Ver);
+        var stand = await dienst.LaadAsync(Adm);
         Assert.Equal(rekeningen.Count - 1, stand.Rekeningen.Count);
         Assert.Equal(["MEM", "KAS", "VRK"], stand.Dagboeken.OrderBy(d => d.Soort).Select(d => d.Code));
         Assert.Equal(2026, Assert.Single(stand.Boekjaren).Jaar);
@@ -96,7 +96,7 @@ public sealed class RekeningsjabloonTests
 
         var export = Rekeningsjablonen.Lees(Rekeningsjablonen.Schrijf(Rekeningsjablonen.UitStand(stand, "Onze groep")));
         Assert.Equal("Onze groep", export.Naam);
-        Assert.Equal(Ver, export.Administratie);
+        Assert.Equal(Adm, export.Administratie);
         Assert.Equal(stand.Rekeningen.Select(r => r.Nummer).Order(), export.Rekeningen.Select(r => r.Nummer).Order());
         Assert.Equal(ResultaatKant.Baten, export.Rekeningen.Single(r => r.Nummer == 8000).Kant);
         Assert.Equal(stand.Rubrieken.Count, export.Rubrieken.Count);

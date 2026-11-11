@@ -7,11 +7,10 @@ public class AdministratieTests
     [Fact]
     public void Nieuwe_administratie_heeft_opgegeven_eigenschappen()
     {
-        var a = new Administratie(AdministratieSoort.Vereniging, "Vakantiehuisje", Kleur.Parse("#1565C0"));
+        var a = new Administratie(AdministratieSoort.Standaard, "Vakantiehuisje");
 
-        Assert.Equal(AdministratieSoort.Vereniging, a.Soort);
+        Assert.Equal(AdministratieSoort.Standaard, a.Soort);
         Assert.Equal("Vakantiehuisje", a.Naam);
-        Assert.Equal(Kleur.Parse("#1565C0"), a.Accentkleur);
     }
 
     [Theory]
@@ -43,23 +42,6 @@ public class AdministratieTests
     }
 
     [Fact]
-    public void WijzigAccentkleur_past_kleur_aan()
-    {
-        var a = Standaard();
-
-        a.WijzigAccentkleur(Kleur.Parse("#6A1B9A"));
-
-        Assert.Equal(Kleur.Parse("#6A1B9A"), a.Accentkleur);
-    }
-
-    [Fact]
-    public void Standaardkleur_is_groen_en_een_onbekende_soort_wordt_geweigerd()
-    {
-        Assert.Equal(Kleur.Parse("#2E7D32"), Administratie.Standaardkleur(AdministratieSoort.Vereniging));
-        Assert.Throws<ArgumentOutOfRangeException>(() => Administratie.Standaardkleur((AdministratieSoort)2));
-    }
-
-    [Fact]
     public void Drempel_zonder_bon_is_standaard_10_euro_en_instelbaar()
     {
         var a = Standaard();
@@ -72,6 +54,5 @@ public class AdministratieTests
         Assert.Throws<ArgumentOutOfRangeException>(() => a.WijzigZonderBonDrempel(-1));
     }
 
-    private static Administratie Standaard() =>
-        new(AdministratieSoort.Vereniging, "Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging));
+    private static Administratie Standaard() => new(AdministratieSoort.Standaard, Administratie.Standaardnaam);
 }
