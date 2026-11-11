@@ -6,7 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <Version>0.19.0</Version>
+    <Version>0.20.0</Version>
     <Company>BTW-Boeker</Company>
     <Product>BTW-Boeker</Product>
     <Copyright>© 2026</Copyright>

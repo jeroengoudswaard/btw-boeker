@@ -4,6 +4,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.20.0] - 2026-11-11: Opgeruimd, en geen vraag meer om op te slaan na alleen bekijken
+
 ### Opgelost
 - **Afsluiten na alleen bekijken**: met een paar boekingsregels vroeg de app bij het sluiten of de wijzigingen in *Boekhouding* opgeslagen moesten worden, ook als er niets was gewijzigd. Een keuzelijst in de tabel maakte de rekening van een regel leeg zodra die in beeld kwam. De keuzelijsten in de tabellen (boekingsregels, rekeningschema, posteditor) kiezen nu uit een lijst op de rij zelf.
 - **Versienummer**: het programma meldde zich in het logbestand en onder *Help › Over BTW-Boeker* als 0.1.0; het volgt nu de versie van de release.
