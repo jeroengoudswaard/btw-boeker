@@ -13,7 +13,7 @@ public sealed class RelatieDienst(IDatabaseSessie sessie)
     private IBoekhoudingRepository Repository => sessie.Boekhouding;
 
     public Task<Guid> BewaarAsync(RelatieInvoer invoer, CancellationToken annulering = default) =>
-        Repository.PasToeAsync(AdministratieSoort.Vereniging, stand =>
+        Repository.PasToeAsync(AdministratieSoort.Standaard, stand =>
         {
             ArgumentNullException.ThrowIfNull(invoer);
             var toevoegen = new List<object>();

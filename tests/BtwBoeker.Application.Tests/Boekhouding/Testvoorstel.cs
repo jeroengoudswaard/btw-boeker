@@ -21,14 +21,14 @@ internal static class Testvoorstel
 
     /// <summary>
     /// Reserve, kas en bank met beginsaldi per 1-1-2026, een kostenrekening (4115 Energie) en een opbrengstrekening
-    /// (8020 Contributie Welpen). In evenwicht zolang <paramref name="bank"/> 799,50 is.
+    /// (8020 Verhuur huisje). In evenwicht zolang <paramref name="bank"/> 799,50 is.
     /// </summary>
     public static Inrichtvoorstel Standaard(decimal bank = 799.5m) => Maak(2026,
         Balans(600, "Algemene Reserve", "Vermogen", credit: 1000, rol: RekeningRol.Reserve),
         Balans(1000, "Kas", "Kas Bank", debet: 200.5m, rol: RekeningRol.Kas),
         Balans(1100, "Bank", "Kas Bank", debet: bank),
-        Resultaat(4115, "Energie", "Terreinkosten", ResultaatKant.Lasten),
-        Resultaat(8020, "Contributie Welpen", "Contributie", ResultaatKant.Baten));
+        Resultaat(4115, "Energie", "Parkkosten", ResultaatKant.Lasten),
+        Resultaat(8020, "Verhuur huisje", "Verhuur", ResultaatKant.Baten));
 
     private static Bedrag Centen(decimal euro) => new((long)Math.Round(euro * 100m, MidpointRounding.AwayFromZero));
 }

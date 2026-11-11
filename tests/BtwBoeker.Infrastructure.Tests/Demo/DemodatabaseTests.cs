@@ -29,10 +29,9 @@ public sealed class DemodatabaseTests : IDisposable
         await Demodatabase.MaakAsync(pad, new DateTimeOffset(2026, 11, 4, 12, 0, 0, TimeSpan.Zero));
 
         await using var sessie = await Demodatabase.OpenAsync(pad);
-        var administraties = await sessie.Administraties.HaalAlleAsync();
-        Assert.Equal(Demodatabase.NaamVereniging, Assert.Single(administraties).Naam);
+        Assert.Equal(Demodatabase.Administratienaam, (await sessie.Administraties.HaalAsync()).Naam);
 
-        var stand = await new BoekhoudingDienst(sessie, TimeProvider.System).LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await new BoekhoudingDienst(sessie, TimeProvider.System).LaadAsync(AdministratieSoort.Standaard);
         Assert.True(stand.IsIngericht);
         Assert.True(stand.Posten.Count(p => p.Status == PostStatus.Geboekt) >= 20, $"{stand.Posten.Count} posten");
         Assert.Contains(stand.Posten, p => p.Status == PostStatus.Concept); // een startkaart "conceptposten"

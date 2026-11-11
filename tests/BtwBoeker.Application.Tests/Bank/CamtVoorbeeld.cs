@@ -36,7 +36,7 @@ internal static class CamtVoorbeeld
         {
             volgnummer++;
             x.Append(CultureInfo.InvariantCulture, $"<Stmt><Id>{a.Datum:yyyyMMdd}{volgnummer}</Id><ElctrncSeqNb>{volgnummer}</ElctrncSeqNb><CreDtTm>{a.Datum:yyyy-MM-dd}T23:00:00</CreDtTm>");
-            x.Append(CultureInfo.InvariantCulture, $"<Acct><Id><IBAN>{iban}</IBAN></Id><Ccy>EUR</Ccy><Nm>Verzonnen vereniging</Nm></Acct>");
+            x.Append(CultureInfo.InvariantCulture, $"<Acct><Id><IBAN>{iban}</IBAN></Id><Ccy>EUR</Ccy><Nm>Verzonnen rekeninghouder</Nm></Acct>");
             x.Append(Saldo("PRCD", a.Begin, a.Datum.AddDays(-1))).Append(Saldo("OPBD", a.Begin, a.Datum)).Append(Saldo("CLBD", a.Eind, a.Datum));
             foreach (var t in a.Transacties)
             {

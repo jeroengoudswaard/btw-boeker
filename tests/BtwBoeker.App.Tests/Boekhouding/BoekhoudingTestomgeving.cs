@@ -24,11 +24,11 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public VasteTijd Tijd { get; } = new(new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero));
     public InMemoryBoekhoudingOpslag Opslag => (InMemoryBoekhoudingOpslag)Sessie.Boekhouding;
 
-    public static AdministratieViewModel Vereniging { get; } = new(
-        new Administratie(AdministratieSoort.Vereniging, "Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging)));
+    public static AdministratieViewModel Administratie { get; } = new(
+        new Domain.Administraties.Administratie(AdministratieSoort.Standaard, "Mijn administratie"));
 
     public BoekhoudingViewModel Maak(AdministratieViewModel? administratie = null) =>
-        new(Sessie, Dialogen, Tijd, administratie ?? Vereniging, Hulpmiddelen, NullLogger.Instance);
+        new(Sessie, Dialogen, Tijd, administratie ?? Administratie, Hulpmiddelen, NullLogger.Instance);
 
     /// <summary>Schrijft een verzonnen CAMT.053-bestand naar een tijdelijk bestand; wordt bij <see cref="Dispose"/> opgeruimd.</summary>
     public string CamtBestand(string iban, params Application.Tests.Bank.VbAfschrift[] afschriften)
@@ -53,9 +53,9 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public async Task<BoekhoudingViewModel> OpenMetBankrekeningenAsync()
     {
         var dienst = new BoekhoudingDienst(Sessie, Tijd);
-        await dienst.ImporteerAsync(AdministratieSoort.Vereniging, Application.Tests.Boekhouding.Testvoorstel.Standaard());
-        await dienst.BewaarRekeningAsync(AdministratieSoort.Vereniging, new RekeningInvoer(null, 1150, "Spaarrekening", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
-        await dienst.BewaarRekeningAsync(AdministratieSoort.Vereniging, new RekeningInvoer(null, 1298, "Kruisposten", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Kruisposten, true));
+        await dienst.ImporteerAsync(AdministratieSoort.Standaard, Application.Tests.Boekhouding.Testvoorstel.Standaard());
+        await dienst.BewaarRekeningAsync(AdministratieSoort.Standaard, new RekeningInvoer(null, 1150, "Spaarrekening", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Geen, true));
+        await dienst.BewaarRekeningAsync(AdministratieSoort.Standaard, new RekeningInvoer(null, 1298, "Kruisposten", null, Domain.Financien.Boekhouding.RekeningSoort.Balans, Domain.Financien.Boekhouding.RekeningRol.Kruisposten, true));
         var vm = Maak();
         await vm.VernieuwCommand.ExecuteAsync(null);
         return vm;
@@ -64,7 +64,7 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public async Task<BoekhoudingViewModel> OpenIngerichtAsync()
     {
         var dienst = new BoekhoudingDienst(Sessie, Tijd);
-        await dienst.ImporteerAsync(AdministratieSoort.Vereniging, Application.Tests.Boekhouding.Testvoorstel.Standaard());
+        await dienst.ImporteerAsync(AdministratieSoort.Standaard, Application.Tests.Boekhouding.Testvoorstel.Standaard());
         var vm = Maak();
         await vm.VernieuwCommand.ExecuteAsync(null);
         return vm;

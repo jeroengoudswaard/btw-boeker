@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
-using BtwBoeker.Domain.Administraties;
+using BtwBoeker.App.ViewModels;
 using BtwBoeker.Domain.Financien.Boekhouding;
 
 namespace BtwBoeker.App.Converters;

@@ -14,8 +14,8 @@ public sealed class BankImportViewModelTests : IDisposable
     private async Task<BankImportViewModel> MaakAsync(params string[] paden)
     {
         await _omgeving.OpenMetBankrekeningenAsync();
-        var stand = await _omgeving.Opslag.LaadAsync(AdministratieSoort.Vereniging);
-        return new BankImportViewModel(new BankDienst(_omgeving.Sessie, _omgeving.Tijd), stand, AdministratieSoort.Vereniging, paden);
+        var stand = await _omgeving.Opslag.LaadAsync(AdministratieSoort.Standaard);
+        return new BankImportViewModel(new BankDienst(_omgeving.Sessie, _omgeving.Tijd), stand, AdministratieSoort.Standaard, paden);
     }
 
     private string Betaal(long begin = 79950) => _omgeving.CamtBestand(CamtVoorbeeld.Betaal,

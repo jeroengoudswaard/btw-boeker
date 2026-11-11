@@ -37,17 +37,17 @@ public sealed class WeergaveTests : IDisposable
     }
 
     [Fact]
-    public async Task Tabblad_volgt_de_weergave_titel_status_rapporten_en_kolommen()
+    public async Task Pagina_volgt_de_weergave_titel_status_rapporten_en_kolommen()
     {
         var vm = await _omgeving.OpenIngerichtAsync();
-        Assert.Equal("Boekhouding · Vereniging", vm.Titel);
+        Assert.Equal("Boekhouding", vm.Titel);
         Assert.Equal("Geboekt", vm.Posten.Single().Status);
         vm.KaartRekening = vm.Rekeningkeuzes.Single(r => r.Nummer == 4115);
         Assert.Equal(("Debet", "Credit"), (vm.KaartDebetkop, vm.KaartCreditkop));
 
         Woorden.Weergave = Weergavemodus.Eenvoudig;
 
-        Assert.Equal("Financiën · Vereniging", vm.Titel);
+        Assert.Equal("Financiën", vm.Titel);
         Assert.Equal("Definitief", vm.Posten.Single().Status);
         Assert.Equal("Stand van alle potjes", vm.Rapportkeuzes.Single(r => r.Soort == Rapportsoort.Saldibalans).Naam);
         Assert.Equal(("Uitgave", "Inkomst"), (vm.KaartDebetkop, vm.KaartCreditkop)); // inkomsten- en uitgavenpotje
@@ -79,7 +79,7 @@ public sealed class WeergaveTests : IDisposable
         await vm.BoekenCommand.ExecuteAsync(null);
 
         Assert.StartsWith("Boeking MEM-2026-0002 is definitief", vm.Melding, StringComparison.Ordinal);
-        var stand = await _omgeving.Opslag.LaadAsync(Domain.Administraties.AdministratieSoort.Vereniging);
+        var stand = await _omgeving.Opslag.LaadAsync(Domain.Administraties.AdministratieSoort.Standaard);
         Assert.Equal("MEM-2026-0002", stand.Posten.Single(p => p.Omschrijving == "Energie juni").Nummer);
     }
 

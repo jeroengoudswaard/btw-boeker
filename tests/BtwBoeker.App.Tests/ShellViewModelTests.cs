@@ -43,10 +43,10 @@ public sealed class ShellViewModelTests
         var shell = MaakShell();
         await shell.InitialiseerAsync();
 
-        var tab = Assert.Single(shell.Tabbladen);
+        var tab = Assert.Single(shell.Paginas);
         Assert.Equal(ModuleSoort.Overzicht, tab.Module.Soort);
         Assert.False(shell.IsDatabaseOpen);
-        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Boekhouding, null)));
+        Assert.False(shell.OpenModuleCommand.CanExecute(ModuleSoort.Boekhouding));
     }
 
     [Fact]
@@ -192,24 +192,17 @@ public sealed class ShellViewModelTests
         Assert.Single(_dialogen.Fouten);
     }
 
-    // ---- Tabbladen -------------------------------------------------------------------------
+    // ---- Paginas -------------------------------------------------------------------------
 
     [Fact]
-    public async Task Financiele_module_zonder_administratie_wordt_geweigerd()
-    {
-        var shell = await MaakShellMetOpenDatabase();
-
-        Assert.False(shell.OpenModuleCommand.CanExecute(new ModuleVerzoek(ModuleSoort.Boekhouding, null)));
-    }
-
-    [Fact]
-    public async Task Sneltoets_zonder_actieve_administratie_kiest_vereniging()
+    public async Task Sneltoets_opent_boekhouding_van_de_administratie()
     {
         var shell = await MaakShellMetOpenDatabase();
 
         shell.OpenModuleViaSneltoetsCommand.Execute("1"); // Boekhouding
 
-        Assert.Equal(AdministratieSoort.Vereniging, shell.GeselecteerdTabblad!.Administratie!.Soort);
+        var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
+        Assert.Same(shell.Administratie, boekhouding.Administratie);
     }
 
     [Fact]
@@ -221,7 +214,7 @@ public sealed class ShellViewModelTests
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
         Assert.True(shell.IsDatabaseOpen);
-        Assert.Same(instellingen, shell.GeselecteerdTabblad);
+        Assert.Same(instellingen, shell.GeselecteerdePagina);
         Assert.Equal(["Instellingen"], _dialogen.OpslaanVragen);
     }
 
@@ -233,7 +226,7 @@ public sealed class ShellViewModelTests
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.DoesNotContain(instellingen, shell.Tabbladen);
+        Assert.DoesNotContain(instellingen, shell.Paginas);
         Assert.False(shell.IsDatabaseOpen);
         Assert.Equal(1, _beheer.Repository.AantalKeerBewaard);
     }
@@ -246,7 +239,7 @@ public sealed class ShellViewModelTests
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.DoesNotContain(instellingen, shell.Tabbladen);
+        Assert.DoesNotContain(instellingen, shell.Paginas);
         Assert.Equal(0, _beheer.Repository.AantalKeerBewaard);
     }
 
@@ -265,9 +258,9 @@ public sealed class ShellViewModelTests
     private async Task<(ShellViewModel Shell, InstellingenViewModel Instellingen)> ShellMetGewijzigdeInstellingen()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Instellingen, null));
-        var instellingen = Assert.IsType<InstellingenViewModel>(shell.GeselecteerdTabblad);
-        instellingen.Regels[0].Naam = "Gewijzigd";
+        shell.OpenModuleCommand.Execute(ModuleSoort.Instellingen);
+        var instellingen = Assert.IsType<InstellingenViewModel>(shell.GeselecteerdePagina);
+        instellingen.Naam = "Gewijzigd";
         return (shell, instellingen);
     }
 
@@ -277,31 +270,31 @@ public sealed class ShellViewModelTests
     public async Task Laatste_pagina_wordt_bewaard_bij_sluiten_en_hersteld_bij_openen()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
+        shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Single(shell.Tabbladen);
+        Assert.Single(shell.Paginas);
         Assert.True(_beheer.LaatsteSessie!.Gesloten);
 
         _dialogen.WachtwoordAntwoorden.Enqueue(new WachtwoordInvoer(Wachtwoord, false));
         await shell.OpenDatabaseCommand.ExecuteAsync(null);
 
-        Assert.Equal("Boekhouding · Vakantiehuis De Duinen", shell.GeselecteerdTabblad!.Titel);
-        Assert.Equal(AdministratieSoort.Vereniging, shell.GekozenAdministratie!.Soort);
+        Assert.Equal("Boekhouding", shell.GeselecteerdePagina!.Titel);
+        Assert.Equal(AdministratieSoort.Standaard, shell.Administratie!.Soort);
     }
 
     [Fact]
     public async Task Afsluiten_bewaart_de_laatste_pagina_en_sluit_database()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
+        shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
 
         var mag = await shell.MagAfsluitenAsync();
 
         Assert.True(mag);
         Assert.True(_beheer.LaatsteSessie!.Gesloten);
-        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging, (int)BoekhoudingSubtab.Journaal), _instellingen.Instellingen.LaatstePagina);
+        Assert.Equal(new LaatstePagina(ModuleSoort.Boekhouding, (int)BoekhoudingSubtab.Journaal), _instellingen.Instellingen.LaatstePagina);
     }
 
     // ---- Thema, back-up en status ----------------------------------------------------------
@@ -347,10 +340,10 @@ public sealed class ShellViewModelTests
     public async Task Statusbalk_toont_database_administratie_en_boekjaar()
     {
         var shell = await MaakShellMetOpenDatabase();
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
+        shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
 
         Assert.Equal("btw-boeker.btwdb", shell.DatabaseNaam);
-        Assert.Equal("Vakantiehuis De Duinen", shell.ActieveAdministratieNaam);
+        Assert.Equal("Vakantiehuis De Duinen", shell.Administratie?.Naam);
         Assert.Equal("Boekjaar 2026", shell.Boekjaartekst);
         Assert.Contains("Vakantiehuis De Duinen", shell.Venstertitel, StringComparison.Ordinal);
     }

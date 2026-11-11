@@ -1,5 +1,4 @@
 using BtwBoeker.Application.Modules;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.Application.Instellingen;
 
@@ -10,15 +9,18 @@ public enum Thema
     Donker,
 }
 
-/// <summary>Welke woorden het tabblad Financiën gebruikt; de gegevens blijven altijd formeel.</summary>
+/// <summary>Welke woorden Boekhouding gebruikt; de gegevens blijven altijd formeel.</summary>
 public enum Weergavemodus
 {
     Expert,
     Eenvoudig,
 }
 
-/// <summary>De pagina die bij een herstart weer opent: module, administratie en onderdeel (subtabblad).</summary>
-public sealed record LaatstePagina(ModuleSoort Module, AdministratieSoort? Administratie, int? Onderdeel);
+/// <summary>
+/// De pagina die bij een herstart weer opent: module en onderdeel (subtabblad). Een bestand van v0.19.0 bevat ook de
+/// administratie; dat veld wordt bij het lezen overgeslagen.
+/// </summary>
+public sealed record LaatstePagina(ModuleSoort Module, int? Onderdeel);
 
 /// <summary>Voorkeuren per Windows-gebruiker. Bevat geen persoonsgegevens of bedragen.</summary>
 public sealed record GebruikersInstellingen

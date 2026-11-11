@@ -8,27 +8,25 @@ namespace BtwBoeker.App.Tests;
 /// <summary>Start in de nieuwe stijl: kerncijfers en tellers in de navigatiebalk.</summary>
 public sealed class StartTests
 {
-    private static Startkaart Kaart(Startkaartsoort soort, AdministratieSoort? administratie, int aantal) =>
-        new(soort, administratie, aantal, "titel", "tekst", "knop");
+    private static Startkaart Kaart(Startkaartsoort soort, int aantal) =>
+        new(soort, aantal, "titel", "tekst", "knop");
 
     [Fact]
-    public void Tellers_horen_bij_het_onderdeel_en_tellen_op_bij_de_module_van_de_gekozen_administratie()
+    public void Tellers_horen_bij_het_onderdeel_en_tellen_op_bij_de_module()
     {
         Startkaart[] kaarten =
         [
-            Kaart(Startkaartsoort.Bank, AdministratieSoort.Vereniging, 3),
-            Kaart(Startkaartsoort.Postvak, AdministratieSoort.Vereniging, 2),
-            Kaart(Startkaartsoort.Bank, ((AdministratieSoort)2), 7), // telt niet mee
-            Kaart(Startkaartsoort.Inrichting, null, 4),
+            Kaart(Startkaartsoort.Bank, 3),
+            Kaart(Startkaartsoort.Postvak, 2),
+            Kaart(Startkaartsoort.Inrichting, 4),
         ];
 
-        var tellers = Navigatietellers.Bepaal(kaarten, AdministratieSoort.Vereniging);
+        var tellers = Navigatietellers.Bepaal(kaarten);
 
         Assert.Equal(3, tellers["Boekhouding.Bank"]);
         Assert.Equal(2, tellers["Boekhouding.Postvak"]);
         Assert.Equal(5, tellers["Boekhouding"]);
         Assert.False(tellers.ContainsKey("Start"));
-        Assert.Equal(7, Navigatietellers.Bepaal(kaarten, ((AdministratieSoort)2))["Boekhouding.Bank"]);
     }
 
     [Fact]

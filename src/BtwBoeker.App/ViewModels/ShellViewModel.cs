@@ -12,19 +12,12 @@ using BtwBoeker.Application.Database;
 using BtwBoeker.Application.Inrichting;
 using BtwBoeker.Application.Instellingen;
 using BtwBoeker.Application.Modules;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels;
 
-public sealed record ModuleVerzoek(ModuleSoort Module, AdministratieSoort? Administratie)
-{
-    /// <summary>Voor gebruik in XAML (Extra › Instellingen, Ctrl+,).</summary>
-    public static ModuleVerzoek Instellingen { get; } = new(ModuleSoort.Instellingen, null);
-}
-
 /// <summary>
-/// Hoofdvenster: database-sessie, navigatiebalk, menu's en statusregel.
-/// De geopende pagina's blijven bewaard in <see cref="Tabbladen"/> (de naam stamt uit de tijd van de tabbladen).
+/// Hoofdvenster: database-sessie, navigatiebalk, menu's en statusregel. De geopende pagina's blijven bewaard in
+/// <see cref="Paginas"/>, zodat een pagina bij terugkeer zijn stand houdt.
 /// </summary>
 public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 {
@@ -57,21 +50,23 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _tijd = tijd;
         _logger = logger;
         _overzicht = new OverzichtViewModel(this);
-        Tabbladen.Add(_overzicht);
-        GeselecteerdTabblad = _overzicht;
+        Paginas.Add(_overzicht);
+        GeselecteerdePagina = _overzicht;
         BouwModuleMenu();
     }
 
-    public ObservableCollection<TabbladViewModel> Tabbladen { get; } = [];
+    public ObservableCollection<PaginaViewModel> Paginas { get; } = [];
 
-    public ObservableCollection<AdministratieViewModel> Administraties { get; } = [];
+    /// <summary>De administratie van de geopende database (besluit 26: er is er één); <c>null</c> zonder database.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Venstertitel))]
+    public partial AdministratieViewModel? Administratie { get; private set; }
 
     public ObservableCollection<ModuleMenuItem> ModuleMenu { get; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
     [NotifyCanExecuteChangedFor(nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand), nameof(ExporteerXafCommand))]
-    public partial TabbladViewModel? GeselecteerdTabblad { get; set; }
+    public partial PaginaViewModel? GeselecteerdePagina { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDatabaseOpen), nameof(Venstertitel), nameof(HeeftLaatsteDatabase), nameof(LaatsteDatabaseNaam), nameof(LaatsteDatabaseMap))]
@@ -83,7 +78,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [ObservableProperty]
     public partial Thema Thema { get; set; }
 
-    /// <summary>Expert of Eenvoudig voor het tabblad Financiën; alleen visueel.</summary>
+    /// <summary>Expert of Eenvoudig voor de woorden in Boekhouding; alleen visueel.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar))]
     public partial Weergavemodus Weergave { get; set; }
@@ -126,15 +121,10 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    /// <summary>Besluit 26: de ene administratie van de database geldt voor de hele app.</summary>
-    public AdministratieViewModel? ActieveAdministratie => GekozenAdministratie;
-
-    public string? ActieveAdministratieNaam => ActieveAdministratie?.Naam;
-
     public string Boekjaartekst => $"Boekjaar {_tijd.GetLocalNow().Year.ToString(CultureInfo.InvariantCulture)}";
 
     /// <summary>Windows-conventie: "Document - Applicatie".</summary>
-    public string Venstertitel => (DatabaseNaam, ActieveAdministratieNaam) switch
+    public string Venstertitel => (DatabaseNaam, Administratie?.Naam) switch
     {
         (null, _) => "BTW-Boeker",
         (var db, null) => $"{db} - BTW-Boeker",
@@ -232,7 +222,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [RelayCommand(CanExecute = nameof(KanOpslaan))]
     private async Task OpslaanAsync()
     {
-        if (GeselecteerdTabblad is { } tab && await tab.BewaarAsync())
+        if (GeselecteerdePagina is { } tab && await tab.BewaarAsync())
         {
             ZetStatus(Statussoort.Gelukt, "Opgeslagen.");
         }
@@ -240,7 +230,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         OpslaanCommand.NotifyCanExecuteChanged();
     }
 
-    private bool KanOpslaan() => GeselecteerdTabblad?.KanOpslaan == true;
+    private bool KanOpslaan() => GeselecteerdePagina?.KanOpslaan == true;
 
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
     private async Task MaakBackupAsync()
@@ -276,67 +266,28 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     /// Bestand › Importeren › Bankafschrift (CAMT.053): opent Boekhouding en start de bankimport.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task ImporteerBankafschriftAsync()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
+    private Task ImporteerBankafschriftAsync() => InBoekhoudingAsync(boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
 
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
-        {
-            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            await boekhouding.BankInlezenCommand.ExecuteAsync(null);
-        }
-    }
-
-    /// <summary>
-    /// Bestand › Importeren › Rekeningschema-sjabloon: opent Boekhouding voor de administratie van het actieve
-    /// tabblad, en richt in met een sjabloonbestand.
-    /// </summary>
+    /// <summary>Bestand › Importeren › Rekeningschema-sjabloon: opent Boekhouding en richt in met een sjabloonbestand.</summary>
     [RelayCommand(CanExecute = nameof(IsDatabaseOpen))]
-    private async Task ImporteerSjabloonAsync()
-    {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging);
-        if (!KanModuleOpenen(verzoek))
-        {
-            return;
-        }
+    private Task ImporteerSjabloonAsync() => InBoekhoudingAsync(boekhouding => boekhouding.SjabloonInlezenCommand.ExecuteAsync(null));
 
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
-        {
-            if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
-            {
-                await laden;
-            }
-
-            await boekhouding.SjabloonInlezenCommand.ExecuteAsync(null);
-        }
-    }
-
-    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon, van het actieve tabblad Boekhouding.</summary>
+    /// <summary>Bestand › Exporteren › Rekeningschema als sjabloon, van de pagina Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task ExporteerSjabloonAsync() =>
-        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerSjabloonCommand.ExecuteAsync(null) : Task.CompletedTask;
+        GeselecteerdePagina is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerSjabloonCommand.ExecuteAsync(null) : Task.CompletedTask;
 
-    /// <summary>Bestand › Exporteren › Auditfile (XAF): het gekozen boekjaar van het tabblad Boekhouding.</summary>
+    /// <summary>Bestand › Exporteren › Auditfile (XAF): het gekozen boekjaar van de pagina Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task ExporteerXafAsync() =>
-        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerXafCommand.ExecuteAsync(null) : Task.CompletedTask;
+        GeselecteerdePagina is BoekhoudingViewModel boekhouding ? boekhouding.ExporteerXafCommand.ExecuteAsync(null) : Task.CompletedTask;
 
-    /// <summary>Bestand › Afdrukken (Ctrl+P): het rapport of de grootboekkaart van het tabblad Boekhouding.</summary>
+    /// <summary>Bestand › Afdrukken (Ctrl+P): het rapport of de grootboekkaart van de pagina Boekhouding.</summary>
     [RelayCommand(CanExecute = nameof(KanAfdrukken))]
     private Task AfdrukkenAsync() =>
-        GeselecteerdTabblad is BoekhoudingViewModel boekhouding ? boekhouding.AfdrukkenCommand.ExecuteAsync(null) : Task.CompletedTask;
+        GeselecteerdePagina is BoekhoudingViewModel boekhouding ? boekhouding.AfdrukkenCommand.ExecuteAsync(null) : Task.CompletedTask;
 
-    private bool KanAfdrukken() => GeselecteerdTabblad is BoekhoudingViewModel;
+    private bool KanAfdrukken() => GeselecteerdePagina is BoekhoudingViewModel;
 
     [RelayCommand]
     private async Task HerstelBackupAsync()
@@ -398,33 +349,29 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     IDatabaseSessie? IStartwizardRegie.Sessie => _sessie;
 
-    IReadOnlyList<AdministratieViewModel> IStartwizardRegie.Administraties => Administraties;
-
     Task IStartwizardRegie.NieuweDatabaseAsync() => NieuweDatabaseCommand.ExecuteAsync(null);
 
     Task IStartwizardRegie.OpenDatabaseAsync() => OpenDatabaseCommand.ExecuteAsync(null);
 
-    Task IStartwizardRegie.RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze) =>
-        InBoekhoudingAsync(administratie, boekhouding => keuze switch
+    Task IStartwizardRegie.RichtBoekhoudingInAsync(Boekhoudingkeuze keuze) =>
+        InBoekhoudingAsync(boekhouding => keuze switch
         {
             Boekhoudingkeuze.Sjabloon => boekhouding.SjabloonInlezenCommand.ExecuteAsync(null),
             _ => boekhouding.LeegBeginnenCommand.ExecuteAsync(null),
         });
 
-    Task IStartwizardRegie.ImporteerBankafschriftAsync(AdministratieSoort administratie) =>
-        InBoekhoudingAsync(administratie, boekhouding => boekhouding.BankInlezenCommand.ExecuteAsync(null));
+    Task IStartwizardRegie.ImporteerBankafschriftAsync() => ImporteerBankafschriftAsync();
 
-    /// <summary>Opent Boekhouding voor een administratie, wacht tot die geladen is en voert dan een actie uit.</summary>
-    private async Task InBoekhoudingAsync(AdministratieSoort administratie, Func<BoekhoudingViewModel, Task> actie)
+    /// <summary>Opent Boekhouding, wacht tot die geladen is en voert dan een actie uit.</summary>
+    private async Task InBoekhoudingAsync(Func<BoekhoudingViewModel, Task> actie)
     {
-        var verzoek = new ModuleVerzoek(ModuleSoort.Boekhouding, administratie);
-        if (!KanModuleOpenen(verzoek))
+        if (!KanModuleOpenen(ModuleSoort.Boekhouding))
         {
             return;
         }
 
-        OpenModule(verzoek);
-        if (GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        OpenModule(ModuleSoort.Boekhouding);
+        if (GeselecteerdePagina is BoekhoudingViewModel boekhouding)
         {
             if (boekhouding.VernieuwCommand.ExecutionTask is { } laden)
             {
@@ -458,92 +405,54 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         BouwNavigatie();
     }
 
-    // ---- Tabbladen -------------------------------------------------------------------------
+    // ---- Pagina's --------------------------------------------------------------------------
 
     [RelayCommand(CanExecute = nameof(KanModuleOpenen))]
-    private void OpenModule(ModuleVerzoek verzoek)
+    private void OpenModule(ModuleSoort module)
     {
-        if (verzoek.Module == ModuleSoort.Overzicht)
+        if (module == ModuleSoort.Overzicht)
         {
-            GeselecteerdTabblad = _overzicht;
+            GeselecteerdePagina = _overzicht;
             _ = VernieuwStartkaartenAsync();
             return;
         }
 
-        // Een pagina van een andere administratie opent, dan wisselt de keuze bovenaan mee.
-        if (verzoek.Administratie is { } gevraagd && GekozenAdministratie?.Soort != gevraagd)
-        {
-            KiesAdministratieZonderWisselen(gevraagd);
-        }
-
-        var bestaand = Tabbladen.FirstOrDefault(t => t.Module.Soort == verzoek.Module && t.Administratie?.Soort == verzoek.Administratie);
+        var bestaand = Paginas.FirstOrDefault(p => p.Module.Soort == module);
         if (bestaand is not null)
         {
-            GeselecteerdTabblad = bestaand;
+            GeselecteerdePagina = bestaand;
             return;
         }
 
-        var definitie = ModuleCatalogus.Geef(verzoek.Module);
-        var administratie = Administraties.FirstOrDefault(a => a.Soort == verzoek.Administratie);
-        TabbladViewModel tab = verzoek.Module switch
+        PaginaViewModel pagina = module switch
         {
-            ModuleSoort.Instellingen => new InstellingenViewModel(_sessie!.Administraties, Administraties),
-            ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, administratie!, _boekhouding, _logger),
-            _ => new ModuleInOntwikkelingViewModel(definitie, administratie),
+            ModuleSoort.Instellingen => new InstellingenViewModel(_sessie!.Administraties, Administratie!),
+            ModuleSoort.Boekhouding => new BoekhoudingViewModel(_sessie!, _dialogen, _tijd, Administratie!, _boekhouding, _logger),
+            _ => throw new ArgumentOutOfRangeException(nameof(module), module, null),
         };
 
-        Tabbladen.Add(tab);
-        GeselecteerdTabblad = tab;
-        switch (tab)
+        Paginas.Add(pagina);
+        GeselecteerdePagina = pagina;
+        if (pagina is BoekhoudingViewModel boekhouding)
         {
-            case BoekhoudingViewModel boekhouding:
-                boekhouding.VernieuwCommand.Execute(null);
-                break;
-            case InstellingenViewModel instellingen:
-                break;
+            boekhouding.VernieuwCommand.Execute(null);
         }
     }
 
-    private bool KanModuleOpenen(ModuleVerzoek? verzoek)
-    {
-        if (verzoek is null)
-        {
-            return false;
-        }
+    /// <summary>Start kan altijd; de andere pagina's alleen met een geopende database.</summary>
+    private bool KanModuleOpenen(ModuleSoort module) => module == ModuleSoort.Overzicht || (IsDatabaseOpen && Administratie is not null);
 
-        if (verzoek.Module == ModuleSoort.Overzicht)
-        {
-            return true;
-        }
-
-        var definitie = ModuleCatalogus.Geef(verzoek.Module);
-        return IsDatabaseOpen
-            && definitie.PerAdministratie == verzoek.Administratie.HasValue
-            && (definitie.AlleenVoor is null || definitie.AlleenVoor == verzoek.Administratie)
-            && (verzoek.Administratie is null || Administraties.Any(a => a.Soort == verzoek.Administratie));
-    }
-
-    /// <summary>Ctrl+1 (Boekhouding). Financiële modules openen voor de gekozen administratie.</summary>
+    /// <summary>Ctrl+1 (Boekhouding).</summary>
     [RelayCommand]
     private void OpenModuleViaSneltoets(string? nummer)
     {
-        if (!int.TryParse(nummer, CultureInfo.InvariantCulture, out var n)
-            || ModuleCatalogus.Alle.FirstOrDefault(m => m.Sneltoetsnummer == n) is not { } definitie)
+        if (int.TryParse(nummer, CultureInfo.InvariantCulture, out var n)
+            && ModuleCatalogus.Alle.FirstOrDefault(m => m.Sneltoetsnummer == n) is { } definitie
+            && KanModuleOpenen(definitie.Soort))
         {
-            return;
-        }
-
-        var verzoek = new ModuleVerzoek(
-            definitie.Soort,
-            definitie.PerAdministratie
-                ? definitie.AlleenVoor ?? ActieveAdministratie?.Soort ?? AdministratieSoort.Vereniging
-                : null);
-        if (KanModuleOpenen(verzoek))
-        {
-            OpenModule(verzoek);
+            OpenModule(definitie.Soort);
         }
     }
-
 
     /// <summary>Ctrl+Tab: de volgende pagina; een gesloten modulekop opent de standaardpagina van die module.</summary>
     [RelayCommand]
@@ -555,7 +464,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
 
     private void SelecteerRelatief(int stap)
     {
-        var actieveModule = GeselecteerdTabblad?.Module.Soort;
+        var actieveModule = GeselecteerdePagina?.Module.Soort;
         var paginas = Navigatie
             .Where(n => !n.IsMeer && (!n.HeeftOnderdelen || n.Module != actieveModule))
             .ToList();
@@ -573,29 +482,29 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         GeselecteerdeNavigatie = paginas[((index + stap) % paginas.Count + paginas.Count) % paginas.Count];
     }
 
-    partial void OnGeselecteerdTabbladChanged(TabbladViewModel? oldValue, TabbladViewModel? newValue)
+    partial void OnGeselecteerdePaginaChanged(PaginaViewModel? oldValue, PaginaViewModel? newValue)
     {
         if (oldValue is not null)
         {
-            oldValue.PropertyChanged -= ActiefTabbladGewijzigd;
+            oldValue.PropertyChanged -= ActievePaginaGewijzigd;
         }
 
         if (newValue is not null)
         {
-            newValue.PropertyChanged += ActiefTabbladGewijzigd;
+            newValue.PropertyChanged += ActievePaginaGewijzigd;
         }
 
         BouwNavigatie();
     }
 
-    private void ActiefTabbladGewijzigd(object? sender, PropertyChangedEventArgs e)
+    private void ActievePaginaGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
         {
-            case nameof(TabbladViewModel.KanOpslaan):
+            case nameof(PaginaViewModel.KanOpslaan):
                 OpslaanCommand.NotifyCanExecuteChanged();
                 break;
-            case nameof(TabbladViewModel.Onderdeel):
+            case nameof(PaginaViewModel.Onderdeel):
                 // Een onderdeel onder Meer… moet zichtbaar worden; anders alleen markeren.
                 BouwNavigatie();
                 break;
@@ -682,26 +591,20 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _sessie = sessie;
         _uiContext = SynchronizationContext.Current;
         sessie.Gewijzigd += SessieGewijzigd;
-        foreach (var administratie in await sessie.Administraties.HaalAlleAsync())
-        {
-            var vm = new AdministratieViewModel(administratie);
-            vm.PropertyChanged += AdministratieGewijzigd;
-            Administraties.Add(vm);
-        }
+        Administratie = new AdministratieViewModel(await sessie.Administraties.HaalAsync());
+        Administratie.PropertyChanged += AdministratieGewijzigd;
 
         var laatste = herstelPagina ? _instellingen.LaatstePagina : null;
         _instellingen = _instellingen with { LaatsteDatabase = sessie.Pad, LaatstePagina = laatste };
         _opslag.Bewaar(_instellingen);
 
-        // Besluit 26: de ene administratie (een oudere laatste keuze wordt genegeerd).
-        KiesAdministratieZonderWisselen(laatste?.Administratie ?? AdministratieSoort.Vereniging);
         DatabaseNaam = Path.GetFileName(sessie.Pad);
         BouwModuleMenu();
-        GeselecteerdTabblad = _overzicht;
-        if (laatste is { Module: not ModuleSoort.Overzicht } && KanModuleOpenen(new ModuleVerzoek(laatste.Module, laatste.Administratie)))
+        GeselecteerdePagina = _overzicht;
+        if (laatste is { Module: not ModuleSoort.Overzicht } && KanModuleOpenen(laatste.Module))
         {
-            OpenModule(new ModuleVerzoek(laatste.Module, laatste.Administratie));
-            if (laatste.Onderdeel is { } onderdeel && GeselecteerdTabblad is { } pagina)
+            OpenModule(laatste.Module);
+            if (laatste.Onderdeel is { } onderdeel && GeselecteerdePagina is { } pagina)
             {
                 pagina.Onderdeel = onderdeel;
             }
@@ -731,37 +634,36 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             return true;
         }
 
-        foreach (var tab in Tabbladen.ToList())
+        foreach (var pagina in Paginas.ToList())
         {
-            if (!await MagTabbladSluitenAsync(tab))
+            if (!await MagPaginaSluitenAsync(pagina))
             {
-                GeselecteerdTabblad = tab;
+                GeselecteerdePagina = pagina;
                 return false;
             }
         }
 
         _instellingen = _instellingen with
         {
-            LaatstePagina = GeselecteerdTabblad is { Module.Soort: not ModuleSoort.Overzicht } pagina
-                ? new LaatstePagina(pagina.Module.Soort, pagina.Administratie?.Soort, pagina.Onderdeel)
+            LaatstePagina = GeselecteerdePagina is { Module.Soort: not ModuleSoort.Overzicht } open
+                ? new LaatstePagina(open.Module.Soort, open.Onderdeel)
                 : null,
         };
         _opslag.Bewaar(_instellingen);
 
-        foreach (var tab in Tabbladen.Where(t => t != _overzicht).ToList())
+        foreach (var pagina in Paginas.Where(p => p != _overzicht).ToList())
         {
-            Tabbladen.Remove(tab);
-            tab.Opruimen();
+            Paginas.Remove(pagina);
+            pagina.Opruimen();
         }
 
-        GeselecteerdTabblad = _overzicht;
-        foreach (var administratie in Administraties)
+        GeselecteerdePagina = _overzicht;
+        if (Administratie is not null)
         {
-            administratie.PropertyChanged -= AdministratieGewijzigd;
+            Administratie.PropertyChanged -= AdministratieGewijzigd;
+            Administratie = null;
         }
 
-        Administraties.Clear();
-        KiesAdministratieZonderWisselen(null);
         _overzicht.Kaarten.Clear();
         _sessie.Gewijzigd -= SessieGewijzigd;
         await _sessie.DisposeAsync();
@@ -773,56 +675,32 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         return true;
     }
 
-    private async Task<bool> MagTabbladSluitenAsync(TabbladViewModel tab)
+    private async Task<bool> MagPaginaSluitenAsync(PaginaViewModel pagina)
     {
-        if (!tab.HeeftOnopgeslagenWijzigingen)
+        if (!pagina.HeeftOnopgeslagenWijzigingen)
         {
             return true;
         }
 
-        GeselecteerdTabblad = tab;
-        return _dialogen.VraagOmOpslaan(tab.Titel) switch
+        GeselecteerdePagina = pagina;
+        return _dialogen.VraagOmOpslaan(pagina.Titel) switch
         {
-            OpslaanKeuze.Opslaan => await tab.BewaarAsync(),
+            OpslaanKeuze.Opslaan => await pagina.BewaarAsync(),
             OpslaanKeuze.NietOpslaan => true,
             _ => false,
         };
     }
 
-    private void AdministratieGewijzigd(object? sender, PropertyChangedEventArgs e)
-    {
-        if (ReferenceEquals(sender, ActieveAdministratie))
-        {
-            OnPropertyChanged(nameof(ActieveAdministratieNaam));
-            OnPropertyChanged(nameof(Venstertitel));
-        }
-    }
+    private void AdministratieGewijzigd(object? sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(Venstertitel));
 
     private void BouwModuleMenu()
     {
         ModuleMenu.Clear();
         foreach (var module in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
         {
-            // Financiën volgt de weergave; de overige modules houden hun naam.
-            var definitie = module.Soort == ModuleSoort.Boekhouding ? module with { Titel = _boekhouding.Woorden["Boekhouding"] } : module;
-            var sneltoets = $"Ctrl+{definitie.Sneltoetsnummer}";
-            if (definitie.AlleenVoor is { } vast)
-            {
-                ModuleMenu.Add(new ModuleMenuItem(
-                    definitie.Titel, definitie.Pictogram, sneltoets, OpenModuleCommand, new ModuleVerzoek(definitie.Soort, vast), []));
-            }
-            else if (definitie.PerAdministratie && Administraties.Count > 0)
-            {
-                var kinderen = Administraties
-                    .Select(a => ModuleMenuItem.VoorAdministratie(a, OpenModuleCommand, new ModuleVerzoek(definitie.Soort, a.Soort)))
-                    .ToList();
-                ModuleMenu.Add(new ModuleMenuItem(definitie.Titel, definitie.Pictogram, sneltoets, null, null, kinderen));
-            }
-            else
-            {
-                ModuleMenu.Add(new ModuleMenuItem(
-                    definitie.Titel, definitie.Pictogram, sneltoets, OpenModuleCommand, new ModuleVerzoek(definitie.Soort, null), []));
-            }
+            // Boekhouding volgt de weergave; de overige modules houden hun naam.
+            var titel = module.Soort == ModuleSoort.Boekhouding ? _boekhouding.Woorden["Boekhouding"] : module.Titel;
+            ModuleMenu.Add(new ModuleMenuItem(titel, module.Pictogram, $"Ctrl+{module.Sneltoetsnummer}", OpenModuleCommand, module.Soort));
         }
     }
 }

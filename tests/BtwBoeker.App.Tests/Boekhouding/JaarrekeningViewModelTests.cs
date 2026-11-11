@@ -51,7 +51,7 @@ public sealed class JaarrekeningViewModelTests : IDisposable
 
         var editor = Assert.Single(_omgeving.Dialogen.Indelingen);
         Assert.Equal(JaarrekeningRapport.Balans, editor.Rapport);
-        Assert.Single(_omgeving.Opslag.Van(AdministratieSoort.Vereniging).OfType<Jaarrekeningindeling>());
+        Assert.Single(_omgeving.Opslag.Van(AdministratieSoort.Standaard).OfType<Jaarrekeningindeling>());
         Assert.StartsWith("✓", vm.Melding, StringComparison.Ordinal);
         Assert.Contains("1000, 1100", vm.JaarrekeningMelding, StringComparison.Ordinal);
         Assert.Contains(vm.Rapport!.Rijen, r => (string)r.Cellen[0]! == "⚠ " + Jaarrekeningrekenaar.NietIngedeeldTekst);
@@ -66,27 +66,27 @@ public sealed class JaarrekeningViewModelTests : IDisposable
         await vm.IndelingBewerkenCommand.ExecuteAsync(null);
 
         Assert.Single(_omgeving.Dialogen.Indelingen);
-        Assert.Empty(_omgeving.Opslag.Van(AdministratieSoort.Vereniging).OfType<Jaarrekeningindeling>());
+        Assert.Empty(_omgeving.Opslag.Van(AdministratieSoort.Standaard).OfType<Jaarrekeningindeling>());
     }
 
     [Fact]
     public async Task Editor_begint_met_een_regel_per_rubriek_en_houdt_rubrieken_per_deel_uniek()
     {
         var vm = await _omgeving.OpenIngerichtAsync();
-        var stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         var editor = new JaarrekeningIndelingViewModel(new JaarrekeningDienst(_omgeving.Sessie), stand, JaarrekeningRapport.BatenEnLasten);
 
-        Assert.Equal(["Terreinkosten", "Contributie"], editor.Regels.Select(r => r.Tekst).Order(StringComparer.Ordinal).Reverse());
+        Assert.Equal(["Verhuur", "Parkkosten"], editor.Regels.Select(r => r.Tekst).Order(StringComparer.Ordinal).Reverse());
         Assert.Equal([JaarrekeningAfdeling.Baten, JaarrekeningAfdeling.Lasten], editor.Afdelingen.Select(a => a.Waarde));
 
         // Een nieuwe regel in hetzelfde deel: de rubriek van de bestaande regel is daar grijs.
-        var contributieRegel = editor.Regels.Single(r => r.Tekst == "Contributie");
-        editor.Geselecteerd = contributieRegel;
+        var verhuurRegel = editor.Regels.Single(r => r.Tekst == "Verhuur");
+        editor.Geselecteerd = verhuurRegel;
         editor.NieuweRegelCommand.Execute(null);
         var nieuw = editor.Geselecteerd!;
-        Assert.Equal(contributieRegel.Afdeling, nieuw.Afdeling);
-        Assert.False(nieuw.Rubrieken.Single(r => r.Naam == "Contributie").KanKiezen);
-        Assert.True(nieuw.Rubrieken.Single(r => r.Naam == "Terreinkosten").KanKiezen);
+        Assert.Equal(verhuurRegel.Afdeling, nieuw.Afdeling);
+        Assert.False(nieuw.Rubrieken.Single(r => r.Naam == "Verhuur").KanKiezen);
+        Assert.True(nieuw.Rubrieken.Single(r => r.Naam == "Parkkosten").KanKiezen);
 
         // Een lege regel wordt niet opgeslagen; de melding zegt wat er mis is.
         await editor.OpslaanCommand.ExecuteAsync(null);
@@ -94,10 +94,10 @@ public sealed class JaarrekeningViewModelTests : IDisposable
         Assert.StartsWith("✕", editor.Fout, StringComparison.Ordinal);
         Assert.Contains("kies minstens één rubriek", editor.Fout, StringComparison.Ordinal);
 
-        nieuw.Rubrieken.Single(r => r.Naam == "Terreinkosten").IsGekozen = true;
-        Assert.True(nieuw.Rubrieken.Single(r => r.Naam == "Terreinkosten").IsGekozen);
+        nieuw.Rubrieken.Single(r => r.Naam == "Parkkosten").IsGekozen = true;
+        Assert.True(nieuw.Rubrieken.Single(r => r.Naam == "Parkkosten").IsGekozen);
         nieuw.Soort = IndelingsregelSoort.Kop;
-        nieuw.Rubrieken.Single(r => r.Naam == "Terreinkosten").IsGekozen = false;
+        nieuw.Rubrieken.Single(r => r.Naam == "Parkkosten").IsGekozen = false;
         nieuw.Tekst = "Opbrengsten";
         editor.OmhoogCommand.Execute(null);
         Assert.Equal(0, editor.Regels.IndexOf(nieuw));
@@ -106,7 +106,7 @@ public sealed class JaarrekeningViewModelTests : IDisposable
         await editor.OpslaanCommand.ExecuteAsync(null);
         Assert.True(editor.IsOpgeslagen);
         Assert.Null(editor.Fout);
-        stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+        stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         Assert.Equal("Opbrengsten", stand.Jaarrekeningindelingen.Single().Regels[0].Tekst);
         Assert.NotNull(vm);
     }
@@ -115,7 +115,7 @@ public sealed class JaarrekeningViewModelTests : IDisposable
     public async Task Regel_naar_een_ander_deel_sluit_daar_achteraan_aan()
     {
         await _omgeving.OpenIngerichtAsync();
-        var stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+        var stand = await _omgeving.Sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         var editor = new JaarrekeningIndelingViewModel(new JaarrekeningDienst(_omgeving.Sessie), stand, JaarrekeningRapport.Balans);
         var eerste = editor.Regels[0];
         Assert.Equal(JaarrekeningAfdeling.Activa, eerste.Afdeling);

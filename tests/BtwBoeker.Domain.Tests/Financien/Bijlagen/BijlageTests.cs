@@ -8,7 +8,7 @@ namespace BtwBoeker.Domain.Tests.Financien.Bijlagen;
 /// <summary>Bijlagen bij journaalposten.</summary>
 public sealed class BijlageTests
 {
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private static readonly DateTime Nu = new(2026, 10, 29, 9, 0, 0, DateTimeKind.Utc);
 
     internal static byte[] Pdf(string tekst = "bon") => Encoding.ASCII.GetBytes("%PDF-1.7\n" + tekst);
@@ -20,17 +20,17 @@ public sealed class BijlageTests
     [Fact]
     public void Het_soort_wordt_herkend_aan_de_inhoud_en_niet_aan_de_extensie()
     {
-        Assert.Equal(BijlageSoort.Pdf, new Bijlage(Ver, "bon.jpg", Pdf(), Nu).Soort);
-        Assert.Equal(BijlageSoort.Jpg, new Bijlage(Ver, "foto.pdf", Jpg(), Nu).Soort);
-        Assert.Equal(BijlageSoort.Png, new Bijlage(Ver, "scherm.png", Png(), Nu).Soort);
+        Assert.Equal(BijlageSoort.Pdf, new Bijlage(Adm, "bon.jpg", Pdf(), Nu).Soort);
+        Assert.Equal(BijlageSoort.Jpg, new Bijlage(Adm, "foto.pdf", Jpg(), Nu).Soort);
+        Assert.Equal(BijlageSoort.Png, new Bijlage(Adm, "scherm.png", Png(), Nu).Soort);
     }
 
     [Fact]
     public void Andere_bestanden_worden_geweigerd()
     {
-        var fout = Assert.Throws<ArgumentException>(() => new Bijlage(Ver, "virus.exe", [0x4D, 0x5A, 0x90, 0x00], Nu));
+        var fout = Assert.Throws<ArgumentException>(() => new Bijlage(Adm, "virus.exe", [0x4D, 0x5A, 0x90, 0x00], Nu));
         Assert.Contains("PDF, JPG of PNG", fout.Message, StringComparison.Ordinal);
-        Assert.Throws<ArgumentException>(() => new Bijlage(Ver, "leeg.pdf", [], Nu));
+        Assert.Throws<ArgumentException>(() => new Bijlage(Adm, "leeg.pdf", [], Nu));
     }
 
     [Fact]
@@ -38,20 +38,20 @@ public sealed class BijlageTests
     {
         var precies = new byte[Bijlage.MaximaleGrootte];
         Pdf().CopyTo(precies, 0);
-        Assert.Equal(Bijlage.MaximaleGrootte, new Bijlage(Ver, "groot.pdf", precies, Nu).Grootte);
+        Assert.Equal(Bijlage.MaximaleGrootte, new Bijlage(Adm, "groot.pdf", precies, Nu).Grootte);
 
         var teGroot = new byte[Bijlage.MaximaleGrootte + 1];
         Pdf().CopyTo(teGroot, 0);
-        var fout = Assert.Throws<ArgumentException>(() => new Bijlage(Ver, "te-groot.pdf", teGroot, Nu));
+        var fout = Assert.Throws<ArgumentException>(() => new Bijlage(Adm, "te-groot.pdf", teGroot, Nu));
         Assert.Contains("10 MB", fout.Message, StringComparison.Ordinal);
     }
 
     [Fact]
     public void De_bestandsnaam_is_zonder_map_en_de_controlecode_is_de_sha256_van_de_inhoud()
     {
-        var a = new Bijlage(Ver, @"C:\Users\x\Downloads\bon hema.pdf", Pdf("a"), Nu);
-        var b = new Bijlage(Ver, "andere-naam.pdf", Pdf("a"), Nu);
-        var c = new Bijlage(Ver, "bon.pdf", Pdf("c"), Nu);
+        var a = new Bijlage(Adm, @"C:\Users\x\Downloads\bon hema.pdf", Pdf("a"), Nu);
+        var b = new Bijlage(Adm, "andere-naam.pdf", Pdf("a"), Nu);
+        var c = new Bijlage(Adm, "bon.pdf", Pdf("c"), Nu);
 
         Assert.Equal("bon hema.pdf", a.Bestandsnaam);
         Assert.Equal(64, a.Controlecode.Length);
@@ -64,7 +64,7 @@ public sealed class BijlageTests
     [Fact]
     public void Een_nieuwe_bijlage_staat_in_het_postvak_en_kan_worden_gekoppeld_en_ontkoppeld()
     {
-        var bijlage = new Bijlage(Ver, "bon.pdf", Pdf(), Nu);
+        var bijlage = new Bijlage(Adm, "bon.pdf", Pdf(), Nu);
         Assert.True(bijlage.IsInPostvak);
 
         var post = Guid.NewGuid();
@@ -80,7 +80,7 @@ public sealed class BijlageTests
     [Fact]
     public void Datum_en_bedrag_kunnen_herkend_of_ingevuld_worden()
     {
-        var bijlage = new Bijlage(Ver, "bon.pdf", Pdf(), Nu);
+        var bijlage = new Bijlage(Adm, "bon.pdf", Pdf(), Nu);
         Assert.Null(bijlage.Datum);
         Assert.Null(bijlage.Bedrag);
 
@@ -97,7 +97,7 @@ public sealed class BijlageTests
     public void De_inhoud_wordt_apart_bewaard()
     {
         var gegevens = Pdf();
-        var bijlage = new Bijlage(Ver, "bon.pdf", gegevens, Nu);
+        var bijlage = new Bijlage(Adm, "bon.pdf", gegevens, Nu);
         var inhoud = new BijlageInhoud(bijlage.Id, gegevens);
 
         Assert.Equal(bijlage.Id, inhoud.BijlageId);

@@ -155,7 +155,7 @@ public sealed class BoekhoudingViewModelTests : IDisposable
         nieuw.Nummertekst = "4116";
         nieuw.Naam = "Water";
         nieuw.Soort = RekeningSoort.Resultaat;
-        nieuw.GekozenRubriek = vm.Rubrieken.Single(r => r.Naam == "Terreinkosten");
+        nieuw.GekozenRubriek = vm.Rubrieken.Single(r => r.Naam == "Parkkosten");
         Assert.True(await vm.BewaarAsync());
         Assert.Contains(vm.Rekeningen, r => r.Nummertekst == "4116" && !r.IsNieuw);
 
@@ -232,12 +232,12 @@ public sealed class BoekhoudingViewModelTests : IDisposable
     {
         // Besluit 26: het model blijft per administratie, ook al toont de app er één.
         await _omgeving.OpenIngerichtAsync();
-        var ander = new ViewModels.AdministratieViewModel(new Administratie((AdministratieSoort)2, "Tweede huisje", Kleur.Parse("#1565C0")));
+        var ander = new ViewModels.AdministratieViewModel(new Administratie((AdministratieSoort)2, "Tweede huisje"));
 
         var vm = _omgeving.Maak(ander);
         await vm.VernieuwCommand.ExecuteAsync(null);
 
         Assert.False(vm.IsIngericht);
-        Assert.Equal("Boekhouding · Tweede huisje", vm.Titel);
+        Assert.Equal("Tweede huisje", vm.Administratie.Naam);
     }
 }

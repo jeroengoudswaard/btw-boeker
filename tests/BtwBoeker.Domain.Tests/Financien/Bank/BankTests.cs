@@ -7,23 +7,23 @@ namespace BtwBoeker.Domain.Tests.Financien.Bank;
 
 public class BankTests
 {
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
-    private static readonly Grootboekrekening Bank = new(Ver, 1100, "Rabobank", RekeningSoort.Balans, null);
-    private static readonly Grootboekrekening Energie = new(Ver, 4115, "Energie", RekeningSoort.Resultaat, null);
-    private static readonly Dagboek Rabo = new(Ver, DagboekSoort.Bank, "RABO", "Rabobank betaalrekening", Bank, Iban.Maak("NL91ABNA0417164300"));
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
+    private static readonly Grootboekrekening Bank = new(Adm, 1100, "Rabobank", RekeningSoort.Balans, null);
+    private static readonly Grootboekrekening Energie = new(Adm, 4115, "Energie", RekeningSoort.Resultaat, null);
+    private static readonly Dagboek Rabo = new(Adm, DagboekSoort.Bank, "RABO", "Rabobank betaalrekening", Bank, Iban.Maak("NL91ABNA0417164300"));
     private static readonly BankTransactiecode Overboeking = new("PMNT", "ICDT", "ESCT", "520", "RABOBANK");
     private static readonly BankTransactiecode Rente = new(null, null, null, "1025", "RABOBANK");
 
     private static Bankmutatie Mutatie(long centen = 4500, bool bij = false, string? tegenIban = "NL20INGB0001234567", string? naam = "Energie BV",
         string? omschrijving = "Factuur 2026-09", BankTransactiecode? code = null, int? batch = null) =>
-        new(Ver, Rabo, "sleutel-1", new DateOnly(2026, 9, 14), new Bedrag(centen), bij, code ?? Overboeking,
+        new(Adm, Rabo, "sleutel-1", new DateOnly(2026, 9, 14), new Bedrag(centen), bij, code ?? Overboeking,
             tegenIban, naam, omschrijving, "E2E-1", null, batch);
 
     [Fact]
     public void Bankdagboek_heeft_iban_alleen_voor_soort_bank()
     {
         Assert.Equal("NL91ABNA0417164300", Rabo.Iban?.Waarde);
-        Assert.Throws<ArgumentException>(() => new Dagboek(Ver, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null, Iban.Maak("NL91ABNA0417164300")));
+        Assert.Throws<ArgumentException>(() => new Dagboek(Adm, DagboekSoort.Memoriaal, "MEM", "Memoriaal", null, Iban.Maak("NL91ABNA0417164300")));
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class BankTests
     [Fact]
     public void Boekingsregel_vereist_minstens_een_voorwaarde()
     {
-        Assert.Throws<ArgumentException>(() => new Boekingsregel(Ver, "Leeg", Energie, new BoekingsregelVoorwaarden()));
+        Assert.Throws<ArgumentException>(() => new Boekingsregel(Adm, "Leeg", Energie, new BoekingsregelVoorwaarden()));
     }
 
     [Theory]
@@ -112,7 +112,7 @@ public class BankTests
     public void Boekingsregel_past_alleen_als_alle_voorwaarden_kloppen(
         string? iban, string? naam, string? omschrijving, Richting richting, long? van, long? tot, string? code, bool verwacht)
     {
-        var regel = new Boekingsregel(Ver, "Energie", Energie, new BoekingsregelVoorwaarden(
+        var regel = new Boekingsregel(Adm, "Energie", Energie, new BoekingsregelVoorwaarden(
             iban, naam, omschrijving, richting, van is null ? null : new Bedrag(van.Value), tot is null ? null : new Bedrag(tot.Value), code));
 
         Assert.Equal(verwacht, regel.Past(Mutatie()));
@@ -121,7 +121,7 @@ public class BankTests
     [Fact]
     public void Inactieve_regel_past_nooit()
     {
-        var regel = new Boekingsregel(Ver, "Energie", Energie, new BoekingsregelVoorwaarden(NaamBevat: "Energie"));
+        var regel = new Boekingsregel(Adm, "Energie", Energie, new BoekingsregelVoorwaarden(NaamBevat: "Energie"));
         regel.Deactiveer();
 
         Assert.False(regel.Past(Mutatie()));

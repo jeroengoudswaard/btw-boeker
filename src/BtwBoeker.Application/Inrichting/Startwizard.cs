@@ -61,6 +61,6 @@ public sealed record Inrichtingsstatus(bool DatabaseOpen, bool BoekhoudingIngeri
             return Leeg;
         }
 
-        return Bepaal(await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging, annulering).ConfigureAwait(false));
+        return Bepaal(await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard, annulering).ConfigureAwait(false));
     }
 }

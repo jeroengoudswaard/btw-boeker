@@ -12,7 +12,7 @@ public class GrootboekTests
     {
         _data.Geboekt(new DateOnly(2026, 1, 1), "Openingsbalans", PostSoort.Openingsbalans,
             (_data.Kas, 61000, 0), (_data.Bank, 1342345, 0), (_data.Reserve, 0, 1403345));
-        _data.Geboekt(new DateOnly(2026, 3, 3), "Contributie maart", (_data.Bank, 109900, 0), (_data.Welpen, 0, 109900));
+        _data.Geboekt(new DateOnly(2026, 3, 3), "Verhuur maart", (_data.Bank, 109900, 0), (_data.Huur, 0, 109900));
         _data.Geboekt(new DateOnly(2026, 4, 1), "Energie", (_data.Energie, 30000, 0), (_data.Bank, 0, 30000));
     }
 
@@ -20,7 +20,7 @@ public class GrootboekTests
     public void Saldo_per_rekening_alleen_geboekte_posten()
     {
         Basis();
-        var concept = new Journaalpost(BoekhoudingTestdata.Ver, _data.Memoriaal, new DateOnly(2026, 5, 1), "concept");
+        var concept = new Journaalpost(BoekhoudingTestdata.Adm, _data.Memoriaal, new DateOnly(2026, 5, 1), "concept");
         concept.Wijzig(_data.Memoriaal, concept.Datum, "concept",
             [new RegelInvoer(_data.Energie, null, new Bedrag(999), Bedrag.Nul), new RegelInvoer(_data.Bank, null, Bedrag.Nul, new Bedrag(999))]);
         _data.Posten.Add(concept);
@@ -53,8 +53,8 @@ public class GrootboekTests
         Assert.Equal(new Bedrag(109900), wenv.TotaalBaten);
         Assert.Equal(new Bedrag(30000), wenv.TotaalLasten);
         Assert.Equal(79900, wenv.Resultaat);
-        Assert.Equal("Contributie", Assert.Single(wenv.Baten).Rubriek);
-        Assert.Equal("Terreinkosten", Assert.Single(wenv.Lasten).Rubriek);
+        Assert.Equal("Verhuur", Assert.Single(wenv.Baten).Rubriek);
+        Assert.Equal("Parkkosten", Assert.Single(wenv.Lasten).Rubriek);
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class GrootboekTests
     {
         Basis();
         _data.Geboekt(new DateOnly(2026, 12, 31), "Afsluiting", PostSoort.Afsluiting,
-            (_data.Welpen, 109900, 0), (_data.Energie, 0, 30000), (_data.Reserve, 0, 79900));
+            (_data.Huur, 109900, 0), (_data.Energie, 0, 30000), (_data.Reserve, 0, 79900));
 
         var wenv = Grootboek.WinstEnVerlies(_data.Stand, 2026);
         var balans = Grootboek.Balans(_data.Stand, 2026);
@@ -103,7 +103,7 @@ public class GrootboekTests
     {
         Basis();
 
-        var tabel = Rapporten.Balans(Grootboek.Balans(_data.Stand, 2026), "Vereniging");
+        var tabel = Rapporten.Balans(Grootboek.Balans(_data.Stand, 2026), "Mijn administratie");
 
         Assert.Equal("Balans per 31-12-2026", tabel.Titel);
         Assert.Contains(tabel.Rijen, r => r.IsKop && Equals(r.Cellen[0], "Activa"));

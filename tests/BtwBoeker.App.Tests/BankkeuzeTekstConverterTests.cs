@@ -10,7 +10,7 @@ public sealed class BankkeuzeTekstConverterTests
     private static object Tekst(object? dagboek, object? aantallen) =>
         new BankkeuzeTekstConverter().Convert([dagboek, aantallen], typeof(string), null, CultureInfo.InvariantCulture);
 
-    private static Dagboek Betaal() => new(AdministratieSoort.Vereniging, DagboekSoort.Memoriaal, "RABO", "Betaalrekening", null);
+    private static Dagboek Betaal() => new(AdministratieSoort.Standaard, DagboekSoort.Memoriaal, "RABO", "Betaalrekening", null);
 
     [Fact]
     public void Met_aantal_tussen_haakjes_achter_de_naam()

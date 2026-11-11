@@ -1,5 +1,5 @@
 <!-- Het visuele ontwerp Fluent Mica. Alle kleuren komen uit het Fluent-thema van .NET (DynamicResource), zodat
-     licht en donker vanzelf werken; de accentkleur zet ShellWindow per gekozen administratie (AccentFillColor*Brush). -->
+     licht en donker vanzelf werken; de accentkleur is die van Windows (AccentFillColor*Brush). -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 

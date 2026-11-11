@@ -22,19 +22,19 @@ public sealed class MomentopnameTests : IDisposable
         await using var sessie = await Testdatabase.OpenAsync(pad);
         var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
 
-        var eerste = await dienst.LaadAsync(AdministratieSoort.Vereniging);
-        var tweede = await dienst.LaadAsync(AdministratieSoort.Vereniging);
+        var eerste = await dienst.LaadAsync(AdministratieSoort.Standaard);
+        var tweede = await dienst.LaadAsync(AdministratieSoort.Standaard);
         Assert.Same(eerste, tweede);
         Assert.NotSame(eerste, await dienst.LaadAsync(((AdministratieSoort)2)));
 
         var memoriaal = eerste.Dagboeken.Single(d => d.Code == "MEM");
-        await dienst.BoekAsync(AdministratieSoort.Vereniging, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Na de momentopname",
+        await dienst.BoekAsync(AdministratieSoort.Standaard, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Na de momentopname",
         [
             new RegelInvoerId(eerste.Rekeningen.Single(r => r.Nummer == 4210).Id, null, new Bedrag(500), Bedrag.Nul),
             new RegelInvoerId(eerste.Rekeningen.Single(r => r.Nummer == 1100).Id, null, Bedrag.Nul, new Bedrag(500)),
         ]));
 
-        var derde = await dienst.LaadAsync(AdministratieSoort.Vereniging);
+        var derde = await dienst.LaadAsync(AdministratieSoort.Standaard);
         Assert.NotSame(eerste, derde);
         Assert.Contains(derde.Posten, p => p.Omschrijving == "Na de momentopname");
         Assert.Equal(eerste.Posten.Count + 1, derde.Posten.Count);
@@ -47,12 +47,12 @@ public sealed class MomentopnameTests : IDisposable
         await Testdatabase.MaakAsync(pad, 5);
         await using var sessie = await Testdatabase.OpenAsync(pad);
 
-        var eerste = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
-        var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);
-        vereniging.WijzigNaam("Vakantiehuis Proef");
-        await sessie.Administraties.BewaarAsync(vereniging);
+        var eerste = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
+        var administratie = await sessie.Administraties.HaalAsync();
+        administratie.WijzigNaam("Vakantiehuis Proef");
+        await sessie.Administraties.BewaarAsync(administratie);
 
-        Assert.NotSame(eerste, await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging));
+        Assert.NotSame(eerste, await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard));
     }
 
     [Fact]
@@ -69,20 +69,20 @@ public sealed class MomentopnameTests : IDisposable
             Interlocked.Increment(ref aantal);
         };
 
-        var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
-        await sessie.Administraties.HaalAlleAsync();
+        var stand = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
+        await sessie.Administraties.HaalAsync();
         Assert.Equal(0, Volatile.Read(ref aantal));
 
-        var vereniging = (await sessie.Administraties.HaalAlleAsync()).Single(a => a.Soort == AdministratieSoort.Vereniging);
-        vereniging.WijzigNaam("Vakantiehuis Proef");
-        await sessie.Administraties.BewaarAsync(vereniging);
+        var administratie = await sessie.Administraties.HaalAsync();
+        administratie.WijzigNaam("Vakantiehuis Proef");
+        await sessie.Administraties.BewaarAsync(administratie);
         Assert.True(Volatile.Read(ref aantal) > 0);
         Assert.Same(sessie, afzender); // de shell herkent zo zijn eigen sessie
 
         Volatile.Write(ref aantal, 0);
         var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
         var memoriaal = stand.Dagboeken.Single(d => d.Code == "MEM");
-        await dienst.BoekAsync(AdministratieSoort.Vereniging, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Seintje",
+        await dienst.BoekAsync(AdministratieSoort.Standaard, new PostInvoer(null, memoriaal.Id, new DateOnly(2026, 11, 3), "Seintje",
         [
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4210).Id, null, new Bedrag(500), Bedrag.Nul),
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, null, Bedrag.Nul, new Bedrag(500)),
@@ -98,10 +98,10 @@ public sealed class MomentopnameTests : IDisposable
         Application.Boekhouding.BoekhoudingStand eerste;
         await using (var sessie = await Testdatabase.OpenAsync(pad))
         {
-            eerste = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Vereniging);
+            eerste = await sessie.Boekhouding.LaadAsync(AdministratieSoort.Standaard);
         }
 
         await using var opnieuw = await Testdatabase.OpenAsync(pad);
-        Assert.NotSame(eerste, await opnieuw.Boekhouding.LaadAsync(AdministratieSoort.Vereniging));
+        Assert.NotSame(eerste, await opnieuw.Boekhouding.LaadAsync(AdministratieSoort.Standaard));
     }
 }

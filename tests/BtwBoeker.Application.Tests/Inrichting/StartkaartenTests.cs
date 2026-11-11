@@ -32,11 +32,11 @@ public sealed class StartkaartenTests
     {
         var status = AllesKlaar with { BankGekoppeld = false };
 
-        var kaart = Assert.Single(Startkaarten.Bepaal(status, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Vereniging), Vandaag));
+        var kaart = Assert.Single(Startkaarten.Bepaal(status, Startwizardvoortgang.Nieuw, Leeg(AdministratieSoort.Standaard), Vandaag));
 
         Assert.Equal(Startkaartsoort.Inrichting, kaart.Soort);
         Assert.Equal("2 van 5 stappen klaar", kaart.Tekst);
-        Assert.Empty(Startkaarten.Bepaal(status, new Startwizardvoortgang(null, IsAfgerond: true), Leeg(AdministratieSoort.Vereniging), Vandaag));
+        Assert.Empty(Startkaarten.Bepaal(status, new Startwizardvoortgang(null, IsAfgerond: true), Leeg(AdministratieSoort.Standaard), Vandaag));
     }
 
     [Fact]
@@ -44,11 +44,11 @@ public sealed class StartkaartenTests
     {
         var data = new BoekhoudingTestdata();
         var bank = data.Bankdagboek("BNK", "NL91ABNA0417164300");
-        data.Bankmutaties.Add(new Bankmutatie(AdministratieSoort.Vereniging, bank, "a", new DateOnly(2026, 10, 1), new Bedrag(2500), false, default, null, null, null, null, null, null));
-        data.Bankmutaties.Add(new Bankmutatie(AdministratieSoort.Vereniging, bank, "b", new DateOnly(2026, 10, 2), new Bedrag(500), true, default, null, null, null, null, null, null));
-        data.Posten.Add(new Journaalpost(AdministratieSoort.Vereniging, data.Memoriaal, new DateOnly(2026, 10, 5), "concept"));
-        data.Bijlagen.Add(new Bijlage(AdministratieSoort.Vereniging, "bon.pdf", BijlagenTests.Pdf(), Nu));
-        var uitgave = new Journaalpost(AdministratieSoort.Vereniging, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
+        data.Bankmutaties.Add(new Bankmutatie(AdministratieSoort.Standaard, bank, "a", new DateOnly(2026, 10, 1), new Bedrag(2500), false, default, null, null, null, null, null, null));
+        data.Bankmutaties.Add(new Bankmutatie(AdministratieSoort.Standaard, bank, "b", new DateOnly(2026, 10, 2), new Bedrag(500), true, default, null, null, null, null, null, null));
+        data.Posten.Add(new Journaalpost(AdministratieSoort.Standaard, data.Memoriaal, new DateOnly(2026, 10, 5), "concept"));
+        data.Bijlagen.Add(new Bijlage(AdministratieSoort.Standaard, "bon.pdf", BijlagenTests.Pdf(), Nu));
+        var uitgave = new Journaalpost(AdministratieSoort.Standaard, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
         uitgave.Wijzig(bank, uitgave.Datum, "Bouwmarkt",
             [new RegelInvoer(data.Energie, null, new Bedrag(2500), Bedrag.Nul), new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(2500))]);
         uitgave.Boek(1, Nu);
@@ -60,7 +60,6 @@ public sealed class StartkaartenTests
         Assert.Equal(1, Kaart(kaarten, Startkaartsoort.Concepten).Aantal);
         Assert.Equal(1, Kaart(kaarten, Startkaartsoort.Postvak).Aantal);
         Assert.Equal(1, Kaart(kaarten, Startkaartsoort.ZonderBon).Aantal);
-        Assert.All(kaarten, k => Assert.Equal(AdministratieSoort.Vereniging, k.Administratie));
         Assert.Equal("2 banktransacties te verwerken", Kaart(kaarten, Startkaartsoort.Bank).Titel);
     }
 
@@ -69,18 +68,15 @@ public sealed class StartkaartenTests
     {
         var data = new BoekhoudingTestdata();
         var bank = data.Bankdagboek("BNK", "NL91ABNA0417164300");
-        var uitgave = new Journaalpost(AdministratieSoort.Vereniging, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
+        var uitgave = new Journaalpost(AdministratieSoort.Standaard, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
         uitgave.Wijzig(bank, uitgave.Datum, "Bouwmarkt",
             [new RegelInvoer(data.Energie, null, new Bedrag(2500), Bedrag.Nul), new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(2500))]);
         uitgave.Boek(1, Nu);
         data.Posten.Add(uitgave);
-        var drempels = new Dictionary<AdministratieSoort, Bedrag> { [AdministratieSoort.Vereniging] = new(5000) };
-
-        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Vandaag, drempels);
+        var kaarten = Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Vandaag, new Bedrag(5000));
         Assert.DoesNotContain(kaarten, k => k.Soort == Startkaartsoort.ZonderBon); // € 25 ligt onder de drempel van € 50
 
-        drempels[AdministratieSoort.Vereniging] = new(2000);
-        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Vandaag, drempels),
+        var kaart = Kaart(Startkaarten.Bepaal(AllesKlaar, Startwizardvoortgang.Nieuw, data.Stand, Vandaag, new Bedrag(2000)),
             Startkaartsoort.ZonderBon);
         Assert.Contains("€ 20,00", kaart.Tekst, StringComparison.Ordinal);
     }

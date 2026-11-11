@@ -253,15 +253,11 @@ internal sealed class InMemoryStartwizardOpslag : BtwBoeker.Application.Inrichti
 
 internal sealed class InMemoryAdministratieRepository : IAdministratieRepository
 {
-    public List<Administratie> Opgeslagen { get; } =
-    [
-        new(AdministratieSoort.Vereniging, "Vakantiehuis De Duinen", Administratie.Standaardkleur(AdministratieSoort.Vereniging)),
-    ];
+    public Administratie Opgeslagen { get; } = new(AdministratieSoort.Standaard, "Vakantiehuis De Duinen");
 
     public int AantalKeerBewaard { get; private set; }
 
-    public Task<IReadOnlyList<Administratie>> HaalAlleAsync(CancellationToken annulering = default) =>
-        Task.FromResult<IReadOnlyList<Administratie>>(Opgeslagen.ToList());
+    public Task<Administratie> HaalAsync(CancellationToken annulering = default) => Task.FromResult(Opgeslagen);
 
     public Task BewaarAsync(Administratie administratie, CancellationToken annulering = default)
     {

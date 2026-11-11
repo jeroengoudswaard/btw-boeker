@@ -49,14 +49,27 @@ public class ReikwijdteTests
     }
 
     [Fact]
-    public void Ingebouwde_standaardschemas_en_speltakken_bestaan_niet()
+    public void Ingebouwde_standaardschemas_bestaan_niet()
     {
-        Assert.Empty(BestandenMet("Speltak", "vereniging.json", "stichting.json", "Standaardschema"));
+        // De woorden van het oude domein zelf bewaakt ProductnaamTests in alle bestanden.
+        Assert.Empty(BestandenMet("Standaardschema"));
     }
 
     [Fact]
     public void Er_is_geen_tweede_administratie_en_geen_wisselaar()
     {
-        Assert.Empty(BestandenMet("Stichting", "Wisselaar"));
+        Assert.Empty(BestandenMet("Wisselaar"));
+    }
+
+    /// <summary>
+    /// De app toont één administratie (besluit 26): geen keuze per module, geen accentkleur per administratie en geen
+    /// administratie in het navigatieverzoek. Het datamodel per administratie blijft.
+    /// </summary>
+    [Fact]
+    public void De_app_kent_geen_navigatie_per_administratie()
+    {
+        Assert.Empty(BestandenMet(
+            "PerAdministratie", "AlleenVoor", "KiesAdministratie", "GekozenAdministratie", "ActieveAdministratie",
+            "WijzigAccentkleur", ".Accentkleur", "Accentkleuren.", "ModuleVerzoek", "ModuleInOntwikkeling", "Tabblad" + "ViewModel", "Geselecteerd" + "Tabblad"));
     }
 }

@@ -1,6 +1,6 @@
-using BtwBoeker.Domain.Administraties;
+using BtwBoeker.App.ViewModels;
 
-namespace BtwBoeker.Domain.Tests;
+namespace BtwBoeker.App.Tests;
 
 public class KleurTests
 {

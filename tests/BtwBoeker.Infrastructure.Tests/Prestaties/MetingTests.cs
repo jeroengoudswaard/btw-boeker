@@ -45,7 +45,7 @@ public sealed class MetingTests(ITestOutputHelper uitvoer) : IDisposable
         var dienst = new BoekhoudingDienst(sessie, TimeProvider.System);
 
         BoekhoudingStand stand = null!;
-        var laden = await MeetAsync("Boekhouding laden", async () => stand = await dienst.LaadAsync(AdministratieSoort.Vereniging));
+        var laden = await MeetAsync("Boekhouding laden", async () => stand = await dienst.LaadAsync(AdministratieSoort.Standaard));
         var startkaarten = await MeetAsync("Startkaarten bepalen", () => Startkaarten.BepaalAsync(sessie, Vandaag));
         var saldibalans = Meet("Overzicht saldibalans 2026", () => Grootboek.Saldibalans(stand, 2026));
         var balans = Meet("Overzicht balans 2026", () => Grootboek.Balans(stand, 2026));
@@ -64,7 +64,7 @@ public sealed class MetingTests(ITestOutputHelper uitvoer) : IDisposable
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4210).Id, null, new Bedrag(1234), Bedrag.Nul),
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1100).Id, null, Bedrag.Nul, new Bedrag(1234)),
         ]);
-        var boeken = await MeetAsync("Eén post boeken", () => dienst.BoekAsync(AdministratieSoort.Vereniging, post));
+        var boeken = await MeetAsync("Eén post boeken", () => dienst.BoekAsync(AdministratieSoort.Standaard, post));
 
         // Ruime budgetten (ook voor CI); de tabel vóór en na staat in de pull request.
         Assert.True(laden < 5000, $"Laden {laden} ms");

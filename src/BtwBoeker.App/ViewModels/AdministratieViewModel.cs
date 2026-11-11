@@ -4,8 +4,8 @@ using BtwBoeker.Domain.Administraties;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Gedeelde, levende weergave van een administratie. Alle tabbladen verwijzen naar dezelfde instantie,
-/// zodat een gewijzigde naam of kleur direct overal zichtbaar is.
+/// Gedeelde, levende weergave van de administratie. Alle pagina's verwijzen naar dezelfde instantie,
+/// zodat een gewijzigde naam direct overal zichtbaar is.
 /// </summary>
 public sealed class AdministratieViewModel(Administratie model) : ObservableObject
 {
@@ -15,15 +15,9 @@ public sealed class AdministratieViewModel(Administratie model) : ObservableObje
 
     public string Naam => Model.Naam;
 
-    public Kleur Accentkleur => Model.Accentkleur;
-
-    public Kleur Tekstkleur => Model.Accentkleur.LeesbareTekstkleur();
-
     /// <summary>Meldt dat het onderliggende model is gewijzigd.</summary>
     internal void Ververs()
     {
         OnPropertyChanged(nameof(Naam));
-        OnPropertyChanged(nameof(Accentkleur));
-        OnPropertyChanged(nameof(Tekstkleur));
     }
 }

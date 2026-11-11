@@ -43,11 +43,11 @@ public class XafSchrijverTests
     public void Alleen_geboekte_posten_van_het_boekjaar_met_kloppende_totalen()
     {
         var data = new BoekhoudingTestdata();
-        data.Boekjaren.Add(new Boekjaar(BoekhoudingTestdata.Ver, 2027));
+        data.Boekjaren.Add(new Boekjaar(BoekhoudingTestdata.Adm, 2027));
         data.Geboekt(new DateOnly(2026, 3, 5), "Energie maart", (data.Energie, 4500, 0), (data.Bank, 0, 4500));
-        data.Geboekt(new DateOnly(2026, 4, 1), "Verhuur", (data.Bank, 12000, 0), (data.Welpen, 0, 12000));
+        data.Geboekt(new DateOnly(2026, 4, 1), "Verhuur", (data.Bank, 12000, 0), (data.Huur, 0, 12000));
         data.Geboekt(new DateOnly(2027, 1, 3), "Volgend jaar", (data.Energie, 100, 0), (data.Bank, 0, 100));
-        var concept = new Journaalpost(BoekhoudingTestdata.Ver, data.Memoriaal, new DateOnly(2026, 5, 1), "Nog niet geboekt");
+        var concept = new Journaalpost(BoekhoudingTestdata.Adm, data.Memoriaal, new DateOnly(2026, 5, 1), "Nog niet geboekt");
         concept.Wijzig(data.Memoriaal, concept.Datum, concept.Omschrijving,
             [new RegelInvoer(data.Energie, null, new Bedrag(700), Bedrag.Nul), new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(700))]);
         data.Posten.Add(concept);
@@ -129,7 +129,7 @@ public class XafSchrijverTests
         var huurder = new Relatie(new RelatieGegevens("Huurder BV", "J. Jansen", "Dorpsstraat 1", "1234 AB", "Ergens", "huur@example.org", "0612345678",
             "NL91ABNA0417164300", IsDebiteur: true, IsCrediteur: false, Notitie: null));
         var leverancier = new Relatie(new RelatieGegevens("Bouwmarkt", null, null, null, null, null, null, null, IsDebiteur: false, IsCrediteur: true, null));
-        var beide = new Relatie(new RelatieGegevens("Buurvereniging", null, null, null, null, null, null, null, IsDebiteur: true, IsCrediteur: true, null));
+        var beide = new Relatie(new RelatieGegevens("Buurhuisje", null, null, null, null, null, null, null, IsDebiteur: true, IsCrediteur: true, null));
         data.Relaties.AddRange([huurder, leverancier, beide]);
         var resultaat = Schrijf(data);
 
@@ -143,7 +143,7 @@ public class XafSchrijverTests
         Assert.Equal("Ergens", Tekst(r.Element(X + "streetAddress")!, "city"));
         Assert.Equal("NL91ABNA0417164300", Tekst(r.Element(X + "bankAccount")!, "bankAccNr"));
         Assert.Equal("S", Tekst(relaties.Single(e => Tekst(e, "custSupName") == "Bouwmarkt"), "custSupTp"));
-        Assert.Equal("B", Tekst(relaties.Single(e => Tekst(e, "custSupName") == "Buurvereniging"), "custSupTp"));
+        Assert.Equal("B", Tekst(relaties.Single(e => Tekst(e, "custSupName") == "Buurhuisje"), "custSupTp"));
         Assert.All(relaties, e => Assert.True(Tekst(e, "custSupID").Length <= 35));
     }
 

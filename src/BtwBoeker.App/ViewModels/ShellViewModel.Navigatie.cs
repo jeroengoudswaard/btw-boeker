@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using BtwBoeker.App.ViewModels.Boekhouding;
 using BtwBoeker.Application.Inrichting;
 using BtwBoeker.Application.Modules;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels;
 
@@ -31,11 +30,6 @@ public sealed partial class ShellViewModel
 
     [ObservableProperty]
     public partial NavigatieItem? GeselecteerdeNavigatie { get; set; }
-
-    /// <summary>De administratie van de database (besluit 26: er is er één); geldt voor de hele app.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ActieveAdministratie), nameof(ActieveAdministratieNaam), nameof(Venstertitel))]
-    public partial AdministratieViewModel? GekozenAdministratie { get; set; }
 
     /// <summary>In Expert altijd; in Eenvoudig alleen tijdelijk na Alt.</summary>
     public bool IsMenubalkZichtbaar => Weergave == Application.Instellingen.Weergavemodus.Expert || _menubalkTijdelijk;
@@ -68,22 +62,6 @@ public sealed partial class ShellViewModel
         }
     }
 
-    /// <summary>Kiest de administratie zonder van pagina te wisselen (bij openen van een database of van een pagina).</summary>
-    private void KiesAdministratieZonderWisselen(AdministratieSoort? soort)
-    {
-        _synchroniseren = true;
-        try
-        {
-            GekozenAdministratie = soort is null ? null : Administraties.FirstOrDefault(a => a.Soort == soort);
-        }
-        finally
-        {
-            _synchroniseren = false;
-        }
-
-        BouwModuleMenu();
-    }
-
     /// <summary>Klapt <i>Meer…</i> om; alleen op een bewuste actie (klik, Enter of Spatie).</summary>
     [RelayCommand]
     private void MeerWisselen(NavigatieItem? item)
@@ -112,17 +90,14 @@ public sealed partial class ShellViewModel
         }
 
         using var meting = Meetpunt.Start(_logger, "Navigeren naar " + item.Sleutel);
-        var administratie = GekozenAdministratie?.Soort;
-        var definitie = ModuleCatalogus.Geef(item.Module);
-        var verzoek = new ModuleVerzoek(item.Module, definitie.PerAdministratie ? definitie.AlleenVoor ?? administratie : null);
-        if (!KanModuleOpenen(verzoek))
+        if (!KanModuleOpenen(item.Module))
         {
             SynchroniseerNavigatie();
             return;
         }
 
-        OpenModule(verzoek);
-        if (item.Onderdeel is { } onderdeel && GeselecteerdTabblad is { } pagina)
+        OpenModule(item.Module);
+        if (item.Onderdeel is { } onderdeel && GeselecteerdePagina is { } pagina)
         {
             pagina.Onderdeel = onderdeel;
         }
@@ -130,14 +105,13 @@ public sealed partial class ShellViewModel
         BouwNavigatie();
     }
 
-    /// <summary>Bouwt de navigatiebalk opnieuw op: andere administratie, weergave of geopende module.</summary>
+    /// <summary>Bouwt de navigatiebalk opnieuw op: andere weergave of geopende module.</summary>
     private void BouwNavigatie()
     {
         var items = new List<NavigatieItem> { Module(ModuleSoort.Overzicht, "Start", "Start") };
-        var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten, GekozenAdministratie?.Soort) : new Dictionary<string, int>();
         if (IsDatabaseOpen)
         {
-            var open = GeselecteerdTabblad?.Module.Soort;
+            var open = GeselecteerdePagina?.Module.Soort;
             items.Add(Module(ModuleSoort.Boekhouding, "Boekhouding", _boekhouding.Woorden["Boekhouding"], heeftOnderdelen: true,
                 uitgeklapt: open == ModuleSoort.Boekhouding));
             if (open == ModuleSoort.Boekhouding)
@@ -204,7 +178,7 @@ public sealed partial class ShellViewModel
     /// <summary>Markeert de regel van de pagina die nu open is, zonder opnieuw te navigeren.</summary>
     private void SynchroniseerNavigatie()
     {
-        var pagina = GeselecteerdTabblad;
+        var pagina = GeselecteerdePagina;
         NavigatieItem? gekozen = pagina switch
         {
             null or OverzichtViewModel => Navigatie.FirstOrDefault(),
@@ -246,15 +220,14 @@ public sealed partial class ShellViewModel
     }
 
     /// <summary>
-    /// De dagelijkse onderdelen, dan <i>Meer…</i> en, als die open is of de pagina daar staat, de onderdelen voor inrichting
-    ///.
+    /// De dagelijkse onderdelen, dan <i>Meer…</i> en, als die open is of de pagina daar staat, de onderdelen voor de inrichting.
     /// </summary>
     private List<NavigatieItem> Onderdelen(
         ModuleSoort module, string sleutel, IEnumerable<(int Onderdeel, string Titel)> dagelijks, IEnumerable<(int Onderdeel, string Titel)> meer,
         Func<int, string> naam)
     {
         var meerLijst = meer.ToList();
-        if (GeselecteerdTabblad is { } pagina && pagina.Module.Soort == module && pagina.Onderdeel is { } huidig && meerLijst.Exists(m => m.Onderdeel == huidig))
+        if (GeselecteerdePagina is { } pagina && pagina.Module.Soort == module && pagina.Onderdeel is { } huidig && meerLijst.Exists(m => m.Onderdeel == huidig))
         {
             _meerOpen.Add(module);
         }
@@ -298,7 +271,7 @@ public sealed partial class ShellViewModel
         _overzicht.Kaarten.Vervang(_kaarten);
 
         _overzicht.Kerncijfers.Clear();
-        if (gegevens is not null && GekozenAdministratie is { } administratie)
+        if (gegevens is not null)
         {
             // Dezelfde geladen boekhouding als de kaarten, niet opnieuw laden.
             foreach (var regel in OverzichtViewModel.Kerncijferregels(Kerncijfers.Bepaal(gegevens.Boekhouding, vandaag), vandaag.Year))
@@ -352,7 +325,7 @@ public sealed partial class ShellViewModel
     /// <summary>De aantallen bij de regels van de navigatiebalk.</summary>
     private void PasTellersToe()
     {
-        var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten, GekozenAdministratie?.Soort) : new Dictionary<string, int>();
+        var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten) : new Dictionary<string, int>();
         foreach (var regel in Navigatie)
         {
             regel.Teller = tellers.TryGetValue(regel.Sleutel, out var aantal) ? aantal : null;
@@ -366,11 +339,6 @@ public sealed partial class ShellViewModel
         if (kaart is null)
         {
             return;
-        }
-
-        if (kaart.Administratie is { } soort && GekozenAdministratie?.Soort != soort)
-        {
-            KiesAdministratieZonderWisselen(soort);
         }
 
         switch (kaart.Soort)
@@ -388,7 +356,7 @@ public sealed partial class ShellViewModel
             _ => BoekhoudingSubtab.Journaal,
         };
         Navigeer(new NavigatieItem($"Boekhouding.{onderdeel}", string.Empty, string.Empty, ModuleSoort.Boekhouding, (int)onderdeel));
-        if (kaart.Soort == Startkaartsoort.ZonderBon && GeselecteerdTabblad is BoekhoudingViewModel boekhouding)
+        if (kaart.Soort == Startkaartsoort.ZonderBon && GeselecteerdePagina is BoekhoudingViewModel boekhouding)
         {
             boekhouding.AlleenZonderBon = true;
         }

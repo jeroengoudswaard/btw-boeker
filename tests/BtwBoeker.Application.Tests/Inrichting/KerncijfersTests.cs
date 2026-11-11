@@ -17,7 +17,7 @@ public sealed class KerncijfersTests
     {
         var data = new BoekhoudingTestdata();
         var bank = data.Bankdagboek("BNK", "NL91ABNA0417164300");
-        var uitgave = new Journaalpost(AdministratieSoort.Vereniging, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
+        var uitgave = new Journaalpost(AdministratieSoort.Standaard, bank, new DateOnly(2026, 10, 1), "Bouwmarkt");
         uitgave.Wijzig(bank, uitgave.Datum, "Bouwmarkt",
             [new RegelInvoer(data.Energie, null, new Bedrag(centen), Bedrag.Nul), new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(centen))]);
         uitgave.Boek(1, Nu);
@@ -41,7 +41,7 @@ public sealed class KerncijfersTests
     [Fact]
     public void Een_niet_inggerichte_administratie_heeft_geen_boekhouding()
     {
-        var stand = new BoekhoudingStand(AdministratieSoort.Vereniging, [], [], [], [], []);
+        var stand = new BoekhoudingStand(AdministratieSoort.Standaard, [], [], [], [], []);
 
         var cijfers = Kerncijfers.Bepaal(stand, Vandaag);
 

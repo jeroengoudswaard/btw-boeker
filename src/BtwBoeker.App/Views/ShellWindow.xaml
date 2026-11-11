@@ -25,7 +25,7 @@
 
     <Window.Resources>
 
-        <!-- Inhoud per soort tabblad -->
+        <!-- Inhoud per soort pagina -->
         <DataTemplate DataType="{x:Type vm:OverzichtViewModel}">
             <views:OverzichtView />
         </DataTemplate>
@@ -35,21 +35,12 @@
         <DataTemplate DataType="{x:Type boekhoudingvm:BoekhoudingViewModel}">
             <boekhouding:BoekhoudingView />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ModuleInOntwikkelingViewModel}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
-                <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="{Binding Module.Pictogram}" FontSize="48"
-                           HorizontalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                <TextBlock Text="{Binding Module.Titel}" Style="{StaticResource Sectietitel}" HorizontalAlignment="Center" />
-                <TextBlock Text="{Binding Melding}" Style="{StaticResource Toelichting}" TextAlignment="Center" />
-            </StackPanel>
-        </DataTemplate>
 
         <Style x:Key="ModuleMenuItemStijl" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
             <Setter Property="Header" Value="{Binding Titel}" />
             <Setter Property="Command" Value="{Binding Opdracht}" />
             <Setter Property="CommandParameter" Value="{Binding Parameter}" />
             <Setter Property="InputGestureText" Value="{Binding Sneltoets}" />
-            <Setter Property="ItemsSource" Value="{Binding Kinderen}" />
             <Setter Property="AutomationProperties.AutomationId" Value="{Binding Titel, StringFormat=Menu_{0}}" />
         </Style>
     </Window.Resources>
@@ -61,7 +52,7 @@
         <KeyBinding Gesture="Ctrl+P" Command="{Binding AfdrukkenCommand}" />
         <KeyBinding Gesture="Ctrl+Tab" Command="{Binding VolgendePaginaCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding VorigePaginaCommand}" />
-        <KeyBinding Key="OemComma" Modifiers="Ctrl" Command="{Binding OpenModuleCommand}" CommandParameter="{x:Static vm:ModuleVerzoek.Instellingen}" />
+        <KeyBinding Key="OemComma" Modifiers="Ctrl" Command="{Binding OpenModuleCommand}" CommandParameter="{x:Static mod:ModuleSoort.Instellingen}" />
         <KeyBinding Gesture="Ctrl+D1" Command="{Binding OpenModuleViaSneltoetsCommand}" CommandParameter="1" />
     </Window.InputBindings>
 
@@ -155,7 +146,7 @@
                       ItemsSource="{Binding ModuleMenu}" ItemContainerStyle="{StaticResource ModuleMenuItemStijl}" />
             <MenuItem Header="E_xtra" AutomationProperties.AutomationId="Menu_Extra">
                 <MenuItem Header="_Instellingen" InputGestureText="Ctrl+," Command="{Binding OpenModuleCommand}"
-                          CommandParameter="{x:Static vm:ModuleVerzoek.Instellingen}" />
+                          CommandParameter="{x:Static mod:ModuleSoort.Instellingen}" />
             </MenuItem>
             <MenuItem Header="_Help" AutomationProperties.AutomationId="Menu_Help">
                 <MenuItem Header="_Logbestanden openen" Click="LogbestandenOpenen_Click" />
@@ -175,14 +166,9 @@
                     <TextBlock Text="{Binding DatabaseNaam, TargetNullValue='Geen database geopend'}" />
                 </StackPanel>
             </StatusBarItem>
-            <Separator Visibility="{Binding ActieveAdministratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
-            <StatusBarItem Visibility="{Binding ActieveAdministratie, Converter={StaticResource NietNullNaarZichtbaar}}"
-                           AutomationProperties.AutomationId="StatusAdministratie">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"
-                             Fill="{Binding ActieveAdministratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                    <TextBlock Text="{Binding ActieveAdministratieNaam}" FontWeight="SemiBold" />
-                </StackPanel>
+            <Separator Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
+            <StatusBarItem Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
+                <TextBlock Text="{Binding Administratie.Naam}" FontWeight="SemiBold" AutomationProperties.AutomationId="StatusAdministratie" />
             </StatusBarItem>
             <Separator Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
             <StatusBarItem Content="{Binding Boekjaartekst}"
@@ -279,34 +265,19 @@
 
         <!-- ===== Pagina ===== -->
         <Border Style="{StaticResource Paginavlak}">
-            <ContentControl Content="{Binding GeselecteerdTabblad}" Focusable="False" AutomationProperties.AutomationId="Pagina">
+            <ContentControl Content="{Binding GeselecteerdePagina}" Focusable="False" AutomationProperties.AutomationId="Pagina">
                 <ContentControl.ContentTemplate>
-                    <DataTemplate DataType="{x:Type vm:TabbladViewModel}">
+                    <DataTemplate DataType="{x:Type vm:PaginaViewModel}">
                         <DockPanel>
                             <!-- Een band in de onderdeelkleur en dezelfde kop op elke pagina. -->
                             <Border DockPanel.Dock="Top" Height="4" CornerRadius="8,0,0,0"
                                     Background="{Binding Module.Soort, Converter={StaticResource Onderdeelkleur}}"
                                     Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}" />
-                            <Grid DockPanel.Dock="Top" Margin="48,24,48,0"
-                                  Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Paginatitel}" Style="{StaticResource Paginatitel}" Margin="0" AutomationProperties.HeadingLevel="Level1" />
-                                    <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
-                                </StackPanel>
-                                <Border Grid.Column="1" VerticalAlignment="Top" Margin="16,4,0,0" Padding="12,4" CornerRadius="10"
-                                        BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                                        Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center"
-                                                 Fill="{Binding Administratie.Accentkleur, Converter={StaticResource KleurNaarBrush}}" />
-                                        <TextBlock Text="{Binding Administratie.Naam}" FontSize="12" AutomationProperties.AutomationId="AdministratieBand" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
+                            <StackPanel DockPanel.Dock="Top" Margin="48,24,48,0"
+                                        Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}">
+                                <TextBlock Text="{Binding Titel}" Style="{StaticResource Paginatitel}" Margin="0" AutomationProperties.HeadingLevel="Level1" />
+                                <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
+                            </StackPanel>
                             <ContentControl Content="{Binding}" Focusable="False" />
                         </DockPanel>
                     </DataTemplate>

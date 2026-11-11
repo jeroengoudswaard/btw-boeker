@@ -1,6 +1,6 @@
 # BTW-Boeker: projectrichtlijnen
 
-BTW-Boeker is een Windows-desktopapplicatie voor een eenvoudige financiële administratie met btw: facturen en bonnen invoeren, de boekhouding bijhouden en de btw-aangifte per maand voorbereiden. Het eerste gebruik is de verhuur van een tweede huisje op een Landal-park (huurafrekeningen, parkbijdragen, energie). BTW-Boeker is een afsplitsing van Verenigd (de ledenadministratie van een scoutingvereniging) en een eigen product met een eigen naam, database en installatiebestand.
+BTW-Boeker is een Windows-desktopapplicatie voor een eenvoudige financiële administratie met btw: facturen en bonnen invoeren, de boekhouding bijhouden en de btw-aangifte per maand voorbereiden. Het eerste gebruik is de verhuur van een tweede huisje op een Landal-park (huurafrekeningen, parkbijdragen, energie).
 
 ## Rol
 
@@ -43,13 +43,13 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 | # | Onderwerp | Besluit |
 |---|-----------|---------|
-| 1 | Product | BTW-Boeker, afsplitsing van Verenigd (2026-11-09). Eigen naam, repository (`jeroengoudswaard/btw-boeker`), database en installatiebestand. Verenigd-databases worden niet geopend; importeren uit Verenigd is alleen mogelijk na een apart ontwerp |
+| 1 | Product | BTW-Boeker is een eigen product (2026-11-09) met een eigen naam, repository (`jeroengoudswaard/btw-boeker`), database en installatiebestand |
 | 2 | Tech-stack | C# / .NET 10 + WPF met Fluent-thema, MVVM (CommunityToolkit.Mvvm), EF Core met versleutelde SQLite (SQLite3MC), xUnit en FlaUI voor tests; lagen Domain, Application, Infrastructure, App, bewaakt met architectuurtests |
 | 3 | Gebruiker | Eén gebruiker op één pc (desktop-app). Geen webapp, geen server |
 | 4 | Opslag | Versleuteld SQLite-bestand `.btwdb` met sleutelbestand `<naam>.btwdb.sleutel` ernaast en back-up `.btwbackup` (beide bestanden erin); rekeningschema-sjabloon `.btwsjabloon` |
-| 5 | Naam in code | Namespaces, projecten en bestanden heten `BtwBoeker.*`; teksten in de UI "BTW-Boeker". Een architectuurtest (`ProductnaamTests`) bewaakt dat de oude naam en extensies niet terugkomen |
-| 6 | Reikwijdte | Eén administratie (één object: het huisje); geen Vereniging/Stichting, geen leden, contributie, SEPA-incasso, begroting of meerjarenplan, geen e-mail en geen webapp. Verwijdering van die onderdelen volgt in stap 2 |
-| 7 | Boekhouding | Dubbel boekhouden zoals in Verenigd (grootboek, journaalposten concept → geboekt, bank- en kasdagboeken, relaties, verkoopfacturen met PDF, bijlagen bij boekingen, balans, W&V); alleen geboekte posten tellen en een geboekte post is onveranderlijk |
+| 5 | Naam in code | Namespaces, projecten en bestanden heten `BtwBoeker.*`; teksten in de UI "BTW-Boeker". `ProductnaamTests` bewaakt in alle bestanden (ook in zichzelf) dat oude namen, extensies en woorden uit het oude domein niet terugkomen; alleen de migraties mogen de oude standaardnaam bevatten, omdat ze die moeten herkennen |
+| 6 | Reikwijdte | Eén administratie (één object: het huisje); geen ledenadministratie, incasso, begroting of meerjarenplan, geen e-mail en geen webapp |
+| 7 | Boekhouding | Dubbel boekhouden (grootboek, journaalposten concept → geboekt, bank- en kasdagboeken, relaties, verkoopfacturen met PDF, bijlagen bij boekingen, balans, W&V); alleen geboekte posten tellen en een geboekte post is onveranderlijk |
 | 8 | Bank | CAMT.053 (Rabobank), elke transactie apart te boeken met boekingsregels |
 | 9 | Aangifteperiode | Alleen per maand; geen kwartaal of jaar |
 | 10 | Btw-tarieven | Per boekingsregel een keuze uit 21%, 9% en 0%, met de keuze of het ingevoerde bedrag inclusief of exclusief btw is; de app rekent grondslag, btw en totaal uit |
@@ -61,48 +61,34 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 | 16 | Buiten beeld | Geen buitenlandse platformkosten, geen verleggingsregeling en geen EU-transacties. Een all-in prijs wordt niet automatisch gesplitst |
 | 17 | Bedragen | Altijd in hele centen (`Bedrag.Centen`); afronden op de helft naar boven (`MidpointRounding.AwayFromZero`) |
 | 18 | Installatie | MSI (WiX 5), self-contained win-x64, `BtwBoeker-<versie>.msi`, eigen UpgradeCode; geen codesigning in de bèta |
-| 19 | Website | De release-workflow publiceert alleen naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat. Er is nog geen BTW-Boeker-pagina; een eigen pagina op de website mag (besluit 24) |
-| 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests`. De Android-iconen van het oude product zijn verwijderd (besluit 31) |
+| 19 | Website | De release-workflow publiceert naar de website als de repository-variabele `WEBSITE_PUBLICEREN` op `true` staat (aan sinds 2026-11-11) en het geheim `WEBSITE_TOKEN` bestaat (zie `docs/PUBLICEREN.md`) |
+| 20 | App-icoon | Groene tegel met wit huisje en "BTW" (aangeleverd door de gebruiker, 2026-11-10); hoeken transparant gemaakt. `BtwBoeker.ico` heeft 16–256 px; 16 en 24 px zonder de tekst (keuze A). Bron `assets/bron/btw-boeker-icoon-1024.png`, gemaakt met `assets/bron/maak-icoon.py`; bewaakt door `IcoonTests` |
 | 21 | Rekeningschema | Het schema uit e-Boekhouden (2026-11-10). De gebruiker levert een XAF-export; die wordt alleen lokaal gelezen (map `prive/`, nooit in Git) |
 | 22 | Inkomende stukken | De Landal-afrekening komt als PDF; daarnaast andere rekeningen, zoals voorschotnota's voor energie. De indeling volgt uit een voorbeeld-PDF van de gebruiker (lokaal, nooit in Git) |
 | 23 | Privégebruik | Het huisje wordt ook privé gebruikt; dat staat apart vermeld op de nota's (aanvulling op besluit 15) |
-| 24 | Websitepagina | Er mag een eigen pagina voor BTW-Boeker op de website komen; inhoud en moment volgen in stap 4 |
+| 24 | Websitepagina | Eigen pagina `https://jeroengoudswaard.github.io/btw-boeker/` (live sinds 2026-11-10, v0.19.0), met een kaart op de startpagina; doelgroep: verhuur van een vakantiewoning |
 | 25 | XAF importeren | Een XAF-bestand (uit e-Boekhouden) wordt volledig overgenomen: rekeningschema, beginsaldi (`openingBalance`) en alle boekingen van het jaar (keuze 1C). Inlezen gebeurt XXE-veilig en wordt gecontroleerd tegen het XSD. Vervangt de Excel-overname, het historisch boekjaar en de ingebouwde standaardschema's |
-| 26 | Eén administratie | Het datamodel per administratie blijft bestaan, maar de app toont één administratie, zonder wisselaar (keuze 2A). Een tweede object blijft later mogelijk |
+| 26 | Eén administratie | Het datamodel per administratie blijft bestaan (`AdministratieSoort.Standaard`), maar de app toont één administratie, zonder wisselaar (keuze 2A). Navigatie, menu en pagina's kennen geen administratie meer en er is geen accentkleur per administratie: de app volgt de accentkleur van Windows (2026-11-11, migratie *VerwijderAccentkleur*). Een tweede object blijft later mogelijk |
 | 27 | Jaarrekeningindeling | Blijft bestaan (keuze 3A) |
-| 28 | Ontwerp stap 2 | Goedgekeurd (2026-11-10): begroting, meerjarenplan, Excel-overname, historisch boekjaar en de standaardschema's Vereniging/Stichting verdwijnen; startwizard Welkom → Database → Rekeningschema (XAF) → Bank → Klaar; navigatie Start · Boekhouding · Instellingen. Eerst verwijderen met de suite groen, daarna de XAF-import. `.gitignore` bevat de extensies `.btwdb`, `.btwdb.sleutel`, `.btwbackup` en `.xaf` (keuze 4A; een sjabloon `.btwsjabloon` bevat geen gegevens en mag wel in Git; geanonimiseerde XAF-testbestanden krijgen de extensie `.xml`) |
+| 28 | Ontwerp stap 2 | Goedgekeurd (2026-11-10): begroting, meerjarenplan, Excel-overname, historisch boekjaar en de ingebouwde standaardschema's verdwijnen; startwizard Welkom → Database → Rekeningschema (XAF) → Bank → Klaar; navigatie Start · Boekhouding · Instellingen. `.gitignore` bevat de extensies `.btwdb`, `.btwdb.sleutel`, `.btwbackup` en `.xaf` (keuze 4A; een sjabloon `.btwsjabloon` bevat geen gegevens en mag wel in Git; geanonimiseerde XAF-testbestanden krijgen de extensie `.xml`) |
 | 29 | Linux | Wens, geen prioriteit (2026-11-10). WPF draait alleen op Windows; de kern (Domain, Application, Infrastructure) is al platformonafhankelijk. Als het later toch moet: eerst een ontwerp voor Blazor Server lokaal (de app draait op de eigen pc, bediening in de browser; één gebruiker en het versleutelde bestand blijven), pas na stap 3 |
 | 30 | Standaardnaam administratie | *Mijn administratie* (keuze A, 2026-11-10). Een bestaande database met de oude standaardnaam krijgt die naam via de migratie *StandaardnaamAdministratie*; een zelf gekozen naam blijft |
-| 31 | Opruimen oude product | Alles van het oude product weg (2026-11-10): Android-iconen, `COPILOT.md`, Gmail-handleiding, SEPA-voorbeeld, webapp-job in de release-workflow, verwijzingen naar besluitnummers van het oude product in code en documentatie, scouting-namen in tests en de demodatabase. CHANGELOG begint bij de afsplitsing. `ProductnaamTests` bewaakt naam en domein; de mappen `prive/` en `voorbeelden/` leest geen test |
+| 31 | Geen resten van het oude product | Geen code, teksten, testgegevens of documentatie uit het product waarvan BTW-Boeker is afgeleid (2026-11-11, keuzes 1A 2B 3A 4A): testgegevens gaan over verhuur. De bestaande migraties blijven (keuze 2B), omdat bestaande databases ermee worden bijgewerkt. De mappen `prive/` en `voorbeelden/` leest geen test |
 
 ## Planning
 
-1. **Hernoemen** van Verenigd naar BtwBoeker: gereed (2026-11-10), gebouwd en getest op Windows.
-2. **Eén administratie** met een rekeningschema voor de verhuur; scouting- en niet-relevante onderdelen verwijderen. Ontwerp goedgekeurd (besluit 28). 2a verwijderen: gereed. 2b XAF importeren (besluit 25): wacht op een XAF-export van de gebruiker in `prive/`.
+1. **Eigen naam en opruimen**: gereed (2026-11-11).
+2. **Eén administratie** met een rekeningschema voor de verhuur. 2a verwijderen: gereed. 2b XAF importeren (besluit 25): ontwerp goedgekeurd, branch `xaf-import`.
 3. **Btw-integratie**, test-first: btw-code en prestatiedatum op journaalregels, opslag en migratie, btw-rekeningen en automatische boekingsregels, invoer in de posteditor, maandrapport en export.
 4. Documentatie (README, CHANGELOG, installatie) en validatie op Windows.
 5. (Later, geen prioriteit) Linux via Blazor Server lokaal (besluit 29): eerst een ontwerp en een schatting.
 
-Antwoorden op de open vragen (2026-11-10): rekeningschema uit e-Boekhouden (besluit 21), Landal-afrekening als PDF plus andere nota's (besluit 22), ook privégebruik (besluit 23). Nog te leveren door de gebruiker: een XAF-export uit e-Boekhouden en een voorbeeld-PDF van de Landal-afrekening en een energienota, in `prive/`.
+Snelheid (keuze C, 2026-11-11): een meting in de echte app met de tijden uit het logbestand, op een demodatabase met een paar jaar huurinkomsten.
 
 ## Stand van zaken (bijwerken na elke sessie)
 
-- **Stap 1 (hernoemen): gereed.** 273 bestanden aangepast.
-- **Windows-test (2026-11-10, Windows 11, branch `hernoemen-btwboeker`):** build zonder waarschuwingen. Eerste run 584/586: `ProductnaamTests` vond (1) lokale `bin`/`obj`-restanten in mappen `Verenigd.*` van de oude checkout (verwijderd; geen fout in Git) en (2) de omgevingsvariabelen `VERENIGD_SCREENSHOTS` en `VERENIGD_WEBSITE_SCHERMAFBEELDINGEN`. Die heten nu `BTWBOEKER_*` (commit `2ba9443`). Daarna **586/586 geslaagd** (Domain 117, Application 195, Architectuur 30, Infrastructure 62, App 182), met `--blame-hang --blame-hang-timeout 4m`.
-- **Eerste build op Windows (2026-11-09, branch `hernoemen-btwboeker`):** 0 waarschuwingen en 57 compilefouten in `BtwBoeker.Infrastructure.Tests` en `BtwBoeker.App.Tests`; de overige projecten bouwden.
-  - Oorzaak: de zoek-en-vervangslag zette "Verenigd" ook in namen om naar "BTW-Boeker"; het koppelteken is ongeldig in een C#-namespace of -methodenaam. Het ging om `BTW-Boeker.Tests.Gedeeld` (4 bestanden) en de methode `Standaardpaden_zijn_gescheiden_van_BTW-Boeker`.
-  - Opgelost: namespace `BtwBoeker.Tests.Gedeeld`; de paden-test heet nu `Standaardpaden_staan_in_de_eigen_btwboeker_map`, en zijn twee `DoesNotContain("BTW-Boeker")`-regels zijn vervallen (ze spraken zichzelf tegen). Nieuwe test in `ProductnaamTests` verbiedt een koppelteken in namespace-, using- en methoderegels.
-  - Ook gecorrigeerd: de snelkoppeling in `installer/Package.wxs` wees naar `BtwBoeker.exe`, maar de assemblynaam van de app is `BTW-Boeker`, dus het uitvoerbestand is `BTW-Boeker.exe`.
-  - Daarna gebouwd en getest op Windows (zie hierboven).
-- **Stap 2a (verwijderen): gereed** (2026-11-10, branch `hernoemen-btwboeker`), in vier delen met elk een eigen commit:
-  1. begroting en meerjarenplan (`aad1699`, migratie *VerwijderBegrotingEnMeerjarenplan*);
-  2. Excel-overname en historisch boekjaar (`a18c78b`, migratie *VerwijderExcelHistorie*); de inrichtingsroute heet nu `Inrichtvoorstel`/`Inrichtrekening`;
-  3. ingebouwde standaardschema's en speltakken (`2d81f15`); de wizard heet `SjablooninrichtingViewModel`;
-  4. tweede administratie en wisselaar, startwizard Welkom → Database → Boekhouding → Bank → Klaar (migratie *EenAdministratie*: alleen een lege tweede administratie verdwijnt).
-  - `ReikwijdteTests` bewaakt dat de onderdelen niet terugkomen; `MigratieTests` dat bestaande databases zonder verlies worden bijgewerkt.
-  - Ook: app-icoon in programma, venster en taakbalk (`5f10014`; de test verbood het na het hernoemen) en in de titelbalk op 16 px (`13360d8`, keuze A).
-  - **Windows-test (2026-11-10):** na elk deel de volledige suite; laatste stand **506/506** geslaagd, build zonder waarschuwingen. Na deel 4 faalden in twee runs wisselende UI-tests (database niet geopend, *Startkaarten* en *Boekingsregels* niet gevonden); los gedraaid slaagden ze (5 en 2 keer), en de volgende volledige run was groen. Bevestigd door de gebruiker: de pc was tijdens die UI-tests in gebruik. Tijdens UI-tests niets met muis of toetsenbord doen.
-  - Standaardnaam: *Mijn administratie* (besluit 30).
+- **v0.19.0** uitgebracht (2026-11-10): tag `v0.19.0`, MSI op de release `btw-boeker` van de website (met de hand geüpload, want `WEBSITE_TOKEN` ontbrak nog), websitepagina live.
+- **Opruimen (2026-11-11, branch `opruimen`):** interne naam `AdministratieSoort.Standaard`; `TabbladViewModel` heet `PaginaViewModel`; navigatie, menu en instellingen zonder administratiekeuze; accentkleur per administratie weg (migratie *VerwijderAccentkleur*, getest in `MigratieTests`); een instellingenbestand van v0.19.0 blijft leesbaar (`JsonInstellingenOpslagTests`); testgegevens gaan over verhuur; de MSI-snelkoppeling had nog een omschrijving uit het oude domein.
+- **XAF-import (stap 2b):** de besluiten over jaren, btw per regel, het koppelen van de bank en 2026 staan als stash op branch `xaf-import` en komen in deze tabel bij het hervatten.
 - **Ontwikkelomgeving:** .NET SDK 10, Visual Studio of VS Code; de gebruiker draait Windows-tests zelf.
-- **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`.
-- De historie van Verenigd (besluiten 1–278) staat in de repository van Verenigd en in `CHANGELOG.md`.
+- **Bouwen en testen (Windows):** `dotnet build`, daarna `dotnet test --blame-hang --blame-hang-timeout 4m`; UI-tests met `--filter Categorie=UI`. Tijdens UI-tests niets met muis of toetsenbord doen: wisselende UI-fouten kwamen tot nu toe door gebruik van de pc.

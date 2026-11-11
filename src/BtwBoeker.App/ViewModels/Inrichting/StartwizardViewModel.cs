@@ -3,11 +3,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BtwBoeker.Application.Database;
 using BtwBoeker.Application.Inrichting;
-using BtwBoeker.Domain.Administraties;
 
 namespace BtwBoeker.App.ViewModels.Inrichting;
 
-/// <summary>De routes van een lege boekhouding, zoals op de startkaart van het tabblad Boekhouding.</summary>
+/// <summary>De routes van een lege boekhouding, zoals op de lege pagina Boekhouding.</summary>
 public enum Boekhoudingkeuze
 {
     Sjabloon,
@@ -15,22 +14,20 @@ public enum Boekhoudingkeuze
 }
 
 /// <summary>
-/// Wat de startwizard aan het hoofdvenster vraagt: de bestaande wizards, diensten en tabbladen, zodat de
+/// Wat de startwizard aan het hoofdvenster vraagt: de bestaande wizards, diensten en pagina's, zodat de
 /// startwizard alleen regisseert en niets opnieuw bouwt.
 /// </summary>
 public interface IStartwizardRegie
 {
     IDatabaseSessie? Sessie { get; }
 
-    IReadOnlyList<AdministratieViewModel> Administraties { get; }
-
     Task NieuweDatabaseAsync();
 
     Task OpenDatabaseAsync();
 
-    Task RichtBoekhoudingInAsync(AdministratieSoort administratie, Boekhoudingkeuze keuze);
+    Task RichtBoekhoudingInAsync(Boekhoudingkeuze keuze);
 
-    Task ImporteerBankafschriftAsync(AdministratieSoort administratie);
+    Task ImporteerBankafschriftAsync();
 }
 
 /// <summary>Eén stap in de stappenbalk bovenaan.</summary>
@@ -214,10 +211,10 @@ public sealed partial class StartwizardViewModel : ObservableObject
     private Task OpenDatabaseAsync() => NaDatabaseAsync(_regie.OpenDatabaseAsync);
 
     [RelayCommand]
-    private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(AdministratieSoort.Vereniging, keuze));
+    private Task BoekhoudingInrichtenAsync(Boekhoudingkeuze keuze) => VoerUitAsync(() => _regie.RichtBoekhoudingInAsync(keuze));
 
     [RelayCommand]
-    private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync(AdministratieSoort.Vereniging));
+    private Task BankInlezenAsync() => VoerUitAsync(() => _regie.ImporteerBankafschriftAsync());
 
     private async Task NaDatabaseAsync(Func<Task> actie)
     {

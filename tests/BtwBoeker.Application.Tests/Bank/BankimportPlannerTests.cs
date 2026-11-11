@@ -33,7 +33,7 @@ public class BankimportPlannerTests
         var bekend = new VbTransactie(1000, Ref: "A");
         var plan1 = BankimportPlanner.Plan(_data.Stand, [Bestand(CamtVoorbeeld.Betaal, Dag(1, 2, 0, bekend))]);
         var sleutel = plan1.Rekeningen[0].Nieuw[0].Sleutel;
-        _data.Bankmutaties.Add(new Domain.Financien.Bank.Bankmutatie(BoekhoudingTestdata.Ver, rabo, sleutel, new DateOnly(2026, 1, 2),
+        _data.Bankmutaties.Add(new Domain.Financien.Bank.Bankmutatie(BoekhoudingTestdata.Adm, rabo, sleutel, new DateOnly(2026, 1, 2),
             new Bedrag(1000), true, default, null, null, null, null, null, null));
 
         var nieuw = new VbTransactie(500, Ref: "B", NtryRef: "2");

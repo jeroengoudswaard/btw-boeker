@@ -4,7 +4,8 @@ namespace BtwBoeker.Application.Administraties;
 
 public interface IAdministratieRepository
 {
-    Task<IReadOnlyList<Administratie>> HaalAlleAsync(CancellationToken annulering = default);
+    /// <summary>De administratie van de app (besluit 26: er is er een).</summary>
+    Task<Administratie> HaalAsync(CancellationToken annulering = default);
 
     Task BewaarAsync(Administratie administratie, CancellationToken annulering = default);
 }

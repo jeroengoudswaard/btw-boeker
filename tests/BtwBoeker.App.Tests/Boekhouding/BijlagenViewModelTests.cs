@@ -10,7 +10,7 @@ namespace BtwBoeker.App.Tests.Boekhouding;
 /// <summary>Bijlagen bij een post, het postvak bonnen en het filter "Zonder bon".</summary>
 public sealed class BijlagenViewModelTests : IDisposable
 {
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private readonly BoekhoudingTestomgeving _omgeving = new();
     private readonly List<string> _bestanden = [];
 
@@ -43,7 +43,7 @@ public sealed class BijlagenViewModelTests : IDisposable
         var dienst = new BoekhoudingDienst(_omgeving.Sessie, _omgeving.Tijd);
         if (!_ingericht)
         {
-            await dienst.ImporteerAsync(Ver, Application.Tests.Boekhouding.Testvoorstel.Standaard());
+            await dienst.ImporteerAsync(Adm, Application.Tests.Boekhouding.Testvoorstel.Standaard());
             _ingericht = true;
         }
 
@@ -54,16 +54,16 @@ public sealed class BijlagenViewModelTests : IDisposable
     private async Task<Guid> KasuitgaveAsync(long centen, DateOnly datum, bool boeken = true)
     {
         var dienst = await InrichtenAsync();
-        var stand = await dienst.LaadAsync(Ver);
+        var stand = await dienst.LaadAsync(Adm);
         var invoer = new PostInvoer(null, stand.Dagboeken.Single(d => d.Code == "KAS").Id, datum, "Boodschappen",
         [
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4115).Id, null, new Bedrag(centen), Bedrag.Nul),
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1000).Id, null, Bedrag.Nul, new Bedrag(centen)),
         ]);
-        var id = await dienst.BewaarConceptAsync(Ver, invoer);
+        var id = await dienst.BewaarConceptAsync(Adm, invoer);
         if (boeken)
         {
-            await dienst.BoekAsync(Ver, invoer with { Id = id });
+            await dienst.BoekAsync(Adm, invoer with { Id = id });
         }
 
         return id;
@@ -172,7 +172,7 @@ public sealed class BijlagenViewModelTests : IDisposable
         await KasuitgaveAsync(2500, new DateOnly(2026, 6, 1));
         await KasuitgaveAsync(900, new DateOnly(2026, 6, 2));
         await InrichtenAsync();
-        var model = new Administratie(AdministratieSoort.Vereniging, "Vereniging", Administratie.Standaardkleur(AdministratieSoort.Vereniging));
+        var model = new Administratie(AdministratieSoort.Standaard, "Mijn administratie");
         model.WijzigZonderBonDrempel(500);
         var vm = _omgeving.Maak(new AdministratieViewModel(model));
         await vm.VernieuwCommand.ExecuteAsync(null);
@@ -203,7 +203,7 @@ public sealed class BijlagenViewModelTests : IDisposable
 
         Assert.Empty(vm.Postvak);
         Assert.True(vm.Posten.Single(p => p.Id == post).HeeftBijlage);
-        var opgeslagen = Assert.Single((await _omgeving.Opslag.LaadAsync(Ver)).Bijlagen);
+        var opgeslagen = Assert.Single((await _omgeving.Opslag.LaadAsync(Adm)).Bijlagen);
         Assert.Equal(new Bedrag(2345), opgeslagen.Bedrag);
         Assert.Equal(new DateOnly(2026, 6, 12), opgeslagen.Datum);
     }
@@ -212,13 +212,13 @@ public sealed class BijlagenViewModelTests : IDisposable
     public async Task Postvak_accepteert_een_negatief_bedrag_en_stelt_een_ontvangst_voor()
     {
         var dienst = await InrichtenAsync();
-        var stand = await dienst.LaadAsync(Ver);
+        var stand = await dienst.LaadAsync(Adm);
         var invoer = new PostInvoer(null, stand.Dagboeken.Single(d => d.Code == "KAS").Id, new DateOnly(2026, 6, 10), "Retour",
         [
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 1000).Id, null, new Bedrag(1500), Bedrag.Nul),
             new RegelInvoerId(stand.Rekeningen.Single(r => r.Nummer == 4115).Id, null, Bedrag.Nul, new Bedrag(1500)),
         ]);
-        var retour = await dienst.BewaarConceptAsync(Ver, invoer);
+        var retour = await dienst.BewaarConceptAsync(Adm, invoer);
         var vm = await OpenAsync();
         await vm.BonnenSlepenCommand.ExecuteAsync([Bestand("creditnota.jpg", [0xFF, 0xD8, 0xFF, 9])]);
         var bon = Assert.Single(vm.Postvak);

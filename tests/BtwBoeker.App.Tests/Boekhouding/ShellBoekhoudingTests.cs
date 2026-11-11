@@ -34,8 +34,8 @@ public sealed class ShellBoekhoudingTests
         var shell = await MaakShellMetOpenDatabase();
         Assert.False(shell.AfdrukkenCommand.CanExecute(null));
 
-        shell.OpenModuleCommand.Execute(new ModuleVerzoek(ModuleSoort.Boekhouding, AdministratieSoort.Vereniging));
-        var tab = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
+        var tab = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await tab.VernieuwCommand.ExecutionTask!;
         await tab.LeegBeginnenCommand.ExecuteAsync(null);
 
@@ -58,10 +58,10 @@ public sealed class ShellBoekhoudingTests
         };
 
         await shell.ImporteerBankafschriftCommand.ExecuteAsync(null);
-        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdTabblad);
+        Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         Assert.False(gestart); // nog niet ingericht: eerst uitleg, geen wizard
 
-        await ((BoekhoudingViewModel)shell.GeselecteerdTabblad!).LeegBeginnenCommand.ExecuteAsync(null);
+        await ((BoekhoudingViewModel)shell.GeselecteerdePagina!).LeegBeginnenCommand.ExecuteAsync(null);
         await shell.ImporteerBankafschriftCommand.ExecuteAsync(null);
         Assert.True(gestart);
     }

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace BtwBoeker.Domain.Administraties;
+namespace BtwBoeker.App.ViewModels;
 
 /// <summary>Een RGB-kleur, uitgewisseld als hexcode in de vorm <c>#RRGGBB</c>.</summary>
 public readonly record struct Kleur(byte R, byte G, byte B)

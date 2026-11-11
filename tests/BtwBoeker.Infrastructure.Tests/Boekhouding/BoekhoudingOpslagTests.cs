@@ -14,7 +14,7 @@ namespace BtwBoeker.Infrastructure.Tests.Boekhouding;
 public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
 {
     private const string Wachtwoord = "zonnig vakantiehuis 2026";
-    private const AdministratieSoort Ver = AdministratieSoort.Vereniging;
+    private const AdministratieSoort Adm = AdministratieSoort.Standaard;
     private readonly TijdelijkeMap _map = new();
     private readonly DatabaseBeheer _beheer = new();
     private IDatabaseSessie _sessie = null!;
@@ -33,7 +33,7 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     public void Dispose() => _map.Dispose();
 
     private Task ImporteerAsync(decimal bank = 799.5m, VerschilKeuze? verschil = null) =>
-        _dienst.ImporteerAsync(Ver, Testvoorstel.Standaard(bank), verschil);
+        _dienst.ImporteerAsync(Adm, Testvoorstel.Standaard(bank), verschil);
 
     private static PostInvoer Invoer(BoekhoudingStand stand, long bedrag, Guid? id = null) => new(
         id, stand.Dagboeken.Single(d => d.Code == "MEM").Id, new DateOnly(2026, 5, 1), "Energie mei",
@@ -47,9 +47,9 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     {
         await ImporteerAsync();
 
-        var stand = await _dienst.LaadAsync(Ver);
+        var stand = await _dienst.LaadAsync(Adm);
         Assert.Equal([600, 1000, 1100, 4115, 8020], stand.Rekeningen.Select(r => r.Nummer));
-        Assert.Equal("Terreinkosten", stand.Rekeningen.Single(r => r.Nummer == 4115).Rubriek?.Naam);
+        Assert.Equal("Parkkosten", stand.Rekeningen.Single(r => r.Nummer == 4115).Rubriek?.Naam);
         Assert.Equal(["MEM", "KAS"], stand.Dagboeken.Select(d => d.Code));
         Assert.Equal(2026, Assert.Single(stand.Boekjaren).Jaar);
         var opening = Assert.Single(stand.Posten);
@@ -62,11 +62,11 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     public async Task Import_met_verschil_alleen_na_bewuste_keuze()
     {
         await Assert.ThrowsAsync<InvalidOperationException>(() => ImporteerAsync(bank: 806.74m));
-        Assert.False((await _dienst.LaadAsync(Ver)).IsIngericht);
+        Assert.False((await _dienst.LaadAsync(Adm)).IsIngericht);
 
         await ImporteerAsync(bank: 806.74m, verschil: VerschilKeuze.Standaard);
 
-        var stand = await _dienst.LaadAsync(Ver);
+        var stand = await _dienst.LaadAsync(Adm);
         var verschil = stand.Rekeningen.Single(r => r.Nummer == 1299);
         Assert.Equal(-724, Grootboek.Saldo(stand, verschil, 2026));
         Assert.True(Assert.Single(stand.Posten).IsInEvenwicht);
@@ -76,14 +76,14 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     public async Task Concept_wijzigen_boeken_en_tegenboeken_worden_opgeslagen()
     {
         await ImporteerAsync();
-        var stand = await _dienst.LaadAsync(Ver);
+        var stand = await _dienst.LaadAsync(Adm);
 
-        var id = await _dienst.BewaarConceptAsync(Ver, Invoer(stand, 10000));
-        await _dienst.BewaarConceptAsync(Ver, Invoer(stand, 12000, id));
-        var nummer = await _dienst.BoekAsync(Ver, Invoer(stand, 12500, id));
-        var tegen = await _dienst.TegenboekAsync(Ver, id, new DateOnly(2026, 5, 2));
+        var id = await _dienst.BewaarConceptAsync(Adm, Invoer(stand, 10000));
+        await _dienst.BewaarConceptAsync(Adm, Invoer(stand, 12000, id));
+        var nummer = await _dienst.BoekAsync(Adm, Invoer(stand, 12500, id));
+        var tegen = await _dienst.TegenboekAsync(Adm, id, new DateOnly(2026, 5, 2));
 
-        stand = await _dienst.LaadAsync(Ver);
+        stand = await _dienst.LaadAsync(Adm);
         Assert.Equal("MEM-2026-0002", nummer);
         Assert.Equal("MEM-2026-0003", tegen);
         Assert.Equal(2, stand.Posten.Single(p => p.Id == id).Regels.Count); // oude conceptregels zijn weg
@@ -94,20 +94,20 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     public async Task Jaarafsluiting_en_heropenen_worden_opgeslagen()
     {
         await ImporteerAsync();
-        var stand = await _dienst.LaadAsync(Ver);
-        await _dienst.BoekAsync(Ver, Invoer(stand, 30000));
+        var stand = await _dienst.LaadAsync(Adm);
+        await _dienst.BoekAsync(Adm, Invoer(stand, 30000));
 
-        var resultaat = await _dienst.SluitBoekjaarAsync(Ver, 2026);
+        var resultaat = await _dienst.SluitBoekjaarAsync(Adm, 2026);
 
-        stand = await _dienst.LaadAsync(Ver);
+        stand = await _dienst.LaadAsync(Adm);
         Assert.Equal(new Bedrag(30000), new Bedrag(-resultaat.Centen));
         Assert.False(stand.Boekjaar(2026)!.IsOpen);
         Assert.True(stand.Boekjaar(2027)!.IsOpen);
         Assert.Equal(-70000 - 0, Grootboek.Saldo(stand, stand.Rekeningen.Single(r => r.Rol == RekeningRol.Reserve), 2027));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _dienst.BoekAsync(Ver, Invoer(stand, 100)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _dienst.BoekAsync(Adm, Invoer(stand, 100)));
 
-        await _dienst.HeropenBoekjaarAsync(Ver, 2026);
-        stand = await _dienst.LaadAsync(Ver);
+        await _dienst.HeropenBoekjaarAsync(Adm, 2026);
+        stand = await _dienst.LaadAsync(Adm);
         Assert.True(stand.Boekjaar(2026)!.IsOpen);
         Assert.DoesNotContain(stand.Posten, p => p.Soort == PostSoort.Afsluiting);
     }
@@ -116,10 +116,10 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
     public async Task Rapport_naar_xlsx_bevat_bedragen_als_getal()
     {
         await ImporteerAsync();
-        var stand = await _dienst.LaadAsync(Ver);
+        var stand = await _dienst.LaadAsync(Adm);
         var pad = _map.Bestand("balans.xlsx");
 
-        new ClosedXmlSpreadsheetSchrijver().Schrijf(Rapporten.Balans(Grootboek.Balans(stand, 2026), "Vereniging"), pad);
+        new ClosedXmlSpreadsheetSchrijver().Schrijf(Rapporten.Balans(Grootboek.Balans(stand, 2026), "Mijn administratie"), pad);
 
         using var boek = new XLWorkbook(pad);
         var blad = boek.Worksheet(1);
