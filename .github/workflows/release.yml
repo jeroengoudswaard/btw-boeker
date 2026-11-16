@@ -62,6 +62,18 @@ jobs:
           if (-not $msi) { throw "$naam niet gevonden" }
           New-Item -ItemType Directory -Force artifacts/uitvoer/release | Out-Null
           Copy-Item $msi.FullName artifacts/uitvoer/release/
+
+      # Besluit 37 (uit het moederproduct): dezelfde publicatie ook als zip, voor wie zonder installatie wil starten (BTW-Boeker.exe).
+      - name: Zip bouwen (zonder installatie)
+        shell: pwsh
+        run: |
+          $zip = "artifacts/uitvoer/release/BtwBoeker-${{ steps.versie.outputs.versie }}-win-x64.zip"
+          Compress-Archive -Path artifacts/publish/* -DestinationPath $zip -CompressionLevel Optimal
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $inhoud = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $zip))
+          try {
+            if (-not ($inhoud.Entries | Where-Object FullName -eq 'BTW-Boeker.exe')) { throw "BTW-Boeker.exe ontbreekt in de zip" }
+          } finally { $inhoud.Dispose() }
           Get-ChildItem artifacts/uitvoer/release
 
       # FlaUI heeft een bureaublad nodig; op een GitHub-runner is dat niet gegarandeerd. Lukt het niet, dan gaat de release
@@ -89,9 +101,11 @@ jobs:
         with:
           path: bron
 
+      # Naam en map vast: met één artefact zet download-artifact v8 de bestanden anders direct in uit/ (v0.20.0 mislukte daarop).
       - uses: actions/download-artifact@v8
         with:
-          path: uit
+          name: installatiebestand
+          path: uit/installatiebestand
 
       - name: Release "btw-boeker" op de website bijwerken
         env:
@@ -100,13 +114,14 @@ jobs:
         run: |
           set -euo pipefail
           ls -R uit
-          notities="BTW-Boeker ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit). Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
+          notities="BTW-Boeker ${VERSIE#v} (bèta). Installatiebestand voor Windows 10/11 (64-bit), en dezelfde app als zip zonder installatie. Bron: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${VERSIE}"
           if gh release view btw-boeker --repo "$WEBSITE" > /dev/null 2>&1; then
             gh release edit btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities"
           else
             gh release create btw-boeker --repo "$WEBSITE" --title "BTW-Boeker ${VERSIE#v} (bèta)" --notes "$notities" --prerelease
           fi
-          gh release upload btw-boeker --repo "$WEBSITE" --clobber uit/installatiebestand/release/*.msi
+          gh release upload btw-boeker --repo "$WEBSITE" --clobber \
+            uit/installatiebestand/release/*.msi uit/installatiebestand/release/*-win-x64.zip
 
       - name: Versie en schermafbeeldingen in de website zetten
         env:
