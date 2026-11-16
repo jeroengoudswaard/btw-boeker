@@ -89,9 +89,11 @@ jobs:
         with:
           path: bron
 
+      # Naam en map vast: met één artefact zet download-artifact v8 de bestanden anders direct in uit/ (v0.20.0 mislukte daarop).
       - uses: actions/download-artifact@v8
         with:
-          path: uit
+          name: installatiebestand
+          path: uit/installatiebestand
 
       - name: Release "btw-boeker" op de website bijwerken
         env:
