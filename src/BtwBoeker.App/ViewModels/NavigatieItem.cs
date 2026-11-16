@@ -4,8 +4,8 @@ using BtwBoeker.Application.Modules;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Eén regel in de navigatiebalk: een module, of een onderdeel (subtabblad) van Boekhouding of
-/// Onderdelen staan alleen in de lijst als hun module is uitgeklapt.
+/// Eén regel in de navigatiebalk: een module (Start, Instellingen) of een onderdeel van de boekhouding. Besluit 33: de
+/// dagelijkse onderdelen staan bovenaan; de inrichting staat onder <i>Meer…</i> en alleen als die is uitgeklapt.
 /// </summary>
 public sealed partial class NavigatieItem(string sleutel, string titel, string pictogram, ModuleSoort module, int? onderdeel) : ObservableObject
 {
@@ -14,7 +14,7 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
 
     public string Titel { get; } = titel;
 
-    /// <summary>Codepunt uit Segoe Fluent Icons; leeg bij een onderdeel.</summary>
+    /// <summary>Codepunt uit Segoe Fluent Icons; leeg bij een onderdeel onder <i>Meer…</i>.</summary>
     public string Pictogram { get; } = pictogram;
 
     public ModuleSoort Module { get; } = module;
@@ -22,7 +22,8 @@ public sealed partial class NavigatieItem(string sleutel, string titel, string p
     /// <summary>Het onderdeel binnen de module, of <c>null</c> voor de module zelf.</summary>
     public int? Onderdeel { get; } = onderdeel;
 
-    public bool IsSubitem => Onderdeel is not null || IsMeer;
+    /// <summary>Ingesprongen: een onderdeel onder <i>Meer…</i>.</summary>
+    public bool IsSubitem => IsDiep;
 
     /// <summary>De inklapbare regel <i>Meer…</i> met de onderdelen voor inrichting.</summary>
     public bool IsMeer { get; init; }

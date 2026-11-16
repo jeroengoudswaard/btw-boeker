@@ -4,6 +4,16 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Gewijzigd
+- **Platte navigatie** (besluit 33): Start · Journaal · Bank · Bonnen · Rapporten · Meer… · Instellingen. De onderdelen staan direct in de navigatie, zonder de tussenlaag *Boekhouding*. Elk onderdeel heeft een eigen pictogram en een eigen kleur, ook in de band boven de pagina. *Postvak bonnen* heet nu *Bonnen*.
+- **De titel zegt waar u bent:** de paginatitel is het onderdeel (*Bank*, *Rapporten*), met één zin uitleg, ook in Eenvoudig.
+- **Meldingsbalk in plaats van statusbalk:** meldingen staan rechts in de paginakop, met ✓, ⚠ of ✕ op een gekleurde achtergrond. Een ✓ verdwijnt na 6 seconden; ⚠ en ✕ blijven tot u ze sluit of naar een ander onderdeel gaat.
+- **Titelbalk:** 🔒 *bestand – BTW-Boeker*, zonder de naam van de administratie. Het venster heeft weer de schaduw en rand van Windows, en op Windows 11 afgeronde hoeken.
+- **Menubalk:** *Modules* (herhaalde de navigatie) en *Extra* (alleen Instellingen) zijn weg; *Instellingen* (Ctrl+,) staat in *Bestand*.
+- **Opslaan alleen als er iets op te slaan is**, en dan als hoofdactie; Ctrl+S werkt altijd. De tekst "Niet-opgeslagen wijzigingen" is vervallen.
+- **Navigatie:** één teller per regel; de focusrand verschijnt alleen bij toetsenbordgebruik. Boven de onderdelen staat geen lege lijn meer.
+- **Instellingen:** de kaart lijnt uit op de paginatitel.
+
 ## [0.20.0] - 2026-11-11: Opgeruimd, en geen vraag meer om op te slaan na alleen bekijken
 
 ### Opgelost

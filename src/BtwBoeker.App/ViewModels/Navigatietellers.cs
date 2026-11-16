@@ -3,8 +3,8 @@ using BtwBoeker.Application.Inrichting;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// De aantallen bij de onderdelen in de navigatiebalk, uit dezelfde berekening als de startkaarten. Een
-/// module telt de onderdelen op, zodat het aantal ook zichtbaar is als de module is ingeklapt.
+/// De aantallen bij de onderdelen in de navigatiebalk, uit dezelfde berekening als de startkaarten. Besluit 33: één
+/// teller per regel, alleen bij het onderdeel; er is geen laag Boekhouding meer die optelt.
 /// </summary>
 public static class Navigatietellers
 {
@@ -27,8 +27,6 @@ public static class Navigatietellers
             }
 
             tellers[sleutel] = tellers.GetValueOrDefault(sleutel) + kaart.Aantal;
-            var module = sleutel[..sleutel.IndexOf('.', StringComparison.Ordinal)];
-            tellers[module] = tellers.GetValueOrDefault(module) + kaart.Aantal;
         }
 
         return tellers;

@@ -55,11 +55,12 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Na_openen_staan_de_modules_met_ingeklapte_onderdelen_en_is_de_administratie_geladen()
+    public async Task Na_openen_staan_de_onderdelen_met_ingeklapte_inrichting_en_is_de_administratie_geladen()
     {
         var shell = await OpenAsync();
 
-        Assert.Equal(["Start", "Boekhouding", "Instellingen"], shell.Navigatie.Select(n => n.Sleutel));
+        Assert.Equal(["Start", "Boekhouding.Journaal", "Boekhouding.Bank", "Boekhouding.Postvak", "Boekhouding.Rapporten", "Boekhouding.Meer", "Instellingen"],
+            shell.Navigatie.Select(n => n.Sleutel));
         Assert.Equal(AdministratieSoort.Standaard, shell.Administratie!.Soort);
         Assert.Same(Item(shell, "Start"), shell.GeselecteerdeNavigatie);
         Assert.IsType<OverzichtViewModel>(shell.GeselecteerdePagina);
@@ -70,10 +71,10 @@ public sealed class ShellNavigatieTests
     {
         var shell = await OpenAsync();
 
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
 
         Assert.Equal(["Boekhouding.Journaal", "Boekhouding.Bank", "Boekhouding.Postvak", "Boekhouding.Rapporten", "Boekhouding.Meer"],
-            shell.Navigatie.Where(n => n.Module == ModuleSoort.Boekhouding && n.IsSubitem).Select(n => n.Sleutel));
+            shell.Navigatie.Where(n => n.Module == ModuleSoort.Boekhouding).Select(n => n.Sleutel));
         var meer = Item(shell, "Boekhouding.Meer");
         Assert.True(meer.IsMeer);
         Assert.False(meer.IsUitgeklapt);
@@ -84,9 +85,9 @@ public sealed class ShellNavigatieTests
         Assert.True(meer.IsUitgeklapt);
         Assert.Same(pagina, shell.GeselecteerdePagina);
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
-        Assert.True(Item(shell, "Boekhouding.Rekeningschema").IsDiep);
+        Assert.True(Item(shell, "Boekhouding.Rekeningschema").IsSubitem);
         Assert.Equal(["Boekingsregels", "Relaties", "Rekeningschema", "Grootboekkaart", "Boekjaren"],
-            shell.Navigatie.Where(n => n.IsDiep && n.Module == ModuleSoort.Boekhouding).Select(n => n.Sleutel.Split('.')[1]));
+            shell.Navigatie.Where(n => n.IsSubitem).Select(n => n.Sleutel.Split('.')[1]));
 
         shell.MeerWisselenCommand.Execute(meer); // weer inklappen
         Assert.DoesNotContain(shell.Navigatie, n => n.Sleutel == "Boekhouding.Rekeningschema");
@@ -96,7 +97,7 @@ public sealed class ShellNavigatieTests
     public async Task Meer_selecteren_klapt_niet_om_en_de_selectie_gaat_terug_naar_de_pagina()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var pagina = shell.GeselecteerdePagina;
         var meer = Item(shell, "Boekhouding.Meer");
 
@@ -116,7 +117,7 @@ public sealed class ShellNavigatieTests
     public async Task Meer_wisselen_klapt_precies_een_keer_om_en_negeert_een_andere_regel()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var meer = Item(shell, "Boekhouding.Meer");
 
         shell.MeerWisselenCommand.Execute(Item(shell, "Boekhouding.Bank")); // geen Meer…-regel
@@ -136,7 +137,7 @@ public sealed class ShellNavigatieTests
     public async Task Een_pagina_onder_meer_klapt_meer_vanzelf_uit()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
 
         boekhouding.Subtab = BoekhoudingSubtab.Rekeningschema; // bijvoorbeeld via het menu
@@ -161,13 +162,13 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Een_onderdeel_kiezen_klapt_de_module_uit_en_opent_het_subtabblad()
+    public async Task Een_onderdeel_kiezen_opent_het_subtabblad()
     {
         var shell = await OpenAsync();
 
-        await Kies(shell, "Boekhouding"); // uitklappen en naar het huidige onderdeel (Journaal)
+        await Kies(shell, "Boekhouding.Journaal");
         Assert.Same(Item(shell, "Boekhouding.Journaal"), shell.GeselecteerdeNavigatie);
-        Assert.True(Item(shell, "Boekhouding.Bank").IsSubitem);
+        Assert.False(Item(shell, "Boekhouding.Bank").IsSubitem); // besluit 33: de dagelijkse onderdelen staan bovenaan
 
         await Kies(shell, "Boekhouding.Bank");
 
@@ -185,16 +186,20 @@ public sealed class ShellNavigatieTests
     public async Task Uitklappen_houdt_de_bestaande_regels_en_voegt_alleen_onderdelen_toe()
     {
         var shell = await OpenAsync();
-        var boekhouding = Item(shell, "Boekhouding");
-        await Kies(shell, "Boekhouding");
+        var journaal = Item(shell, "Boekhouding.Journaal");
+        var meer = Item(shell, "Boekhouding.Meer");
+        await Kies(shell, "Boekhouding.Journaal");
 
-        Assert.Same(boekhouding, Item(shell, "Boekhouding"));
-        Assert.True(boekhouding.IsUitgeklapt);
-        Assert.Equal(Item(shell, "Boekhouding.Journaal"), shell.Navigatie[shell.Navigatie.IndexOf(boekhouding) + 1]);
+        shell.MeerWisselenCommand.Execute(meer);
+
+        Assert.Same(journaal, Item(shell, "Boekhouding.Journaal"));
+        Assert.Same(meer, Item(shell, "Boekhouding.Meer"));
+        Assert.True(meer.IsUitgeklapt);
+        Assert.Equal(Item(shell, "Boekhouding.Boekingsregels"), shell.Navigatie[shell.Navigatie.IndexOf(meer) + 1]);
 
         await Kies(shell, "Instellingen");
-        Assert.Same(boekhouding, Item(shell, "Boekhouding"));
-        Assert.False(boekhouding.IsUitgeklapt);
+        Assert.Same(meer, Item(shell, "Boekhouding.Meer"));
+        Assert.False(meer.IsUitgeklapt);
         Assert.DoesNotContain(shell.Navigatie, n => n.IsSubitem);
     }
 
@@ -214,7 +219,7 @@ public sealed class ShellNavigatieTests
     public async Task Laatste_pagina_en_administratie_worden_na_herstart_hersteld()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         await Kies(shell, "Boekhouding.Rapporten");
         Assert.True(await shell.MagAfsluitenAsync());
 
@@ -240,25 +245,25 @@ public sealed class ShellNavigatieTests
     }
 
     [Fact]
-    public async Task Statusregel_toont_melding_en_fout_van_de_pagina_met_een_teken()
+    public async Task Meldingsbalk_toont_melding_en_fout_van_de_pagina_met_een_teken()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
 
         await boekhouding.ConceptenBoekenCommand.ExecuteAsync(null); // geen concepten: een melding
 
-        Assert.Equal(Statussoort.Gelukt, shell.Statussoort);
-        Assert.Equal("✓", shell.Statusteken);
-        Assert.Equal(boekhouding.Melding, shell.Statusmelding);
+        Assert.Equal(Statussoort.Gelukt, shell.Meldingsbalk.Soort);
+        Assert.Equal("✓", shell.Meldingsbalk.Teken);
+        Assert.Equal(boekhouding.Melding, shell.Meldingsbalk.Tekst);
     }
 
     [Fact]
-    public async Task Statusregel_toont_een_waarschuwing_als_een_halve_boekingsregel_niet_is_opgeslagen()
+    public async Task Meldingsbalk_toont_een_waarschuwing_als_een_halve_boekingsregel_niet_is_opgeslagen()
     {
         var shell = await OpenAsync();
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
         boekhouding.NieuweRegelCommand.Execute(null);
@@ -269,10 +274,10 @@ public sealed class ShellNavigatieTests
 
         await shell.OpslaanCommand.ExecuteAsync(null);
 
-        Assert.Equal(Statussoort.Waarschuwing, shell.Statussoort); // niet "Opgeslagen."
-        Assert.Equal("⚠", shell.Statusteken);
-        Assert.Equal(boekhouding.Waarschuwing, shell.Statusmelding);
-        Assert.Contains("1 boekingsregel nog niet", shell.Statusmelding, StringComparison.Ordinal);
+        Assert.Equal(Statussoort.Waarschuwing, shell.Meldingsbalk.Soort); // niet "Opgeslagen."
+        Assert.Equal("⚠", shell.Meldingsbalk.Teken);
+        Assert.Equal(boekhouding.Waarschuwing, shell.Meldingsbalk.Tekst);
+        Assert.Contains("1 boekingsregel nog niet", shell.Meldingsbalk.Tekst, StringComparison.Ordinal);
     }
 
     private static async Task Wacht(Func<bool> voorwaarde)
@@ -287,7 +292,7 @@ public sealed class ShellNavigatieTests
 
     private static async Task<BoekhoudingViewModel> OpenLegeBoekhoudingMetRekening(ShellViewModel shell)
     {
-        await Kies(shell, "Boekhouding");
+        await Kies(shell, "Boekhouding.Journaal");
         var boekhouding = Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina);
         await boekhouding.LeegBeginnenCommand.ExecuteAsync(null);
         boekhouding.NieuweRekeningCommand.Execute(null);
@@ -319,7 +324,6 @@ public sealed class ShellNavigatieTests
         _beheer.LaatsteSessie!.MeldWijziging(); // De echte sessie doet dit bij elke opslag
 
         await Wacht(() => Item(shell, "Boekhouding.Journaal").Teller == 1);
-        Assert.Equal(1, Item(shell, "Boekhouding").Teller);
         Assert.IsType<BoekhoudingViewModel>(shell.GeselecteerdePagina); // de pagina blijft staan
     }
 

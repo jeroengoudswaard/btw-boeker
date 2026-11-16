@@ -12,7 +12,7 @@ public sealed class StartTests
         new(soort, aantal, "titel", "tekst", "knop");
 
     [Fact]
-    public void Tellers_horen_bij_het_onderdeel_en_tellen_op_bij_de_module()
+    public void Tellers_horen_bij_het_onderdeel_en_alleen_daar()
     {
         Startkaart[] kaarten =
         [
@@ -25,7 +25,7 @@ public sealed class StartTests
 
         Assert.Equal(3, tellers["Boekhouding.Bank"]);
         Assert.Equal(2, tellers["Boekhouding.Postvak"]);
-        Assert.Equal(5, tellers["Boekhouding"]);
+        Assert.False(tellers.ContainsKey("Boekhouding")); // besluit 33: geen laag Boekhouding, één teller per regel
         Assert.False(tellers.ContainsKey("Start"));
     }
 

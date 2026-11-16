@@ -16,7 +16,7 @@ using BtwBoeker.Application.Modules;
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// Hoofdvenster: database-sessie, navigatiebalk, menu's en statusregel. De geopende pagina's blijven bewaard in
+/// Hoofdvenster: database-sessie, navigatiebalk, menu's en meldingsbalk. De geopende pagina's blijven bewaard in
 /// <see cref="Paginas"/>, zodat een pagina bij terugkeer zijn stand houdt.
 /// </summary>
 public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
@@ -49,20 +49,20 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _boekhouding = boekhouding;
         _tijd = tijd;
         _logger = logger;
+        Meldingsbalk = new Meldingsbalk(tijd);
         _overzicht = new OverzichtViewModel(this);
         Paginas.Add(_overzicht);
         GeselecteerdePagina = _overzicht;
-        BouwModuleMenu();
     }
 
     public ObservableCollection<PaginaViewModel> Paginas { get; } = [];
 
     /// <summary>De administratie van de geopende database (besluit 26: er is er één); <c>null</c> zonder database.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Venstertitel))]
     public partial AdministratieViewModel? Administratie { get; private set; }
 
-    public ObservableCollection<ModuleMenuItem> ModuleMenu { get; } = [];
+    /// <summary>UX-review stap 1 (besluit 32): meldingen rechts in de paginakop in plaats van in een statusbalk.</summary>
+    public Meldingsbalk Meldingsbalk { get; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(OpslaanCommand), nameof(AfdrukkenCommand), nameof(ExporteerSjabloonCommand), nameof(ExporteerXafCommand))]
@@ -82,22 +82,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar))]
     public partial Weergavemodus Weergave { get; set; }
-
-    [ObservableProperty]
-    public partial string Statusmelding { get; set; } = "Gereed";
-
-    /// <summary>✓ gelukt, ⚠ waarschuwing, ✕ fout; zonder teken bij een gewone melding.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Statusteken))]
-    public partial Statussoort Statussoort { get; private set; }
-
-    public string Statusteken => Statussoort switch
-    {
-        Statussoort.Gelukt => "✓",
-        Statussoort.Waarschuwing => "⚠",
-        Statussoort.Fout => "✕",
-        _ => string.Empty,
-    };
 
     public bool IsDatabaseOpen => DatabaseNaam is not null;
 
@@ -121,15 +105,11 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
     }
 
-    public string Boekjaartekst => $"Boekjaar {_tijd.GetLocalNow().Year.ToString(CultureInfo.InvariantCulture)}";
-
-    /// <summary>Windows-conventie: "Document - Applicatie".</summary>
-    public string Venstertitel => (DatabaseNaam, Administratie?.Naam) switch
-    {
-        (null, _) => "BTW-Boeker",
-        (var db, null) => $"{db} - BTW-Boeker",
-        (var db, var adm) => $"{adm} - {db} - BTW-Boeker",
-    };
+    /// <summary>
+    /// Windows-conventie: "Document – Applicatie". Sinds de UX-review zonder de naam van de administratie: die staat al
+    /// op de afdrukken en in Instellingen (één ding één keer). Het slotje staat ervoor in de eigen titelbalk.
+    /// </summary>
+    public string Venstertitel => DatabaseNaam is { } db ? $"{db} – BTW-Boeker" : "BTW-Boeker";
 
     public async Task InitialiseerAsync()
     {
@@ -138,7 +118,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _thema.PasToe(Thema);
         Weergave = _instellingen.Weergave;
         _boekhouding.Woorden.Weergave = Weergave;
-        BouwModuleMenu();
 
         if (_instellingen.LaatsteDatabase is { } pad && _beheer.Bestaat(pad))
         {
@@ -401,7 +380,6 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _boekhouding.Woorden.Weergave = weergave;
         _instellingen = _instellingen with { Weergave = weergave };
         _opslag.Bewaar(_instellingen);
-        BouwModuleMenu();
         BouwNavigatie();
     }
 
@@ -494,6 +472,11 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             newValue.PropertyChanged += ActievePaginaGewijzigd;
         }
 
+        if (oldValue is not null && !ReferenceEquals(oldValue, newValue))
+        {
+            Meldingsbalk.AnderePagina(); // een ⚠ of ✕ hoort bij de pagina waar hij ontstond
+        }
+
         BouwNavigatie();
     }
 
@@ -505,6 +488,8 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
                 OpslaanCommand.NotifyCanExecuteChanged();
                 break;
             case nameof(PaginaViewModel.Onderdeel):
+                // Besluit 33: een onderdeel is in de platte navigatie een eigen pagina; een ⚠ of ✕ hoort daar niet meer bij.
+                Meldingsbalk.AnderePagina();
                 // Een onderdeel onder Meer… moet zichtbaar worden; anders alleen markeren.
                 BouwNavigatie();
                 break;
@@ -592,14 +577,12 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         _uiContext = SynchronizationContext.Current;
         sessie.Gewijzigd += SessieGewijzigd;
         Administratie = new AdministratieViewModel(await sessie.Administraties.HaalAsync());
-        Administratie.PropertyChanged += AdministratieGewijzigd;
 
         var laatste = herstelPagina ? _instellingen.LaatstePagina : null;
         _instellingen = _instellingen with { LaatsteDatabase = sessie.Pad, LaatstePagina = laatste };
         _opslag.Bewaar(_instellingen);
 
         DatabaseNaam = Path.GetFileName(sessie.Pad);
-        BouwModuleMenu();
         GeselecteerdePagina = _overzicht;
         if (laatste is { Module: not ModuleSoort.Overzicht } && KanModuleOpenen(laatste.Module))
         {
@@ -658,18 +641,13 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         }
 
         GeselecteerdePagina = _overzicht;
-        if (Administratie is not null)
-        {
-            Administratie.PropertyChanged -= AdministratieGewijzigd;
-            Administratie = null;
-        }
+        Administratie = null;
 
         _overzicht.Kaarten.Clear();
         _sessie.Gewijzigd -= SessieGewijzigd;
         await _sessie.DisposeAsync();
         _sessie = null;
         DatabaseNaam = null;
-        BouwModuleMenu();
         BouwNavigatie();
         ShellLog.DatabaseGesloten(_logger);
         return true;
@@ -691,16 +669,4 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         };
     }
 
-    private void AdministratieGewijzigd(object? sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(Venstertitel));
-
-    private void BouwModuleMenu()
-    {
-        ModuleMenu.Clear();
-        foreach (var module in ModuleCatalogus.Alle.Where(m => m.Sneltoetsnummer is not null))
-        {
-            // Boekhouding volgt de weergave; de overige modules houden hun naam.
-            var titel = module.Soort == ModuleSoort.Boekhouding ? _boekhouding.Woorden["Boekhouding"] : module.Titel;
-            ModuleMenu.Add(new ModuleMenuItem(titel, module.Pictogram, $"Ctrl+{module.Sneltoetsnummer}", OpenModuleCommand, module.Soort));
-        }
-    }
 }

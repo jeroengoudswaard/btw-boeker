@@ -29,11 +29,29 @@ public static class Onderdeelkleuren
         _ => Grijs,
     };
 
-    /// <summary>Het onderdeel waar een startkaart naartoe leidt, voor de kleur van het getal op de kaart.</summary>
-    public static ModuleSoort OnderdeelVan(Startkaartsoort soort) => soort switch
+    /// <summary>
+    /// Besluit 33: elke regel van de platte navigatie een eigen kleur, op zijn sleutel (<c>Boekhouding.Bank</c>). De
+    /// onderdelen onder <i>Meer…</i> (de inrichting) delen violet; Start, Instellingen en onbekend zijn grijs.
+    /// </summary>
+    public static Kleur Voor(string? sleutel) => sleutel switch
     {
-        Startkaartsoort.Inrichting => ModuleSoort.Overzicht,
-        _ => ModuleSoort.Boekhouding,
+        "Boekhouding.Journaal" => Indigo,
+        "Boekhouding.Bank" => Blauw,
+        "Boekhouding.Postvak" => Amber,
+        "Boekhouding.Rapporten" => Groenblauw,
+        "Boekhouding.Meer" => Grijs,
+        "Boekhouding" => Indigo,
+        not null when sleutel.StartsWith("Boekhouding.", StringComparison.Ordinal) => Violet,
+        _ => Grijs,
+    };
+
+    /// <summary>De regel in de navigatie waar een startkaart naartoe leidt, voor de kleur van het getal op de kaart.</summary>
+    public static string OnderdeelVan(Startkaartsoort soort) => soort switch
+    {
+        Startkaartsoort.Inrichting => "Start",
+        Startkaartsoort.Bank => "Boekhouding.Bank",
+        Startkaartsoort.Postvak => "Boekhouding.Postvak",
+        _ => "Boekhouding.Journaal",
     };
 
     /// <summary>De kleur met <see cref="Tintdekking"/> over de grond gelegd.</summary>

@@ -7,7 +7,7 @@ using BtwBoeker.Application.Modules;
 
 namespace BtwBoeker.App.ViewModels;
 
-/// <summary>Soort melding in de statusregel.</summary>
+/// <summary>Soort melding in de meldingsbalk.</summary>
 public enum Statussoort
 {
     Info,
@@ -17,7 +17,7 @@ public enum Statussoort
 }
 
 /// <summary>
-/// Navigatiebalk, statusregel, menubalk en startkaarten.
+/// Navigatiebalk, meldingsbalk, menubalk en startkaarten.
 /// </summary>
 public sealed partial class ShellViewModel
 {
@@ -46,11 +46,7 @@ public sealed partial class ShellViewModel
         OnPropertyChanged(nameof(IsMenubalkZichtbaar));
     }
 
-    private void ZetStatus(Statussoort soort, string tekst)
-    {
-        Statussoort = soort;
-        Statusmelding = tekst;
-    }
+    private void ZetStatus(Statussoort soort, string tekst) => Meldingsbalk.Toon(soort, tekst);
 
     partial void OnDatabaseNaamChanged(string? value) => BouwNavigatie();
 
@@ -105,25 +101,22 @@ public sealed partial class ShellViewModel
         BouwNavigatie();
     }
 
-    /// <summary>Bouwt de navigatiebalk opnieuw op: andere weergave of geopende module.</summary>
+    /// <summary>
+    /// Bouwt de navigatiebalk opnieuw op: andere weergave of geopende pagina. Besluit 33: een platte navigatie, Start · Journaal
+    /// · Bank · Bonnen · Rapporten · Meer… · Instellingen; de onderdelen van de boekhouding staan er direct in, zonder de laag
+    /// Boekhouding.
+    /// </summary>
     private void BouwNavigatie()
     {
         var items = new List<NavigatieItem> { Module(ModuleSoort.Overzicht, "Start", "Start") };
         if (IsDatabaseOpen)
         {
-            var open = GeselecteerdePagina?.Module.Soort;
-            items.Add(Module(ModuleSoort.Boekhouding, "Boekhouding", _boekhouding.Woorden["Boekhouding"], heeftOnderdelen: true,
-                uitgeklapt: open == ModuleSoort.Boekhouding));
-            if (open == ModuleSoort.Boekhouding)
+            if (GeselecteerdePagina?.Module.Soort != ModuleSoort.Boekhouding)
             {
-                items.AddRange(Boekhoudingonderdelen());
+                _meerOpen.Clear(); // een andere pagina: Meer… begint weer ingeklapt
             }
 
-            if (open != ModuleSoort.Boekhouding)
-            {
-                _meerOpen.Clear(); // een andere module: Meer… begint weer ingeklapt
-            }
-
+            items.AddRange(Boekhoudingonderdelen());
             items.Add(Module(ModuleSoort.Instellingen, "Instellingen", "Instellingen"));
         }
 
@@ -183,7 +176,7 @@ public sealed partial class ShellViewModel
         {
             null or OverzichtViewModel => Navigatie.FirstOrDefault(),
             _ => Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsMeer && n.Onderdeel == pagina.Onderdeel)
-                ?? Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsSubitem),
+                ?? Navigatie.FirstOrDefault(n => n.Module == pagina.Module.Soort && !n.IsMeer && !n.IsSubitem),
         };
 
         if (!ReferenceEquals(gekozen, GeselecteerdeNavigatie))
@@ -203,28 +196,39 @@ public sealed partial class ShellViewModel
     private List<NavigatieItem> Boekhoudingonderdelen()
     {
         var woorden = _boekhouding.Woorden;
+        (int, string, string) Dagelijks(BoekhoudingSubtab o, string pictogram) => ((int)o, woorden[$"Tab.{o}"], pictogram);
+        (int, string, string) Inrichting(BoekhoudingSubtab o) => ((int)o, woorden[$"Tab.{o}"], string.Empty);
         return Onderdelen(ModuleSoort.Boekhouding, "Boekhouding",
         [
-            ((int)BoekhoudingSubtab.Journaal, woorden["Tab.Journaal"]),
-            ((int)BoekhoudingSubtab.Bank, woorden["Tab.Bank"]),
-            ((int)BoekhoudingSubtab.Postvak, woorden["Tab.Postvak"]),
-            ((int)BoekhoudingSubtab.Rapporten, woorden["Tab.Rapporten"]),
+            Dagelijks(BoekhoudingSubtab.Journaal, ModuleCatalogus.Geef(ModuleSoort.Boekhouding).Pictogram),
+            Dagelijks(BoekhoudingSubtab.Bank, Pictogrammen.Bank),
+            Dagelijks(BoekhoudingSubtab.Postvak, Pictogrammen.Bonnen),
+            Dagelijks(BoekhoudingSubtab.Rapporten, Pictogrammen.Rapporten),
         ],
         [
-            ((int)BoekhoudingSubtab.Boekingsregels, woorden["Tab.Boekingsregels"]),
-            ((int)BoekhoudingSubtab.Relaties, "Relaties"),
-            ((int)BoekhoudingSubtab.Rekeningschema, woorden["Tab.Rekeningschema"]),
-            ((int)BoekhoudingSubtab.Grootboekkaart, woorden["Tab.Grootboekkaart"]),
-            ((int)BoekhoudingSubtab.Boekjaren, woorden["Tab.Boekjaren"]),
+            Inrichting(BoekhoudingSubtab.Boekingsregels),
+            Inrichting(BoekhoudingSubtab.Relaties),
+            Inrichting(BoekhoudingSubtab.Rekeningschema),
+            Inrichting(BoekhoudingSubtab.Grootboekkaart),
+            Inrichting(BoekhoudingSubtab.Boekjaren),
         ], BoekhoudingSubtabNaam);
+    }
+
+    /// <summary>Codepunten uit Segoe Fluent Icons voor de dagelijkse onderdelen (besluit 33: elk een eigen pictogram).</summary>
+    private static class Pictogrammen
+    {
+        public const string Bank = "\uE825";
+        public const string Bonnen = "\uE723";
+        public const string Rapporten = "\uE9F9";
+        public const string Meer = "\uE712";
     }
 
     /// <summary>
     /// De dagelijkse onderdelen, dan <i>Meer…</i> en, als die open is of de pagina daar staat, de onderdelen voor de inrichting.
     /// </summary>
     private List<NavigatieItem> Onderdelen(
-        ModuleSoort module, string sleutel, IEnumerable<(int Onderdeel, string Titel)> dagelijks, IEnumerable<(int Onderdeel, string Titel)> meer,
-        Func<int, string> naam)
+        ModuleSoort module, string sleutel, IEnumerable<(int Onderdeel, string Titel, string Pictogram)> dagelijks,
+        IEnumerable<(int Onderdeel, string Titel, string Pictogram)> meer, Func<int, string> naam)
     {
         var meerLijst = meer.ToList();
         if (GeselecteerdePagina is { } pagina && pagina.Module.Soort == module && pagina.Onderdeel is { } huidig && meerLijst.Exists(m => m.Onderdeel == huidig))
@@ -233,8 +237,8 @@ public sealed partial class ShellViewModel
         }
 
         var open = _meerOpen.Contains(module);
-        var items = dagelijks.Select(o => new NavigatieItem($"{sleutel}.{naam(o.Onderdeel)}", Zonder_(o.Titel), string.Empty, module, o.Onderdeel)).ToList();
-        items.Add(new NavigatieItem($"{sleutel}.Meer", "Meer…", string.Empty, module, null) { IsMeer = true, IsUitgeklapt = open, HeeftOnderdelen = true });
+        var items = dagelijks.Select(o => new NavigatieItem($"{sleutel}.{naam(o.Onderdeel)}", Zonder_(o.Titel), o.Pictogram, module, o.Onderdeel)).ToList();
+        items.Add(new NavigatieItem($"{sleutel}.Meer", "Meer…", Pictogrammen.Meer, module, null) { IsMeer = true, IsUitgeklapt = open, HeeftOnderdelen = true });
         if (open)
         {
             items.AddRange(meerLijst.Select(o => new NavigatieItem($"{sleutel}.{naam(o.Onderdeel)}", Zonder_(o.Titel), string.Empty, module, o.Onderdeel) { IsDiep = true }));
@@ -322,7 +326,7 @@ public sealed partial class ShellViewModel
         }
     }
 
-    /// <summary>De aantallen bij de regels van de navigatiebalk.</summary>
+    /// <summary>De aantallen bij de regels van de navigatiebalk: één teller per regel, bij het onderdeel waar het werk ligt.</summary>
     private void PasTellersToe()
     {
         var tellers = IsDatabaseOpen ? Navigatietellers.Bepaal(_kaarten) : new Dictionary<string, int>();

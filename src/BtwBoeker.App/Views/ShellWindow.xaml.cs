@@ -19,6 +19,13 @@ public partial class ShellWindow : Window
         DataContext = _viewModel = viewModel;
     }
 
+    /// <summary>UX-review stap 1: afgeronde hoeken (Windows 11) zodra het venster een handle heeft.</summary>
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        Views.Thema.VensterrandDwm.ZetHoeken(this);
+    }
+
     /// <summary>Een gemaximaliseerd venster met eigen titelbalk valt anders buiten het scherm; het pictogram wisselt.</summary>
     protected override void OnStateChanged(EventArgs e)
     {

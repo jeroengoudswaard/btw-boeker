@@ -384,3 +384,58 @@ internal sealed class VasteTijd(DateTimeOffset nu) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => nu;
 }
+
+/// <summary>Een klok die alleen vooruitgaat met <see cref="Verder"/>; timers gaan dan af (eenmalig, zonder herhaling).</summary>
+internal sealed class HandmatigeTijd(DateTimeOffset begin) : TimeProvider
+{
+    private readonly List<Timer> _timers = [];
+
+    public DateTimeOffset Nu { get; private set; } = begin;
+
+    public override DateTimeOffset GetUtcNow() => Nu;
+
+    public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
+    {
+        var timer = new Timer(this, callback, state);
+        timer.Change(dueTime, period);
+        return timer;
+    }
+
+    public void Verder(TimeSpan duur)
+    {
+        Nu += duur;
+        foreach (var timer in _timers.Where(t => t.Moment is { } m && m <= Nu).ToList())
+        {
+            timer.Moment = null;
+            timer.Callback(timer.State);
+        }
+    }
+
+    private sealed class Timer(HandmatigeTijd klok, TimerCallback callback, object? state) : ITimer
+    {
+        public TimerCallback Callback { get; } = callback;
+
+        public object? State { get; } = state;
+
+        public DateTimeOffset? Moment { get; set; }
+
+        public bool Change(TimeSpan dueTime, TimeSpan period)
+        {
+            Moment = dueTime == Timeout.InfiniteTimeSpan ? null : klok.Nu + dueTime;
+            if (!klok._timers.Contains(this))
+            {
+                klok._timers.Add(this);
+            }
+
+            return true;
+        }
+
+        public void Dispose() => klok._timers.Remove(this);
+
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
+        }
+    }
+}

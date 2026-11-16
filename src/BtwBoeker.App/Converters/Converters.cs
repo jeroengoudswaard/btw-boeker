@@ -127,8 +127,8 @@ public sealed class HoofdactieStijlConverter : IValueConverter
 }
 
 /// <summary>
-/// Een onderdeel (<see cref="BtwBoeker.Application.Modules.ModuleSoort"/>, of een startkaart via het onderdeel
-/// waar hij naartoe leidt) naar zijn kleur. Met <see cref="Tint"/> de kleur voor 16 % dekkend, zodat de tint in licht en
+/// Een onderdeel (de sleutel van een navigatieregel, een <see cref="BtwBoeker.Application.Modules.ModuleSoort"/>, of een
+/// startkaart via het onderdeel waar hij naartoe leidt) naar zijn kleur. Met <see cref="Tint"/> de kleur voor 16 % dekkend, zodat de tint in licht en
 /// donker vanzelf klopt.
 /// </summary>
 public sealed class OnderdeelkleurConverter : IValueConverter
@@ -137,13 +137,13 @@ public sealed class OnderdeelkleurConverter : IValueConverter
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var module = value switch
+        var kleur = value switch
         {
-            BtwBoeker.Application.Modules.ModuleSoort m => m,
-            BtwBoeker.Application.Inrichting.Startkaartsoort s => ViewModels.Onderdeelkleuren.OnderdeelVan(s),
-            _ => BtwBoeker.Application.Modules.ModuleSoort.Overzicht,
+            BtwBoeker.Application.Modules.ModuleSoort m => ViewModels.Onderdeelkleuren.Voor(m),
+            BtwBoeker.Application.Inrichting.Startkaartsoort s => ViewModels.Onderdeelkleuren.Voor(ViewModels.Onderdeelkleuren.OnderdeelVan(s)),
+            string sleutel => ViewModels.Onderdeelkleuren.Voor(sleutel),
+            _ => ViewModels.Onderdeelkleuren.Grijs,
         };
-        var kleur = ViewModels.Onderdeelkleuren.Voor(module);
         var alfa = Tint ? (byte)Math.Round(ViewModels.Onderdeelkleuren.Tintdekking * 255) : (byte)255;
         var brush = new SolidColorBrush(Color.FromArgb(alfa, kleur.R, kleur.G, kleur.B));
         brush.Freeze();

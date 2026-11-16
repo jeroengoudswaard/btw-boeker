@@ -42,14 +42,22 @@ public class OnderdeelkleurenTests
     }
 
     [Fact]
-    public void Elke_startkaart_hoort_bij_een_onderdeel()
+    public void Elke_startkaart_heeft_de_kleur_van_het_onderdeel_waar_hij_naartoe_leidt()
     {
         foreach (var soort in Enum.GetValues<BtwBoeker.Application.Inrichting.Startkaartsoort>())
         {
-            Assert.True(Enum.IsDefined(Onderdeelkleuren.OnderdeelVan(soort)));
+            Assert.Contains(Onderdeelkleuren.Voor(Onderdeelkleuren.OnderdeelVan(soort)), Onderdeelkleuren.Palet);
         }
 
-        Assert.Equal(ModuleSoort.Boekhouding, Onderdeelkleuren.OnderdeelVan(BtwBoeker.Application.Inrichting.Startkaartsoort.Bank));
+        Assert.Equal("Boekhouding.Bank", Onderdeelkleuren.OnderdeelVan(BtwBoeker.Application.Inrichting.Startkaartsoort.Bank));
+        Assert.Equal(Onderdeelkleuren.Voor("Boekhouding.Bank"), Onderdeelkleuren.Voor(Onderdeelkleuren.OnderdeelVan(BtwBoeker.Application.Inrichting.Startkaartsoort.Bank)));
+    }
+
+    [Fact]
+    public void De_onderdelen_onder_meer_delen_een_kleur_en_onbekend_is_grijs()
+    {
+        Assert.Equal(Onderdeelkleuren.Voor("Boekhouding.Rekeningschema"), Onderdeelkleuren.Voor("Boekhouding.Boekjaren"));
+        Assert.Equal(Onderdeelkleuren.Grijs, Onderdeelkleuren.Voor("Onbekend"));
     }
 
     [Theory]

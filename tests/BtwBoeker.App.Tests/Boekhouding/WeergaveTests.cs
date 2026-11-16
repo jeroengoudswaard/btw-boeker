@@ -92,14 +92,12 @@ public sealed class WeergaveTests : IDisposable
             _omgeving.Tijd, NullLogger<ShellViewModel>.Instance);
         await shell.InitialiseerAsync();
         Assert.Equal(Weergavemodus.Expert, shell.Weergave);
-        Assert.Contains(shell.ModuleMenu, m => m.Titel == "Boekhouding");
 
         shell.KiesWeergaveCommand.Execute(Weergavemodus.Eenvoudig);
 
         Assert.Equal(Weergavemodus.Eenvoudig, shell.Weergave);
         Assert.Equal(Weergavemodus.Eenvoudig, hulpmiddelen.Woorden.Weergave);
         Assert.Equal(Weergavemodus.Eenvoudig, opslag.Instellingen.Weergave);
-        Assert.Contains(shell.ModuleMenu, m => m.Titel == "Financiën");
 
         var opnieuw = new ShellViewModel(new FakeDatabaseBeheer(), opslag, new FakeDialoogService(), new FakeThemaService(), FakeBoekhouding.Hulpmiddelen(),
             _omgeving.Tijd, NullLogger<ShellViewModel>.Instance);

@@ -176,7 +176,7 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - Tests: `ShellNavigatieTests` (navigatie en *Meer…*), `Boekhouding/ZichtbaarheidTests`; de FlaUI-tests klappen *Meer…* met een echte muisklik uit voordat ze een item onder *Meer…* kiezen, en `Meer_blijft_dicht_met_de_pijltjes_en_klapt_om_met_enter_en_spatie` controleert het toetsenbord.
 
 ## Opslaan en tellers
-- `BoekhoudingViewModel.BewaarAsync` slaat op wat klopt. Een gewijzigde boekingsregel met een `Fout` blijft achter via `_halveRegels`: `LaadRegels` zet die rijen terug en koppelt hun rekening aan het object uit de nieuwe `Toewijsrekeningen`, anders blijft de keuzelijst leeg. `BewaarAsync` geeft dan `false`, zodat een pagina met een halve regel niet ongemerkt sluit, en zet `Waarschuwing` (`IPaginameldingen`: ⚠ in de statusregel). Andere fouten (rekening, post, factuur) blokkeren nog wel alles.
+- `BoekhoudingViewModel.BewaarAsync` slaat op wat klopt. Een gewijzigde boekingsregel met een `Fout` blijft achter via `_halveRegels`: `LaadRegels` zet die rijen terug en koppelt hun rekening aan het object uit de nieuwe `Toewijsrekeningen`, anders blijft de keuzelijst leeg. `BewaarAsync` geeft dan `false`, zodat een pagina met een halve regel niet ongemerkt sluit, en zet `Waarschuwing` (`IPaginameldingen`: ⚠ in de meldingsbalk). Andere fouten (rekening, post, factuur) blokkeren nog wel alles.
 - `Wijzigingen` geeft bij elke verhoging het event `Gewijzigd`, naar buiten als `IDatabaseSessie.Gewijzigd` (standaard een lege implementatie, zodat testvervangers het niet hoeven te hebben). De drie opslagen met een transactie verhogen ook na de commit: wie vlak ervoor las, zou anders de oude stand met de nieuwste versie bewaren.
 - `ShellViewModel.SessieGewijzigd` komt op een willekeurige thread binnen en gaat via de `SynchronizationContext` naar de UI-thread. `VernieuwNaWijzigingAsync` wacht tot het 400 ms stil is en herberekent dan de startkaarten en tellers; `_kaartenRonde` zorgt dat de nieuwste berekening wint. Laden geeft geen seintje, dus er ontstaat geen lus.
 - De teller in de navigatiebalk telt alle bankrekeningen; `TeVerwerkenPerRekening` en `BankkeuzeTekstConverter` tonen het aantal per rekening in de keuzelijst.
@@ -187,4 +187,31 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - **Inrichten** gaat via één route: `BoekhoudingDienst.ImporteerAsync(Inrichtvoorstel)`. Een voorstel bevat rekeningen (`Inrichtrekening`) met beginsaldi; de dienst maakt rubrieken, rekeningen, dagboeken (memoriaal, kas, verkoop), het beginjaar en de openingsbalans, na een back-up. Bronnen: een rekeningschema-sjabloon (`.btwsjabloon`, wizard `SjablooninrichtingViewModel`) of leeg beginnen; het inlezen van een XAF-bestand volgt.
 - **Startwizard:** Welkom → Database → Boekhouding → Bank → Klaar; de voortgang staat in de tabel `Startwizard`.
 - **Reikwijdte:** `ReikwijdteTests` bewaakt dat onderdelen van het oude product (begroting, Excel-overname, standaardschema's, tweede administratie) niet terugkomen; `MigratieTests` dat bestaande databases zonder verlies worden bijgewerkt.
+
+## Rustiger schil en platte navigatie (UX-review ronde 2, stappen 1 en 2; besluiten 32 en 33)
+
+- **Platte navigatie:** Start · Journaal · Bank · Bonnen · Rapporten · Meer… · Instellingen. De onderdelen van de boekhouding staan direct in de navigatie; er is geen regel *Boekhouding* meer.
+  - Ze blijven één pagina (`BoekhoudingViewModel` met `Subtab`), en de sleutels blijven `Boekhouding.Bank` enzovoort. Daardoor werken de bewaarde laatste pagina, de tellers en de AutomationIds (`Nav_Boekhouding.Bank`) gewoon door.
+  - `NavigatieItem.IsSubitem` betekent nu "ingesprongen onder *Meer…*".
+  - `Navigatietellers` geeft één teller per regel, zonder optelling per module.
+- **Kleur per regel:** `Onderdeelkleuren.Voor(string sleutel)` geeft elke dagelijkse regel een eigen kleur: Journaal indigo, Bank blauw, Bonnen amber, Rapporten groenblauw. De inrichting onder *Meer…* is violet; Start en Instellingen zijn grijs.
+  - De `OnderdeelkleurConverter` neemt een sleutel, een `ModuleSoort` of een `Startkaartsoort`.
+  - De band boven de pagina volgt `PaginaViewModel.Navigatiesleutel`.
+  - Een startkaart krijgt de kleur van de regel waar hij naartoe leidt.
+- **Paginakop:** de kop toont het onderdeel waar de gebruiker is (`PaginaViewModel.Paginatitel`), met één zin uitleg (`Omschrijving`).
+  - Boekhouding haalt titel en uitleg uit de woordenlijst (`Tab.*`, nieuw `Kop.*`), dus ook in Eenvoudig.
+  - Zolang de boekhouding niet is ingericht, heet de pagina *Boekhouding*.
+  - Een wijziging van `Onderdeel` meldt titel, uitleg en band (`MeldKopGewijzigd`).
+  - `Titel` blijft de naam van de pagina, bijvoorbeeld in de vraag om op te slaan.
+- **Meldingsbalk:** `ViewModels/Meldingsbalk` vervangt de statusbalk. Het is een `Groepskader` met AutomationId `Meldingsbalk`, rechts in de paginakop.
+  - ✓ verdwijnt na 6 s via `TimeProvider.CreateTimer`; ⚠ en ✕ verdwijnen bij een andere pagina of een ander onderdeel (`AnderePagina`).
+  - De tests gebruiken de handmatige klok `HandmatigeTijd`.
+- **Venster:** de titel is *bestand – BTW-Boeker*, met het slotje in de eigen titelbalk. `GlassFrameThickness="0,0,0,1"` zorgt dat Windows schaduw en rand tekent. `VensterrandDwm.ZetHoeken` vraagt op Windows 11 om afgeronde hoeken; de randkleur volgt Windows (besluit 26).
+- **Menubalk:** Bestand, Bewerken, Beeld en Help. *Modules* en *Extra* zijn weg, *Instellingen* (Ctrl+,) staat in Bestand en `ModuleMenuItem` is verwijderd.
+- **Opslaan** staat er alleen bij wijzigingen, en is dan de hoofdactie (`HoofdactieStijl`). De tekst "Niet-opgeslagen wijzigingen" is vervallen.
+- **Thema:**
+  - `Focusrand`: afgerond, alleen bij toetsenbordgebruik;
+  - `Meldingsbalk`, `Meldingsteken` en `Sluitkruisje`;
+  - `Onderdeelpaneel`: een TabControl zonder kopregel en zonder lijn.
+- **Bewaakt door:** `SchilTests` (architectuur), `ShellSchilTests`, `MeldingsbalkTests` en `VensterrandTests`.
 
