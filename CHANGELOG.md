@@ -4,6 +4,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.21.0] - 2026-11-16: Rustiger schil, platte navigatie en een zip zonder installatie
+
 ### Toegevoegd
 - **Zip zonder installatie** (besluit 37): naast `BtwBoeker-<versie>.msi` staat op de release ook `BtwBoeker-<versie>-win-x64.zip`, uit dezelfde publicatie. Uitpakken en `BTW-Boeker.exe` starten werkt zonder installatie en zonder beheerdersrechten. Instellingen en logboek staan ook dan in de eigen Windows-map van de gebruiker.
 - **Website:** de release-workflow zet de knop *Zip, zonder installatie* direct onder de downloadknop, of werkt hem bij als hij er al staat (`website-bijwerken.sh`, met tests).
