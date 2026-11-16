@@ -4,6 +4,13 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Toegevoegd
+- **Zip zonder installatie** (besluit 37): naast `BtwBoeker-<versie>.msi` staat op de release ook `BtwBoeker-<versie>-win-x64.zip`, uit dezelfde publicatie. Uitpakken en `BTW-Boeker.exe` starten werkt zonder installatie en zonder beheerdersrechten. Instellingen en logboek staan ook dan in de eigen Windows-map van de gebruiker.
+- **Website:** de release-workflow zet de knop *Zip, zonder installatie* direct onder de downloadknop, of werkt hem bij als hij er al staat (`website-bijwerken.sh`, met tests).
+
+### Opgelost
+- **Release-workflow:** het publiceren naar de website vond de MSI niet (`download-artifact` v8 met één artefact); nu met een vaste naam en map.
+
 ## [0.20.0] - 2026-11-11: Opgeruimd, en geen vraag meer om op te slaan na alleen bekijken
 
 ### Opgelost

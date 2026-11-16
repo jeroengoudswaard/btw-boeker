@@ -38,6 +38,12 @@ De MSI heeft het versienummer in de naam (`BtwBoeker-0.19.0.msi`). De workflow z
 
 Oudere versies blijven op de release staan, zodat u kunt teruggaan.
 
+Naast de MSI staat dezelfde app als zip: `BtwBoeker-<versie>-win-x64.zip` (besluit 37).
+- **Gebruik:** wie de zip uitpakt, start `BTW-Boeker.exe` direct, zonder installatie en zonder beheerdersrechten.
+- **Herkomst:** de zip komt uit dezelfde publicatiemap als de MSI.
+- **Website:** de workflow zet de knop *Zip, zonder installatie* direct onder de MSI-knop, of werkt hem bij als hij er al staat.
+- **Geen USB-versie:** instellingen en logboek staan ook bij de zip in `%APPDATA%\BTW-Boeker` en `%LOCALAPPDATA%\BTW-Boeker\logs`.
+
 ## Wat niet automatisch gaat
 
 - **Schermafbeeldingen van de desktop:** daarvoor heeft FlaUI een bureaublad nodig. Lukt dat niet op de GitHub-runner, dan geeft de workflow een waarschuwing en blijven de vorige afbeeldingen staan. U kunt ze dan zelf maken op Windows:
@@ -59,3 +65,5 @@ dotnet build installer/BtwBoeker.Installer.wixproj -c Release -p:Versie=0.19.0 -
 ```
 
 De MSI staat daarna als `BtwBoeker-0.19.0.msi` in `installer/bin/x64/Release/`.
+
+Een zip maakt u van dezelfde map met `Compress-Archive -Path artifacts/publish/* -DestinationPath BtwBoeker-0.19.0-win-x64.zip` (PowerShell).
