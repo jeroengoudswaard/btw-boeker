@@ -43,12 +43,24 @@ bevat "andere app ongewijzigd" "$site/index.html" 'TraceLab <span class="tag">v0
 bevat "downloadlink" "$site/btw-boeker/index.html" 'releases/download/btw-boeker/BtwBoeker-0.19.0.msi"'
 bevat_niet "oude link" "$site/btw-boeker/index.html" 'btw-boeker/BtwBoeker.msi'
 bevat "releaseinformatie ongewijzigd" "$site/btw-boeker/index.html" 'releases/tag/btw-boeker"'
+# Besluit 37: de zip komt er de eerste keer bij, als tweede knop direct na de MSI.
+bevat "ziplink" "$site/btw-boeker/index.html" 'releases/download/btw-boeker/BtwBoeker-0.19.0-win-x64.zip"'
+bevat "ziptekst" "$site/btw-boeker/index.html" 'zonder installatie'
+if [ "$(grep -n 'win-x64.zip' "$site/btw-boeker/index.html" | cut -d: -f1)" != "2" ]; then
+  echo "FOUT: de ziplink staat niet direct onder de downloadknop"
+  fouten=$((fouten + 1))
+fi
 
 # Volgende versie, ook een patch: de vorige versie wordt vervangen.
 bash "$script" "$site" 0.19.1 || { echo "FOUT: patchversie faalde"; fouten=$((fouten + 1)); }
 bevat "patch label" "$site/index.html" '<span class="tag">v0.19.1 · beta</span>'
 bevat "patch link" "$site/btw-boeker/index.html" 'BtwBoeker-0.19.1.msi"'
 bevat_niet "vorige link" "$site/btw-boeker/index.html" 'BtwBoeker-0.19.0.msi'
+bevat "patch ziplink" "$site/btw-boeker/index.html" 'BtwBoeker-0.19.1-win-x64.zip"'
+if [ "$(grep -c 'win-x64.zip' "$site/btw-boeker/index.html")" != "1" ]; then
+  echo "FOUT: de ziplink staat er niet precies een keer"
+  fouten=$((fouten + 1))
+fi
 
 # Twee keer dezelfde versie verandert niets.
 cp "$site/index.html" "$map/label-voor"
@@ -63,6 +75,10 @@ maak_site "$site" '\r\n'
 bash "$script" "$site" 0.19.0 || { echo "FOUT: CRLF faalde"; fouten=$((fouten + 1)); }
 if [ "$(grep -c $'\r$' "$site/index.html")" != "2" ]; then
   echo "FOUT: CRLF ging verloren"
+  fouten=$((fouten + 1))
+fi
+if [ "$(grep -c $'\r$' "$site/btw-boeker/index.html")" != "3" ]; then
+  echo "FOUT: CRLF ging verloren op de pagina (ook de nieuwe ziplink heeft CRLF)"
   fouten=$((fouten + 1))
 fi
 

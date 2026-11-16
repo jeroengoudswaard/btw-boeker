@@ -22,3 +22,13 @@ grep -Eq "$knop" "$pagina" || { echo "::error::Downloadknop van BTW-Boeker niet 
 
 sed -E -i "s#$label#\1v$versie#" "$startpagina"
 sed -E -i "s#$knop#\1BtwBoeker-$versie.msi#g" "$pagina"
+
+# Besluit 37 (uit het moederproduct): de zip (zonder installatie) als tweede knop direct onder de MSI. Staat hij er al,
+# dan krijgt hij de nieuwe versie; anders komt hij er één keer bij, met dezelfde inspringing en hetzelfde regeleinde.
+zip='(releases/download/btw-boeker/)BtwBoeker-[0-9.]+-win-x64\.zip'
+if grep -Eq "$zip" "$pagina"; then
+  sed -E -i "s#$zip#\1BtwBoeker-$versie-win-x64.zip#g" "$pagina"
+else
+  zipknop='<a class="btn" href="\3BtwBoeker-'"$versie"'-win-x64.zip"><span lang="en">Zip, without installing</span><span lang="nl">Zip, zonder installatie</span></a>'
+  sed -E -i "s#^([ \t]*)(<a [^>]*href=\"([^\"]*releases/download/btw-boeker/)BtwBoeker-$versie\.msi\"[^\r]*)(\r?)\$#\1\2\4\n\1$zipknop\4#" "$pagina"
+fi
