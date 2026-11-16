@@ -78,10 +78,15 @@ public sealed class AppUiTests : IDisposable
         var venster = Start();
 
         Assert.Equal("BTW-Boeker", venster.Title);
-        foreach (var menu in new[] { "Bestand", "Bewerken", "Beeld", "Modules", "Extra", "Help" })
+        foreach (var menu in new[] { "Bestand", "Bewerken", "Beeld", "Help" })
         {
             Zoek(venster, $"Menu_{menu}");
         }
+
+        // UX-review stap 1: Modules herhaalde de navigatie en Extra had alleen Instellingen (nu in Bestand); geen statusbalk.
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Menu_Modules")));
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Menu_Extra")));
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Statusbalk")));
 
         Zoek(venster, "StartNieuw");
         Zoek(venster, "StartOpenen");
@@ -94,6 +99,7 @@ public sealed class AppUiTests : IDisposable
         importeren.Expand();
         Zoek(venster, "Menu_ImporteerSjabloon");
         importeren.Collapse();
+        Zoek(venster, "Menu_Instellingen");
         bestand.Collapse();
 
         Sluit(venster);
@@ -111,16 +117,23 @@ public sealed class AppUiTests : IDisposable
 
         VoerWachtwoordIn(venster); // het wachtwoordvenster verschijnt automatisch voor de laatst gebruikte database
 
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
         Bewaar(venster, "02-overzicht");
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, Diagnose(venster));
-        Zoek(venster, "StatusAdministratie");
+        Zoek(venster, "BoekhoudingTabblad");
+        Assert.True(Retry.WhileFalse(() => Zoek(venster, "Paginatitel").Name == "Boekhouding", Wachttijd).Result, Diagnose(venster)); // nog niet ingericht
         Bewaar(venster, "03-boekhouding");
 
+        // UX-review stap 1: Opslaan verschijnt pas bij een wijziging; na Ctrl+S meldt de meldingsbalk het met ✓.
         Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
+        Zoek(venster, "AdministratieNaam");
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("InstellingenOpslaan")));
+        Zoek(venster, "DrempelZonderBon").AsTextBox().Text = "25";
         Zoek(venster, "InstellingenOpslaan");
+        Sneltoets(venster, VirtualKeyShort.KEY_S);
+        Assert.True(Retry.WhileFalse(() => ZoekMetDiagnose(venster, "Meldingstekst").Name == "Opgeslagen.", Wachttijd).Result, Diagnose(venster));
+        Assert.True(WachtTotWeg(venster, "InstellingenOpslaan"), Diagnose(venster));
         Bewaar(venster, "04-instellingen");
 
         Sluit(venster);
@@ -204,7 +217,7 @@ public sealed class AppUiTests : IDisposable
             .Bewaar(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
@@ -250,7 +263,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
@@ -294,7 +307,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         Zoek(venster, "BoekhoudingTabblad");
@@ -359,7 +372,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Sneltoets(venster, VirtualKeyShort.KEY_1); // Boekhouding
         var posten = Zoek(venster, "Journaalposten").AsGrid();
@@ -434,7 +447,7 @@ public sealed class AppUiTests : IDisposable
 
         var venster = Start();
         VoerWachtwoordIn(venster);
-        Assert.True(Retry.WhileFalse(() => venster.Title == "Mijn administratie - btw-boeker.btwdb - BTW-Boeker", Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "btw-boeker.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
 
         Zoek(venster, "Navigatiebalk");
         Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("Administratiewisselaar"))); // besluit 26: geen wisselaar
@@ -456,8 +469,8 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => venster.FindFirstDescendant(c => c.ByAutomationId("Menubalk")) is null, Wachttijd).Result,
             "De tijdelijke menubalk verdween niet na Escape.");
 
-        Kies(venster, "Nav_Boekhouding");
-        Zoek(venster, "Nav_Boekhouding.Bank");
+        Kies(venster, "Nav_Boekhouding.Bank"); // besluit 33: de onderdelen staan direct in de navigatie
+        Zoek(venster, "BoekhoudingTabblad");
         Sluit(venster);
     }
 
@@ -485,13 +498,13 @@ public sealed class AppUiTests : IDisposable
             var venster = Start();
             VoerWachtwoordIn(venster, Demodatabase.Wachtwoord);
             Assert.True(
-                Retry.WhileFalse(() => venster.Title == $"{Demodatabase.Administratienaam} - vakantiehuis.btwdb - BTW-Boeker", Wachttijd).Result,
+                Retry.WhileFalse(() => venster.Title == "vakantiehuis.btwdb – BTW-Boeker", Wachttijd).Result,
                 venster.Title);
             ZetVenstergrootte(venster);
 
             Zoek(venster, "Startkaarten");
             Schermafbeelding(venster, uitvoer, $"start-{naam}");
-            Kies(venster, "Nav_Boekhouding");
+            Kies(venster, "Nav_Boekhouding.Journaal");
             Zoek(venster, "Journaalposten");
             Schermafbeelding(venster, uitvoer, $"boekhouding-{naam}");
             Kies(venster, "Nav_Boekhouding.Rapporten");
@@ -527,13 +540,12 @@ public sealed class AppUiTests : IDisposable
         BewaarInstellingen(new GebruikersInstellingen { LaatsteDatabase = db, StartwizardGetoond = true });
         var venster = Start();
         VoerWachtwoordIn(venster, Meerjarendemo.Wachtwoord);
-        Assert.True(Retry.WhileFalse(() => venster.Title.StartsWith(Meerjarendemo.Administratienaam, StringComparison.Ordinal), Wachttijd).Result, venster.Title);
+        Assert.True(Retry.WhileFalse(() => venster.Title == "meerjarig.btwdb – BTW-Boeker", Wachttijd).Result, venster.Title);
         Zoek(venster, "Startkaarten");
         var gewijzigdNa = new List<string>(); // alleen bekijken mag Boekhouding niet als gewijzigd markeren
 
         for (var ronde = 0; ronde < 2; ronde++)
         {
-            Stap(venster, "Nav_Boekhouding"); // opent op het laatst gekozen onderdeel
             Stap(venster, "Nav_Boekhouding.Journaal", "Journaalposten");
             ControleerOngewijzigd(venster, "Journaal", gewijzigdNa);
             Stap(venster, "Nav_Boekhouding.Bank");
@@ -599,10 +611,10 @@ public sealed class AppUiTests : IDisposable
         Assert.Contains("Openen database", rapport, StringComparison.Ordinal);
     }
 
-    /// <summary>De melding Niet-opgeslagen wijzigingen van Boekhouding staat er alleen bij een echte wijziging.</summary>
+    /// <summary>De knop Opslaan van Boekhouding staat er alleen bij een echte wijziging.</summary>
     private static void ControleerOngewijzigd(Window venster, string stap, List<string> gewijzigdNa)
     {
-        if (gewijzigdNa.Count == 0 && venster.FindFirstDescendant(c => c.ByAutomationId("BoekhoudingOnopgeslagen")) is not null)
+        if (gewijzigdNa.Count == 0 && venster.FindFirstDescendant(c => c.ByAutomationId("BoekhoudingOpslaan")) is not null)
         {
             gewijzigdNa.Add(stap);
         }

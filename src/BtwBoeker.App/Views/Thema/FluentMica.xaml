@@ -35,8 +35,21 @@
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
+    <!-- UX-review stap 1: de focusrand bij toetsenbordgebruik (WPF toont een FocusVisualStyle niet bij een muisklik), afgerond
+         zoals Fluent. -->
+    <Style x:Key="Focusrand">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border CornerRadius="8" BorderThickness="2" BorderBrush="{DynamicResource FocusStrokeColorOuterBrush}" SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Een regel in de navigatiebalk: zonder kader, bij de gekozen regel een vlak en een accentstreepje (zoals Windows 11). -->
     <Style x:Key="Navigatieregel" TargetType="ListBoxItem">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource Focusrand}" />
         <Setter Property="Padding" Value="8,4" />
         <Setter Property="Margin" Value="0,0" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -197,6 +210,91 @@
     </Style>
 
     <!-- Een knop die alleen tekst is, in de accentkleur (bijvoorbeeld de actie op een startkaart). -->
+    <!-- ===== UX-review stap 1: uit het moederproduct (besluit 32) ===== -->
+
+    <!-- De meldingsbalk rechts in de paginakop (in plaats van de statusbalk); de achtergrond volgt de soort (✓ ⚠ ✕). -->
+    <Style x:Key="Meldingsbalk" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Soort}" Value="Gelukt">
+                <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Soort}" Value="Waarschuwing">
+                <Setter Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Soort}" Value="Fout">
+                <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="Meldingsteken" TargetType="TextBlock">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Soort}" Value="Gelukt">
+                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Soort}" Value="Waarschuwing">
+                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Soort}" Value="Fout">
+                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Een klein sluitkruisje (24 × 24 px), bijvoorbeeld in de meldingsbalk. -->
+    <Style x:Key="Sluitkruisje" TargetType="Button">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Content" Value="&#xE711;" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource Focusrand}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Vlak" Background="Transparent" CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Vlak" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Vlak" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Onderdelen die de navigatiebalk kiest: alleen de inhoud, zonder tabkoppen en zonder de lijn waar die stonden. -->
+    <Style x:Key="Onderdeelpaneel" TargetType="TabControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <TabPanel IsItemsHost="True" Visibility="Collapsed" />
+                        <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="TabItem">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Tekstknop" TargetType="Button">
         <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />

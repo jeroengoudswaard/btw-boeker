@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels"
         xmlns:views="clr-namespace:BtwBoeker.App.Views"
+        xmlns:tg="clr-namespace:BtwBoeker.App.Views.Toegankelijkheid"
         xmlns:boekhoudingvm="clr-namespace:BtwBoeker.App.ViewModels.Boekhouding"
         xmlns:boekhouding="clr-namespace:BtwBoeker.App.Views.Boekhouding"
         xmlns:inst="clr-namespace:BtwBoeker.Application.Instellingen;assembly=BtwBoeker.Application"
@@ -18,9 +19,10 @@
         FontFamily="{StaticResource Lettertype}"
         AutomationProperties.AutomationId="Hoofdvenster">
 
-    <!-- Eigen titelbalk; slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven van Windows. -->
+    <!-- Eigen titelbalk; slepen, dubbelklikken, Snap (Win+pijl, slepen naar de rand) en Alt+spatie blijven van Windows.
+         GlassFrameThickness mag niet 0 zijn, anders tekent Windows geen schaduw en geen rand om het venster (UX-review stap 1). -->
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="8" UseAeroCaptionButtons="False" />
+        <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="8" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
@@ -35,14 +37,6 @@
         <DataTemplate DataType="{x:Type boekhoudingvm:BoekhoudingViewModel}">
             <boekhouding:BoekhoudingView />
         </DataTemplate>
-
-        <Style x:Key="ModuleMenuItemStijl" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
-            <Setter Property="Header" Value="{Binding Titel}" />
-            <Setter Property="Command" Value="{Binding Opdracht}" />
-            <Setter Property="CommandParameter" Value="{Binding Parameter}" />
-            <Setter Property="InputGestureText" Value="{Binding Sneltoets}" />
-            <Setter Property="AutomationProperties.AutomationId" Value="{Binding Titel, StringFormat=Menu_{0}}" />
-        </Style>
     </Window.Resources>
 
     <Window.InputBindings>
@@ -70,6 +64,10 @@
             <!-- Keuze A (2026-11-10): het app-icoon op 16 px, zoals Windows 11-apps -->
             <Image Source="/Assets/BtwBoeker.ico" Width="16" Height="16" Margin="16,0,12,0" VerticalAlignment="Center"
                    RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="BTW-Boeker" AutomationProperties.AutomationId="TitelbalkIcoon" />
+            <!-- Het slotje voor de bestandsnaam: de database is versleuteld. -->
+            <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" ToolTip="Versleuteld" AutomationProperties.Name="Versleuteld"
+                       Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
             <TextBlock Text="{Binding Venstertitel}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </DockPanel>
@@ -111,6 +109,9 @@
                 <MenuItem Header="_Back-up maken..." Command="{Binding MaakBackupCommand}" />
                 <MenuItem Header="Back-up _terugzetten..." Command="{Binding HerstelBackupCommand}" />
                 <Separator />
+                <MenuItem Header="_Instellingen" InputGestureText="Ctrl+," Command="{Binding OpenModuleCommand}"
+                          CommandParameter="{x:Static mod:ModuleSoort.Instellingen}" AutomationProperties.AutomationId="Menu_Instellingen" />
+                <Separator />
                 <MenuItem Header="_Afsluiten" InputGestureText="Alt+F4" Click="Afsluiten_Click" />
             </MenuItem>
             <MenuItem Header="Be_werken" AutomationProperties.AutomationId="Menu_Bewerken">
@@ -142,12 +143,6 @@
                 <MenuItem Header="_Volgende pagina" InputGestureText="Ctrl+Tab" Command="{Binding VolgendePaginaCommand}" />
                 <MenuItem Header="Vo_rige pagina" InputGestureText="Ctrl+Shift+Tab" Command="{Binding VorigePaginaCommand}" />
             </MenuItem>
-            <MenuItem Header="_Modules" AutomationProperties.AutomationId="Menu_Modules"
-                      ItemsSource="{Binding ModuleMenu}" ItemContainerStyle="{StaticResource ModuleMenuItemStijl}" />
-            <MenuItem Header="E_xtra" AutomationProperties.AutomationId="Menu_Extra">
-                <MenuItem Header="_Instellingen" InputGestureText="Ctrl+," Command="{Binding OpenModuleCommand}"
-                          CommandParameter="{x:Static mod:ModuleSoort.Instellingen}" />
-            </MenuItem>
             <MenuItem Header="_Help" AutomationProperties.AutomationId="Menu_Help">
                 <MenuItem Header="_Logbestanden openen" Click="LogbestandenOpenen_Click" />
                 <Separator />
@@ -155,56 +150,12 @@
             </MenuItem>
         </Menu>
 
-        <!-- ===== Statusbalk ===== -->
-        <StatusBar DockPanel.Dock="Bottom" AutomationProperties.AutomationId="Statusbalk" Background="Transparent"
-                   BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Padding="8,0">
-            <StatusBarItem>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE72E;" Margin="0,0,8,0" VerticalAlignment="Center"
-                               Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}"
-                               ToolTip="Versleuteld" />
-                    <TextBlock Text="{Binding DatabaseNaam, TargetNullValue='Geen database geopend'}" />
-                </StackPanel>
-            </StatusBarItem>
-            <Separator Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}" />
-            <StatusBarItem Visibility="{Binding Administratie, Converter={StaticResource NietNullNaarZichtbaar}}">
-                <TextBlock Text="{Binding Administratie.Naam}" FontWeight="SemiBold" AutomationProperties.AutomationId="StatusAdministratie" />
-            </StatusBarItem>
-            <Separator Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
-            <StatusBarItem Content="{Binding Boekjaartekst}"
-                           Visibility="{Binding IsDatabaseOpen, Converter={StaticResource BoolNaarZichtbaar}}" />
-            <Separator />
-            <!-- ✓ gelukt, ⚠ waarschuwing, ✕ fout; de tekst zegt wat er gebeurde. -->
-            <StatusBarItem AutomationProperties.AutomationId="Statusregel" AutomationProperties.LiveSetting="Polite">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Statusteken}" FontWeight="SemiBold" Margin="0,0,8,0">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Statussoort}" Value="Gelukt">
-                                        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Statussoort}" Value="Waarschuwing">
-                                        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Statussoort}" Value="Fout">
-                                        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <TextBlock Text="{Binding Statusmelding}" TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </StatusBarItem>
-        </StatusBar>
-
         <!-- ===== Navigatiebalk ===== -->
         <Border DockPanel.Dock="Left" Width="248" Background="Transparent">
             <DockPanel Margin="8,8,8,8">
                 <ListBox x:Name="Navigatiebalk" ItemsSource="{Binding Navigatie}" SelectedItem="{Binding GeselecteerdeNavigatie}"
                          PreviewMouseLeftButtonDown="Navigatiebalk_PreviewMouseLeftButtonDown" PreviewKeyDown="Navigatiebalk_PreviewKeyDown"
-                         BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" FocusVisualStyle="{x:Null}"
                          AutomationProperties.Name="Navigatie" AutomationProperties.AutomationId="Navigatiebalk">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource Navigatieregel}">
@@ -228,12 +179,12 @@
                                     <TextBlock Text="{Binding Teller}" FontSize="12" FontWeight="SemiBold" TextAlignment="Center"
                                                Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                                 </Border>
-                                <!-- Het pictogram in de kleur van het onderdeel, op een zachte tint. -->
+                                <!-- Het pictogram in de kleur van het onderdeel (besluit 33: elke regel een eigen kleur), op een zachte tint. -->
                                 <Border x:Name="Tegel" Width="28" Height="28" CornerRadius="8" Margin="0,0,12,0" VerticalAlignment="Center"
-                                        Background="{Binding Module, Converter={StaticResource Onderdeeltint}}">
+                                        Background="{Binding Sleutel, Converter={StaticResource Onderdeeltint}}">
                                     <TextBlock x:Name="Glyph" FontFamily="{StaticResource Pictogrammen}" Text="{Binding Pictogram}" FontSize="16"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Foreground="{Binding Module, Converter={StaticResource Onderdeelkleur}}" />
+                                               Foreground="{Binding Sleutel, Converter={StaticResource Onderdeelkleur}}" />
                                 </Border>
                                 <TextBlock x:Name="Titeltekst" Text="{Binding Titel}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                             </DockPanel>
@@ -244,11 +195,10 @@
                                     <Setter TargetName="Tegel" Property="Height" Value="24" />
                                     <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding IsDiep}" Value="True">
-                                    <Setter TargetName="Regel" Property="Margin" Value="48,0,0,0" />
-                                </DataTrigger>
                                 <DataTrigger Binding="{Binding IsMeer}" Value="True">
                                     <Setter TargetName="Titeltekst" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Setter TargetName="Tegel" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HeeftOnderdelen}" Value="True">
                                     <Setter TargetName="Pijl" Property="Visibility" Value="Visible" />
@@ -269,15 +219,36 @@
                 <ContentControl.ContentTemplate>
                     <DataTemplate DataType="{x:Type vm:PaginaViewModel}">
                         <DockPanel>
-                            <!-- Een band in de onderdeelkleur en dezelfde kop op elke pagina. -->
+                            <!-- Een band in de kleur van het onderdeel (besluit 33) en dezelfde kop op elke pagina. -->
                             <Border DockPanel.Dock="Top" Height="4" CornerRadius="8,0,0,0"
-                                    Background="{Binding Module.Soort, Converter={StaticResource Onderdeelkleur}}"
+                                    Background="{Binding Navigatiesleutel, Converter={StaticResource Onderdeelkleur}}"
                                     Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}" />
-                            <StackPanel DockPanel.Dock="Top" Margin="48,24,48,0"
-                                        Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}">
-                                <TextBlock Text="{Binding Titel}" Style="{StaticResource Paginatitel}" Margin="0" AutomationProperties.HeadingLevel="Level1" />
-                                <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
-                            </StackPanel>
+                            <!-- UX-review stap 1: de titel is het onderdeel waar de gebruiker is; rechts de meldingsbalk, op een vaste plek
+                                 zodat de pagina niet verspringt. -->
+                            <Grid DockPanel.Dock="Top" Margin="48,24,48,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Visibility="{Binding DataContext.IsDatabaseOpen, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaarZichtbaar}}">
+                                    <TextBlock Text="{Binding Paginatitel}" Style="{StaticResource Paginatitel}" Margin="0" AutomationProperties.HeadingLevel="Level1"
+                                               AutomationProperties.AutomationId="Paginatitel" />
+                                    <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <tg:Groepskader Grid.Column="1" DataContext="{Binding DataContext.Meldingsbalk, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                Style="{StaticResource Meldingsbalk}" MaxWidth="440" Margin="16,0,0,0" VerticalAlignment="Top"
+                                                AutomationProperties.Name="Melding" AutomationProperties.AutomationId="Meldingsbalk"
+                                                Visibility="{Binding IsZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource Sluitkruisje}" Command="{Binding SluitCommand}" Margin="8,0,0,0"
+                                                ToolTip="Sluiten" AutomationProperties.Name="Melding sluiten" AutomationProperties.AutomationId="MeldingSluiten" />
+                                        <TextBlock DockPanel.Dock="Left" Text="{Binding Teken}" FontWeight="SemiBold" Margin="0,0,8,0" VerticalAlignment="Top"
+                                                   Style="{StaticResource Meldingsteken}" AutomationProperties.Name="" />
+                                        <TextBlock Text="{Binding Tekst}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                                   AutomationProperties.AutomationId="Meldingstekst" AutomationProperties.LiveSetting="Polite" />
+                                    </DockPanel>
+                                </tg:Groepskader>
+                            </Grid>
                             <ContentControl Content="{Binding}" Focusable="False" />
                         </DockPanel>
                     </DataTemplate>

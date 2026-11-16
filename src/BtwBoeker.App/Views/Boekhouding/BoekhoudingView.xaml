@@ -26,10 +26,10 @@
     <DockPanel Margin="{StaticResource PaginaMarge}">
         <!-- ===== Opdrachtbalk onderaan ===== -->
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <!-- UX-review stap 1: alleen als er iets op te slaan is, en dan als hoofdactie; Ctrl+S werkt altijd. -->
             <Button DockPanel.Dock="Right" Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}"
-                    ToolTip="Concept en rekeningen opslaan (Ctrl+S)" AutomationProperties.AutomationId="BoekhoudingOpslaan" />
-            <TextBlock DockPanel.Dock="Right" Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0" AutomationProperties.AutomationId="BoekhoudingOnopgeslagen"
-                       Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
+                    Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}"
+                    Style="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource HoofdactieStijl}}" ToolTip="Opslaan (Ctrl+S)" AutomationProperties.AutomationId="BoekhoudingOpslaan" />
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="0" AutomationProperties.LiveSetting="Assertive"
                            AutomationProperties.AutomationId="BoekhoudingFout"
@@ -89,13 +89,8 @@
                 </StackPanel>
             </WrapPanel>
 
-            <TabControl SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="BoekhoudingSubtabbladen">
-                <!-- Sinds v0.8.0 kiest de navigatiebalk het onderdeel; de tabkoppen zijn verborgen. -->
-                <TabControl.ItemContainerStyle>
-                    <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                    </Style>
-                </TabControl.ItemContainerStyle>
+            <!-- De navigatiebalk kiest het onderdeel; geen tabkoppen en geen lege lijn waar die stonden. -->
+            <TabControl Style="{StaticResource Onderdeelpaneel}" SelectedIndex="{Binding Subtab, Converter={StaticResource EnumNaarIndex}}" AutomationProperties.AutomationId="BoekhoudingSubtabbladen">
                 <!-- ===== Journaal ===== -->
                 <TabItem Header="{DynamicResource T.Tab.Journaal}" ToolTip="{DynamicResource U.Journaal}" AutomationProperties.AutomationId="SubtabJournaal">
                     <Grid Margin="0,12,0,0">
@@ -445,7 +440,7 @@
                                            Visibility="{Binding Postvak.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                             <DataGrid ItemsSource="{Binding Postvak}" SelectedItem="{Binding GeselecteerdeBon}" AutoGenerateColumns="False" IsReadOnly="True"
                                       SelectionMode="Single" HeadersVisibility="Column" AllowDrop="True" DragOver="Bijlagen_DragOver" Drop="Postvak_Drop"
-                                      AutomationProperties.Name="Postvak bonnen" AutomationProperties.AutomationId="Postvak">
+                                      AutomationProperties.Name="Bonnen" AutomationProperties.AutomationId="Postvak">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Bestand" Binding="{Binding Bestandsnaam}" Width="2*" />
                                     <DataGridTextColumn Header="Soort" Binding="{Binding Soort}" Width="Auto" />

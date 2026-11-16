@@ -337,14 +337,13 @@ public sealed class ShellViewModelTests
     }
 
     [Fact]
-    public async Task Statusbalk_toont_database_administratie_en_boekjaar()
+    public async Task Titelbalk_toont_de_database_zonder_de_administratie()
     {
         var shell = await MaakShellMetOpenDatabase();
         shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
 
         Assert.Equal("btw-boeker.btwdb", shell.DatabaseNaam);
         Assert.Equal("Vakantiehuis De Duinen", shell.Administratie?.Naam);
-        Assert.Equal("Boekjaar 2026", shell.Boekjaartekst);
-        Assert.Contains("Vakantiehuis De Duinen", shell.Venstertitel, StringComparison.Ordinal);
+        Assert.Equal("btw-boeker.btwdb – BTW-Boeker", shell.Venstertitel); // UX-review: één ding één keer
     }
 }

@@ -8,6 +8,16 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 - **Zip zonder installatie** (besluit 37): naast `BtwBoeker-<versie>.msi` staat op de release ook `BtwBoeker-<versie>-win-x64.zip`, uit dezelfde publicatie. Uitpakken en `BTW-Boeker.exe` starten werkt zonder installatie en zonder beheerdersrechten. Instellingen en logboek staan ook dan in de eigen Windows-map van de gebruiker.
 - **Website:** de release-workflow zet de knop *Zip, zonder installatie* direct onder de downloadknop, of werkt hem bij als hij er al staat (`website-bijwerken.sh`, met tests).
 
+### Gewijzigd
+- **Platte navigatie** (besluit 33): Start · Journaal · Bank · Bonnen · Rapporten · Meer… · Instellingen. De onderdelen staan direct in de navigatie, zonder de tussenlaag *Boekhouding*. Elk onderdeel heeft een eigen pictogram en een eigen kleur, ook in de band boven de pagina. *Postvak bonnen* heet nu *Bonnen*.
+- **De titel zegt waar u bent:** de paginatitel is het onderdeel (*Bank*, *Rapporten*), met één zin uitleg, ook in Eenvoudig.
+- **Meldingsbalk in plaats van statusbalk:** meldingen staan rechts in de paginakop, met ✓, ⚠ of ✕ op een gekleurde achtergrond. Een ✓ verdwijnt na 6 seconden; ⚠ en ✕ blijven tot u ze sluit of naar een ander onderdeel gaat.
+- **Titelbalk:** 🔒 *bestand – BTW-Boeker*, zonder de naam van de administratie. Het venster heeft weer de schaduw en rand van Windows, en op Windows 11 afgeronde hoeken.
+- **Menubalk:** *Modules* (herhaalde de navigatie) en *Extra* (alleen Instellingen) zijn weg; *Instellingen* (Ctrl+,) staat in *Bestand*.
+- **Opslaan alleen als er iets op te slaan is**, en dan als hoofdactie; Ctrl+S werkt altijd. De tekst "Niet-opgeslagen wijzigingen" is vervallen.
+- **Navigatie:** één teller per regel; de focusrand verschijnt alleen bij toetsenbordgebruik. Boven de onderdelen staat geen lege lijn meer.
+- **Instellingen:** de kaart lijnt uit op de paginatitel.
+
 ### Opgelost
 - **Release-workflow:** het publiceren naar de website vond de MSI niet (`download-artifact` v8 met één artefact); nu met een vaste naam en map.
 

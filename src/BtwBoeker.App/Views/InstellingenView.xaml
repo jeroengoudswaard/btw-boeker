@@ -8,20 +8,19 @@
              d:DataContext="{d:DesignInstance Type=vm:InstellingenViewModel}"
              AutomationProperties.AutomationId="Instellingen">
     <DockPanel>
+        <!-- UX-review stap 1: de balk met Opslaan alleen als er iets op te slaan is; Ctrl+S werkt altijd. -->
         <Border DockPanel.Dock="Bottom" Padding="48,12" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <TextBlock Text="Niet-opgeslagen wijzigingen" Style="{StaticResource Toelichting}" VerticalAlignment="Center" Margin="0,0,16,0"
-                           Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}" />
-                <Button Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}"
-                        Style="{DynamicResource AccentButtonStyle}" ToolTip="Opslaan (Ctrl+S)"
-                        AutomationProperties.AutomationId="InstellingenOpslaan" />
-            </StackPanel>
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}">
+            <Button Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}" HorizontalAlignment="Right"
+                    Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}"
+                    Style="{DynamicResource AccentButtonStyle}" ToolTip="Opslaan (Ctrl+S)"
+                    AutomationProperties.AutomationId="InstellingenOpslaan" />
         </Border>
         <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="48,0,48,8"
                    Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="32,24" MaxWidth="760" HorizontalAlignment="Left">
+            <StackPanel Margin="48,24" MaxWidth="760" HorizontalAlignment="Left">
                 <TextBlock Text="Administratie" Style="{StaticResource Sectietitel}" />
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
                            Text="De naam staat in de titelbalk en op afdrukken; de drempel bepaalt welke boekingen zonder bon worden gemeld." />

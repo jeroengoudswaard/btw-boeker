@@ -60,6 +60,21 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
 
     public override string Titel => Woorden["Boekhouding"];
 
+    /// <summary>
+    /// UX-review stap 1: de titel is het onderdeel (<i>Bank</i>), in de woorden van de weergave. Zolang de boekhouding niet
+    /// is ingericht, staat er alleen het inrichten en heet de pagina Boekhouding.
+    /// </summary>
+    public override string Paginatitel => IsLeeg ? Titel : Woorden[$"Tab.{Subtab}"].Replace("_", string.Empty, StringComparison.Ordinal);
+
+    public override string Omschrijving => IsLeeg ? Module.Omschrijving : Woorden[$"Kop.{Subtab}"];
+
+    /// <summary>Besluit 33: de regel in de platte navigatie, bijvoorbeeld <c>Boekhouding.Bank</c>.</summary>
+    public override string Navigatiesleutel => $"Boekhouding.{Subtab}";
+
+    partial void OnIsIngerichtChanged(bool value) => MeldKopGewijzigd();
+
+    partial void OnIsGeladenChanged(bool value) => MeldKopGewijzigd();
+
     public IAsyncRelayCommand VernieuwCommand { get; }
 
     public IAsyncRelayCommand OpslaanCommand { get; }
@@ -795,6 +810,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
     private void WoordenGewijzigd(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(Titel));
+        MeldKopGewijzigd();
         OnPropertyChanged(nameof(Rapportkeuzes));
         if (_stand is not null)
         {
