@@ -105,7 +105,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
     public partial IReadOnlyList<Grootboekrekening> Rekeningkeuzes { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren))]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren), nameof(IsJaarkeuzeZichtbaar))]
     public partial IReadOnlyList<int> Boekjaren { get; private set; } = [];
 
     /// <summary>De jaarkeuze alleen bij meer dan één boekjaar.</summary>
@@ -285,7 +285,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
                 await _dienst.BewaarRekeningAsync(Soort, rekening.Invoer);
             }
 
-            await BewaarRegelsAsync();
+            var regelsBewaard = await BewaarRegelsAsync();
             await BewaarRelatiesAsync();
             Guid? selectie = Editor?.Id;
             if (Editor is { IsGewijzigd: true } editor)
@@ -296,6 +296,11 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
             Foutmelding = null;
             _halveRegels = [.. Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is not null)];
             var aantalHalf = _halveRegels.Count;
+            if (regelsBewaard > 0 && _stand is not null && _stand.Bankmutaties.Count > 0)
+            {
+                await Bankdienst.PasRegelsToeAsync(Soort); // besluit 38: regels toepassen gaat vanzelf
+            }
+
             await LaadAsync(selectie);
             if (aantalHalf == 0)
             {
@@ -674,6 +679,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
     {
         LaadPostbijlagen();
         CommandsVernieuwen();
+        MeldDetail();
     }
 
     partial void OnZoektekstChanged(string value) => PasPostfilterToe(GeselecteerdePost?.Id);
@@ -764,6 +770,8 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
         OnPropertyChanged(nameof(HeeftUitvoer));
         OnPropertyChanged(nameof(Afdruktabel));
         OnPropertyChanged(nameof(Onderdeel));
+        OnPropertyChanged(nameof(IsJaarkeuzeZichtbaar));
+        MeldDetail();
     }
 
     /// <summary>Het onderdeel in de navigatiebalk.</summary>
@@ -1006,6 +1014,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
         OnPropertyChanged(nameof(HeeftOnopgeslagenWijzigingen));
         OnPropertyChanged(nameof(KanOpslaan));
         OnPropertyChanged(nameof(HeeftOnopgeslagenNieuweRekeningen));
+        MeldDetail();
         OpslaanCommand.NotifyCanExecuteChanged();
         BoekenCommand.NotifyCanExecuteChanged();
         VerwijderConceptCommand.NotifyCanExecuteChanged();

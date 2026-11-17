@@ -44,10 +44,29 @@ public sealed record TransactiecodeKeuze(string Code, string Naam)
     public override string ToString() => $"{Code} · {Naam}";
 }
 
+/// <summary>Een voorwaarde van een boekingsregel; in het detail staan alleen de ingevulde en de toegevoegde (besluit 38).</summary>
+public enum Voorwaarde
+{
+    TegenIban,
+    NaamBevat,
+    OmschrijvingBevat,
+    Richting,
+    Bedrag,
+    Transactiecode,
+}
+
 /// <summary>Eén boekingsregel in het subtabblad Boekingsregels; een nieuwe regel heeft nog geen Id.</summary>
 public sealed partial class BoekingsregelRegel : ObservableObject
 {
+    private static readonly string[] Afgeleid =
+    [
+        nameof(Wanneer), nameof(Waarheen), nameof(ToeTeVoegenVoorwaarden), nameof(IsTegenIbanZichtbaar), nameof(IsNaamBevatZichtbaar),
+        nameof(IsOmschrijvingBevatZichtbaar), nameof(IsRichtingZichtbaar), nameof(IsBedragZichtbaar), nameof(IsTransactiecodeZichtbaar),
+        nameof(HeeftToeTeVoegenVoorwaarden),
+    ];
+
     private readonly string _origineel;
+    private readonly HashSet<Voorwaarde> _toegevoegd = [];
 
     public BoekingsregelRegel(Boekingsregel? regel, Grootboekrekening? rekening, BoekingsregelVoorwaarden? voorwaarden = null)
     {
@@ -133,6 +152,114 @@ public sealed partial class BoekingsregelRegel : ObservableObject
         : Voorwaarden is { BedragVan: { } van, BedragTot: { } tot } && van > tot ? "Het bedrag 'van' is groter dan 'tot'."
         : !string.IsNullOrWhiteSpace(TegenIban) && !Iban.Maak(TegenIban).ControlegetalGeldig ? "Het tegen-IBAN klopt niet."
         : null;
+
+    // ---- Lijst en detail (besluit 38) ------------------------------------------------------------
+
+    /// <summary>In de lijst: wanneer de regel geldt, in gewone woorden.</summary>
+    public string Wanneer
+    {
+        get
+        {
+            var delen = new List<string>();
+            if (!string.IsNullOrWhiteSpace(TegenIban))
+            {
+                delen.Add($"IBAN {TegenIban.Trim()}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(NaamBevat))
+            {
+                delen.Add($"naam bevat \"{NaamBevat.Trim()}\"");
+            }
+
+            if (!string.IsNullOrWhiteSpace(OmschrijvingBevat))
+            {
+                delen.Add($"omschrijving bevat \"{OmschrijvingBevat.Trim()}\"");
+            }
+
+            if (Richting != Richting.Beide)
+            {
+                delen.Add(Richting == Richting.Af ? "af" : "bij");
+            }
+
+            switch (Lees(BedragVanTekst), Lees(BedragTotTekst))
+            {
+                case ({ } van, { } tot):
+                    delen.Add($"van {van} tot {tot}");
+                    break;
+                case ({ } van, null):
+                    delen.Add($"vanaf {van}");
+                    break;
+                case (null, { } tot):
+                    delen.Add($"tot {tot}");
+                    break;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Transactiecode))
+            {
+                delen.Add($"code {Transactiecode.Trim()}");
+            }
+
+            return delen.Count == 0 ? "nog geen voorwaarde" : string.Join(", ", delen);
+        }
+    }
+
+    /// <summary>In de lijst: de rekening waar de transactie heen gaat.</summary>
+    public string Waarheen => GekozenRekening is { } rekening ? $"→ {rekening}" : "→ nog geen rekening";
+
+    public bool IsTegenIbanZichtbaar => !string.IsNullOrWhiteSpace(TegenIban) || _toegevoegd.Contains(Voorwaarde.TegenIban);
+
+    public bool IsNaamBevatZichtbaar => !string.IsNullOrWhiteSpace(NaamBevat) || _toegevoegd.Contains(Voorwaarde.NaamBevat);
+
+    public bool IsOmschrijvingBevatZichtbaar => !string.IsNullOrWhiteSpace(OmschrijvingBevat) || _toegevoegd.Contains(Voorwaarde.OmschrijvingBevat);
+
+    public bool IsRichtingZichtbaar => Richting != Richting.Beide || _toegevoegd.Contains(Voorwaarde.Richting);
+
+    public bool IsBedragZichtbaar =>
+        !string.IsNullOrWhiteSpace(BedragVanTekst) || !string.IsNullOrWhiteSpace(BedragTotTekst) || _toegevoegd.Contains(Voorwaarde.Bedrag);
+
+    public bool IsTransactiecodeZichtbaar => !string.IsNullOrWhiteSpace(Transactiecode) || _toegevoegd.Contains(Voorwaarde.Transactiecode);
+
+    /// <summary>De voorwaarden die nog niet in het detail staan, voor <i>Voorwaarde toevoegen ▾</i>.</summary>
+    public IReadOnlyList<Voorwaarde> ToeTeVoegenVoorwaarden =>
+    [
+        .. Enum.GetValues<Voorwaarde>().Where(v => !(v switch
+        {
+            Voorwaarde.TegenIban => IsTegenIbanZichtbaar,
+            Voorwaarde.NaamBevat => IsNaamBevatZichtbaar,
+            Voorwaarde.OmschrijvingBevat => IsOmschrijvingBevatZichtbaar,
+            Voorwaarde.Richting => IsRichtingZichtbaar,
+            Voorwaarde.Bedrag => IsBedragZichtbaar,
+            _ => IsTransactiecodeZichtbaar,
+        })),
+    ];
+
+    public bool HeeftToeTeVoegenVoorwaarden => ToeTeVoegenVoorwaarden.Count > 0;
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void VoorwaardeToevoegen(Voorwaarde voorwaarde)
+    {
+        if (_toegevoegd.Add(voorwaarde))
+        {
+            MeldAfgeleid();
+        }
+    }
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName is { } naam && !Afgeleid.Contains(naam) && naam is not (nameof(IsGewijzigd) or nameof(Fout)))
+        {
+            MeldAfgeleid();
+        }
+    }
+
+    private void MeldAfgeleid()
+    {
+        foreach (var naam in Afgeleid)
+        {
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(naam));
+        }
+    }
 
     internal BoekingsregelVoorwaarden Voorwaarden => new(
         Leeg(TegenIban), Leeg(NaamBevat), Leeg(OmschrijvingBevat), Richting, Lees(BedragVanTekst), Lees(BedragTotTekst), Leeg(Transactiecode));

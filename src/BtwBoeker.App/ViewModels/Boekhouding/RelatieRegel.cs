@@ -79,9 +79,10 @@ public sealed partial class RelatieRegel : ObservableObject
 
     public string Rol => (IsDebiteur, IsCrediteur) switch
     {
-        (true, true) => "Debiteur en crediteur",
-        (false, true) => "Crediteur",
-        _ => "Debiteur",
+        // Besluit 38: gewone woorden in plaats van debiteur en crediteur.
+        (true, true) => "Klant en leverancier",
+        (false, true) => "Leverancier",
+        _ => "Klant",
     };
 
     public bool IsGewijzigd => !string.Equals(Momentopname(), _origineel, StringComparison.Ordinal);

@@ -147,6 +147,7 @@ public sealed class BankViewModelTests : IDisposable
         Assert.Equal(2, vm.TeVerwerkenPerRekening[betaal.Id]);
 
         vm.GekozenBankrekening = betaal;
+        vm.GeselecteerdeMutatie = vm.Mutaties[0]; // besluit 38: geen vanzelf gekozen eerste regel
         vm.ToewijsRekening = vm.Toewijsrekeningen.Single(r => r.Nummer == 4115);
         await vm.ToewijzenCommand.ExecuteAsync(null);
         Assert.Equal(1, vm.TeVerwerkenPerRekening[betaal.Id]);

@@ -50,7 +50,7 @@ public sealed partial class BoekhoudingViewModel
         var selectie = GeselecteerdeBon?.Id;
         Postvak.Vervang((_stand!.Bijlagen.Where(b => b.IsInPostvak).OrderBy(b => b.ToegevoegdUtc)).Select(bijlage => new BonRegel(bijlage, Postkeuzes)));
 
-        GeselecteerdeBon = Postvak.FirstOrDefault(b => b.Id == selectie) ?? Postvak.FirstOrDefault();
+        GeselecteerdeBon = Postvak.FirstOrDefault(b => b.Id == selectie); // besluit 38: het detail opent pas bij een keuze
         OnPropertyChanged(nameof(Postvaktekst));
     }
 

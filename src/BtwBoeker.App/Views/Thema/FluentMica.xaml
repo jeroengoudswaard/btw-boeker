@@ -1,7 +1,8 @@
 <!-- Het visuele ontwerp Fluent Mica. Alle kleuren komen uit het Fluent-thema van .NET (DynamicResource), zodat
      licht en donker vanzelf werken; de accentkleur is die van Windows (AccentFillColor*Brush). -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:g="clr-namespace:BtwBoeker.App.Views.Gedeeld">
 
     <FontFamily x:Key="Lettertype">Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="Koplettertype">Segoe UI Variable Display, Segoe UI</FontFamily>
@@ -269,6 +270,38 @@
                             <Setter TargetName="Vlak" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- UX-review stap 3 (besluit 38): het detail naast een lijst, met de titel en ✕ bovenaan. -->
+    <Style TargetType="g:Detailpaneel">
+        <Setter Property="Width" Value="440" />
+        <Setter Property="Margin" Value="16,0,0,0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="g:Detailpaneel">
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                                <Button DockPanel.Dock="Right" Style="{StaticResource Sluitkruisje}" Command="{TemplateBinding SluitOpdracht}" Margin="8,0,0,0"
+                                        ToolTip="Sluiten (Esc)" AutomationProperties.Name="Sluiten" AutomationProperties.AutomationId="DetailSluiten" />
+                                <ContentPresenter ContentSource="Header" VerticalAlignment="Center">
+                                    <ContentPresenter.Resources>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="16" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        </Style>
+                                    </ContentPresenter.Resources>
+                                </ContentPresenter>
+                            </DockPanel>
+                            <ContentPresenter />
+                        </DockPanel>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

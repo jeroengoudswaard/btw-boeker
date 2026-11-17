@@ -84,6 +84,39 @@ public partial class SchilTests
         Assert.DoesNotContain("Niet-opgeslagen wijzigingen", string.Concat(Directory.EnumerateFiles(Views, "*.xaml", SearchOption.AllDirectories).Select(File.ReadAllText)), StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// UX-review stap 3 (besluit 38): elk onderdeel met een lijst heeft één detailpaneel dat sluit (✕, Esc), en nergens staat
+    /// nog een leeg vlak met "Selecteer een …" of "Kies een … in de lijst".
+    /// </summary>
+    [Fact]
+    public void Lijst_en_detail_zonder_leeg_vlak()
+    {
+        var xaml = Lees("Boekhouding", "BoekhoudingView.xaml");
+
+        Assert.DoesNotContain("Selecteer een", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("in de lijst.", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("T.Tekst.SelecteerPost", xaml, StringComparison.Ordinal);
+        var panelen = Detailpaneel().Matches(xaml).Select(m => m.Value).ToList();
+        Assert.Equal(6, panelen.Count); // Journaal, Bank, Bonnen, Boekingsregels, Relaties, Rekeningschema
+        Assert.All(panelen, p => Assert.Contains("SluitOpdracht=\"{Binding", p, StringComparison.Ordinal));
+        Assert.Contains("Key=\"Escape\"", xaml, StringComparison.Ordinal);
+    }
+
+    /// <summary>Boekingsregels en het rekeningschema worden in het detail bewerkt, niet meer in de cellen van de lijst.</summary>
+    [Theory]
+    [InlineData("Boekingsregels")]
+    [InlineData("Rekeningen")]
+    public void Inrichtingslijsten_zijn_alleen_lezen(string lijst)
+    {
+        var grid = Regex.Match(Lees("Boekhouding", "BoekhoudingView.xaml"), $"<DataGrid ItemsSource=\"{{Binding {lijst}[^>]*>");
+
+        Assert.True(grid.Success, lijst);
+        Assert.Contains("IsReadOnly=\"True\"", grid.Value, StringComparison.Ordinal);
+    }
+
+    [GeneratedRegex("<g:Detailpaneel\\s[^>]*>")]
+    private static partial Regex Detailpaneel();
+
     /// <summary>De navigatiebalk kiest het onderdeel: geen tabkoppen en ook geen lege lijn waar die stonden.</summary>
     [Fact]
     public void Onderdelen_zonder_tabkoppen_gebruiken_het_onderdeelpaneel()
