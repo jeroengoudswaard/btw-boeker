@@ -416,11 +416,17 @@
                                         </TextBox>
                                         <DockPanel>
                                             <Button DockPanel.Dock="Right" Content="{DynamicResource T.Knop.Toewijzen}" MinWidth="96" Command="{Binding ToewijzenCommand}" ContentTemplate="{StaticResource Toegangstekst}"
+                                                    Visibility="{Binding IsToewijzenZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                                                     ToolTip="{DynamicResource T.Tip.Toewijzen}" AutomationProperties.AutomationId="Toewijzen" />
                                             <Button Content="Regel _maken…" Command="{Binding RegelMakenCommand}" Style="{StaticResource Linkknop}" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                     ToolTip="Een boekingsregel, zodat dit voortaan vanzelf gaat" AutomationProperties.AutomationId="RegelMaken" />
                                         </DockPanel>
+                                        <TextBlock Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap" Text="Kies de rekening waarop dit bedrag hoort; dan verschijnt Toewijzen."
+                                                   Visibility="{Binding ToewijsRekening, Converter={StaticResource NullNaarZichtbaar}}" AutomationProperties.AutomationId="ToewijzenHint" />
                                     </StackPanel>
+                                    <Button Content="Naar de _post" HorizontalAlignment="Left" MinWidth="96" Command="{Binding NaarPostCommand}" ContentTemplate="{StaticResource Toegangstekst}"
+                                            Visibility="{Binding IsNaarPostZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
+                                            ToolTip="De post van deze transactie in het journaal" AutomationProperties.AutomationId="NaarPost" />
                                     <TextBlock Style="{StaticResource Toelichting}" Margin="0,12,0,0" TextWrapping="Wrap" Text="{DynamicResource T.Tekst.ConceptBank}" />
                                 </StackPanel>
                             </ScrollViewer>
@@ -478,10 +484,11 @@
                                           IsTextSearchEnabled="True" TextSearch.TextPath="Tekst" AutomationProperties.AutomationId="BonPost"
                                           ToolTip="Voorstellen (✓) hebben precies hetzelfde bedrag en een datum binnen 7 dagen" />
                                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
-                                           Text="Datum en bedrag worden vanzelf bewaard. Dubbelklik op een bon om hem te bekijken." />
+                                           Text="Datum en bedrag worden vanzelf bewaard. Kies bij welke post de bon hoort; dan verschijnt Koppelen. Dubbelklik op een bon om hem te bekijken." />
                                 <DockPanel Margin="0,16,0,0">
                                     <Button DockPanel.Dock="Right" Content="Koppele_n" MinWidth="96" ContentTemplate="{StaticResource Toegangstekst}"
                                             Command="{Binding DataContext.BonKoppelenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Visibility="{Binding IsKoppelenZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                                             AutomationProperties.AutomationId="BonKoppelen" />
                                     <Button Content="_Bekijken…" Style="{StaticResource Linkknop}" HorizontalAlignment="Left" VerticalAlignment="Center"
                                             Command="{Binding DataContext.BonBekijkenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -815,18 +822,24 @@
                             <Label Content="{DynamicResource T.Label.Rekening}" Target="{Binding ElementName=Kaartrekening}" VerticalAlignment="Center" Padding="0,0,8,0" />
                             <ComboBox x:Name="Kaartrekening" ItemsSource="{Binding Rekeningkeuzes}" SelectedItem="{Binding KaartRekening}" Width="280"
                                       IsTextSearchEnabled="True" Margin="0,0,16,0" VerticalAlignment="Center" AutomationProperties.AutomationId="KaartRekening" />
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding IsKaartRekeningGekozen, Converter={StaticResource BoolNaarZichtbaar}}">
                             <Label Content="_Van" Target="{Binding ElementName=KaartVan}" VerticalAlignment="Center" Padding="0,0,8,0" />
                             <DatePicker x:Name="KaartVan" SelectedDate="{Binding KaartVan}" Width="130" Margin="0,0,16,0" VerticalAlignment="Center" />
                             <Label Content="_Tot en met" Target="{Binding ElementName=KaartTot}" VerticalAlignment="Center" Padding="0,0,8,0" />
                             <DatePicker x:Name="KaartTot" SelectedDate="{Binding KaartTot}" Width="130" VerticalAlignment="Center" />
+                            </StackPanel>
                             </WrapPanel>
                         </DockPanel>
-                        <TextBlock DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                        <TextBlock DockPanel.Dock="Top" Style="{StaticResource Toelichting}" TextWrapping="Wrap" AutomationProperties.AutomationId="KaartUitleg"
+                                   Visibility="{Binding IsKaartRekeningGekozen, Converter={StaticResource OnwaarNaarZichtbaar}}"
+                                   Text="Kies een rekening om alle boekingen erop te zien, met het saldo na elke boeking." />
+                        <TextBlock DockPanel.Dock="Bottom" Margin="0,8,0,0" Visibility="{Binding IsKaartRekeningGekozen, Converter={StaticResource BoolNaarZichtbaar}}">
                             <Run Text="Beginsaldo " /><Run Text="{Binding KaartBeginsaldo, Mode=OneWay}" FontWeight="SemiBold" />
                             <Run Text="   ·   eindsaldo " /><Run Text="{Binding KaartEindsaldo, Mode=OneWay}" FontWeight="SemiBold" />
                             <Run Text="   (positief = debet)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </TextBlock>
                         <DataGrid ItemsSource="{Binding KaartMutaties}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                  Visibility="{Binding IsKaartRekeningGekozen, Converter={StaticResource BoolNaarZichtbaar}}"
                                   AutomationProperties.Name="Mutaties op de grootboekkaart" AutomationProperties.AutomationId="KaartMutaties">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Datum" Binding="{Binding Datum}" Width="Auto" />
@@ -861,6 +874,9 @@
                             <TextBlock VerticalAlignment="Center" Margin="16,0,0,0" Text="{Binding Conceptmelding}" TextWrapping="Wrap"
                                        AutomationProperties.AutomationId="Conceptmelding"
                                        Visibility="{Binding Conceptmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                            <Button Content="Naar het _journaal" Margin="8,0,0,0" VerticalAlignment="Center" Style="{StaticResource Linkknop}"
+                                    Command="{Binding NaarJournaalCommand}" CommandParameter="{Binding Jaar}"
+                                    Visibility="{Binding Conceptmelding, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.AutomationId="RapportNaarJournaal" />
                             </StackPanel>
                         </DockPanel>
                         <!-- Jaarrekening volgens de eigen indeling -->
@@ -879,40 +895,58 @@
                     </DockPanel>
                 </TabItem>
 
-                <!-- ===== Boekjaren ===== -->
+                <!-- ===== Boekjaren (besluit 40: lijst en detail; alleen de actie die nu kan) ===== -->
                 <TabItem Header="{DynamicResource T.Tab.Boekjaren}" AutomationProperties.AutomationId="SubtabBoekjaren">
                     <DockPanel Margin="0,12,0,0">
-                        <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Content="Volgend boekjaar _openen" Command="{Binding OpenVolgendBoekjaarCommand}"
-                                Margin="0,0,0,12" ToolTip="Om alvast in het volgende jaar te boeken, voordat het huidige jaar is afgesloten" />
-                        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0"
-                                   Text="Afsluiten kan als er geen concepten meer zijn en eerdere jaren zijn afgesloten. Het resultaat gaat naar de reserverekening; vooraf wordt een back-up gemaakt." />
-                        <DataGrid ItemsSource="{Binding Jaren}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                        <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Content="{Binding VolgendBoekjaarTekst}" Command="{Binding OpenVolgendBoekjaarCommand}"
+                                Visibility="{Binding IsVolgendBoekjaarZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
+                                Margin="0,0,0,12" ToolTip="Om alvast in het volgende jaar te boeken, voordat het huidige jaar is afgesloten"
+                                AutomationProperties.AutomationId="VolgendBoekjaar" />
+
+                        <g:Detailpaneel DockPanel.Dock="Right" DataContext="{Binding GeselecteerdJaar}" d:DataContext="{d:DesignInstance Type=vm:JaarRegel}"
+                                        SluitOpdracht="{Binding DataContext.SluitDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        Visibility="{Binding Converter={StaticResource NietNullNaarZichtbaar}}"
+                                        AutomationProperties.Name="Boekjaar" AutomationProperties.AutomationId="BoekjaarDetail">
+                            <g:Detailpaneel.Header>
+                                <TextBlock>
+                                    <Run Text="Boekjaar " /><Run Text="{Binding Jaartekst, Mode=OneWay}" />
+                                </TextBlock>
+                            </g:Detailpaneel.Header>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Samenvatting}" Margin="0,0,0,12" AutomationProperties.AutomationId="BoekjaarSamenvatting" />
+                                    <TextBlock Text="{Binding Toelichting}" TextWrapping="Wrap" Margin="0,0,0,16"
+                                               AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="BoekjaarToelichting" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button Content="_Afsluiten…" MinWidth="96" Margin="0,0,8,0" CommandParameter="{Binding}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
+                                                Command="{Binding DataContext.SluitBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Visibility="{Binding KanAfsluiten, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} afsluiten}" AutomationProperties.AutomationId="BoekjaarAfsluiten" />
+                                        <Button Content="{Binding Vervolgtekst}" MinWidth="96" Margin="0,0,8,0" CommandParameter="{Binding}"
+                                                Command="{Binding DataContext.VervolgCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Visibility="{Binding HeeftVervolg, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                AutomationProperties.AutomationId="BoekjaarVervolg" />
+                                        <Button Content="_Heropenen…" MinWidth="96" Margin="0,0,8,0" CommandParameter="{Binding}"
+                                                Command="{Binding DataContext.HeropenBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Visibility="{Binding KanHeropenen, Converter={StaticResource BoolNaarZichtbaar}}"
+                                                AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} heropenen}" AutomationProperties.AutomationId="BoekjaarHeropenen" />
+                                    </StackPanel>
+                                    <Button Content="Auditfile (XAF) e_xporteren…" Margin="0,16,0,0" HorizontalAlignment="Left" CommandParameter="{Binding}" Style="{StaticResource Linkknop}"
+                                            Command="{Binding DataContext.ExporteerXafCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="Het boekjaar als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander boekhoudpakket; ook via Bestand › Exporteren"
+                                            AutomationProperties.Name="{Binding Jaartekst, StringFormat=Auditfile van boekjaar {0} exporteren}" AutomationProperties.AutomationId="BoekjaarXaf" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </g:Detailpaneel>
+
+                        <DataGrid ItemsSource="{Binding Jaren}" SelectedItem="{Binding GeselecteerdJaar}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  HeadersVisibility="Column" SelectionMode="Single"
                                   AutomationProperties.Name="Boekjaren" AutomationProperties.AutomationId="Boekjaren">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Boekjaar" Binding="{Binding Jaartekst}" Width="Auto" />
                                 <DataGridTextColumn Header="Status" Binding="{Binding Statustekst}" Width="Auto" />
                                 <DataGridTextColumn Header="Geboekt" Binding="{Binding AantalGeboekt}" Width="Auto" />
-                                <DataGridTextColumn Header="Concepten" Binding="{Binding AantalConcepten}" Width="Auto" />
-                                <DataGridTemplateColumn Width="*">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate DataType="{x:Type vm:JaarRegel}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <Button Content="Afsluiten..." Margin="0,0,8,0" CommandParameter="{Binding}"
-                                                        Command="{Binding DataContext.SluitBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Visibility="{Binding IsOpen, Converter={StaticResource BoolNaarZichtbaar}}"
-                                                        AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} afsluiten}" />
-                                                <Button Content="Heropenen..." Margin="0,0,8,0" CommandParameter="{Binding}"
-                                                        Command="{Binding DataContext.HeropenBoekjaarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Visibility="{Binding IsAfgesloten, Converter={StaticResource BoolNaarZichtbaar}}"
-                                                        AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} heropenen}" />
-                                                <Button Content="Auditfile (XAF)..." CommandParameter="{Binding}"
-                                                        Command="{Binding DataContext.ExporteerXafCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        ToolTip="Het boekjaar als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander boekhoudpakket"
-                                                        AutomationProperties.Name="{Binding Jaartekst, StringFormat=Auditfile van boekjaar {0} exporteren}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Concepten" Binding="{Binding AantalConcepten}" Width="*" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </DockPanel>

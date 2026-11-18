@@ -226,3 +226,12 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - **Bonnen:** datum en bedrag van een bon worden bewaard zodra de gebruiker een andere bon kiest of het detail sluit (`OnGeselecteerdeBonChanged`).
 - **Boekingsregels:** `BoekingsregelRegel.Wanneer` en `Waarheen` voor de lijst; `Is…Zichtbaar` en `ToeTeVoegenVoorwaarden` met `VoorwaardeToevoegenCommand` voor het detail.
 - **Bewaakt door:** `LijstEnDetailTests` (ViewModel), `SchilTests.Lijst_en_detail_zonder_leeg_vlak` en `Inrichtingslijsten_zijn_alleen_lezen` (architectuur), en de UI-tests (lege lijsten tonen `Leeg_…`).
+
+## Acties volgens status (UX-review ronde 2, stap 4; besluit 40)
+
+- **Regel:** een knop staat er alleen als hij nu iets kan doen (`Visibility` aan een `Is…Zichtbaar`/`Kan…`-eigenschap, niet alleen `CanExecute`). Kan het nog niet, dan staat er een toelichting en een knop naar wat eerst moet.
+- **Afsluitcontrole** (`Application/Boekhouding/Afsluitcontrole.cs`): de voorwaarden om een boekjaar af te sluiten op één plek (al afgesloten, eerder jaar open, concepten, geen reserverekening). `BoekhoudingDienst.ControleerAfsluiten` gooit met `Reden`; de app bouwt er per jaar een `JaarRegel` mee (`KanAfsluiten`, `KanHeropenen`, `Toelichting`, `Vervolg`, `Vervolgtekst`).
+- **Boekjaren** is een lijst met detail (`GeselecteerdJaar`, zevende `Detailpaneel`). `VervolgCommand` gaat naar het journaal van dat jaar, naar het eerdere open jaar of naar het rekeningschema. *Volgend boekjaar openen* alleen vanaf december van het laatste jaar (`IsVolgendBoekjaarZichtbaar`).
+- **Bank, Rapporten, Grootboekkaart:** `IsToewijzenZichtbaar`, `IsNaarPostZichtbaar` met `NaarPostCommand`, `NaarJournaalCommand(jaar)` en `IsKaartRekeningGekozen`; in `BoekhoudingViewModel.Status.cs`. Bonnen: `BonRegel.IsKoppelenZichtbaar`.
+- **Startwizard:** `IsVorigeZichtbaar`, `IsVolgendeZichtbaar`, `IsOverslaanZichtbaar`, `IsVoltooienZichtbaar`; de knop *Later verder* is weg (`LaterVerderCommand` blijft voor ✕).
+- **Bewaakt door:** `ActiesVolgensStatusTests`, `StartwizardTests`, `SchilTests.Acties_staan_in_het_detail_en_niet_in_de_rijen` en de UI-test van de startwizard.

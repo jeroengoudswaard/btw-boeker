@@ -148,9 +148,66 @@ public sealed record KaartRegel(KaartMutatie Mutatie)
     public string Saldo => new Bedrag(Mutatie.LopendSaldo).ToString();
 }
 
-public sealed record JaarRegel(int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt)
+/// <summary>Wat eerst moet als een jaar nog niet kan worden afgesloten of heropend (besluit 40).</summary>
+public enum Vervolgactie
+{
+    Geen,
+    NaarJournaal,
+    NaarEerderJaar,
+    NaarRekeningschema,
+}
+
+/// <summary>
+/// Eén boekjaar in de lijst en het detail. Besluit 40: alleen de actie die nu kan (<see cref="KanAfsluiten"/>,
+/// <see cref="KanHeropenen"/>); anders <see cref="Toelichting"/> en een knop naar wat eerst moet (<see cref="Vervolg"/>).
+/// </summary>
+/// <param name="Controle">De voorwaarden voor afsluiten (alleen bij een open jaar).</param>
+/// <param name="LaterAfgesloten">Het volgende jaar als dat al is afgesloten; dan moet dat eerst worden heropend.</param>
+public sealed record JaarRegel(
+    int Jaar, bool IsOpen, string Statustekst, int AantalConcepten, int AantalGeboekt,
+    Application.Boekhouding.Afsluitcontrole? Controle = null, int? LaterAfgesloten = null)
 {
     public string Jaartekst => Jaar.ToString(CultureInfo.InvariantCulture);
 
     public bool IsAfgesloten => !IsOpen;
+
+    public bool KanAfsluiten => IsOpen && Controle?.KanAfsluiten == true;
+
+    public bool KanHeropenen => IsAfgesloten && LaterAfgesloten is null;
+
+    public string Samenvatting => string.Create(CultureInfo.CurrentCulture,
+        $"{Statustekst} · {AantalGeboekt} geboekt · {AantalConcepten} {(AantalConcepten == 1 ? "concept" : "concepten")}");
+
+    public string Toelichting => (IsOpen, Controle?.Beletsel) switch
+    {
+        (true, Application.Boekhouding.Afsluitbeletsel.Geen) =>
+            "Dit jaar kan worden afgesloten. Het resultaat gaat naar de reserverekening; vooraf wordt een back-up gemaakt.",
+        (true, Application.Boekhouding.Afsluitbeletsel.Concepten) => string.Create(CultureInfo.CurrentCulture,
+            $"Er {(Controle!.Concepten == 1 ? "staat nog 1 conceptpost" : $"staan nog {Controle.Concepten} conceptposten")} in {Jaartekst}. Boek of verwijder ze eerst."),
+        (true, Application.Boekhouding.Afsluitbeletsel.EerderJaarOpen) => string.Create(CultureInfo.CurrentCulture, $"Sluit eerst {Controle!.EerderJaar} af."),
+        (true, Application.Boekhouding.Afsluitbeletsel.GeenReserve) => "Wijs eerst een reserverekening aan in het rekeningschema; daarheen gaat het resultaat.",
+        (true, _) => string.Empty,
+        _ when LaterAfgesloten is { } later => string.Create(CultureInfo.CurrentCulture, $"Afgesloten. Heropen eerst {later}."),
+        _ => string.Create(CultureInfo.CurrentCulture, $"Afgesloten. Heropenen verwijdert de afsluitpost en de openingsbalans van {Jaar + 1}."),
+    };
+
+    public Vervolgactie Vervolg => IsOpen
+        ? Controle?.Beletsel switch
+        {
+            Application.Boekhouding.Afsluitbeletsel.Concepten => Vervolgactie.NaarJournaal,
+            Application.Boekhouding.Afsluitbeletsel.EerderJaarOpen => Vervolgactie.NaarEerderJaar,
+            Application.Boekhouding.Afsluitbeletsel.GeenReserve => Vervolgactie.NaarRekeningschema,
+            _ => Vervolgactie.Geen,
+        }
+        : Vervolgactie.Geen;
+
+    public bool HeeftVervolg => Vervolg != Vervolgactie.Geen;
+
+    public string Vervolgtekst => Vervolg switch
+    {
+        Vervolgactie.NaarJournaal => "Naar het journaal",
+        Vervolgactie.NaarEerderJaar => string.Create(CultureInfo.CurrentCulture, $"Naar {Controle!.EerderJaar}"),
+        Vervolgactie.NaarRekeningschema => "Naar het rekeningschema",
+        _ => string.Empty,
+    };
 }

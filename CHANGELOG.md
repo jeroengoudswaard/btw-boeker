@@ -5,6 +5,22 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 ## [Onuitgebracht]
 
 ### Gewijzigd
+- **Acties volgens status** (besluit 40): een knop staat er alleen als hij nu iets kan doen. Kan iets nog niet, dan staat er waarom, met één knop naar wat eerst moet.
+  - **Boekjaren** is een lijst met detail, zonder knoppen in de rijen.
+    - *Afsluiten* staat er alleen bij het oudste open jaar zonder concepten en met een reserverekening.
+    - Anders staat er wat eerst moet, met een knop *Naar het journaal*, *Naar \<jaar>* of *Naar het rekeningschema*.
+    - *Heropenen* staat er alleen bij het nieuwste afgesloten jaar.
+    - *Auditfile (XAF)* staat in het detail en blijft in Bestand › Exporteren.
+    - *Boekjaar \<jaar> openen* verschijnt pas vanaf december, of als het jaar voorbij is.
+  - **Bank:** *Toewijzen* verschijnt pas als er een rekening is gekozen; een verwerkte transactie heeft een knop *Naar de post*.
+  - **Bonnen:** *Koppelen* verschijnt pas als er een post is gekozen.
+  - **Rapporten:** bij concepten een link *Naar het journaal*.
+  - **Grootboekkaart:** zonder rekening alleen de keuze en een uitleg.
+  - **Startwizard:**
+    - *Vorige* en één hoofdknop (*Volgende* of *Voltooien*);
+    - *Deze stap overslaan* is een link;
+    - *Later verder* is weg, want sluiten (✕) onthoudt de stap ook;
+    - geen uitgeschakelde knoppen meer; bij Bank staat zonder boekhouding wat eerst moet.
 - **Lijst en detail** (besluit 38): Journaal, Bank, Bonnen, Boekingsregels, Relaties en Rekeningschema werken op dezelfde manier.
   - De lijst krijgt de volle breedte.
   - Het detail schuift rechts in als u een regel kiest of *Nieuw …*, en sluit met ✕ of Esc.

@@ -460,27 +460,11 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
 
     private static void ControleerAfsluiten(BoekhoudingStand stand, int jaar)
     {
-        var boekjaar = stand.Boekjaar(jaar) ?? throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} bestaat niet.");
-        if (!boekjaar.IsOpen)
+        // Besluit 40: dezelfde voorwaarden als de app toont (Afsluitcontrole).
+        var controle = Afsluitcontrole.Voor(stand, jaar);
+        if (!controle.KanAfsluiten)
         {
-            throw new InvalidOperationException($"Boekjaar {Jaartekst(jaar)} is al afgesloten.");
-        }
-
-        if (stand.Boekjaren.Any(b => b.Jaar < jaar && b.IsOpen))
-        {
-            throw new InvalidOperationException("Sluit eerst de eerdere boekjaren af.");
-        }
-
-        var concepten = stand.Posten.Count(p => !p.IsGeboekt && p.Datum.Year == jaar);
-        if (concepten > 0)
-        {
-            throw new InvalidOperationException(string.Create(CultureInfo.CurrentCulture,
-                $"Er {(concepten == 1 ? "staat nog 1 conceptpost" : $"staan nog {concepten} conceptposten")} in {jaar}. Boek of verwijder ze eerst."));
-        }
-
-        if (!stand.Rekeningen.Any(r => r.Rol == RekeningRol.Reserve))
-        {
-            throw new InvalidOperationException("Wijs eerst een reserverekening aan (bijv. 600 Algemene reserve) bij Rekeningschema.");
+            throw new InvalidOperationException(controle.Reden(jaar));
         }
 
         _ = Memoriaal(stand);

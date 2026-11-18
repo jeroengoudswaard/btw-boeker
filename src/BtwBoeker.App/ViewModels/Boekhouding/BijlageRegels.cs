@@ -66,8 +66,11 @@ public sealed partial class BonRegel : ObservableObject
     public partial IReadOnlyList<PostKeuze> Postkeuzes { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Voorsteltekst))]
+    [NotifyPropertyChangedFor(nameof(Voorsteltekst), nameof(IsKoppelenZichtbaar))]
     public partial PostKeuze? GekozenPost { get; set; }
+
+    /// <summary>Besluit 40: <i>Koppelen</i> verschijnt pas als er een post is gekozen.</summary>
+    public bool IsKoppelenZichtbaar => GekozenPost is not null;
 
     /// <summary><c>null</c> als het veld leeg of ongeldig is.</summary>
     /// <summary>Negatief bij een creditnota.</summary>

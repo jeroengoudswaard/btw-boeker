@@ -97,7 +97,7 @@ public partial class SchilTests
         Assert.DoesNotContain("in de lijst.", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("T.Tekst.SelecteerPost", xaml, StringComparison.Ordinal);
         var panelen = Detailpaneel().Matches(xaml).Select(m => m.Value).ToList();
-        Assert.Equal(6, panelen.Count); // Journaal, Bank, Bonnen, Boekingsregels, Relaties, Rekeningschema
+        Assert.Equal(7, panelen.Count); // Journaal, Bank, Bonnen, Boekingsregels, Relaties, Rekeningschema, Boekjaren (besluit 40)
         Assert.All(panelen, p => Assert.Contains("SluitOpdracht=\"{Binding", p, StringComparison.Ordinal));
         Assert.Contains("Key=\"Escape\"", xaml, StringComparison.Ordinal);
     }
@@ -112,6 +112,20 @@ public partial class SchilTests
 
         Assert.True(grid.Success, lijst);
         Assert.Contains("IsReadOnly=\"True\"", grid.Value, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// UX-review stap 4 (besluit 40): acties staan in het detail, volgens de status, niet als knoppen in elke rij van een lijst;
+    /// en de startwizard heeft geen <i>Later verder</i> meer (sluiten doet hetzelfde).
+    /// </summary>
+    [Fact]
+    public void Acties_staan_in_het_detail_en_niet_in_de_rijen()
+    {
+        var boekjaren = Regex.Match(Lees("Boekhouding", "BoekhoudingView.xaml"), "<DataGrid ItemsSource=\"\\{Binding Jaren\\}\".*?</DataGrid>", RegexOptions.Singleline);
+
+        Assert.True(boekjaren.Success, "Geen lijst Jaren");
+        Assert.DoesNotContain("<Button", boekjaren.Value, StringComparison.Ordinal);
+        Assert.DoesNotContain("StartwizardLaterVerder", Lees("Inrichting", "StartwizardVenster.xaml"), StringComparison.Ordinal);
     }
 
     [GeneratedRegex("<g:Detailpaneel\\s[^>]*>")]

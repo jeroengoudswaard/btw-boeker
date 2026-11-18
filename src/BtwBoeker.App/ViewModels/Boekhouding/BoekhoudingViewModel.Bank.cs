@@ -222,7 +222,11 @@ public sealed partial class BoekhoudingViewModel
         ToewijsOmschrijving = string.Empty;
     }
 
-    partial void OnToewijsRekeningChanged(Grootboekrekening? value) => ToewijzenCommand.NotifyCanExecuteChanged();
+    partial void OnToewijsRekeningChanged(Grootboekrekening? value)
+    {
+        ToewijzenCommand.NotifyCanExecuteChanged();
+        MeldStatus();
+    }
 
     private void LaadBank()
     {

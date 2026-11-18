@@ -46,8 +46,8 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
         BoekenCommand = new AsyncRelayCommand(BoekAsync, () => !IsBezig && Editor?.KanBoeken == true);
         VerwijderConceptCommand = new AsyncRelayCommand(VerwijderConceptAsync, () => !IsBezig && GeselecteerdePost?.IsConcept == true);
         TegenboekenCommand = new AsyncRelayCommand(TegenboekAsync, () => !IsBezig && GeselecteerdePost?.KanTegenboeken == true);
-        SluitBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(SluitBoekjaarAsync, j => !IsBezig && j?.IsOpen == true);
-        HeropenBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(HeropenBoekjaarAsync, j => !IsBezig && j?.IsAfgesloten == true);
+        SluitBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(SluitBoekjaarAsync, j => !IsBezig && j?.KanAfsluiten == true);
+        HeropenBoekjaarCommand = new AsyncRelayCommand<JaarRegel>(HeropenBoekjaarAsync, j => !IsBezig && j?.KanHeropenen == true);
         Jaar = Vandaag.Year;
         Woorden.PropertyChanged += WoordenGewijzigd;
     }
@@ -105,7 +105,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
     public partial IReadOnlyList<Grootboekrekening> Rekeningkeuzes { get; private set; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren), nameof(IsJaarkeuzeZichtbaar))]
+    [NotifyPropertyChangedFor(nameof(HeeftMeerdereBoekjaren), nameof(IsJaarkeuzeZichtbaar), nameof(IsVolgendBoekjaarZichtbaar), nameof(VolgendBoekjaarTekst))]
     public partial IReadOnlyList<int> Boekjaren { get; private set; } = [];
 
     /// <summary>De jaarkeuze alleen bij meer dan één boekjaar.</summary>
@@ -192,6 +192,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
     public partial RapportTabel? Rapport { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsKaartRekeningGekozen))]
     public partial Grootboekrekening? KaartRekening { get; set; }
 
     [ObservableProperty]
@@ -363,14 +364,19 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
 
         KoppelRekeningen(true);
 
+        var gekozenJaar = GeselecteerdJaar?.Jaar;
         Jaren.Clear();
         foreach (var boekjaar in _stand.Boekjaren.OrderByDescending(b => b.Jaar))
         {
             var posten = _stand.Posten.Where(p => p.Datum.Year == boekjaar.Jaar).ToList();
+            var later = _stand.Boekjaar(boekjaar.Jaar + 1) is { IsOpen: false } ? boekjaar.Jaar + 1 : (int?)null;
             Jaren.Add(new JaarRegel(
                 boekjaar.Jaar, boekjaar.IsOpen, boekjaar.IsOpen ? "Open" : "Afgesloten",
-                posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt)));
+                posten.Count(p => !p.IsGeboekt), posten.Count(p => p.IsGeboekt),
+                boekjaar.IsOpen ? Application.Boekhouding.Afsluitcontrole.Voor(_stand, boekjaar.Jaar) : null, later));
         }
+
+        GeselecteerdJaar = Jaren.FirstOrDefault(j => j.Jaar == gekozenJaar);
 
         _allePosten = MaakPostregels();
         BerekenZonderBon();

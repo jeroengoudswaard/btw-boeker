@@ -51,7 +51,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 ## Waar staat wat
 
-- `docs/BESLUITEN.md`: alle besluiten (nu t/m 39). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
+- `docs/BESLUITEN.md`: alle besluiten (nu t/m 40). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
 - `docs/HISTORIE.md`: wat per versie en per stap is gebouwd, getest en uitgebracht, en de planning bij de start.
 - `docs/UX-REVIEW.md`: UX-review ronde 1 en de volgorde van ronde 2.
 - `docs/ARCHITECTUUR.md`, `docs/PUBLICEREN.md`, `README.md` (bouwen, testen, snelheidsmeting), `CHANGELOG.md`.
@@ -70,7 +70,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 ## Huidige stand (bijwerken na elke sessie)
 
 - **Uitgebracht:** v0.21.0, rustiger schil, platte navigatie en een zip zonder installatie (2026-11-16).
-- **Klaar, nog niet uitgebracht:** UX-review stap 3, lijst en detail (besluit 38), branch `lijst-en-detail`, gecommit; tests zonder UI 547/547 en UI 12/12.
-- **Volgende:** UX-review stap 4 (acties volgens status), 5 (teksten) en 6 (instellingen); daarna de hulp per onderdeel (besluit 36), de XAF-import (stap 2b, besluit 25, stash op branch `xaf-import`; de besluiten daar krijgen de volgende vrije nummers), met de gemengde betaalrekening (besluit 39) en de btw-integratie (planning stap 3).
+- **Klaar, nog niet uitgebracht:** UX-review stap 3, lijst en detail (besluit 38), branch `lijst-en-detail` (PR #10); stap 4, acties volgens status (besluit 40), branch `acties-volgens-status`; tests zonder UI 562/562 en UI 12/12.
+- **Volgende:** UX-review stap 5 (teksten) en 6 (instellingen); daarna de hulp per onderdeel (besluit 36), de XAF-import (stap 2b, besluit 25, stash op branch `xaf-import`; de besluiten daar krijgen de volgende vrije nummers), met de gemengde betaalrekening (besluit 39) en de btw-integratie (planning stap 3).
 - **Nagaan:** de app sloot één keer in Eenvoudig niet binnen de tijd af na het rondkijken; snelheidsmeting en schermafbeeldingen faalden één keer samen in één run.
 - **Later:** Linux via Blazor Server lokaal (besluit 29), eerst een ontwerp.

@@ -44,17 +44,19 @@
         </Border>
         <Border DockPanel.Dock="Bottom" Padding="24,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
             <DockPanel>
-                <Button DockPanel.Dock="Left" Content="_Later verder" Command="{Binding LaterVerderCommand}" MinWidth="96"
-                        AutomationProperties.AutomationId="StartwizardLaterVerder" />
+                <!-- Besluit 40 (4A): Vorige en één hoofdknop; overslaan als link; geen uitgeschakelde knop. Sluiten (✕) onthoudt de stap. -->
+                <Button DockPanel.Dock="Left" Content="Deze stap over_slaan" Style="{StaticResource Linkknop}" Command="{Binding OverslaanCommand}" VerticalAlignment="Center"
+                        Visibility="{Binding IsOverslaanZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
+                        AutomationProperties.AutomationId="StartwizardOverslaan" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Over_slaan" Style="{StaticResource DialoogKnop}" Command="{Binding OverslaanCommand}"
-                            AutomationProperties.AutomationId="StartwizardOverslaan" />
                     <Button Content="&lt; Vo_rige" Style="{StaticResource DialoogKnop}" Command="{Binding VorigeCommand}"
+                            Visibility="{Binding IsVorigeZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                             AutomationProperties.AutomationId="StartwizardVorige" />
-                    <Button Content="_Volgende &gt;" IsDefault="True" Command="{Binding VolgendeCommand}"
+                    <Button Content="_Volgende &gt;" IsDefault="True" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" MinWidth="120" Margin="8,0,0,0" Command="{Binding VolgendeCommand}"
+                            Visibility="{Binding IsVolgendeZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                             AutomationProperties.AutomationId="StartwizardVolgende" />
-                    <Button Content="_Voltooien" Style="{StaticResource DialoogKnop}" Command="{Binding VoltooienCommand}"
-                            Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}"
+                    <Button Content="_Voltooien" IsDefault="True" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}" MinWidth="120" Margin="8,0,0,0" Command="{Binding VoltooienCommand}"
+                            Visibility="{Binding IsVoltooienZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                             AutomationProperties.AutomationId="StartwizardVoltooien" />
                 </StackPanel>
             </DockPanel>
@@ -104,8 +106,11 @@
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Bank}">
                     <TextBlock Style="{StaticResource Toelichting}" Text="Lees een bankafschrift in om de beginstanden te controleren en transacties te verwerken." Margin="0,0,0,16" />
-                    <Button Content="Bankafschrift inlezen..." Command="{Binding BankInlezenCommand}" IsEnabled="{Binding KanBankInlezen}"
+                    <Button Content="Bankafschrift inlezen..." Command="{Binding BankInlezenCommand}"
+                            Visibility="{Binding KanBankInlezen, Converter={StaticResource BoolNaarZichtbaar}}"
                             HorizontalAlignment="Left" AutomationProperties.AutomationId="StartwizardBankInlezen" />
+                    <TextBlock Text="Richt eerst de boekhouding in (de vorige stap); daarna kunt u hier een bankafschrift inlezen." TextWrapping="Wrap"
+                               Visibility="{Binding KanBankInlezen, Converter={StaticResource OnwaarNaarZichtbaar}}" AutomationProperties.AutomationId="StartwizardBankEerst" />
                 </StackPanel>
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}">
