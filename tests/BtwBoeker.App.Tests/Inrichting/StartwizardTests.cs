@@ -155,5 +155,51 @@ public sealed class StartwizardTests
         await shell.StartwizardCommand.ExecuteAsync(null);
     }
 
+    /// <summary>
+    /// Besluit 40 (keuze 4A): <i>Vorige</i> en één hoofdknop, <i>Deze stap overslaan</i> als link, en geen uitgeschakelde knop:
+    /// een knop die nu niet kan, staat er niet.
+    /// </summary>
+    [Fact]
+    public async Task Alleen_de_knoppen_die_bij_de_stap_kunnen()
+    {
+        _instellingen.Instellingen = new GebruikersInstellingen { StartwizardGetoond = true };
+        var shell = MaakShell();
+        await shell.InitialiseerAsync();
+        _dialogen.Startwizard = w =>
+        {
+            Assert.Equal(Startstap.Welkom, w.Huidig);
+            Assert.False(w.IsVorigeZichtbaar);
+            Assert.True(w.IsVolgendeZichtbaar);
+            Assert.False(w.IsOverslaanZichtbaar);
+            Assert.False(w.IsVoltooienZichtbaar);
 
+            w.VolgendeCommand.Execute(null);
+
+            Assert.Equal(Startstap.Database, w.Huidig);
+            Assert.True(w.IsVorigeZichtbaar);
+            Assert.False(w.IsVolgendeZichtbaar); // zonder database niet verder; de stap zelf heeft de knoppen
+            Assert.False(w.IsOverslaanZichtbaar);
+            return Task.CompletedTask;
+        };
+
+        await shell.StartwizardCommand.ExecuteAsync(null);
+    }
+
+    [Fact]
+    public async Task Op_de_laatste_stap_staat_alleen_voltooien()
+    {
+        var shell = await MaakShellMetOpenDatabase();
+        _dialogen.Startwizard = w =>
+        {
+            w.GaNaarCommand.Execute(w.Stappen[^1]);
+
+            Assert.Equal(Startstap.Klaar, w.Huidig);
+            Assert.True(w.IsVoltooienZichtbaar);
+            Assert.False(w.IsVolgendeZichtbaar);
+            Assert.False(w.IsOverslaanZichtbaar);
+            return Task.CompletedTask;
+        };
+
+        await shell.StartwizardCommand.ExecuteAsync(null);
+    }
 }

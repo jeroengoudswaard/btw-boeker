@@ -18,6 +18,7 @@ public sealed partial class BoekhoudingViewModel
         BoekhoudingSubtab.Boekingsregels => GeselecteerdeRegel is not null,
         BoekhoudingSubtab.Relaties => GeselecteerdeRelatie is not null,
         BoekhoudingSubtab.Rekeningschema => GeselecteerdeRekening is not null,
+        BoekhoudingSubtab.Boekjaren => GeselecteerdJaar is not null,
         _ => false,
     };
 
@@ -63,6 +64,9 @@ public sealed partial class BoekhoudingViewModel
             case BoekhoudingSubtab.Rekeningschema:
                 GeselecteerdeRekening = null;
                 break;
+            case BoekhoudingSubtab.Boekjaren:
+                GeselecteerdJaar = null;
+                break;
         }
 
         MeldDetail();
@@ -94,6 +98,7 @@ public sealed partial class BoekhoudingViewModel
         OnPropertyChanged(nameof(IsDetailOpen));
         OnPropertyChanged(nameof(HeeftOnopgeslagenWijzigingenMetDetail));
         OnPropertyChanged(nameof(HeeftOnopgeslagenWijzigingenZonderDetail));
+        MeldStatus();
     }
 
     partial void OnGeselecteerdeRelatieChanged(RelatieRegel? value) => MeldDetail();

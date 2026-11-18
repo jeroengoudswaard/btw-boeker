@@ -10,10 +10,12 @@ namespace BtwBoeker.App.Tests.Boekhouding;
 /// <summary>Tabblad Boekhouding op een in-memory grootboek, ingericht met een verzonnen voorstel.</summary>
 internal sealed class BoekhoudingTestomgeving : IDisposable
 {
-    public BoekhoudingTestomgeving()
+    /// <param name="nu">De datum van "vandaag"; standaard 15 juni 2026.</param>
+    public BoekhoudingTestomgeving(DateTimeOffset? nu = null)
     {
         Sessie = new FakeSessie(Path.Combine(Path.GetTempPath(), "boekhouding-test.btwdb"), new InMemoryAdministratieRepository());
         Hulpmiddelen = new BoekhoudingHulpmiddelen(Schrijver, Afdruk);
+        Tijd = new VasteTijd(nu ?? new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero));
     }
 
     public FakeSessie Sessie { get; }
@@ -21,7 +23,7 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public FakeSpreadsheetSchrijver Schrijver { get; } = new();
     public FakeAfdrukDienst Afdruk { get; } = new();
     public BoekhoudingHulpmiddelen Hulpmiddelen { get; }
-    public VasteTijd Tijd { get; } = new(new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero));
+    public VasteTijd Tijd { get; }
     public InMemoryBoekhoudingOpslag Opslag => (InMemoryBoekhoudingOpslag)Sessie.Boekhouding;
 
     public static AdministratieViewModel Administratie { get; } = new(

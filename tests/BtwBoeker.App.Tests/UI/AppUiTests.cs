@@ -429,7 +429,9 @@ public sealed class AppUiTests : IDisposable
 
         Zoek(wizard, "StartwizardVolgende").AsButton().Invoke();
         Zoek(wizard, "StartwizardNieuweDatabase");
-        Assert.False(Zoek(wizard, "StartwizardVolgende").IsEnabled); // zonder database niet verder
+        // Besluit 40: zonder database niet verder, en dan staat de knop er niet (geen uitgeschakelde knop).
+        Assert.Null(wizard.FindFirstDescendant(cf => cf.ByAutomationId("StartwizardVolgende")));
+        Assert.Null(wizard.FindFirstDescendant(cf => cf.ByAutomationId("StartwizardLaterVerder")));
         Bewaar(wizard, "07-startwizard-database");
 
         wizard.Close();

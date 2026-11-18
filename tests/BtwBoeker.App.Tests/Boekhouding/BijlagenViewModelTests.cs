@@ -193,9 +193,11 @@ public sealed class BijlagenViewModelTests : IDisposable
 
         var bon = Assert.Single(vm.Postvak);
         Assert.Null(bon.GekozenPost);
+        Assert.False(bon.IsKoppelenZichtbaar); // besluit 40: Koppelen pas met een gekozen post
         bon.Datum = new DateTime(2026, 6, 12);
         bon.Bedragtekst = "23,45";
         Assert.Equal(post, bon.GekozenPost?.Post.Id);
+        Assert.True(bon.IsKoppelenZichtbaar);
         Assert.True(bon.GekozenPost!.IsVoorstel);
         vm.GeselecteerdeBon = bon;
 

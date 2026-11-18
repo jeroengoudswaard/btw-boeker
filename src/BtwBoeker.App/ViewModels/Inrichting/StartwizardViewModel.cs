@@ -91,12 +91,12 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public int Jaar => _tijd.GetLocalNow().Year;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HuidigeTitel), nameof(IsHuidigeStapKlaar), nameof(Stapnummer))]
+    [NotifyPropertyChangedFor(nameof(HuidigeTitel), nameof(IsHuidigeStapKlaar), nameof(Stapnummer), nameof(IsVorigeZichtbaar), nameof(IsVolgendeZichtbaar), nameof(IsOverslaanZichtbaar), nameof(IsVoltooienZichtbaar))]
     [NotifyCanExecuteChangedFor(nameof(VolgendeCommand), nameof(VorigeCommand), nameof(OverslaanCommand))]
     public partial Startstap Huidig { get; private set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHuidigeStapKlaar), nameof(Klaarregels), nameof(KanBankInlezen))]
+    [NotifyPropertyChangedFor(nameof(IsHuidigeStapKlaar), nameof(Klaarregels), nameof(KanBankInlezen), nameof(IsVorigeZichtbaar), nameof(IsVolgendeZichtbaar), nameof(IsOverslaanZichtbaar), nameof(IsVoltooienZichtbaar))]
     [NotifyCanExecuteChangedFor(nameof(VolgendeCommand), nameof(OverslaanCommand), nameof(GaNaarCommand))]
     public partial Inrichtingsstatus Status { get; private set; } = Inrichtingsstatus.Leeg;
 
@@ -108,7 +108,18 @@ public sealed partial class StartwizardViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(VolgendeCommand), nameof(VorigeCommand), nameof(OverslaanCommand), nameof(LaterVerderCommand))]
+    [NotifyPropertyChangedFor(nameof(IsVorigeZichtbaar), nameof(IsVolgendeZichtbaar), nameof(IsOverslaanZichtbaar), nameof(IsVoltooienZichtbaar))]
     public partial bool IsBezig { get; private set; }
+
+    // Besluit 40: alleen de knoppen die bij deze stap kunnen; geen uitgeschakelde knop.
+    // Op de stap, niet op IsBezig: tijdens het laden mogen de knoppen niet verdwijnen en terugkomen.
+    public bool IsVorigeZichtbaar => Huidig != Startstap.Welkom;
+
+    public bool IsVolgendeZichtbaar => Huidig != Startstap.Klaar && (Huidig != Startstap.Database || Status.DatabaseOpen);
+
+    public bool IsOverslaanZichtbaar => Huidig is not (Startstap.Welkom or Startstap.Database or Startstap.Klaar);
+
+    public bool IsVoltooienZichtbaar => Huidig == Startstap.Klaar;
 
     public bool IsGesloten { get; private set; }
 
@@ -122,7 +133,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
     public IReadOnlyList<KlaarRegel> Klaarregels =>
     [
         new(Status.DatabaseOpen, Status.DatabaseOpen ? "De database is aangemaakt of geopend." : "Er is nog geen database: kies Bestand › Nieuwe database."),
-        new(Status.BoekhoudingIngericht, Status.BoekhoudingIngericht ? "De boekhouding is ingericht." : "De boekhouding is nog leeg: open Modules › Boekhouding."),
+        new(Status.BoekhoudingIngericht, Status.BoekhoudingIngericht ? "De boekhouding is ingericht." : "De boekhouding is nog leeg: kies Journaal in de navigatie."),
         new(Status.BankGekoppeld, Status.BankGekoppeld ? "Een bankrekening is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
     ];
 
