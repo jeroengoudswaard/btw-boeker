@@ -1,21 +1,18 @@
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BtwBoeker.Application.Administraties;
 using BtwBoeker.Application.Modules;
 using BtwBoeker.Domain.Administraties;
-using BtwBoeker.Domain.Financien;
 
 namespace BtwBoeker.App.ViewModels;
 
 /// <summary>
-/// De pagina Instellingen: de naam van de administratie en de drempel voor <i>Zonder bon</i>. Een bewerkbare kopie;
-/// pas bij Opslaan wordt het domeinmodel gewijzigd.
+/// De pagina Instellingen (besluit 42): de naam van de administratie, en thema en weergave (die van de shell, zodat ze
+/// gelijk lopen met het menu Beeld). Alles wordt direct bewaard, zoals in Windows-Instellingen: de naam bij het verlaten van
+/// het veld of bij Enter. Een ongeldige naam wordt niet bewaard.
 /// </summary>
 public sealed partial class InstellingenViewModel : PaginaViewModel, IPaginameldingen
 {
-    private static readonly CultureInfo Nederlands = CultureInfo.GetCultureInfo("nl-NL");
-
     private readonly IAdministratieRepository _repository;
     private readonly AdministratieViewModel _administratie;
 
@@ -24,51 +21,30 @@ public sealed partial class InstellingenViewModel : PaginaViewModel, IPaginameld
     {
         _repository = repository;
         _administratie = administratie;
-        OpslaanCommand = new AsyncRelayCommand(BewaarAsync, () => KanOpslaan);
         Naam = administratie.Naam;
-        Drempeltekst = Drempelweergave(administratie.Model.ZonderBonDrempel);
     }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fout), nameof(HeeftOnopgeslagenWijzigingen), nameof(KanOpslaan))]
-    [NotifyCanExecuteChangedFor(nameof(OpslaanCommand))]
     public partial string Naam { get; set; }
-
-    /// <summary>Vanaf welk bedrag het filter <i>Zonder bon</i> een boeking zonder bijlage toont.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Fout), nameof(HeeftOnopgeslagenWijzigingen), nameof(KanOpslaan))]
-    [NotifyCanExecuteChangedFor(nameof(OpslaanCommand))]
-    public partial string Drempeltekst { get; set; }
 
     [ObservableProperty]
     public partial string? Foutmelding { get; private set; }
 
-    public IAsyncRelayCommand OpslaanCommand { get; }
+    public string? Fout =>
+        string.IsNullOrWhiteSpace(Naam) ? "Vul een naam in."
+        : Naam.Trim().Length > Administratie.MaximaleNaamLengte ? $"De naam mag maximaal {Administratie.MaximaleNaamLengte} tekens lang zijn."
+        : null;
 
-    private long? Drempel => Bedrag.TryParse(Drempeltekst, out var bedrag) && bedrag.Centen >= 0 ? bedrag.Centen : null;
+    public override bool BewaartDirect => true;
 
-    public string? Fout
-    {
-        get
-        {
-            if (string.IsNullOrWhiteSpace(Naam))
-            {
-                return "Vul een naam in.";
-            }
-
-            if (Naam.Trim().Length > Administratie.MaximaleNaamLengte)
-            {
-                return $"De naam mag maximaal {Administratie.MaximaleNaamLengte} tekens lang zijn.";
-            }
-
-            return Drempel is null ? "Vul bij de drempel voor 'zonder bon' een bedrag in, bijvoorbeeld 10,00." : null;
-        }
-    }
-
-    public override bool HeeftOnopgeslagenWijzigingen =>
-        !string.Equals(Naam?.Trim(), _administratie.Naam, StringComparison.Ordinal) || Drempel != _administratie.Model.ZonderBonDrempel;
+    public override bool HeeftOnopgeslagenWijzigingen => !string.Equals(Naam?.Trim(), _administratie.Naam, StringComparison.Ordinal);
 
     public override bool KanOpslaan => HeeftOnopgeslagenWijzigingen && Fout is null;
+
+    /// <summary>Het naamveld verliest de focus of de gebruiker drukt op Enter.</summary>
+    [RelayCommand]
+    private async Task BevestigNaamAsync() => await BewaarAsync();
 
     public override async Task<bool> BewaarAsync()
     {
@@ -78,17 +54,28 @@ public sealed partial class InstellingenViewModel : PaginaViewModel, IPaginameld
         }
 
         _administratie.Model.WijzigNaam(Naam);
-        _administratie.Model.WijzigZonderBonDrempel(Drempel!.Value);
         await _repository.BewaarAsync(_administratie.Model);
         _administratie.Ververs();
         Naam = _administratie.Naam;
-        Drempeltekst = Drempelweergave(_administratie.Model.ZonderBonDrempel);
         Foutmelding = null;
-        OnPropertyChanged(nameof(HeeftOnopgeslagenWijzigingen));
-        OnPropertyChanged(nameof(KanOpslaan));
-        OpslaanCommand.NotifyCanExecuteChanged();
         return true;
     }
 
-    private static string Drempelweergave(long centen) => (centen / 100m).ToString("0.00", Nederlands);
+    /// <summary>Een ongeldige naam vervalt bij het verlaten van de pagina; een geldige wordt alsnog bewaard.</summary>
+    public override string? Verlaten()
+    {
+        if (!HeeftOnopgeslagenWijzigingen)
+        {
+            return null;
+        }
+
+        if (Fout is not null)
+        {
+            Naam = _administratie.Naam;
+            return "De nieuwe naam is niet bewaard, omdat hij leeg of te lang was.";
+        }
+
+        _ = BewaarAsync();
+        return null;
+    }
 }

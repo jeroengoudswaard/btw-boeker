@@ -55,6 +55,17 @@ public sealed class GelijkAanParameterConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
 }
 
+/// <summary>
+/// Een keuzerondje voor een enum: aan als de waarde gelijk is aan de parameter; aanzetten kiest de parameter (besluit 42).
+/// </summary>
+public sealed class KeuzeConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => Equals(value, parameter);
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? parameter : Binding.DoNothing;
+}
+
 /// <summary>Zichtbaar als de waarde (bijvoorbeeld een enum) als tekst gelijk is aan de parameter.</summary>
 public sealed class GelijkAanNaarZichtbaarheidConverter : IValueConverter
 {

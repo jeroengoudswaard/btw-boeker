@@ -205,42 +205,45 @@ public sealed class ShellViewModelTests
         Assert.Same(shell.Administratie, boekhouding.Administratie);
     }
 
+    /// <summary>Besluit 42: Instellingen bewaart direct; sluiten bewaart een getypte naam zonder te vragen.</summary>
     [Fact]
-    public async Task Onopgeslagen_wijzigingen_annuleren_houdt_de_database_open()
+    public async Task Sluiten_bewaart_een_getypte_naam_zonder_te_vragen()
     {
         var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
-        _dialogen.OpslaanAntwoord = OpslaanKeuze.Annuleren;
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.True(shell.IsDatabaseOpen);
-        Assert.Same(instellingen, shell.GeselecteerdePagina);
-        Assert.Equal(["Instellingen"], _dialogen.OpslaanVragen);
-    }
-
-    [Fact]
-    public async Task Onopgeslagen_wijzigingen_opslaan_bewaart_en_sluit()
-    {
-        var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
-        _dialogen.OpslaanAntwoord = OpslaanKeuze.Opslaan;
-
-        await shell.SluitDatabaseCommand.ExecuteAsync(null);
-
+        Assert.Empty(_dialogen.OpslaanVragen);
         Assert.DoesNotContain(instellingen, shell.Paginas);
         Assert.False(shell.IsDatabaseOpen);
         Assert.Equal(1, _beheer.Repository.AantalKeerBewaard);
+        Assert.Equal("Gewijzigd", _beheer.Repository.Opgeslagen.Naam);
     }
 
     [Fact]
-    public async Task Onopgeslagen_wijzigingen_niet_opslaan_sluit_zonder_bewaren()
+    public async Task Sluiten_met_een_ongeldige_naam_sluit_zonder_bewaren()
     {
         var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
-        _dialogen.OpslaanAntwoord = OpslaanKeuze.NietOpslaan;
+        instellingen.Naam = string.Empty;
 
         await shell.SluitDatabaseCommand.ExecuteAsync(null);
 
-        Assert.DoesNotContain(instellingen, shell.Paginas);
+        Assert.Empty(_dialogen.OpslaanVragen);
+        Assert.False(shell.IsDatabaseOpen);
         Assert.Equal(0, _beheer.Repository.AantalKeerBewaard);
+    }
+
+    [Fact]
+    public async Task Een_andere_pagina_met_een_ongeldige_naam_meldt_dat_hij_niet_is_bewaard()
+    {
+        var (shell, instellingen) = await ShellMetGewijzigdeInstellingen();
+        instellingen.Naam = string.Empty;
+
+        shell.OpenModuleCommand.Execute(ModuleSoort.Boekhouding);
+
+        Assert.Equal(Statussoort.Waarschuwing, shell.Meldingsbalk.Soort);
+        Assert.Contains("niet bewaard", shell.Meldingsbalk.Tekst, StringComparison.Ordinal);
+        Assert.NotEqual(string.Empty, instellingen.Naam);
     }
 
     [Fact]
@@ -298,6 +301,29 @@ public sealed class ShellViewModelTests
     }
 
     // ---- Thema, back-up en status ----------------------------------------------------------
+
+    /// <summary>
+    /// Besluit 42 (keuze 3A): de keuzerondjes op Instellingen zijn gebonden aan <c>GekozenThema</c> en <c>GekozenWeergave</c>,
+    /// zodat ook kiezen met het toetsenbord of een schermlezer werkt, en het menu Beeld meeloopt.
+    /// </summary>
+    [Fact]
+    public async Task Thema_en_weergave_kiezen_op_instellingen_past_toe_en_loopt_gelijk_met_het_menu()
+    {
+        var shell = MaakShell();
+        await shell.InitialiseerAsync();
+
+        shell.GekozenThema = Thema.Donker;
+        shell.GekozenWeergave = Weergavemodus.Eenvoudig;
+
+        Assert.Equal(Thema.Donker, shell.Thema);
+        Assert.Equal(Thema.Donker, _thema.Toegepast[^1]);
+        Assert.Equal(Thema.Donker, _instellingen.Instellingen.Thema);
+        Assert.Equal(Weergavemodus.Eenvoudig, shell.Weergave);
+        Assert.Equal(Weergavemodus.Eenvoudig, _instellingen.Instellingen.Weergave);
+
+        shell.KiesThemaCommand.Execute(Thema.Licht); // via het menu Beeld
+        Assert.Equal(Thema.Licht, shell.GekozenThema);
+    }
 
     [Fact]
     public async Task Thema_kiezen_past_toe_en_bewaart()

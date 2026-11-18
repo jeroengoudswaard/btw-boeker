@@ -125,21 +125,21 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => Zoek(venster, "Paginatitel").Name == "Boekhouding", Wachttijd).Result, Diagnose(venster)); // nog niet ingericht
         Bewaar(venster, "03-boekhouding");
 
-        // UX-review stap 1: Opslaan verschijnt pas bij een wijziging; na Ctrl+S meldt de meldingsbalk het met ✓.
+        // Besluit 42: Instellingen bewaart direct, zonder knop Opslaan; het thema kiezen werkt ook via UI Automation.
         Sneltoets(venster, VirtualKeyShort.OEM_COMMA); // Instellingen
         Zoek(venster, "AdministratieNaam");
         Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("InstellingenOpslaan")));
-        Zoek(venster, "DrempelZonderBon").AsTextBox().Text = "25";
-        Zoek(venster, "InstellingenOpslaan");
-        Sneltoets(venster, VirtualKeyShort.KEY_S);
-        Assert.True(Retry.WhileFalse(() => ZoekMetDiagnose(venster, "Meldingstekst").Name == "Opgeslagen.", Wachttijd).Result, Diagnose(venster));
-        Assert.True(WachtTotWeg(venster, "InstellingenOpslaan"), Diagnose(venster));
+        Assert.Null(venster.FindFirstDescendant(c => c.ByAutomationId("DrempelZonderBon"))); // die staat bij het filter
+        Zoek(venster, "ThemaDonker").AsRadioButton().IsChecked = true;
+        Assert.True(Retry.WhileFalse(() => new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad().Thema == Thema.Donker, Wachttijd).Result,
+            "Het thema Donker is niet bewaard.");
         Bewaar(venster, "04-instellingen");
 
         Sluit(venster);
 
         var bewaard = new JsonInstellingenOpslag(Path.Combine(_datamap, "instellingen.json")).Laad();
         Assert.Equal(Application.Modules.ModuleSoort.Instellingen, bewaard.LaatstePagina?.Module);
+        Assert.Equal(Thema.Donker, bewaard.Thema);
     }
 
     [Fact(Timeout = Timeout)]

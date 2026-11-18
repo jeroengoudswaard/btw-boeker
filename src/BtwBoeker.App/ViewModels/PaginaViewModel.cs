@@ -70,6 +70,16 @@ public abstract class PaginaViewModel(ModuleDefinitie module) : ObservableObject
     /// <returns><c>true</c> als alles is opgeslagen.</returns>
     public virtual Task<bool> BewaarAsync() => Task.FromResult(true);
 
+    /// <summary>
+    /// Besluit 42: een pagina die direct bewaart, zoals Windows-Instellingen. Bij het sluiten vraagt de app dan niet om op te
+    /// slaan, maar bewaart wat geldig is; ongeldige invoer vervalt.
+    /// </summary>
+    public virtual bool BewaartDirect => false;
+
+    /// <summary>Wordt aangeroepen als de gebruiker een andere pagina kiest.</summary>
+    /// <returns>Een waarschuwing voor de meldingsbalk, of <c>null</c>.</returns>
+    public virtual string? Verlaten() => null;
+
     /// <summary>Wordt aangeroepen als de pagina definitief gesloten is (bij het sluiten van de database).</summary>
     public virtual void Opruimen()
     {

@@ -182,6 +182,45 @@ public sealed class BijlagenViewModelTests : IDisposable
         Assert.Equal(2, vm.Posten.Count); // ook € 9,00 ligt boven de drempel van € 5
     }
 
+    /// <summary>Besluit 42 (keuze 2B): de drempel staat bij het filter, alleen als het filter aan staat, en wordt direct bewaard.</summary>
+    [Fact]
+    public async Task De_drempel_staat_bij_het_filter_en_wordt_direct_bewaard()
+    {
+        await KasuitgaveAsync(2500, new DateOnly(2026, 6, 1));
+        await KasuitgaveAsync(900, new DateOnly(2026, 6, 2));
+        await InrichtenAsync();
+        var vm = _omgeving.Maak(new AdministratieViewModel(await _omgeving.Sessie.Administraties.HaalAsync()));
+        await vm.VernieuwCommand.ExecuteAsync(null);
+        Assert.False(vm.IsDrempelZichtbaar);
+
+        vm.AlleenZonderBon = true;
+        Assert.True(vm.IsDrempelZichtbaar);
+        Assert.Equal("10,00", vm.Drempeltekst);
+        Assert.Single(vm.Posten);
+
+        vm.Drempeltekst = "5";
+        await vm.BevestigDrempelCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, vm.Posten.Count);
+        Assert.Equal("5,00", vm.Drempeltekst);
+        Assert.Equal(500, (await _omgeving.Sessie.Administraties.HaalAsync()).ZonderBonDrempel);
+    }
+
+    [Fact]
+    public async Task Een_ongeldige_drempel_wordt_niet_bewaard()
+    {
+        await InrichtenAsync();
+        var vm = _omgeving.Maak(new AdministratieViewModel(await _omgeving.Sessie.Administraties.HaalAsync()));
+        await vm.VernieuwCommand.ExecuteAsync(null);
+        vm.AlleenZonderBon = true;
+
+        vm.Drempeltekst = "geen bedrag";
+        await vm.BevestigDrempelCommand.ExecuteAsync(null);
+
+        Assert.NotNull(vm.Drempelfout);
+        Assert.Equal(1000, (await _omgeving.Sessie.Administraties.HaalAsync()).ZonderBonDrempel);
+    }
+
     [Fact]
     public async Task Postvak_stelt_een_post_voor_en_koppelt()
     {

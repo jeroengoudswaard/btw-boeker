@@ -242,3 +242,11 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - `TekstTests` (architectuur) bewaakt de zichtbare teksten in de XAML (`Text`, `Content`, `Header`, `Title`, `ToolTip`, `AutomationProperties.Name`), de woordenlijst en de C#-tekenreeksen in App, Application en Infrastructure, met uitzondering van logregels, bestandsnamen, bestandsfilters en migraties. Verboden zijn:
   - overal: "...", "database", "facturen", "administraties" en "groepen";
   - buiten tooltips: "Ctrl+", extensies, "CAMT", "XAF" en "Kruisposten".
+
+## Direct bewaren (UX-review ronde 2, stap 6; besluit 42)
+
+- `PaginaViewModel.BewaartDirect`: zo'n pagina heeft geen knop *Opslaan*. Bij het sluiten van de administratie vraagt de shell niets: `MagPaginaSluitenAsync` roept `BewaarAsync` aan, en ongeldige invoer vervalt.
+- `PaginaViewModel.Verlaten()`: de shell roept dit aan bij een andere pagina. Instellingen bewaart dan een geldige naam, of zet een ongeldige naam terug en geeft een waarschuwing voor de meldingsbalk.
+- De naam wordt bevestigd met `BevestigNaamCommand`, aangeroepen bij `LostFocus` (code-behind) en bij Enter (KeyBinding). De drempel werkt hetzelfde (`BevestigDrempelCommand`, in `BoekhoudingViewModel.Drempel.cs`) en wordt bewaard via `IDatabaseSessie.Administraties`.
+- Thema en weergave op Instellingen binden aan `ShellViewModel.GekozenThema` en `GekozenWeergave`, met de `KeuzeConverter` (ConvertBack geeft de parameter als het rondje aan gaat). Instellen loopt via dezelfde `KiesThema`/`KiesWeergave` als het menu Beeld, dus beide lopen gelijk. Een `Command` op een keuzerondje is vermeden, omdat UI Automation en het toetsenbord die niet aanroepen.
+- **Bewaakt door:** `InstellingenViewModelTests`, `ShellViewModelTests` (sluiten, verlaten, keuzerondjes), `BijlagenViewModelTests` (drempel), `SchilTests.Instellingen_bewaart_direct_en_de_drempel_staat_bij_het_filter` en de UI-test.

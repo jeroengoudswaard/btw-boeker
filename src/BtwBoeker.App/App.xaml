@@ -15,6 +15,7 @@
             <conv:NullNaarZichtbaarheidConverter x:Key="NullNaarZichtbaar" Omgekeerd="True" />
             <conv:OmgekeerdeBoolNaarZichtbaarheidConverter x:Key="OnwaarNaarZichtbaar" />
             <conv:GelijkAanParameterConverter x:Key="GelijkAan" />
+            <conv:KeuzeConverter x:Key="Keuze" />
             <conv:GelijkAanNaarZichtbaarheidConverter x:Key="GelijkAanZichtbaar" />
             <conv:GroterDanNulNaarZichtbaarheidConverter x:Key="GroterDanNulNaarZichtbaar" />
             <conv:NietConverter x:Key="Niet" />
