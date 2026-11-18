@@ -212,6 +212,7 @@ public sealed partial class BoekhoudingViewModel
     partial void OnGeselecteerdeMutatieChanged(MutatieRegel? value)
     {
         ToewijzenCommand.NotifyCanExecuteChanged();
+        MeldDetail();
         if (_mutatieWordtGezet)
         {
             return;
@@ -297,17 +298,26 @@ public sealed partial class BoekhoudingViewModel
             return;
         }
 
+        // Besluit 38: het saldo als één getal; een verschil met de boekhouding alleen als ⚠ met de oorzaak.
         var saldi = Bankoverzicht.Saldi(_stand, dagboek);
         IsBankAangesloten = saldi.IsAangesloten;
         Banksaldotekst = saldi.Bank is { } bank
-            ? $"Saldo bank {Weergave.Datum(saldi.Datum)} {new Bedrag(bank)} · grootboek (met concepten) {new Bedrag(saldi.MetConcepten)}"
-                + (saldi.IsAangesloten ? " ✓" : " — verschil " + new Bedrag(bank - saldi.MetConcepten))
+            ? $"Saldo {new Bedrag(bank)} · afschrift {Weergave.Datum(saldi.Datum)}"
             : "Nog geen afschriften ingelezen.";
+        Bankverschiltekst = saldi.Bank is { } metAfschrift && !saldi.IsAangesloten
+            ? $"⚠ De boekhouding wijkt {new Bedrag(Math.Abs(metAfschrift - saldi.MetConcepten))} af van de bank."
+                + (AantalTeVerwerken > 0 ? $" Er {(AantalTeVerwerken == 1 ? "is" : "zijn")} nog {AantalTeVerwerken} te verwerken." : string.Empty)
+            : null;
     }
+
+    /// <summary>Alleen bij een verschil tussen bank en boekhouding, met de oorzaak die de gebruiker kan oplossen.</summary>
+    [ObservableProperty]
+    public partial string? Bankverschiltekst { get; private set; }
 
     private void KiesMutatie(Guid? id)
     {
-        GeselecteerdeMutatie = Mutaties.FirstOrDefault(m => m.Id == id) ?? Mutaties.FirstOrDefault();
+        // Besluit 38: geen vanzelf gekozen eerste regel; het detail opent pas bij een keuze.
+        GeselecteerdeMutatie = Mutaties.FirstOrDefault(m => m.Id == id);
     }
 
     // ---- Boekingsregels ----------------------------------------------------------------------
@@ -416,14 +426,22 @@ public sealed partial class BoekhoudingViewModel
 
     private void RegelGewijzigd(object? sender, PropertyChangedEventArgs e) => CommandsVernieuwen();
 
-    partial void OnGeselecteerdeRegelChanged(BoekingsregelRegel? value) => CommandsVernieuwen();
-
-    private async Task BewaarRegelsAsync()
+    partial void OnGeselecteerdeRegelChanged(BoekingsregelRegel? value)
     {
-        foreach (var regel in Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is null).ToList())
+        CommandsVernieuwen();
+        MeldDetail();
+    }
+
+    /// <returns>Het aantal bewaarde regels.</returns>
+    private async Task<int> BewaarRegelsAsync()
+    {
+        var bewaren = Boekingsregels.Where(r => r.IsGewijzigd && r.Fout is null).ToList();
+        foreach (var regel in bewaren)
         {
             await Bankdienst.BewaarRegelAsync(Soort, regel.Invoer);
         }
+
+        return bewaren.Count;
     }
 
     private void BankCommandsVernieuwen()

@@ -4,6 +4,35 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Gewijzigd
+- **Lijst en detail** (besluit 38): Journaal, Bank, Bonnen, Boekingsregels, Relaties en Rekeningschema werken op dezelfde manier.
+  - De lijst krijgt de volle breedte.
+  - Het detail schuift rechts in als u een regel kiest of *Nieuw …*, en sluit met ✕ of Esc.
+  - Zonder keuze staat er geen leeg vlak en geen "Selecteer een …" meer.
+  - Een lege lijst toont alleen uitleg en één knop.
+- **Opslaan** staat onderaan het detail; zonder detail onderaan de pagina, zodra er iets op te slaan is. Ctrl+S werkt altijd.
+- **Jaar** rechts in de werkbalk, alleen bij meer dan één jaar en alleen bij Journaal, Bank, Rapporten en Grootboekkaart.
+- **Journaal:**
+  - een zoekveld met "Zoeken";
+  - de kolom Nummer staat nu in het detail;
+  - een geboekte post toont de regels als tekst, zonder invulvelden en prullenbakjes;
+  - *Bijlage toevoegen* staat er één keer.
+- **Bank:**
+  - het saldo is één getal met de datum van het afschrift;
+  - wijkt de boekhouding af van de bank, dan staat er een ⚠ met het verschil en hoeveel er nog te verwerken is;
+  - *Regels toepassen* gaat vanzelf als u een boekingsregel opslaat, dus de knop is weg;
+  - een transactie wordt niet meer vanzelf gekozen.
+- **Bonnen:**
+  - datum en bedrag bewaren zichzelf, dus de knop *Datum en bedrag bewaren* is weg;
+  - bekijken met een dubbelklik;
+  - verwijderen met Delete of het contextmenu;
+  - de hele pagina is een sleepvlak.
+- **Boekingsregels:**
+  - de lijst toont per regel wanneer hij geldt en naar welke rekening het gaat ("naam bevat "energ", af → 4200 Energie");
+  - in het detail staan alleen de ingevulde voorwaarden, met *Voorwaarde toevoegen ▾* voor de rest.
+- **Relaties:** *Klant* en *Leverancier* in plaats van debiteur en crediteur.
+- **Rekeningschema:** een lijst met nummer, naam, rubriek en saldo. Bewerken gebeurt in het detail; *Baten/lasten* staat alleen bij resultaatrekeningen en *Rol* onder *Geavanceerd*.
+
 ## [0.21.0] - 2026-11-16: Rustiger schil, platte navigatie en een zip zonder installatie
 
 ### Toegevoegd

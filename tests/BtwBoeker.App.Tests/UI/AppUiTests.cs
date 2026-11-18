@@ -243,7 +243,13 @@ public sealed class AppUiTests : IDisposable
         Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Bank", "3 te doen"), Wachttijd).Result, "De teller begint niet op 3.");
         Assert.True(Retry.WhileFalse(() => KeuzeToont("Betaalrekening (2)"), Wachttijd).Result, "De keuzelijst toont niet 'Betaalrekening (2)'.");
         Assert.True(KeuzeToont("Spaarrekening (1)"), "De keuzelijst toont niet 'Spaarrekening (1)'.");
-        Zoek(venster, "RegelsToepassen").AsButton().Invoke();
+
+        // Besluit 38: geen knop Regels toepassen meer; een transactie toewijzen maakt net zo een concept.
+        var transacties = Zoek(venster, "Banktransacties").AsGrid();
+        transacties.Rows[0].Select();
+        var rekening = Zoek(venster, "Toewijsrekening").AsComboBox();
+        rekening.Select(rekening.Items.ToList().FindIndex(i => i.Name.StartsWith("4115", StringComparison.Ordinal)));
+        Zoek(venster, "Toewijzen").AsButton().Invoke();
 
         Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Bank", "2 te doen"), Wachttijd).Result, "De teller van Bank liep niet mee.");
         Assert.True(Retry.WhileFalse(() => TellerIs("Nav_Boekhouding.Journaal", "1 te doen"), Wachttijd).Result, "Journaal kreeg geen teller voor het concept.");
@@ -333,10 +339,11 @@ public sealed class AppUiTests : IDisposable
         Kies(venster, "Nav_Boekhouding.Bank");
         Zoek(venster, "BankInlezen");
         Bewaar(venster, "13-boekhouding-bank");
+        // Besluit 38: een lege lijst toont alleen het lege-schermblok met één knop, geen lege tabel.
         Kies(venster, "Nav_Boekhouding.Boekingsregels");
-        Zoek(venster, "Boekingsregels");
+        Zoek(venster, "Leeg_Boekingsregels");
         Kies(venster, "Nav_Boekhouding.Relaties");
-        Zoek(venster, "NieuweRelatie").AsButton().Invoke();
+        Zoek(venster, "Leeg_Relaties").AsButton().Invoke();
         Zoek(venster, "RelatieNaam");
         Kies(venster, "Nav_Boekhouding.Rapporten");
         Zoek(venster, "Rapport");

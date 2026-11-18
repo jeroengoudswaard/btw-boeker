@@ -14,8 +14,8 @@ public partial class BoekhoudingView : UserControl
 
     private BoekhoudingViewModel? ViewModel => DataContext as BoekhoudingViewModel;
 
-    /// <summary>Excel en CSV samen onder één knop <i>Exporteren</i>.</summary>
-    private void Exporteren_Click(object sender, RoutedEventArgs e)
+    /// <summary>Een knop met een menu eronder: <i>Exporteren</i> (Excel en CSV) en <i>Voorwaarde toevoegen ▾</i>.</summary>
+    private void Knopmenu_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { ContextMenu: { } menu } knop)
         {

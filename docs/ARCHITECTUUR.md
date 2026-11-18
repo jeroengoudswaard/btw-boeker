@@ -215,3 +215,14 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
   - `Onderdeelpaneel`: een TabControl zonder kopregel en zonder lijn.
 - **Bewaakt door:** `SchilTests` (architectuur), `ShellSchilTests`, `MeldingsbalkTests` en `VensterrandTests`.
 
+
+## Lijst en detail (UX-review ronde 2, stap 3; besluit 38)
+
+- **Patroon:** de werkbalk staat op één regel (*Nieuw …*, zoeken, filters; rechts het jaar via de template `Jaarkeuze` en afdrukken/exporteren via `Uitvoer`). Daaronder de lijst over de volle breedte, en een `Views/Gedeeld/Detailpaneel` (HeaderedContentControl, 440 px, kop met ✕ via `SluitOpdracht`, voor UI Automation een groep) dat rechts inschuift.
+- **Selectie:** het detail is zichtbaar bij een selectie of *Nieuw* (`BoekhoudingViewModel.IsDetailOpen`, per onderdeel). Bank en Bonnen kiezen niet meer vanzelf de eerste regel. Esc en ✕ roepen `SluitDetailCommand` aan. Een gewijzigde post vraagt eerst of hij verworpen mag worden; een lege nieuwe boekingsregel verdwijnt; een ingevulde nieuwe regel pas na bevestiging.
+- **Opslaan** blijft één opslag per pagina (`BewaarAsync`, Ctrl+S). De knop staat in het detail (`HeeftOnopgeslagenWijzigingenMetDetail`) of onderaan als er geen detail open is (`HeeftOnopgeslagenWijzigingenZonderDetail`); `SchilTests` eist dat elke Opslaan-knop zijn zichtbaarheid aan `HeeftOnopgeslagenWijzigingen…` koppelt.
+- **Regels toepassen** gaat vanzelf: `BewaarAsync` past de regels toe na het opslaan van ten minste één boekingsregel (`BewaarRegelsAsync` geeft het aantal terug). Het inlezen van een afschrift paste ze al toe.
+- **Bank:** `Banksaldotekst` is het saldo met de datum van het afschrift; `Bankverschiltekst` (⚠) alleen als de boekhouding afwijkt. Afwijking van het ontwerp: de ⚠ staat in de pagina en niet in de meldingsbalk, omdat die geen knop kan dragen; de hoofdactie *Concepten boeken* staat er al.
+- **Bonnen:** datum en bedrag van een bon worden bewaard zodra de gebruiker een andere bon kiest of het detail sluit (`OnGeselecteerdeBonChanged`).
+- **Boekingsregels:** `BoekingsregelRegel.Wanneer` en `Waarheen` voor de lijst; `Is…Zichtbaar` en `ToeTeVoegenVoorwaarden` met `VoorwaardeToevoegenCommand` voor het detail.
+- **Bewaakt door:** `LijstEnDetailTests` (ViewModel), `SchilTests.Lijst_en_detail_zonder_leeg_vlak` en `Inrichtingslijsten_zijn_alleen_lezen` (architectuur), en de UI-tests (lege lijsten tonen `Leeg_…`).
