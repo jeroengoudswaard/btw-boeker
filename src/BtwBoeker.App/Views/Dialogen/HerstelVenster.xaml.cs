@@ -10,7 +10,7 @@ public partial class HerstelVenster : Window
         InitializeComponent();
         DataContext = ViewModel;
         Uitleg.Text = $"Voer de herstelsleutel van '{databaseNaam}' in en kies een nieuw wachtwoord. "
-            + "De herstelsleutel kreeg u bij het aanmaken van de database.";
+            + "De herstelsleutel kreeg u bij het aanmaken van de administratie.";
     }
 
     public HerstelViewModel ViewModel { get; } = new();

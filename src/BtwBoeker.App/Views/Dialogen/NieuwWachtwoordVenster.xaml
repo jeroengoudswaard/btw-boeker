@@ -7,7 +7,7 @@
         FocusManager.FocusedElement="{Binding ElementName=Wachtwoord}">
     <StackPanel Margin="24">
         <TextBlock TextWrapping="Wrap" Margin="0,0,0,16"
-                   Text="De database wordt versleuteld met dit wachtwoord. Kies minimaal 12 tekens; een korte zin is sterk én goed te onthouden. Hierna krijgt u een herstelsleutel voor als u het wachtwoord vergeet." />
+                   Text="De administratie wordt versleuteld met dit wachtwoord. Kies minimaal 12 tekens; een korte zin is sterk én goed te onthouden. Hierna krijgt u een herstelsleutel voor als u het wachtwoord vergeet." />
         <Label Content="_Wachtwoord" Target="{Binding ElementName=Wachtwoord}" Padding="0,0,0,4" />
         <PasswordBox x:Name="Wachtwoord" PasswordChanged="Wachtwoord_PasswordChanged" Margin="0,0,0,12"
                      AutomationProperties.AutomationId="NieuwWachtwoord" />

@@ -48,7 +48,7 @@ public static class Woordenlijst
         new("Rapport.JaarrekeningBalans", "Jaarrekening: balans", "Jaarstuk: bezittingen en schulden"),
         new("Rapport.JaarrekeningBatenLasten", "Jaarrekening: baten en lasten", "Jaarstuk: inkomsten en uitgaven"),
         new("Bijlage", "Bijlage", "Bon"),
-        new("Bijlagen", "Bijlagen", "Bonnen", "Bonnen en facturen bij een boeking; ze worden versleuteld bewaard en gaan mee in de back-up."),
+        new("Bijlagen", "Bijlagen", "Bonnen", "Bonnen bij een boeking; ze worden versleuteld bewaard en gaan mee in de back-up."),
 
         // Subtabbladen en knoppen (met toegangstoets)
         new("Tab.Journaal", "_Journaal", "_Alle boekingen"),
@@ -61,7 +61,7 @@ public static class Woordenlijst
         new("Knop.NieuwePost", "_Nieuwe post", "_Nieuwe boeking"),
         new("Knop.Boeken", "_Boeken", "_Definitief maken"),
         new("Knop.ConceptVerwijderen", "Concept _verwijderen", "Voorlopige boeking _verwijderen"),
-        new("Knop.Tegenboeken", "_Tegenboeken...", "_Terugdraaien..."),
+        new("Knop.Tegenboeken", "_Tegenboeken…", "_Terugdraaien…"),
         new("Knop.ConceptenBoeken", "Concepten b_oeken", "Alles definitief m_aken"),
         new("Knop.Toewijzen", "_Toewijzen", "I_ndelen in potje"),
         new("Knop.NieuweRekening", "Nieuwe _rekening", "Nie_uw potje"),
@@ -74,20 +74,19 @@ public static class Woordenlijst
         // Uitleg onder de paginatitel, per onderdeel (UX-review stap 1)
         new("Kop.Journaal", "Alle posten van het boekjaar, concept en geboekt.", "Alle boekingen van het jaar, ook de nog niet definitieve."),
         new("Kop.Bank", "Banktransacties inlezen, aan een rekening toewijzen en boeken.", "Je bankafschriften: zet elke transactie in een potje."),
-        new("Kop.Postvak", "Bonnen en facturen die nog bij een post moeten.", "Bonnen die nog bij een boeking moeten."),
+        new("Kop.Postvak", "Bonnen die nog bij een post moeten.", "Bonnen die nog bij een boeking moeten."),
         new("Kop.Rapporten", "Saldibalans, balans, staat van baten en lasten en de jaarrekening.", "Overzichten: de potjes, bezittingen en schulden, inkomsten en uitgaven."),
         new("Kop.Boekingsregels", "Regels die banktransacties automatisch aan een rekening toewijzen.", "Regels die banktransacties automatisch in het juiste potje zetten."),
         new("Kop.Relaties", "Klanten en leveranciers, zoals de verhuurorganisatie en de energieleverancier.", "Klanten en leveranciers, zoals de verhuurorganisatie en de energieleverancier."),
-        new("Kop.Rekeningschema", "De rekeningen en rubrieken van de administratie.", "De potjes en groepen van de administratie."),
+        new("Kop.Rekeningschema", "De rekeningen en rubrieken van de administratie.", "De potjes van de administratie, per soort."),
         new("Kop.Grootboekkaart", "Alle boekingen op één rekening, met het saldo na elke regel.", "Alle boekingen in één potje, met de stand na elke boeking."),
         new("Kop.Boekjaren", "Boekjaren openen, afsluiten en als auditfile exporteren.", "Jaren openen en afsluiten."),
         new("Knop.ZonderBon", "_Zonder bon", "_Zonder bon", "Uitgaven en ontvangsten van bank of kas boven de drempel (Instellingen) zonder bon."),
-        new("Knop.BijlageToevoegen", "Bijlag_e toevoegen...", "Bon toevo_egen..."),
+        new("Knop.BijlageToevoegen", "Bijlag_e toevoegen…", "Bon toevo_egen…"),
         new("Tip.Toewijzen", "Maakt een conceptpost (Enter)", "Maakt een voorlopige boeking (Enter)"),
         new("Tip.Tegenboeken", "Een geboekte post corrigeren met een post met omgekeerde bedragen", "Een definitieve boeking terugdraaien met een correctieboeking"),
 
         // Zinnen
-        new("Tekst.SelecteerPost", "Selecteer een post of kies Nieuwe post (Ctrl+N).", "Selecteer een boeking of kies Nieuwe boeking (Ctrl+N)."),
         new("Tekst.TeVerwerken", " te verwerken · ", " nog in te delen · "),
         new("Tekst.ConceptAantal", " concept", " nog niet definitief"),
         new("Tekst.ConceptBank",
@@ -102,7 +101,7 @@ public static class Woordenlijst
         new("Boekingsregel.Enkelvoud", "boekingsregel", "regel voor automatisch indelen"),
         new("Boekingsregel.Meervoud", "boekingsregels", "regels voor automatisch indelen"),
         new("Melding.RegelsNietOpgeslagen", "Opgeslagen; {0} nog niet: zie Let op bij Boekingsregels.", "Opgeslagen; {0} nog niet: zie Let op bij Automatisch indelen."),
-        new("Melding.RekeningNietOpgeslagen", "⚠ Er zijn niet-opgeslagen rekeningen. Sla op (Ctrl+S) om ze hier te kunnen kiezen.", "⚠ Er zijn niet-opgeslagen potjes. Sla op (Ctrl+S) om ze hier te kunnen kiezen."),
+        new("Melding.RekeningNietOpgeslagen", "⚠ Er zijn niet-opgeslagen rekeningen. Sla eerst op om ze hier te kunnen kiezen.", "⚠ Er zijn niet-opgeslagen potjes. Sla eerst op om ze hier te kunnen kiezen."),
     ];
 
     private static readonly Dictionary<string, Term> PerSleutel = Termen.ToDictionary(t => t.Sleutel, StringComparer.Ordinal);

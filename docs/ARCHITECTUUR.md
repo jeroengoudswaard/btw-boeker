@@ -235,3 +235,10 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - **Bank, Rapporten, Grootboekkaart:** `IsToewijzenZichtbaar`, `IsNaarPostZichtbaar` met `NaarPostCommand`, `NaarJournaalCommand(jaar)` en `IsKaartRekeningGekozen`; in `BoekhoudingViewModel.Status.cs`. Bonnen: `BonRegel.IsKoppelenZichtbaar`.
 - **Startwizard:** `IsVorigeZichtbaar`, `IsVolgendeZichtbaar`, `IsOverslaanZichtbaar`, `IsVoltooienZichtbaar`; de knop *Later verder* is weg (`LaterVerderCommand` blijft voor ✕).
 - **Bewaakt door:** `ActiesVolgensStatusTests`, `StartwizardTests`, `SchilTests.Acties_staan_in_het_detail_en_niet_in_de_rijen` en de UI-test van de startwizard.
+
+## Teksten (UX-review ronde 2, stap 5; besluit 41)
+
+- In de interface heet het versleutelde bestand *administratie*; in de code blijven `Database`, `DatabaseBeheer` en `.btwdb`.
+- `TekstTests` (architectuur) bewaakt de zichtbare teksten in de XAML (`Text`, `Content`, `Header`, `Title`, `ToolTip`, `AutomationProperties.Name`), de woordenlijst en de C#-tekenreeksen in App, Application en Infrastructure, met uitzondering van logregels, bestandsnamen, bestandsfilters en migraties. Verboden zijn:
+  - overal: "...", "database", "facturen", "administraties" en "groepen";
+  - buiten tooltips: "Ctrl+", extensies, "CAMT", "XAF" en "Kruisposten".

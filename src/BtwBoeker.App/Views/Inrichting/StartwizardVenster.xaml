@@ -73,23 +73,23 @@
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Welkom}">
                     <TextBlock Style="{StaticResource Toelichting}" FontSize="16" Margin="0,0,0,16"
-                               Text="Deze wizard helpt u de database, administraties, boekhouding en bank in te richten. U kunt stappen overslaan en later verdergaan." />
+                               Text="Deze wizard helpt u de administratie, het rekeningschema en de bank in te richten. U kunt stappen overslaan en later verdergaan." />
                     <Border Style="{StaticResource Stapkaart}">
                         <StackPanel>
                             <TextBlock Text="Wat u nodig hebt" FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <TextBlock Style="{StaticResource Toelichting}" Text="• Een sterk wachtwoord voor de versleutelde database" />
+                            <TextBlock Style="{StaticResource Toelichting}" Text="• Een sterk wachtwoord voor de versleutelde administratie" />
                             <TextBlock Style="{StaticResource Toelichting}" Text="• Uw rekeningschema en beginstanden" />
-                            <TextBlock Style="{StaticResource Toelichting}" Text="• Een bankafschrift in CAMT.053-formaat" />
+                            <TextBlock Style="{StaticResource Toelichting}" Text="• Een bankafschrift van de Rabobank" ToolTip="Een CAMT.053-bestand, te downloaden in Rabo Online Bankieren" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Database}">
-                    <TextBlock Style="{StaticResource Toelichting}" Text="Maak een versleutelde database aan of open een bestaande BTW-Boeker-database." Margin="0,0,0,16" />
+                    <TextBlock Style="{StaticResource Toelichting}" Text="Maak een versleutelde administratie aan of open een bestaande." Margin="0,0,0,16" />
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Nieuwe database..." Command="{Binding NieuweDatabaseCommand}" Style="{DynamicResource AccentButtonStyle}"
+                        <Button Content="Nieuwe administratie…" Command="{Binding NieuweDatabaseCommand}" Style="{DynamicResource AccentButtonStyle}"
                                 AutomationProperties.AutomationId="StartwizardNieuweDatabase" />
-                        <Button Content="Database openen..." Command="{Binding OpenDatabaseCommand}" Margin="8,0,0,0"
+                        <Button Content="Administratie openen…" Command="{Binding OpenDatabaseCommand}" Margin="8,0,0,0"
                                 AutomationProperties.AutomationId="StartwizardOpenDatabase" />
                     </StackPanel>
                 </StackPanel>
@@ -97,7 +97,7 @@
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Boekhouding}">
                     <TextBlock Style="{StaticResource Toelichting}" Text="Richt het rekeningschema in en vul de beginsaldi in. U kunt ook leeg beginnen en later gegevens importeren." Margin="0,0,0,16" />
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Sjabloon..." Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Sjabloon}"
+                        <Button Content="Sjabloon…" Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Sjabloon}"
                                 AutomationProperties.AutomationId="StartwizardSjabloon" />
                         <Button Content="Leeg beginnen" Command="{Binding BoekhoudingInrichtenCommand}" CommandParameter="{x:Static vm:Boekhoudingkeuze.Leeg}"
                                 Margin="8,0,0,0" AutomationProperties.AutomationId="StartwizardLeeg" />
@@ -106,7 +106,7 @@
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Bank}">
                     <TextBlock Style="{StaticResource Toelichting}" Text="Lees een bankafschrift in om de beginstanden te controleren en transacties te verwerken." Margin="0,0,0,16" />
-                    <Button Content="Bankafschrift inlezen..." Command="{Binding BankInlezenCommand}"
+                    <Button Content="Bankafschrift inlezen…" Command="{Binding BankInlezenCommand}"
                             Visibility="{Binding KanBankInlezen, Converter={StaticResource BoolNaarZichtbaar}}"
                             HorizontalAlignment="Left" AutomationProperties.AutomationId="StartwizardBankInlezen" />
                     <TextBlock Text="Richt eerst de boekhouding in (de vorige stap); daarna kunt u hier een bankafschrift inlezen." TextWrapping="Wrap"
@@ -114,7 +114,7 @@
                 </StackPanel>
 
                 <StackPanel Visibility="{Binding Huidig, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=Klaar}">
-                    <TextBlock Style="{StaticResource Toelichting}" Text="Dit is de stand van uw inrichting. U kunt onderdelen later opnieuw openen via Instellingen of Boekhouding." />
+                    <TextBlock Style="{StaticResource Toelichting}" Text="Dit is de stand van uw inrichting. Deze wizard kunt u later opnieuw openen via Bestand › Startwizard." />
                     <ItemsControl ItemsSource="{Binding Klaarregels}" Margin="0,16,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

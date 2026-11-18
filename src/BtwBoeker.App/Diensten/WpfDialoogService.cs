@@ -10,7 +10,7 @@ namespace BtwBoeker.App.Diensten;
 /// <summary>Windows-standaarddialogen (bestandskiezers, MessageBox) en de eigen wachtwoordvensters.</summary>
 internal sealed class WpfDialoogService : IDialoogService
 {
-    private const string DatabaseFilter = "BTW-Boeker-database (*.btwdb)|*.btwdb";
+    private const string DatabaseFilter = "BTW-Boeker-administratie (*.btwdb)|*.btwdb";
     private const string BackupFilter = "BTW-Boeker-back-up (*.btwbackup)|*.btwbackup";
     private const string CsvFilter = "CSV-bestand (*.csv)|*.csv|Alle bestanden (*.*)|*.*";
 
@@ -34,7 +34,7 @@ internal sealed class WpfDialoogService : IDialoogService
 
     public string? KiesBestaandDatabasebestand()
     {
-        var dialoog = new OpenFileDialog { Title = "Database openen", Filter = DatabaseFilter, CheckFileExists = true };
+        var dialoog = new OpenFileDialog { Title = "Administratie openen", Filter = DatabaseFilter, CheckFileExists = true };
         return dialoog.ShowDialog(Eigenaar) == true ? dialoog.FileName : null;
     }
 
@@ -116,7 +116,7 @@ internal sealed class WpfDialoogService : IDialoogService
     {
         var dialoog = new OpenFileDialog
         {
-            Title = "Bonnen of facturen kiezen",
+            Title = "Bonnen kiezen",
             Filter = "Bon of factuur (*.pdf;*.jpg;*.jpeg;*.png)|*.pdf;*.jpg;*.jpeg;*.png",
             CheckFileExists = true,
             Multiselect = true,

@@ -29,7 +29,7 @@ public static class Sleutelbestand
         catch (FileNotFoundException ex)
         {
             throw new DatabaseBestandException(
-                $"Het sleutelbestand '{Path.GetFileName(pad)}' ontbreekt. Het moet in dezelfde map staan als de database.", ex);
+                $"Het sleutelbestand '{Path.GetFileName(pad)}' ontbreekt. Het moet in dezelfde map staan als de administratie.", ex);
         }
         catch (JsonException ex)
         {

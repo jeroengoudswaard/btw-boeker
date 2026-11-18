@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels.Boekhouding"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:BankImportViewModel}"
-        Title="Bankafschriften inlezen (CAMT.053)"
+        Title="Bankafschriften inlezen"
         Width="900" Height="600" MinWidth="640" MinHeight="440"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         AutomationProperties.AutomationId="BankImport">

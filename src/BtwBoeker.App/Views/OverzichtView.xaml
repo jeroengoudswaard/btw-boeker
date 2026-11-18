@@ -22,29 +22,29 @@
                 </Border>
                 <TextBlock Text="Welkom bij BTW-Boeker" Style="{StaticResource Welkomstitel}" AutomationProperties.HeadingLevel="Level1" />
                 <TextBlock Style="{StaticResource Toelichting}" TextAlignment="Center" Margin="0,8,0,32" MaxWidth="480"
-                           Text="Boekhouding, bank, facturen en bonnen, versleuteld in één bestand." />
+                           Text="Boekhouding, bank en bonnen, versleuteld in één bestand." />
 
                 <UniformGrid Columns="3" Margin="-8,0">
                     <Button Style="{StaticResource Hoofdtegel}" Margin="8,0" Command="{Binding Shell.NieuweDatabaseCommand}"
-                            AutomationProperties.Name="Nieuwe database" AutomationProperties.AutomationId="StartNieuw" ToolTip="Ctrl+N">
+                            AutomationProperties.Name="Nieuwe administratie" AutomationProperties.AutomationId="StartNieuw" ToolTip="Ctrl+N">
                         <StackPanel>
                             <Border Style="{StaticResource Pictogramtegel}" HorizontalAlignment="Left" Background="{DynamicResource AccentFillColorDefaultBrush}">
                                 <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE710;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                             </Border>
-                            <TextBlock Text="Nieuwe database" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
+                            <TextBlock Text="Nieuwe administratie" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
                             <TextBlock Text="Begin met een lege, versleutelde administratie." Style="{StaticResource Toelichting}" FontSize="12" />
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource Keuzetegel}" Margin="8,0" Command="{Binding Shell.OpenDatabaseCommand}"
-                            AutomationProperties.Name="Database openen" AutomationProperties.AutomationId="StartOpenen" ToolTip="Ctrl+O">
+                            AutomationProperties.Name="Administratie openen" AutomationProperties.AutomationId="StartOpenen" ToolTip="Ctrl+O">
                         <StackPanel>
                             <Border Style="{StaticResource Pictogramtegel}" HorizontalAlignment="Left" Background="{conv:Paletkleur Naam=Blauw, Tint=True}">
                                 <TextBlock FontFamily="{StaticResource Pictogrammen}" Text="&#xE8E5;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="{conv:Paletkleur Naam=Blauw}" />
                             </Border>
-                            <TextBlock Text="Database openen" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
-                            <TextBlock Text="Kies een bestaand .btwdb-bestand." Style="{StaticResource Toelichting}" FontSize="12" />
+                            <TextBlock Text="Administratie openen" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
+                            <TextBlock Text="Open een bestaande administratie." Style="{StaticResource Toelichting}" FontSize="12" />
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource Keuzetegel}" Margin="8,0" Command="{Binding Shell.HerstelBackupCommand}"
@@ -55,7 +55,7 @@
                                            Foreground="{conv:Paletkleur Naam=Koraal}" />
                             </Border>
                             <TextBlock Text="Back-up terugzetten" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4" />
-                            <TextBlock Text="Herstel een .btwbackup-back-up als nieuwe database." Style="{StaticResource Toelichting}" FontSize="12" />
+                            <TextBlock Text="Zet een back-up terug als nieuwe administratie." Style="{StaticResource Toelichting}" FontSize="12" />
                         </StackPanel>
                     </Button>
                 </UniformGrid>

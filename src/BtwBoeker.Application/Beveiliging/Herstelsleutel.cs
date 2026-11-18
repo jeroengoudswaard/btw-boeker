@@ -6,7 +6,7 @@ namespace BtwBoeker.Application.Beveiliging;
 
 /// <summary>
 /// Een eenmalig getoonde sleutel (200 bits) waarmee de database geopend kan worden als het wachtwoord kwijt is.
-/// Weergave: acht groepen van vijf Base32-tekens (RFC 4648), bijvoorbeeld <c>ABCDE-FGH23-...</c>.
+/// Weergave: acht groepen van vijf Base32-tekens (RFC 4648), bijvoorbeeld <c>ABCDE-FGH23-…</c>.
 /// </summary>
 public sealed class Herstelsleutel
 {
