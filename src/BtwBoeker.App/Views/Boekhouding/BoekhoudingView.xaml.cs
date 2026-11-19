@@ -15,6 +15,15 @@ public partial class BoekhoudingView : UserControl
     private BoekhoudingViewModel? ViewModel => DataContext as BoekhoudingViewModel;
 
     /// <summary>Een knop met een menu eronder: <i>Exporteren</i> (Excel en CSV) en <i>Voorwaarde toevoegen ▾</i>.</summary>
+    /// <summary>Besluit 42: de drempel wordt bewaard zodra het veld de focus verliest.</summary>
+    private void Drempelveld_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is BoekhoudingViewModel vm && vm.BevestigDrempelCommand.CanExecute(null))
+        {
+            vm.BevestigDrempelCommand.Execute(null);
+        }
+    }
+
     private void Knopmenu_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { ContextMenu: { } menu } knop)

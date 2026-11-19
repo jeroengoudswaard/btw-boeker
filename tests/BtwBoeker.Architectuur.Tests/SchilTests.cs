@@ -78,7 +78,7 @@ public partial class SchilTests
             .SelectMany(b => Opslaanknop().Matches(File.ReadAllText(b)).Select(m => (Bestand: Path.GetFileName(b), Knop: m.Value)))
             .ToList();
 
-        Assert.True(knoppen.Count >= 2, "Verwacht de knop Opslaan op Boekhouding en Instellingen");
+        Assert.True(knoppen.Count >= 1, "Verwacht de knop Opslaan op Boekhouding (Instellingen bewaart direct, besluit 42)");
         var fouten = knoppen.Where(k => !k.Knop.Contains("Visibility=\"{Binding HeeftOnopgeslagenWijzigingen", StringComparison.Ordinal)).Select(k => k.Bestand);
         Assert.True(!fouten.Any(), "Opslaan zonder zichtbaarheid bij wijzigingen: " + string.Join(", ", fouten));
         Assert.DoesNotContain("Niet-opgeslagen wijzigingen", string.Concat(Directory.EnumerateFiles(Views, "*.xaml", SearchOption.AllDirectories).Select(File.ReadAllText)), StringComparison.Ordinal);
@@ -126,6 +126,23 @@ public partial class SchilTests
         Assert.True(boekjaren.Success, "Geen lijst Jaren");
         Assert.DoesNotContain("<Button", boekjaren.Value, StringComparison.Ordinal);
         Assert.DoesNotContain("StartwizardLaterVerder", Lees("Inrichting", "StartwizardVenster.xaml"), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// UX-review stap 6 (besluit 42): Instellingen bewaart direct, zonder knop Opslaan, met thema en weergave (ook in het menu
+    /// Beeld); de drempel <i>zonder bon</i> staat bij het filter in het Journaal.
+    /// </summary>
+    [Fact]
+    public void Instellingen_bewaart_direct_en_de_drempel_staat_bij_het_filter()
+    {
+        var instellingen = Lees("InstellingenView.xaml");
+
+        Assert.DoesNotContain("OpslaanCommand", instellingen, StringComparison.Ordinal);
+        Assert.DoesNotContain("Drempel", instellingen, StringComparison.Ordinal);
+        Assert.Contains("GekozenThema", instellingen, StringComparison.Ordinal);
+        Assert.Contains("GekozenWeergave", instellingen, StringComparison.Ordinal);
+        Assert.Contains("KiesThemaCommand", Lees("ShellWindow.xaml"), StringComparison.Ordinal);
+        Assert.Contains("Drempeltekst", Lees("Boekhouding", "BoekhoudingView.xaml"), StringComparison.Ordinal);
     }
 
     [GeneratedRegex("<g:Detailpaneel\\s[^>]*>")]

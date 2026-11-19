@@ -114,6 +114,21 @@
                                 <ToggleButton Content="{Binding ZonderBonTekst}" IsChecked="{Binding AlleenZonderBon}" Margin="8,0,0,0" VerticalAlignment="Center"
                                               ToolTip="{DynamicResource T.Knop.ZonderBon}" Visibility="{Binding IsZonderBonZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                                               AutomationProperties.Name="Alleen boekingen zonder bon" AutomationProperties.AutomationId="FilterZonderBon" />
+                                <!-- Besluit 42 (2B): de drempel staat bij het filter, alleen als het filter aan staat; direct bewaard. -->
+                                <StackPanel Orientation="Horizontal" Margin="8,0,0,0" VerticalAlignment="Center"
+                                            Visibility="{Binding IsDrempelZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}">
+                                    <Label Content="vanaf €" Target="{Binding ElementName=Drempelveld}" VerticalAlignment="Center" Padding="0,0,8,0" />
+                                    <TextBox x:Name="Drempelveld" Width="80" TextAlignment="Right" VerticalAlignment="Center"
+                                             Text="{Binding Drempeltekst, UpdateSourceTrigger=PropertyChanged}" LostFocus="Drempelveld_LostFocus"
+                                             ToolTip="{Binding Drempelfout, TargetNullValue='Boekingen vanaf dit bedrag zonder bon tellen mee, ook op Start'}"
+                                             AutomationProperties.Name="Drempel zonder bon in euro" AutomationProperties.AutomationId="DrempelZonderBon">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Command="{Binding BevestigDrempelCommand}" />
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                    <TextBlock Text="{Binding Drempelfout}" Style="{StaticResource Foutmelding}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                               Visibility="{Binding Drempelfout, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Assertive" />
+                                </StackPanel>
                             </WrapPanel>
                         </DockPanel>
 

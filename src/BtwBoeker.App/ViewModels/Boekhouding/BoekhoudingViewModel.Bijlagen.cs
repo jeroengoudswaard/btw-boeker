@@ -27,6 +27,7 @@ public sealed partial class BoekhoudingViewModel
 
     /// <summary>Filter in het Journaal: uitgaven en ontvangsten van bank of kas boven de drempel zonder bijlage.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDrempelZichtbaar))]
     public partial bool AlleenZonderBon { get; set; }
 
     /// <summary>Een nieuwe post krijgt pas bijlagen nadat hij is opgeslagen.</summary>
@@ -55,8 +56,14 @@ public sealed partial class BoekhoudingViewModel
     }
 
     /// <summary>De drempel van de eigen administratie.</summary>
-    private void BerekenZonderBon() =>
+    private void BerekenZonderBon()
+    {
         _zonderBon = [.. ZonderBon.Posten(_stand!, new Domain.Financien.Bedrag(Administratie.Model.ZonderBonDrempel)).Select(p => p.Id)];
+        if (Drempelfout is null)
+        {
+            Drempeltekst = Drempelweergave(Administratie.Model.ZonderBonDrempel);
+        }
+    }
 
     private void LaadPostbijlagen()
     {

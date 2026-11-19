@@ -4,54 +4,77 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:BtwBoeker.App.ViewModels"
+             xmlns:inst="clr-namespace:BtwBoeker.Application.Instellingen;assembly=BtwBoeker.Application"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:InstellingenViewModel}"
              AutomationProperties.AutomationId="Instellingen">
-    <DockPanel>
-        <!-- UX-review stap 1: de balk met Opslaan alleen als er iets op te slaan is; Ctrl+S werkt altijd. -->
-        <Border DockPanel.Dock="Bottom" Padding="48,12" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}">
-            <Button Content="Opslaan" MinWidth="96" Command="{Binding OpslaanCommand}" HorizontalAlignment="Right"
-                    Visibility="{Binding HeeftOnopgeslagenWijzigingen, Converter={StaticResource BoolNaarZichtbaar}}"
-                    Style="{DynamicResource AccentButtonStyle}" ToolTip="Opslaan (Ctrl+S)"
-                    AutomationProperties.AutomationId="InstellingenOpslaan" />
-        </Border>
-        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Foutmelding}" Style="{StaticResource Foutmelding}" Margin="48,0,48,8"
-                   Visibility="{Binding Foutmelding, Converter={StaticResource NietNullNaarZichtbaar}}" />
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="48,24" MaxWidth="760" HorizontalAlignment="Left">
-                <TextBlock Text="Administratie" Style="{StaticResource Sectietitel}" />
-                <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,16"
-                           Text="De naam staat in de titelbalk en op afdrukken; de drempel bepaalt welke boekingen zonder bon worden gemeld." />
-                <Border Style="{StaticResource Kaart}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="180" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+    <!-- Besluit 42: alles wordt direct bewaard, zoals in Windows-Instellingen; er is geen knop Opslaan. Thema en weergave zijn
+         die van de shell (GekozenThema, GekozenWeergave), zodat ze gelijk lopen met het menu Beeld. -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="{StaticResource PaginaMarge}" MaxWidth="760" HorizontalAlignment="Left">
+            <TextBlock Text="Administratie" Style="{StaticResource Sectietitel}" Margin="0,0,0,8" />
+            <Border Style="{StaticResource Kaart}" Margin="0,0,0,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="_Naam" Target="{Binding ElementName=Naamveld}" VerticalAlignment="Center" />
+                    <TextBox x:Name="Naamveld" Grid.Column="1" Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" LostFocus="Naamveld_LostFocus"
+                             AutomationProperties.AutomationId="AdministratieNaam">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding BevestigNaamCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fout}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0"
+                               Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" AutomationProperties.LiveSetting="Assertive" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Toelichting}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Staat in de titelbalk en op afdrukken." />
+                </Grid>
+            </Border>
 
-                        <Label Content="_Naam" Target="{Binding ElementName=Naamveld}" VerticalAlignment="Center" />
-                        <TextBox x:Name="Naamveld" Grid.Column="1" Margin="0,0,0,8"
-                                 Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}"
-                                 AutomationProperties.AutomationId="AdministratieNaam" />
-
-                        <Label Grid.Row="1" Content="_Drempel 'zonder bon' (€)" Target="{Binding ElementName=Drempelveld}" VerticalAlignment="Center" />
-                        <TextBox x:Name="Drempelveld" Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Margin="0,0,0,8"
-                                 Text="{Binding Drempeltekst, UpdateSourceTrigger=PropertyChanged}"
-                                 ToolTip="Uitgaven en ontvangsten van bank of kas vanaf dit bedrag zonder bijlage komen in het filter en op de startpagina"
-                                 AutomationProperties.AutomationId="DrempelZonderBon" />
-
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Fout}" Style="{StaticResource Foutmelding}"
-                                   Visibility="{Binding Fout, Converter={StaticResource NietNullNaarZichtbaar}}" />
-                    </Grid>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
-    </DockPanel>
+            <TextBlock Text="Uiterlijk" Style="{StaticResource Sectietitel}" Margin="0,0,0,8" />
+            <Border Style="{StaticResource Kaart}">
+                <Grid DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Thema" VerticalAlignment="Center" Margin="4,0,0,0" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <RadioButton GroupName="Thema" Content="_Systeem" ContentTemplate="{StaticResource Toegangstekst}" Margin="0,0,16,0" ToolTip="Volgt de instelling van Windows"
+                                     IsChecked="{Binding GekozenThema, Converter={StaticResource Keuze}, ConverterParameter={x:Static inst:Thema.Systeem}}"
+                                     AutomationProperties.AutomationId="ThemaSysteem" />
+                        <RadioButton GroupName="Thema" Content="L_icht" ContentTemplate="{StaticResource Toegangstekst}" Margin="0,0,16,0"
+                                     IsChecked="{Binding GekozenThema, Converter={StaticResource Keuze}, ConverterParameter={x:Static inst:Thema.Licht}}"
+                                     AutomationProperties.AutomationId="ThemaLicht" />
+                        <RadioButton GroupName="Thema" Content="_Donker" ContentTemplate="{StaticResource Toegangstekst}"
+                                     IsChecked="{Binding GekozenThema, Converter={StaticResource Keuze}, ConverterParameter={x:Static inst:Thema.Donker}}"
+                                     AutomationProperties.AutomationId="ThemaDonker" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Text="Woorden" VerticalAlignment="Center" Margin="4,16,0,0" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,16,0,0">
+                        <RadioButton GroupName="Weergave" Content="_Expert" ContentTemplate="{StaticResource Toegangstekst}" Margin="0,0,16,0"
+                                     IsChecked="{Binding GekozenWeergave, Converter={StaticResource Keuze}, ConverterParameter={x:Static inst:Weergavemodus.Expert}}"
+                                     AutomationProperties.AutomationId="WeergaveExpert" />
+                        <RadioButton GroupName="Weergave" Content="Een_voudig" ContentTemplate="{StaticResource Toegangstekst}"
+                                     IsChecked="{Binding GekozenWeergave, Converter={StaticResource Keuze}, ConverterParameter={x:Static inst:Weergavemodus.Eenvoudig}}"
+                                     AutomationProperties.AutomationId="WeergaveEenvoudig" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Toelichting}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Eenvoudig gebruikt woorden als uitgave en inkomst in plaats van debet en credit. Ook te kiezen in het menu Beeld." />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

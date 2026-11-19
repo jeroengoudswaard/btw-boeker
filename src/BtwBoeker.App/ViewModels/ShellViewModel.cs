@@ -76,12 +76,41 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     public partial string? DatabaseNaam { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(GekozenThema))]
     public partial Thema Thema { get; set; }
 
     /// <summary>Expert of Eenvoudig voor de woorden in Boekhouding; alleen visueel.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar))]
+    [NotifyPropertyChangedFor(nameof(IsMenubalkZichtbaar), nameof(GekozenWeergave))]
     public partial Weergavemodus Weergave { get; set; }
+
+    /// <summary>
+    /// Besluit 42: de keuzerondjes op Instellingen. Instellen werkt als het menu Beeld (toepassen en bewaren), ook als het
+    /// rondje met het toetsenbord of een schermlezer wordt gekozen.
+    /// </summary>
+    public Thema GekozenThema
+    {
+        get => Thema;
+        set
+        {
+            if (value != Thema)
+            {
+                KiesThema(value);
+            }
+        }
+    }
+
+    public Weergavemodus GekozenWeergave
+    {
+        get => Weergave;
+        set
+        {
+            if (value != Weergave)
+            {
+                KiesWeergave(value);
+            }
+        }
+    }
 
     public bool IsDatabaseOpen => DatabaseNaam is not null;
 
@@ -475,6 +504,10 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         if (oldValue is not null && !ReferenceEquals(oldValue, newValue))
         {
             Meldingsbalk.AnderePagina(); // een ⚠ of ✕ hoort bij de pagina waar hij ontstond
+            if (oldValue.Verlaten() is { } waarschuwing)
+            {
+                Meldingsbalk.Toon(Statussoort.Waarschuwing, waarschuwing);
+            }
         }
 
         BouwNavigatie();
@@ -657,6 +690,12 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     {
         if (!pagina.HeeftOnopgeslagenWijzigingen)
         {
+            return true;
+        }
+
+        if (pagina.BewaartDirect)
+        {
+            await pagina.BewaarAsync(); // ongeldige invoer vervalt (besluit 42)
             return true;
         }
 

@@ -5,6 +5,11 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 ## [Onuitgebracht]
 
 ### Gewijzigd
+- **Instellingen bewaart direct** (besluit 42), zoals Windows-Instellingen; de knop *Opslaan* is weg.
+  - De naam wordt bewaard zodra u het veld verlaat of op Enter drukt. Een lege of te lange naam wordt niet bewaard: verlaat u de pagina, dan komt de vorige naam terug, met een melding.
+  - Nieuw op Instellingen: *Uiterlijk*, met *Thema* (Systeem, Licht, Donker) en *Woorden* (Expert, Eenvoudig). Ze lopen gelijk met het menu Beeld.
+  - De drempel *zonder bon* staat nu bij het filter in het Journaal: "vanaf € 10,00", alleen als het filter aan staat. Hij wordt ook direct bewaard.
+  - De kaarten staan gelijk met de paginatitel.
 - **Teksten in gewone taal** (besluit 41).
   - Het versleutelde bestand heet in de app *administratie*: *Nieuwe administratie…*, *Administratie openen…*, "Zet een back-up terug".
   - Alleen *bonnen*, geen *facturen* meer: de app heeft (nog) geen facturen.
