@@ -113,6 +113,24 @@ public sealed partial class BoekhoudingViewModel
         {
             _ = BewaarBonStilAsync(bon);
         }
+
+        if (newValue is { KandidatenGeladen: false, Bijlage.Soort: Domain.Financien.Bijlagen.BijlageSoort.Pdf })
+        {
+            _ = LaadKandidatenAsync(newValue);
+        }
+    }
+
+    /// <summary>Besluit 43: de bedragen van de bon, uit de bewaarde PDF. Lukt dat niet, dan blijven ze gewoon weg.</summary>
+    private async Task LaadKandidatenAsync(BonRegel bon)
+    {
+        try
+        {
+            bon.ZetKandidaten(await Bijlagedienst.KandidatenAsync(Soort, bon.Id));
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or System.Data.Common.DbException)
+        {
+            bon.ZetKandidaten([]);
+        }
     }
 
     private async Task BewaarBonStilAsync(BonRegel bon)

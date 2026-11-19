@@ -7,6 +7,11 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 ## [0.22.0] - 2026-11-19: Lijst en detail, acties volgens status, gewone taal en direct bewaren
 
 ### Gewijzigd
+- **Juist bedrag van de bon** (besluit 43, uit het moederproduct).
+  - "Totaal incl. btw" telt als totaal.
+  - Rente, boetes en kosten bij te late betaling tellen nooit mee.
+  - Bij twijfel wint het bedrag dat bij een boeking past.
+  - In het detail van een bon staat *Ook op de bon:* met de andere bedragen van de PDF; één klik zet het bedrag.
 - **Instellingen bewaart direct** (besluit 42), zoals Windows-Instellingen; de knop *Opslaan* is weg.
   - De naam wordt bewaard zodra u het veld verlaat of op Enter drukt. Een lege of te lange naam wordt niet bewaard: verlaat u de pagina, dan komt de vorige naam terug, met een melding.
   - Nieuw op Instellingen: *Uiterlijk*, met *Thema* (Systeem, Licht, Donker) en *Woorden* (Expert, Eenvoudig). Ze lopen gelijk met het menu Beeld.

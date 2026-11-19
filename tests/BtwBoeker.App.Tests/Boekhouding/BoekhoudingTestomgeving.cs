@@ -14,7 +14,7 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public BoekhoudingTestomgeving(DateTimeOffset? nu = null)
     {
         Sessie = new FakeSessie(Path.Combine(Path.GetTempPath(), "boekhouding-test.btwdb"), new InMemoryAdministratieRepository());
-        Hulpmiddelen = new BoekhoudingHulpmiddelen(Schrijver, Afdruk);
+        Hulpmiddelen = new BoekhoudingHulpmiddelen(Schrijver, Afdruk, Tekstlezer: Tekstlezer);
         Tijd = new VasteTijd(nu ?? new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero));
     }
 
@@ -23,6 +23,9 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
     public FakeSpreadsheetSchrijver Schrijver { get; } = new();
     public FakeAfdrukDienst Afdruk { get; } = new();
     public BoekhoudingHulpmiddelen Hulpmiddelen { get; }
+
+    /// <summary>Standaard leest hij geen tekst (zoals een scan); een test kan <see cref="NepTekstlezer.Tekst"/> zetten.</summary>
+    public NepTekstlezer Tekstlezer { get; } = new();
     public VasteTijd Tijd { get; }
     public InMemoryBoekhoudingOpslag Opslag => (InMemoryBoekhoudingOpslag)Sessie.Boekhouding;
 
@@ -71,4 +74,12 @@ internal sealed class BoekhoudingTestomgeving : IDisposable
         await vm.VernieuwCommand.ExecuteAsync(null);
         return vm;
     }
+}
+
+/// <summary>Geeft de ingestelde tekst terug als tekst van elke PDF; <c>null</c> = geen tekst (zoals een scan).</summary>
+internal sealed class NepTekstlezer : BtwBoeker.Application.Bijlagen.IPdfTekstLezer
+{
+    public string? Tekst { get; set; }
+
+    public string? LeesTekst(byte[] pdf) => Tekst;
 }

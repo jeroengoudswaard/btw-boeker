@@ -273,6 +273,30 @@ public sealed class BijlagenViewModelTests : IDisposable
         Assert.Equal(retour, bon.GekozenPost?.Post.Id);
     }
 
+    /// <summary>
+    /// Besluit 43: bij een gekozen bon staan de andere bedragen van de bon klaar; één klik zet het bedrag. Rente en boetes zijn
+    /// gemarkeerd.
+    /// </summary>
+    [Fact]
+    public async Task Postvak_toont_de_andere_bedragen_van_de_bon()
+    {
+        _omgeving.Tekstlezer.Tekst = "Factuur 02-11-2026\nTotaal incl. BTW 10,47\nBTW 1,82\nNa 40 dagen wettelijke rente a 40,00 euro";
+        var vm = await OpenAsync();
+        await vm.BonnenSlepenCommand.ExecuteAsync([Bestand("factuur.pdf", Pdf("x"))]);
+        var bon = Assert.Single(vm.Postvak);
+        Assert.Equal("10,47", bon.Bedragtekst);
+
+        vm.GeselecteerdeBon = bon;
+        for (var i = 0; i < 40 && bon.Kandidaten.Count == 0; i++)
+        {
+            await Task.Delay(50);
+        }
+
+        Assert.Equal(["€ 1,82", "€ 40,00 (rente of kosten)"], bon.Kandidaten.Select(k => k.Tekst));
+        bon.KiesKandidaatCommand.Execute(bon.Kandidaten[0]);
+        Assert.Equal("1,82", bon.Bedragtekst);
+    }
+
     [Fact]
     public async Task Postvak_bon_verwijderen_na_bevestiging()
     {

@@ -28,6 +28,7 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
     {
         ArgumentNullException.ThrowIfNull(bestanden);
         var nieuw = new List<(int Volgorde, Bijlage Bijlage, byte[] Inhoud)>();
+        var twijfel = new Dictionary<Bijlage, IReadOnlyList<BonKandidaat>>();
         var overgeslagen = new List<(int Volgorde, OvergeslagenBestand Bestand)>();
         foreach (var (volgorde, bestand) in bestanden.Index())
         {
@@ -36,8 +37,13 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
                 var bijlage = new Bijlage(administratie, bestand.Naam, bestand.Inhoud, tijd.GetUtcNow().UtcDateTime);
                 if (bijlage.Soort == BijlageSoort.Pdf)
                 {
-                    var gegevens = BonHerkenning.Herken(LeesVeilig(bestand.Inhoud));
+                    var tekst = LeesVeilig(bestand.Inhoud);
+                    var (gegevens, zeker) = BonHerkenning.HerkenMetZekerheid(tekst);
                     bijlage.ZetGegevens(gegevens.Datum, gegevens.Bedrag);
+                    if (!zeker && gegevens.Bedrag is not null)
+                    {
+                        twijfel[bijlage] = BonHerkenning.Kandidaten(tekst);
+                    }
                 }
 
                 nieuw.Add((volgorde, bijlage, bestand.Inhoud));
@@ -63,6 +69,11 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
                 {
                     dubbel.Add((volgorde, new OvergeslagenBestand(bijlage.Bestandsnaam, Waar(stand, bestaand))));
                     continue;
+                }
+
+                if (postId is null && twijfel.TryGetValue(bijlage, out var kandidaten))
+                {
+                    KiesBedragDatPast(stand, bijlage, kandidaten);
                 }
 
                 if (postId is { } post)
@@ -138,6 +149,33 @@ public sealed class BijlageDienst(IDatabaseSessie sessie, IPdfTekstLezer lezer, 
         bestaand.PostId is { } id && stand.Posten.FirstOrDefault(p => p.Id == id) is { } post
             ? $"Dit bestand is al toegevoegd bij post {post.Nummer}."
             : "Dit bestand is al toegevoegd (in het postvak).";
+
+    /// <summary>Besluit 43: de bedragen op een bon in het postvak, uit de bewaarde PDF; leeg bij een scan of foto.</summary>
+    public async Task<IReadOnlyList<BonKandidaat>> KandidatenAsync(AdministratieSoort administratie, Guid bijlageId, CancellationToken annulering = default)
+    {
+        var stand = await sessie.Boekhouding.LaadAsync(administratie, annulering).ConfigureAwait(false);
+        if (stand.Bijlagen.FirstOrDefault(b => b.Id == bijlageId) is not { Soort: BijlageSoort.Pdf })
+        {
+            return [];
+        }
+
+        var inhoud = await sessie.Boekhouding.LaadBijlageInhoudAsync(bijlageId, annulering).ConfigureAwait(false);
+        return inhoud is null ? [] : BonHerkenning.Kandidaten(LeesVeilig(inhoud));
+    }
+
+    /// <summary>
+    /// Besluit 43: twijfelde de herkenning (geen totaalregel) en past het gekozen bedrag bij geen enkele boeking, maar
+    /// precies één ander bedrag van de bon wel, dan is dat het bedrag.
+    /// </summary>
+    private static void KiesBedragDatPast(BoekhoudingStand stand, Bijlage bijlage, IReadOnlyList<BonKandidaat> kandidaten)
+    {
+        bool Past(Bedrag bedrag) => KoppelVoorsteller.Voorstellen(stand, bijlage.Datum, bedrag).Count > 0;
+        if (bijlage.Bedrag is { } huidig && !Past(huidig)
+            && kandidaten.Where(k => !k.IsBijkomend && k.Bedrag != huidig && Past(k.Bedrag)).ToList() is [var enige])
+        {
+            bijlage.ZetGegevens(bijlage.Datum, enige.Bedrag);
+        }
+    }
 
     private string? LeesVeilig(byte[] pdf)
     {

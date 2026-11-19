@@ -51,7 +51,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 ## Waar staat wat
 
-- `docs/BESLUITEN.md`: alle besluiten (nu t/m 42). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
+- `docs/BESLUITEN.md`: alle besluiten (nu t/m 43). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
 - `docs/HISTORIE.md`: wat per versie en per stap is gebouwd, getest en uitgebracht, en de planning bij de start.
 - `docs/UX-REVIEW.md`: UX-review ronde 1 en de volgorde van ronde 2.
 - `docs/ARCHITECTUUR.md`, `docs/PUBLICEREN.md`, `README.md` (bouwen, testen, snelheidsmeting), `CHANGELOG.md`.
