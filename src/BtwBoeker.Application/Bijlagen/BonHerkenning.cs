@@ -12,28 +12,67 @@ public interface IPdfTekstLezer
 
 public sealed record BonGegevens(DateOnly? Datum, Bedrag? Bedrag);
 
+/// <summary>Besluit 43: een bedrag dat op de bon staat, met de regel waar het vandaan komt.</summary>
+/// <param name="IsBijkomend">Rente, een boete of kosten bij te late betaling: niet het bedrag van de rekening zelf.</param>
+public sealed record BonKandidaat(Bedrag Bedrag, string Regel, bool IsBijkomend);
+
 /// <summary>
 /// Datum en totaalbedrag uit de tekst van een bon of factuur. De datum is de eerste geldige datum
-/// (dag-maand-jaar, jjjj-mm-dd of "1 oktober 2026"); het bedrag komt van de regel "te betalen", anders de laatste
-/// regel met "totaal" (niet subtotaal, excl. of btw), anders het bedrag dat het grootst is zonder minteken. Een minteken
-/// vóór of achter het bedrag blijft behouden, zoals bij een creditnota.
+/// (dag-maand-jaar, jjjj-mm-dd of "1 oktober 2026"). Het bedrag komt van de eerste regel met "te betalen", "te voldoen" of
+/// "openstaand", anders van de laatste regel met "totaal" (niet subtotaal, excl. of alleen btw; "totaal incl. btw" telt
+/// wel), anders is het het grootste bedrag. Regels over rente, boetes, incasso of kosten bij te late betaling tellen
+/// nooit mee. Een minteken vóór of achter het bedrag blijft behouden, zoals bij een creditnota.
 /// </summary>
 public static partial class BonHerkenning
 {
     private static readonly string[] Maanden =
         ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
 
-    public static BonGegevens Herken(string? tekst)
+    public static BonGegevens Herken(string? tekst) => HerkenMetZekerheid(tekst).Gegevens;
+
+    /// <summary>
+    /// Besluit 43: zoals <see cref="Herken"/>, plus of het bedrag van een totaalregel komt (<c>true</c>) of het grootste
+    /// bedrag is bij gebrek aan zo'n regel (<c>false</c>). Bij twijfel kan de aanroeper een bedrag kiezen dat bij een
+    /// boeking past.
+    /// </summary>
+    internal static (BonGegevens Gegevens, bool IsZeker) HerkenMetZekerheid(string? tekst)
     {
         if (string.IsNullOrWhiteSpace(tekst))
         {
-            return new BonGegevens(null, null);
+            return (new BonGegevens(null, null), false);
         }
 
-        var datum = EersteDatum(tekst);
-        var zonderDatums = Datumpatroon().Replace(IsoDatum().Replace(TekstDatum().Replace(tekst, " "), " "), " ");
-        return new BonGegevens(datum, Totaal(zonderDatums));
+        var (bedrag, zeker) = Totaal(ZonderDatums(tekst));
+        return (new BonGegevens(EersteDatum(tekst), bedrag), zeker);
     }
+
+    /// <summary>
+    /// Besluit 43: de bedragen op de bon om uit te kiezen, hooguit zes. Eerst het herkende bedrag, dan de andere in de
+    /// volgorde van de bon, en als laatste rente, boetes en kosten (gemarkeerd).
+    /// </summary>
+    public static IReadOnlyList<BonKandidaat> Kandidaten(string? tekst)
+    {
+        if (string.IsNullOrWhiteSpace(tekst))
+        {
+            return [];
+        }
+
+        var regels = ZonderDatums(tekst).Split('\n');
+        var alle = regels
+            .SelectMany(r => Bedragen(r).Where(b => b.Centen != 0).Select(b => new BonKandidaat(b, r.Trim(), IsBijkomend(r))))
+            .ToList();
+        var gekozen = Totaal(string.Join('\n', regels)).Bedrag;
+        return [.. alle.Where(k => k.Bedrag == gekozen && !k.IsBijkomend).Take(1)
+            .Concat(alle.Where(k => !k.IsBijkomend))
+            .Concat(alle.Where(k => k.IsBijkomend))
+            .DistinctBy(k => k.Bedrag)
+            .Take(6)];
+    }
+
+    private static string ZonderDatums(string tekst) =>
+        Datumpatroon().Replace(IsoDatum().Replace(TekstDatum().Replace(tekst, " "), " "), " ");
+
+    private static bool IsBijkomend(string regel) => Bijkomend().IsMatch(regel);
 
     private static DateOnly? EersteDatum(string tekst)
     {
@@ -66,20 +105,23 @@ public static partial class BonHerkenning
         }
     }
 
-    private static Bedrag? Totaal(string tekst)
+    private static (Bedrag? Bedrag, bool IsZeker) Totaal(string tekst)
     {
-        var regels = tekst.Split('\n');
-        var teBetalen = regels.FirstOrDefault(r => r.Contains("te betalen", StringComparison.OrdinalIgnoreCase) && Bedragen(r).Count > 0);
-        var totaal = regels.LastOrDefault(r =>
-            Totaalwoord().IsMatch(r) && !Uitgesloten().IsMatch(r) && Bedragen(r).Count > 0);
+        var regels = tekst.Split('\n').Where(r => !IsBijkomend(r) && Bedragen(r).Count > 0).ToList();
+        var teBetalen = regels.FirstOrDefault(r => TeBetalen().IsMatch(r));
+        var totaal = regels.LastOrDefault(r => Totaalwoord().IsMatch(r) && !IsUitgesloten(r));
         if ((teBetalen ?? totaal) is { } regel)
         {
-            return Bedragen(regel)[^1];
+            return (Bedragen(regel)[^1], true);
         }
 
-        var alle = Bedragen(tekst);
-        return alle.Count == 0 ? null : alle.MaxBy(b => Math.Abs(b.Centen));
+        var alle = regels.SelectMany(Bedragen).ToList();
+        return (alle.Count == 0 ? null : alle.MaxBy(b => Math.Abs(b.Centen)), false);
     }
+
+    /// <summary>Subtotaal, excl. en btw-regels zijn niet het totaal; "totaal incl. btw" wel.</summary>
+    private static bool IsUitgesloten(string regel) =>
+        Uitgesloten().IsMatch(regel) || (Btw().IsMatch(regel) && !regel.Contains("incl", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Invoer in het postvak: zoals <see cref="Bedrag.TryParse"/>, maar een minteken vóór of achter mag.</summary>
     public static bool TryParseBedrag(string? invoer, out Bedrag bedrag)
@@ -134,6 +176,16 @@ public static partial class BonHerkenning
     [GeneratedRegex(@"\b(totaal|total|bedrag)\b", RegexOptions.IgnoreCase)]
     private static partial Regex Totaalwoord();
 
-    [GeneratedRegex(@"sub|excl|btw|vat", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"sub|excl", RegexOptions.IgnoreCase)]
     private static partial Regex Uitgesloten();
+
+    [GeneratedRegex(@"\b(btw|vat)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex Btw();
+
+    [GeneratedRegex(@"te betalen|te voldoen|openstaand", RegexOptions.IgnoreCase)]
+    private static partial Regex TeBetalen();
+
+    /// <summary>Besluit 43: rente, boetes en kosten bij te late betaling zijn niet het bedrag van de rekening.</summary>
+    [GeneratedRegex(@"boete|rente\b|incassokosten|incassobureau|administratiekosten|aanmaning|herinneringskosten|niet tijdig|te late|na (de )?vervaldatum|art\.?\s?119|wettelijke", RegexOptions.IgnoreCase)]
+    private static partial Regex Bijkomend();
 }

@@ -494,6 +494,25 @@
                                     </TextBox.Style>
                                 </TextBox>
                                 <TextBlock Text="{Binding Fout}" Style="{StaticResource Foutmelding}" AutomationProperties.LiveSetting="Assertive" />
+                                <!-- Besluit 43: de andere bedragen van de bon, met één klik te kiezen; alleen als er iets te kiezen is. -->
+                                <StackPanel Margin="0,4,0,0" Visibility="{Binding HeeftKandidaten, Converter={StaticResource BoolNaarZichtbaar}}">
+                                    <TextBlock Text="Ook op de bon:" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <ItemsControl ItemsSource="{Binding Kandidaten}" Focusable="False" AutomationProperties.AutomationId="BonKandidaten"
+                                                  AutomationProperties.Name="Ook op de bon">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:BedragKeuze}">
+                                                <Button Content="{Binding Tekst}" ToolTip="{Binding Regel}" Style="{StaticResource Linkknop}" Margin="0,0,12,0"
+                                                        Command="{Binding DataContext.KiesKandidaatCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}" AutomationProperties.Name="{Binding Tekst, StringFormat='Bedrag {0} kiezen'}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                                 <Label Content="_Hoort bij post" Target="{Binding ElementName=Bonpost}" Padding="0,12,0,4" />
                                 <ComboBox x:Name="Bonpost" ItemsSource="{Binding Postkeuzes}" SelectedItem="{Binding GekozenPost}" DisplayMemberPath="Tekst"
                                           IsTextSearchEnabled="True" TextSearch.TextPath="Tekst" AutomationProperties.AutomationId="BonPost"

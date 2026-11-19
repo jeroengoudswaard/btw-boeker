@@ -192,6 +192,38 @@ public sealed class BijlagenTests
             dienst.VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("x.pdf", Pdf("x"))], Guid.NewGuid()));
     }
 
+    /// <summary>
+    /// Besluit 43: twijfelt de herkenning (geen totaalregel), dan wint een bedrag van de bon dat precies past bij een
+    /// boeking zonder bon.
+    /// </summary>
+    [Fact]
+    public async Task Bij_twijfel_wint_het_bedrag_dat_bij_een_boeking_past()
+    {
+        Kasuitgave(new DateOnly(2026, 11, 2), 1250);
+        _lezer.Tekst = """
+            Kwitantie
+            Datum 02-11-2026
+            Huur aanhanger 12,50
+            Borg 30,00
+            """;
+
+        var bijlage = Assert.Single((await Dienst().VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("kwitantie.pdf", Pdf())], null)).Toegevoegd);
+
+        Assert.Equal(new Bedrag(1250), bijlage.Bedrag);
+    }
+
+    /// <summary>Besluit 43: de kandidaten van een bon in het postvak, uit de bewaarde PDF.</summary>
+    [Fact]
+    public async Task Kandidaten_van_een_bon_uit_de_bewaarde_pdf()
+    {
+        _lezer.Tekst = "Totaal 23,45\nBij te late betaling rente 5,00";
+        var bijlage = Assert.Single((await Dienst().VoegToeAsync(BoekhoudingTestdata.Adm, [new BijlageBestand("bon.pdf", Pdf())], null)).Toegevoegd);
+
+        var kandidaten = await Dienst().KandidatenAsync(BoekhoudingTestdata.Adm, bijlage.Id);
+
+        Assert.Equal([new Bedrag(2345), new Bedrag(500)], kandidaten.Select(k => k.Bedrag));
+    }
+
     [Fact]
     public async Task Datum_en_bedrag_kunnen_worden_ingevuld()
     {

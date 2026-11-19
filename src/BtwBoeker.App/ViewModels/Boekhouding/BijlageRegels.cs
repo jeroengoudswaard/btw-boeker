@@ -31,6 +31,15 @@ public sealed record PostKeuze(Journaalpost Post, bool IsVoorstel)
     public override string ToString() => Tekst;
 }
 
+/// <summary>Besluit 43: een ander bedrag van de bon om met één klik te kiezen.</summary>
+public sealed record BedragKeuze(Application.Bijlagen.BonKandidaat Kandidaat)
+{
+    public string Tekst => Kandidaat.IsBijkomend ? $"{Kandidaat.Bedrag} (rente of kosten)" : Kandidaat.Bedrag.ToString();
+
+    /// <summary>De regel van de bon waar het bedrag staat (tooltip).</summary>
+    public string Regel => Kandidaat.Regel;
+}
+
 /// <summary>
 /// Eén bon in het postvak. Datum en bedrag zijn herkend of door de gebruiker ingevuld; bij elke
 /// wijziging worden de voorgestelde posten opnieuw berekend.
@@ -38,6 +47,7 @@ public sealed record PostKeuze(Journaalpost Post, bool IsVoorstel)
 public sealed partial class BonRegel : ObservableObject
 {
     private readonly Func<DateOnly?, Bedrag?, IReadOnlyList<PostKeuze>> _keuzes;
+    private IReadOnlyList<Application.Bijlagen.BonKandidaat> _alleKandidaten = [];
 
     public BonRegel(Bijlage bijlage, Func<DateOnly?, Bedrag?, IReadOnlyList<PostKeuze>> keuzes)
     {
@@ -65,6 +75,34 @@ public sealed partial class BonRegel : ObservableObject
     [ObservableProperty]
     public partial IReadOnlyList<PostKeuze> Postkeuzes { get; private set; } = [];
 
+    /// <summary>Besluit 43: de andere bedragen op de bon (niet het huidige), rente en kosten gemarkeerd.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HeeftKandidaten))]
+    public partial IReadOnlyList<BedragKeuze> Kandidaten { get; private set; } = [];
+
+    public bool HeeftKandidaten => Kandidaten.Count > 0;
+
+    internal bool KandidatenGeladen { get; private set; }
+
+    internal void ZetKandidaten(IReadOnlyList<Application.Bijlagen.BonKandidaat> kandidaten)
+    {
+        _alleKandidaten = kandidaten;
+        KandidatenGeladen = true;
+        WerkKandidatenBij();
+    }
+
+    [RelayCommand]
+    private void KiesKandidaat(BedragKeuze? keuze)
+    {
+        if (keuze is not null)
+        {
+            Bedragtekst = Weergave.Invoer(keuze.Kandidaat.Bedrag);
+        }
+    }
+
+    private void WerkKandidatenBij() =>
+        Kandidaten = [.. _alleKandidaten.Where(k => k.Bedrag != Bedrag).Select(k => new BedragKeuze(k))];
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Voorsteltekst), nameof(IsKoppelenZichtbaar))]
     public partial PostKeuze? GekozenPost { get; set; }
@@ -89,7 +127,11 @@ public sealed partial class BonRegel : ObservableObject
 
     partial void OnDatumChanged(DateTime? value) => Herbereken();
 
-    partial void OnBedragtekstChanged(string value) => Herbereken();
+    partial void OnBedragtekstChanged(string value)
+    {
+        Herbereken();
+        WerkKandidatenBij();
+    }
 
     private void Herbereken()
     {
