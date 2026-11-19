@@ -4,6 +4,8 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+## [0.22.0] - 2026-11-19: Lijst en detail, acties volgens status, gewone taal en direct bewaren
+
 ### Gewijzigd
 - **Instellingen bewaart direct** (besluit 42), zoals Windows-Instellingen; de knop *Opslaan* is weg.
   - De naam wordt bewaard zodra u het veld verlaat of op Enter drukt. Een lege of te lange naam wordt niet bewaard: verlaat u de pagina, dan komt de vorige naam terug, met een melding.

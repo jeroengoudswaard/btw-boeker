@@ -69,8 +69,8 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 ## Huidige stand (bijwerken na elke sessie)
 
-- **Uitgebracht:** v0.21.0, rustiger schil, platte navigatie en een zip zonder installatie (2026-11-16).
-- **Klaar, nog niet uitgebracht:** UX-review stap 3, lijst en detail (besluit 38), branch `lijst-en-detail` (PR #10); stap 4, acties volgens status (besluit 40); beide gemerged in `main`. Stap 5, teksten (besluit 41), branch `teksten`; stap 6, instellingen (besluit 42), branch `instellingen` (bouwt op `teksten`); tests zonder UI 572/572 en UI 12/12. Beide gepusht, nog geen PR.
+- **Uitgebracht:** v0.22.0, UX-review ronde 2 stappen 3 t/m 6: lijst en detail, acties volgens status, gewone taal en direct bewaren (2026-11-19, na het zetten van de tag `v0.22.0`).
+- **Klaar, nog niet uitgebracht:** niets; alles staat in `main` en in v0.22.0.
 - **Volgende:** de hulp per onderdeel (besluit 36), de XAF-import (stap 2b, besluit 25, stash op branch `xaf-import`; de besluiten daar krijgen de volgende vrije nummers), met de gemengde betaalrekening (besluit 39) en de btw-integratie (planning stap 3).
-- **Nagaan:** de app sloot één keer in Eenvoudig niet binnen de tijd af na het rondkijken; snelheidsmeting en schermafbeeldingen faalden één keer samen in één run.
+- **Nagaan:** de app sloot één keer in Eenvoudig niet binnen de tijd af na het rondkijken, en op 2026-11-18 één keer na `Tellers_en_bankkeuze_volgen_het_regels_toepassen` (de twee volgende UI-tests faalden daardoor mee; los groen); snelheidsmeting en schermafbeeldingen faalden één keer samen in één run.
 - **Later:** Linux via Blazor Server lokaal (besluit 29), eerst een ontwerp.
