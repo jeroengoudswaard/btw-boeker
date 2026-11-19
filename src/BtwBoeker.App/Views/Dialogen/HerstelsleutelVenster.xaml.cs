@@ -48,8 +48,8 @@ public partial class HerstelsleutelVenster : Window
             File.WriteAllText(
                 dialoog.FileName,
                 $"Herstelsleutel BTW-Boeker\r\n\r\n{_sleutel}\r\n\r\n"
-                    + "Gebruik deze sleutel via 'Wachtwoord vergeten?' bij het openen van de database.\r\n"
-                    + "Bewaar dit bestand NIET in dezelfde map als de database.\r\n");
+                    + "Gebruik deze sleutel via 'Wachtwoord vergeten?' bij het openen van de administratie.\r\n"
+                    + "Bewaar dit bestand NIET in dezelfde map als de administratie.\r\n");
         }
     }
 

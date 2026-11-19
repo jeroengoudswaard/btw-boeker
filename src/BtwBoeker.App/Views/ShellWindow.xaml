@@ -78,36 +78,36 @@
               Visibility="{Binding IsMenubalkZichtbaar, Converter={StaticResource BoolNaarZichtbaar}}"
               IsKeyboardFocusWithinChanged="Menubalk_IsKeyboardFocusWithinChanged">
             <MenuItem Header="_Bestand" AutomationProperties.AutomationId="Menu_Bestand">
-                <MenuItem Header="_Nieuwe database..." InputGestureText="Ctrl+N" Command="{Binding NieuweDatabaseCommand}" />
-                <MenuItem Header="_Openen..." InputGestureText="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
+                <MenuItem Header="_Nieuwe administratie…" InputGestureText="Ctrl+N" Command="{Binding NieuweDatabaseCommand}" />
+                <MenuItem Header="_Openen…" InputGestureText="Ctrl+O" Command="{Binding OpenDatabaseCommand}" />
                 <MenuItem Header="_Sluiten" Command="{Binding SluitDatabaseCommand}" />
                 <Separator />
-                <MenuItem Header="Start_wizard..." Command="{Binding StartwizardCommand}"
-                  ToolTip="Stap voor stap de database, administraties, boekhouding en bank inrichten"
+                <MenuItem Header="Start_wizard…" Command="{Binding StartwizardCommand}"
+                  ToolTip="Stap voor stap de administratie, het rekeningschema en de bank inrichten"
                           AutomationProperties.AutomationId="Menu_Startwizard" />
                 <Separator />
                 <MenuItem Header="Op_slaan" InputGestureText="Ctrl+S" Command="{Binding OpslaanCommand}" />
                 <Separator />
                 <MenuItem Header="_Importeren" AutomationProperties.AutomationId="Menu_Importeren">
-                    <MenuItem Header="Bank_afschrift (CAMT.053)..." Command="{Binding ImporteerBankafschriftCommand}"
+                    <MenuItem Header="Bank_afschrift…" Command="{Binding ImporteerBankafschriftCommand}" ToolTip="Een bankafschrift als CAMT.053-bestand, te downloaden bij de Rabobank"
                               AutomationProperties.AutomationId="Menu_ImporteerBankafschrift" />
-                    <MenuItem Header="_Rekeningschema-sjabloon..." Command="{Binding ImporteerSjabloonCommand}"
+                    <MenuItem Header="_Rekeningschema-sjabloon…" Command="{Binding ImporteerSjabloonCommand}"
                               AutomationProperties.AutomationId="Menu_ImporteerSjabloon" />
                 </MenuItem>
                 <MenuItem Header="_Exporteren" AutomationProperties.AutomationId="Menu_Exporteren">
-                    <MenuItem Header="_Rekeningschema als sjabloon..." Command="{Binding ExporteerSjabloonCommand}"
-                              ToolTip="Alleen nummers, namen, rubrieken en rollen; om te delen met andere groepen"
+                    <MenuItem Header="_Rekeningschema als sjabloon…" Command="{Binding ExporteerSjabloonCommand}"
+                              ToolTip="Alleen nummers, namen, rubrieken en rollen; om in een nieuwe administratie te gebruiken"
                               AutomationProperties.AutomationId="Menu_ExporteerSjabloon" />
-                    <MenuItem Header="_Auditfile (XAF)..." Command="{Binding ExporteerXafCommand}"
+                    <MenuItem Header="_Auditfile…" Command="{Binding ExporteerXafCommand}"
                               ToolTip="Het gekozen boekjaar van de boekhouding als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander pakket"
                               AutomationProperties.AutomationId="Menu_ExporteerXaf" />
                 </MenuItem>
                 <Separator />
-                <MenuItem Header="_Afdrukken..." InputGestureText="Ctrl+P" Command="{Binding AfdrukkenCommand}"
+                <MenuItem Header="_Afdrukken…" InputGestureText="Ctrl+P" Command="{Binding AfdrukkenCommand}"
                           AutomationProperties.AutomationId="Menu_Afdrukken" />
                 <Separator />
-                <MenuItem Header="_Back-up maken..." Command="{Binding MaakBackupCommand}" />
-                <MenuItem Header="Back-up _terugzetten..." Command="{Binding HerstelBackupCommand}" />
+                <MenuItem Header="_Back-up maken…" Command="{Binding MaakBackupCommand}" />
+                <MenuItem Header="Back-up _terugzetten…" Command="{Binding HerstelBackupCommand}" />
                 <Separator />
                 <MenuItem Header="_Instellingen" InputGestureText="Ctrl+," Command="{Binding OpenModuleCommand}"
                           CommandParameter="{x:Static mod:ModuleSoort.Instellingen}" AutomationProperties.AutomationId="Menu_Instellingen" />

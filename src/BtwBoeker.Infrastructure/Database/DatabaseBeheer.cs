@@ -150,7 +150,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
             {
                 LeegPool(pad, databasesleutel);
                 CryptographicOperations.ZeroMemory(databasesleutel);
-                throw new DatabaseBestandException("Dit is geen BTW-Boeker-database. BTW-Boeker-databases kunnen niet in BTW-Boeker worden geopend.");
+                throw new DatabaseBestandException("Dit bestand is geen administratie van BTW-Boeker.");
             }
 
             await context.Database.MigrateAsync(annulering).ConfigureAwait(false);
@@ -160,7 +160,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
             LeegPool(pad, databasesleutel);
             CryptographicOperations.ZeroMemory(databasesleutel);
             throw new DatabaseBestandException(
-                "Het sleutelbestand hoort niet bij deze database, of de database is beschadigd.", ex);
+                "Het sleutelbestand hoort niet bij deze administratie, of de administratie is beschadigd.", ex);
         }
 
         return new DatabaseSessie(pad, databasesleutel);
@@ -170,7 +170,7 @@ public sealed class DatabaseBeheer : IDatabaseBeheer
     {
         if (!File.Exists(pad))
         {
-            throw new DatabaseBestandException($"De database '{Path.GetFileName(pad)}' bestaat niet.");
+            throw new DatabaseBestandException($"De administratie '{Path.GetFileName(pad)}' bestaat niet.");
         }
 
         return Sleutelbestand.Lees(SleutelPad(pad));

@@ -23,7 +23,7 @@ public partial class BijlageVenster : Window
 
     public async Task LaadPaginasAsync()
     {
-        Paginatekst.Text = "Laden...";
+        Paginatekst.Text = "Laden…";
         try
         {
             Paginas = _viewModel.IsPdf ? await PdfPaginas.PdfAsync(_viewModel.Inhoud) : [PdfPaginas.Afbeelding(_viewModel.Inhoud)];
@@ -33,7 +33,7 @@ public partial class BijlageVenster : Window
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             Paginatekst.Text = string.Empty;
-            _viewModel.Foutmelding = "Het voorbeeld kan niet worden getoond. Met Opslaan als... kunt u het bestand in een ander programma openen.";
+            _viewModel.Foutmelding = "Het voorbeeld kan niet worden getoond. Met Opslaan als… kunt u het bestand in een ander programma openen.";
         }
     }
 

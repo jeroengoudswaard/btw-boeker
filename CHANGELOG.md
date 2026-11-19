@@ -5,6 +5,15 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 ## [Onuitgebracht]
 
 ### Gewijzigd
+- **Teksten in gewone taal** (besluit 41).
+  - Het versleutelde bestand heet in de app *administratie*: *Nieuwe administratie…*, *Administratie openen…*, "Zet een back-up terug".
+  - Alleen *bonnen*, geen *facturen* meer: de app heeft (nog) geen facturen.
+  - Bestandsformaten en extensies (CAMT.053, XAF, .btwdb) staan alleen nog in tooltips en het bestandsfilter: het menu heet *Bankafschrift…* en *Auditfile…*.
+  - Overal "…" in plaats van "...".
+  - Sneltoetsen alleen in tooltips en menu's, niet meer in kaarten en meldingen.
+  - Geen resten van het oude model meer ("administraties", "groepen").
+  - "Kruisposten" alleen nog in de tooltip van de rol.
+  - De kolommen Debet en Credit in de posteditor komen uit de woordenlijst.
 - **Acties volgens status** (besluit 40): een knop staat er alleen als hij nu iets kan doen. Kan iets nog niet, dan staat er waarom, met één knop naar wat eerst moet.
   - **Boekjaren** is een lijst met detail, zonder knoppen in de rijen.
     - *Afsluiten* staat er alleen bij het oudste open jaar zonder concepten en met een reserverekening.

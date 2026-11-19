@@ -27,6 +27,10 @@ Wat per versie en per stap is gebouwd, getest en uitgebracht, verplaatst uit CLA
   - Tests eerst: eerst rood (de build faalde), daarna groen. Nieuw: `LijstEnDetailTests` (13) en 2 architectuurtests in `SchilTests` (3 gevallen). Aangepast: één banktest en twee UI-tests, die op de vanzelf gekozen eerste regel, de knop *Regels toepassen* en een lege tabel rekenden.
   - Windows (2026-11-17): zonder UI-tests 547/547 groen (Domain 81, Application 156, Architectuur 43, Infrastructure 65, App 203), UI-tests 12/12. In de eerste UI-run faalden er twee met een UIA-time-out; los en in de volgende volledige run waren ze groen.
   - Afwijking van het ontwerp: de ⚠ bij een bankverschil staat in de pagina en niet in de meldingsbalk (die kan geen knop dragen).
+- **Ronde 2, stap 5: teksten (2026-11-18, besluit 41, keuzes 1A 2A 3A; branch `teksten`).** Zie CHANGELOG.md.
+  - Tests eerst: `TekstTests` (4) waren eerst rood met ruim 80 bevindingen, daarna groen. De test bewaakt de zichtbare XAML-teksten, de woordenlijst en de C#-teksten die de gebruiker ziet. Aangepast: één UI-test (titel van het wachtwoordvenster).
+  - Windows (2026-11-18): zonder UI-tests 566/566 groen (Domain 81, Application 156, Architectuur 48, Infrastructure 65, App 216), UI-tests 12/12.
+  - Stap 4 (PR #11) en stap 3 (PR #10) zijn op 2026-11-18 in `main` gemerged.
 - **Ronde 2, stap 4: acties volgens status gebouwd (2026-11-18, besluit 40, keuzes 1A 2A 3A 4A; branch `acties-volgens-status`, bouwt op `lijst-en-detail`).** Zie CHANGELOG.md en docs/ARCHITECTUUR.md, sectie *Acties volgens status*.
   - Tests eerst: eerst rood (de build faalde), daarna groen. Nieuw: `ActiesVolgensStatusTests` (11), 2 startwizardtests en de architectuurtest `Acties_staan_in_het_detail_en_niet_in_de_rijen`; `Lijst_en_detail_zonder_leeg_vlak` telt nu 7 detailpanelen. Aangepast: één UI-test, die op een uitgeschakelde knop *Volgende* rekende.
   - Windows (2026-11-18): zonder UI-tests 562/562 groen (Domain 81, Application 156, Architectuur 44, Infrastructure 65, App 216), UI-tests 12/12.

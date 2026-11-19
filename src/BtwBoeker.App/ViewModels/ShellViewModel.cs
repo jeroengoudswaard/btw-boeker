@@ -153,7 +153,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     [RelayCommand]
     private async Task NieuweDatabaseAsync()
     {
-        var pad = _dialogen.KiesNieuwDatabasebestand("Nieuwe database aanmaken");
+        var pad = _dialogen.KiesNieuwDatabasebestand("Nieuwe administratie aanmaken");
         if (pad is null || !await SluitSessieAsync())
         {
             return;
@@ -181,7 +181,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
         catch (Exception ex) when (ex is DatabaseBestandException or ArgumentException or IOException or UnauthorizedAccessException)
         {
             ShellLog.Mislukt(_logger, ex, "Aanmaken van database");
-            _dialogen.ToonFout("Nieuwe database", ex.Message);
+            _dialogen.ToonFout("Nieuwe administratie", ex.Message);
         }
     }
 
@@ -272,7 +272,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
     private async Task HerstelBackupAsync()
     {
         var bron = _dialogen.KiesBackupBron();
-        var doel = bron is null ? null : _dialogen.KiesNieuwDatabasebestand("Teruggezette database opslaan als");
+        var doel = bron is null ? null : _dialogen.KiesNieuwDatabasebestand("Teruggezette administratie opslaan als");
         if (bron is null || doel is null)
         {
             return;
@@ -290,7 +290,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             return;
         }
 
-        if (_dialogen.Bevestig("Back-up teruggezet", $"De back-up is teruggezet als '{Path.GetFileName(doel)}'.\n\nWilt u deze database nu openen?"))
+        if (_dialogen.Bevestig("Back-up teruggezet", $"De back-up is teruggezet als '{Path.GetFileName(doel)}'.\n\nWilt u deze administratie nu openen?"))
         {
             await OpenAsync(doel);
         }
@@ -565,7 +565,7 @@ public sealed partial class ShellViewModel : ObservableObject, IStartwizardRegie
             catch (Exception ex) when (ex is DatabaseBestandException or ArgumentException or IOException or UnauthorizedAccessException)
             {
                 ShellLog.Mislukt(_logger, ex, "Openen van database");
-                _dialogen.ToonFout("Database openen", ex.Message);
+                _dialogen.ToonFout("Administratie openen", ex.Message);
                 return;
             }
         }

@@ -44,7 +44,7 @@ public static class Startkaarten
         VoegToe(kaarten, Startkaartsoort.Bank, stand.Bankmutaties.Count(m => Bankoverzicht.Status(stand, m) == MutatieStatus.TeVerwerken),
             n => Enkelvoud(n, "banktransactie", "banktransacties") + " te verwerken", "Kies per transactie een rekening of maak een boekingsregel.", "Naar de bank");
         VoegToe(kaarten, Startkaartsoort.Concepten, stand.Posten.Count(p => !p.IsGeboekt),
-            n => Enkelvoud(n, "conceptpost", "conceptposten") + " te boeken", "Controleer de concepten en boek ze (Ctrl+B).", "Naar het journaal");
+            n => Enkelvoud(n, "conceptpost", "conceptposten") + " te boeken", "Controleer de concepten en boek ze.", "Naar het journaal");
         VoegToe(kaarten, Startkaartsoort.Postvak, stand.Bijlagen.Count(b => b.IsInPostvak),
             n => Enkelvoud(n, "bon", "bonnen") + " in het postvak", "Koppel de bonnen aan een post.", "Naar het postvak");
         var grens = drempel ?? ZonderBon.StandaardDrempel;

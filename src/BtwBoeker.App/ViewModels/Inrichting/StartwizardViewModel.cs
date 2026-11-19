@@ -74,7 +74,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
         Stappen =
         [
             new(Startstap.Welkom, "Welkom"),
-            new(Startstap.Database, "Database"),
+            new(Startstap.Database, "Administratie"),
             new(Startstap.Boekhouding, "Boekhouding"),
             new(Startstap.Bank, "Bank"),
             new(Startstap.Klaar, "Klaar"),
@@ -132,7 +132,7 @@ public sealed partial class StartwizardViewModel : ObservableObject
 
     public IReadOnlyList<KlaarRegel> Klaarregels =>
     [
-        new(Status.DatabaseOpen, Status.DatabaseOpen ? "De database is aangemaakt of geopend." : "Er is nog geen database: kies Bestand › Nieuwe database."),
+        new(Status.DatabaseOpen, Status.DatabaseOpen ? "De administratie is aangemaakt of geopend." : "Er is nog geen administratie: kies Bestand › Nieuwe administratie."),
         new(Status.BoekhoudingIngericht, Status.BoekhoudingIngericht ? "De boekhouding is ingericht." : "De boekhouding is nog leeg: kies Journaal in de navigatie."),
         new(Status.BankGekoppeld, Status.BankGekoppeld ? "Een bankrekening is gekoppeld." : "Nog geen bankrekening: kies Bestand › Importeren › Bankafschrift."),
     ];

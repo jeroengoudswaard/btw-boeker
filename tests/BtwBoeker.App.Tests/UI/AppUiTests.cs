@@ -699,7 +699,7 @@ public sealed class AppUiTests : IDisposable
     {
         var dialoog = Retry.WhileNull(() => venster.ModalWindows.FirstOrDefault(), Wachttijd).Result
             ?? throw new Xunit.Sdk.XunitException("Het wachtwoordvenster verscheen niet. " + Diagnose(venster));
-        Assert.Equal("Database openen", dialoog.Title);
+        Assert.Equal("Administratie openen", dialoog.Title);
         var veld = Zoek(dialoog, "Wachtwoord");
         var gefocust = Retry.WhileFalse(
             () =>

@@ -884,7 +884,7 @@ public sealed partial class BoekhoudingViewModel : PaginaViewModel, IPaginameldi
         }
 
         await VoerUitAsync(() => LaadAsync(null), "De boekhouding kon niet worden geladen.");
-        Melding = "✓ De indeling is opgeslagen. De jaarrekening hieronder gebruikt hem al; afdrukken kan met Ctrl+P.";
+        Melding = "✓ De indeling is opgeslagen. De jaarrekening hieronder gebruikt hem al.";
     }
 
     /// <summary>Ctrl+P, via het standaard Windows-afdrukvenster (ook naar PDF).</summary>

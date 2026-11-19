@@ -85,7 +85,7 @@
                 <TextBlock Style="{StaticResource Toelichting}" Margin="0,0,0,12" TextWrapping="Wrap"
                            Text="Begin met een rekeningschema-sjabloon of met een leeg rekeningschema. Bij een sjabloon voert u daarna de beginsaldi in." />
                 <WrapPanel>
-                    <Button Content="Sjabloon_bestand..." Command="{Binding SjabloonInlezenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
+                    <Button Content="Sjabloon_bestand…" Command="{Binding SjabloonInlezenCommand}" Style="{DynamicResource AccentButtonStyle}" ContentTemplate="{StaticResource Toegangstekst}"
                             Margin="0,0,8,8" ToolTip="Een rekeningschema-sjabloon (.btwsjabloon), bijvoorbeeld geëxporteerd uit een andere administratie"
                             AutomationProperties.AutomationId="SjabloonInlezen" />
                     <Button Content="_Leeg beginnen" Command="{Binding LeegBeginnenCommand}" Margin="0,0,8,8" AutomationProperties.AutomationId="LeegBeginnen" />
@@ -260,14 +260,14 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <DataGridTemplateColumn Header="Debet" Width="*">
+                                        <DataGridTemplateColumn Header="{DynamicResource T.Debet}" Width="*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
                                                     <TextBox Text="{Binding Debettekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Debet" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <DataGridTemplateColumn Header="Credit" Width="*">
+                                        <DataGridTemplateColumn Header="{DynamicResource T.Credit}" Width="*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
                                                     <TextBox Text="{Binding Credittekst, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" AutomationProperties.Name="Credit" />
@@ -636,7 +636,7 @@
                         </g:Detailpaneel>
 
                         <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Toelichting}" Margin="0,8,0,0" TextWrapping="Wrap"
-                                   Text="De eerste passende regel in deze volgorde wint. Overboekingen tussen eigen rekeningen gaan altijd via Kruisposten." />
+                                   Text="De eerste passende regel in deze volgorde wint. Overboekingen tussen eigen rekeningen gaan altijd via de tussenrekening voor overboekingen." />
                         <g:LeegScherm DockPanel.Dock="Top" Lijst="Boekingsregels" Titel="Nog geen boekingsregels" Tekst="Een regel deelt banktransacties automatisch in. Maak er een, of kies bij een transactie Regel maken." Knoptekst="Nieuwe regel" Opdracht="{Binding NieuweRegelCommand}"
                                        Visibility="{Binding Boekingsregels.Count, Converter={StaticResource GelijkAanZichtbaar}, ConverterParameter=0}" />
                         <DataGrid ItemsSource="{Binding Boekingsregels}" SelectedItem="{Binding GeselecteerdeRegel}" AutoGenerateColumns="False" IsReadOnly="True"
@@ -673,7 +673,7 @@
                                     <Label Content="_Naam" Target="{Binding ElementName=RelatieNaam}" Padding="0,0,0,4" />
                                     <TextBox x:Name="RelatieNaam" MaxLength="100" Text="{Binding Naam, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="RelatieNaam" />
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <CheckBox Content="_Klant" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsDebiteur}" Margin="0,0,16,0" ToolTip="Stuurt u facturen (debiteur)" />
+                                        <CheckBox Content="_Klant" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsDebiteur}" Margin="0,0,16,0" ToolTip="Betaalt u, bijvoorbeeld de verhuurorganisatie (debiteur)" />
                                         <CheckBox Content="_Leverancier" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsCrediteur}" Margin="0,0,16,0" ToolTip="Stuurt u rekeningen (crediteur)" />
                                         <CheckBox Content="Ac_tief" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsActief}" />
                                     </StackPanel>
@@ -773,9 +773,10 @@
                                             <Label Content="_Rol" Target="{Binding ElementName=RekeningRol}" Padding="0,8,0,4" />
                                             <ComboBox x:Name="RekeningRol" Width="160" HorizontalAlignment="Left"
                                                       ItemsSource="{Binding DataContext.Rollen, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                      SelectedItem="{Binding Rol, UpdateSourceTrigger=PropertyChanged}" />
+                                                      SelectedItem="{Binding Rol, UpdateSourceTrigger=PropertyChanged}"
+                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Kruisposten: tussenrekening voor overboekingen. Kas: rekening van het kasboek." />
                                             <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,4,0,0"
-                                                       Text="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Kruisposten: tussenrekening voor overboekingen. Kas: rekening van het kasboek." />
+                                                       Text="Alleen nodig voor de reserve, de tussenrekening voor overboekingen en de kas." />
                                         </StackPanel>
                                     </Expander>
                                     <TextBlock Margin="0,16,0,0">
@@ -931,7 +932,7 @@
                                                 Visibility="{Binding KanHeropenen, Converter={StaticResource BoolNaarZichtbaar}}"
                                                 AutomationProperties.Name="{Binding Jaartekst, StringFormat=Boekjaar {0} heropenen}" AutomationProperties.AutomationId="BoekjaarHeropenen" />
                                     </StackPanel>
-                                    <Button Content="Auditfile (XAF) e_xporteren…" Margin="0,16,0,0" HorizontalAlignment="Left" CommandParameter="{Binding}" Style="{StaticResource Linkknop}"
+                                    <Button Content="Auditfile e_xporteren…" Margin="0,16,0,0" HorizontalAlignment="Left" CommandParameter="{Binding}" Style="{StaticResource Linkknop}"
                                             Command="{Binding DataContext.ExporteerXafCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             ToolTip="Het boekjaar als XML Auditfile Financieel (XAF 3.2), voor een accountant of een ander boekhoudpakket; ook via Bestand › Exporteren"
                                             AutomationProperties.Name="{Binding Jaartekst, StringFormat=Auditfile van boekjaar {0} exporteren}" AutomationProperties.AutomationId="BoekjaarXaf" />
