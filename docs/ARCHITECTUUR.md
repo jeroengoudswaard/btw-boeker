@@ -259,3 +259,11 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - `RegelInvoer` en `RegelInvoerId` hebben een optionele btw-code, zodat bestaande aanroepen ongewijzigd blijven.
 - `RekeningRol` kreeg `TeBetalenBtw`, `Voorbelasting`, `Debiteuren` en `Crediteuren`; zoals de andere rollen verspringt een rol naar de laatst gekozen rekening. `RekeningRolTekst` geeft de namen voor de app.
 - XAF: `vatCodes` (`O21`, `V21`, `P21` enzovoort, met de btw-rekeningen) en een `vat`-element op elke grondslagregel; het btw-bedrag wordt per regel berekend met `BtwBerekening`.
+
+## Btw invoeren (fase B2; besluit 50)
+
+- `BtwRegels` (Domain): `SoortVoor(rekening)` (baten is omzet, lasten en balans is voorbelasting), `RolVoor(soort)` en `Btwrekening(rekeningen, soort)`.
+- Posteditor: `PostRegelEditor` heeft `Btwkeuzes`, `GekozenBtw` (`BtwKeuze`: code en incl./excl.), `Btwtekst` (aangepast btw-bedrag) en rekent `Grondslag`, `BtwBedrag`, `Onderregel` en `Btwwaarschuwing` uit. `Debet` en `Credit` zijn het totaal inclusief btw, zodat het evenwicht klopt. `NaarInvoer()` maakt de grondslagregel en direct erna de btw-regel; bij 0 % of een btw-bedrag van nul komt er geen btw-regel.
+- Laden: `PostEditor.LaadRegels` voegt een grondslagregel en de direct volgende btw-regel met dezelfde code samen. Incl. of excl. volgt uit wat precies uitkomt; anders incl. met een aangepast btw-bedrag.
+- Een ontbrekende btw-rekening is een fout van de regel ("Wijs eerst een rekening … aan") met `PostEditor.OntbrekendeBtwrekening` en de knop *Naar het rekeningschema* (`BoekhoudingViewModel.NaarRekeningschemaCommand`).
+- Bank: `Boekingsregel.BtwPercentage` (21, 9, 0 of leeg; migratie `BtwOpBoekingsregel`). `Bankmutatie.MaakPost` splitst het bankbedrag (incl. btw) in grondslag en btw-regel. `BankDienst` weigert een regel met tarief zolang de btw-rekening ontbreekt; is de rol later weggehaald, dan maakt de herkenning een post zonder btw.

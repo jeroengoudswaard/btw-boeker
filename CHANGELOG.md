@@ -5,6 +5,12 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 ## [Onuitgebracht]
 
 ### Toegevoegd
+- **Btw invoeren, fase 2** (besluit 50).
+  - In het journaal heeft elke regel een kolom *Btw*: geen, 21 % of 9 % inclusief of exclusief, of 0 %. Bij een opbrengstrekening staat ook *Privégebruik 21 %* in de lijst.
+  - Of het omzet of voorbelasting is, volgt uit de rekening; de btw komt vanzelf op *Te betalen btw* of *Voorbelasting*.
+  - Onder de regel staan de grondslag en de btw. Met *btw aanpassen…* neemt u het btw-bedrag van de factuur over; wijkt dat af van het tarief, dan staat er een ⚠, maar boeken mag.
+  - Is de btw-rekening nog niet aangewezen, dan zegt de editor dat, met een knop naar het rekeningschema.
+  - Een boekingsregel voor de bank kan een tarief krijgen. Het bankbedrag is inclusief btw; de app splitst het in grondslag en btw.
 - **Btw in de boekhouding, fase 1: het datamodel** (besluiten 44–49).
   - Elke boekingsregel kan een btw-code hebben: omzet, voorbelasting of privégebruik, tegen 21, 9 of 0 %. Bestaande boekingen krijgen "geen btw"; er verandert niets aan.
   - Nieuwe rollen in het rekeningschema: *Te betalen btw*, *Voorbelasting*, *Debiteuren* en *Crediteuren*. De rolkeuze toont nu gewone namen.

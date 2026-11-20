@@ -15,7 +15,7 @@ public sealed record BankimportResultaat(int Nieuw, int Herkend, int Werkvoorraa
 
 public sealed record ConceptenGeboekt(int Aantal, IReadOnlyList<string> Fouten);
 
-public sealed record BoekingsregelInvoer(int? Id, string Naam, int RekeningId, BoekingsregelVoorwaarden Voorwaarden, string? Omschrijving, bool IsActief);
+public sealed record BoekingsregelInvoer(int? Id, string Naam, int RekeningId, BoekingsregelVoorwaarden Voorwaarden, string? Omschrijving, bool IsActief, int? BtwPercentage = null);
 
 /// <summary>
 /// Bankimport (CAMT.053) en verwerking: herkende transacties worden conceptposten, de rest blijft in de
@@ -198,17 +198,27 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
         {
             ArgumentNullException.ThrowIfNull(invoer);
             var rekening = stand.Rekeningen.SingleOrDefault(r => r.Id == invoer.RekeningId) ?? throw new InvalidOperationException("De rekening bestaat niet.");
+            if (invoer.BtwPercentage is > 0)
+            {
+                var soort = Domain.Financien.Btw.BtwRegels.SoortVoor(rekening);
+                if (Domain.Financien.Btw.BtwRegels.Btwrekening(stand.Rekeningen, soort) is null)
+                {
+                    var rol = soort == Domain.Financien.Btw.BtwSoort.Voorbelasting ? "Voorbelasting" : "Te betalen btw";
+                    throw new InvalidOperationException($"Wijs eerst een rekening {rol} aan in het rekeningschema; daar komt de btw van deze regel op.");
+                }
+            }
+
             Boekingsregel regel;
             var toevoegen = new List<object>();
             if (invoer.Id is { } id)
             {
                 regel = Regel(stand, id);
-                regel.Wijzig(invoer.Naam, rekening, invoer.Voorwaarden, invoer.Omschrijving);
+                regel.Wijzig(invoer.Naam, rekening, invoer.Voorwaarden, invoer.Omschrijving, invoer.BtwPercentage);
             }
             else
             {
                 var volgorde = stand.Boekingsregels.Select(r => r.Volgorde).DefaultIfEmpty(0).Max() + 1;
-                regel = new Boekingsregel(administratie, invoer.Naam, rekening, invoer.Voorwaarden, invoer.Omschrijving, volgorde);
+                regel = new Boekingsregel(administratie, invoer.Naam, rekening, invoer.Voorwaarden, invoer.Omschrijving, volgorde, invoer.BtwPercentage);
                 toevoegen.Add(regel);
             }
 
@@ -265,7 +275,17 @@ public sealed class BankDienst(IDatabaseSessie sessie, TimeProvider tijd)
             return null;
         }
 
-        var post = mutatie.MaakPost(herkenning.Rekening, herkenning.Omschrijving);
+        // Besluit 50: met een tarief komt de btw op de btw-rekening; ontbreekt die (rol later weggehaald), dan zonder btw.
+        Domain.Financien.Btw.BtwCode? btw = null;
+        Grootboekrekening? btwrekening = null;
+        if (herkenning.BtwPercentage is { } percentage)
+        {
+            var soort = Domain.Financien.Btw.BtwRegels.SoortVoor(herkenning.Rekening);
+            btwrekening = Domain.Financien.Btw.BtwRegels.Btwrekening(stand.Rekeningen, soort);
+            btw = percentage == 0 || btwrekening is not null ? new Domain.Financien.Btw.BtwCode(soort, percentage) : null;
+        }
+
+        var post = mutatie.MaakPost(herkenning.Rekening, herkenning.Omschrijving, btw, btwrekening);
         mutatie.Koppel(post);
         toevoegen.Add(post);
         return post;

@@ -178,6 +178,9 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                     b.Property<long?>("BedragVan")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("BtwPercentage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsActief")
                         .HasColumnType("INTEGER");
 

@@ -46,3 +46,28 @@ public readonly record struct BtwCode
 
     public bool HeeftBtw => Soort != BtwSoort.Geen;
 }
+
+/// <summary>Besluit 50: welke soort btw bij een rekening hoort en op welke btw-rekening het btw-bedrag komt.</summary>
+public static class BtwRegels
+{
+    /// <summary>Baten is omzet; lasten en balans is voorbelasting.</summary>
+    public static BtwSoort SoortVoor(Boekhouding.Grootboekrekening rekening)
+    {
+        ArgumentNullException.ThrowIfNull(rekening);
+        return rekening.Soort == Boekhouding.RekeningSoort.Resultaat && rekening.Kant == Boekhouding.ResultaatKant.Baten
+            ? BtwSoort.Omzet
+            : BtwSoort.Voorbelasting;
+    }
+
+    /// <summary>De rol van de btw-rekening: voorbelasting, of te betalen btw bij omzet en privégebruik.</summary>
+    public static Boekhouding.RekeningRol RolVoor(BtwSoort soort) =>
+        soort == BtwSoort.Voorbelasting ? Boekhouding.RekeningRol.Voorbelasting : Boekhouding.RekeningRol.TeBetalenBtw;
+
+    /// <summary>De actieve rekening met die rol, of <c>null</c> als er geen is aangewezen.</summary>
+    public static Boekhouding.Grootboekrekening? Btwrekening(IEnumerable<Boekhouding.Grootboekrekening> rekeningen, BtwSoort soort)
+    {
+        ArgumentNullException.ThrowIfNull(rekeningen);
+        var rol = RolVoor(soort);
+        return rekeningen.FirstOrDefault(r => r.Rol == rol && r.IsActief);
+    }
+}

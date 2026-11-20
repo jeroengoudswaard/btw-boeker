@@ -46,6 +46,34 @@ public class BankTests
         Assert.Equal("Energie BV · Factuur 2026-09", bij.Omschrijving);
     }
 
+    /// <summary>Besluit 50: met een tarief splitst de bankpost in grondslag en btw; het bankbedrag is inclusief btw.</summary>
+    [Fact]
+    public void Met_btw_splitst_de_bankpost_in_grondslag_en_btw()
+    {
+        var voorbelasting = new Grootboekrekening(Adm, 1520, "Voorbelasting", RekeningSoort.Balans, null, RekeningRol.Voorbelasting);
+        var code = new Domain.Financien.Btw.BtwCode(Domain.Financien.Btw.BtwSoort.Voorbelasting, 21);
+        var af = Mutatie(centen: 1210);
+
+        var post = af.MaakPost(Energie, "Energie", code, voorbelasting);
+
+        Assert.Equal([-1210L, 1000L, 210L], post.Regels.Select(r => r.Saldo));
+        Assert.Equal(code, post.Regels.Single(r => ReferenceEquals(r.Rekening, Energie)).Btw);
+        Assert.Equal(code, post.Regels.Single(r => ReferenceEquals(r.Rekening, voorbelasting)).Btw);
+        Assert.Empty(post.Controleer());
+        Assert.Null(af.ControleerBankregel(post));
+    }
+
+    [Fact]
+    public void Een_boekingsregel_bewaart_het_tarief()
+    {
+        var regel = new Boekingsregel(Adm, "Energie", Energie, new BoekingsregelVoorwaarden(NaamBevat: "energie"), btwPercentage: 21);
+
+        Assert.Equal(21, regel.BtwPercentage);
+        Assert.Throws<ArgumentOutOfRangeException>(() => regel.Wijzig("Energie", Energie, regel.Voorwaarden, null, btwPercentage: 6));
+        regel.Wijzig("Energie", Energie, regel.Voorwaarden, null);
+        Assert.Null(regel.BtwPercentage);
+    }
+
     [Fact]
     public void Gewijzigde_bankregel_wordt_gesignaleerd()
     {

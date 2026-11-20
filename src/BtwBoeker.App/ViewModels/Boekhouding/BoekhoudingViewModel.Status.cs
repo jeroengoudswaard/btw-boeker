@@ -50,6 +50,10 @@ public sealed partial class BoekhoudingViewModel
         }
     }
 
+    /// <summary>Besluit 50: een btw-rekening aanwijzen kan alleen in het rekeningschema.</summary>
+    [RelayCommand]
+    private void NaarRekeningschema() => Subtab = BoekhoudingSubtab.Rekeningschema;
+
     /// <summary>Naar het journaal, eventueel van een bepaald jaar (vanuit Boekjaren of Rapporten).</summary>
     [RelayCommand]
     private void NaarJournaal(int? jaar)

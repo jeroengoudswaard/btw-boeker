@@ -5,7 +5,7 @@ using BtwBoeker.Domain.Financien.Boekhouding;
 namespace BtwBoeker.Application.Bank;
 
 /// <summary>De rekening voor een banktransactie, met de omschrijving van de post en waar het voorstel vandaan komt.</summary>
-public sealed record Herkenning(Grootboekrekening Rekening, string? Omschrijving, string Bron)
+public sealed record Herkenning(Grootboekrekening Rekening, string? Omschrijving, string Bron, int? BtwPercentage = null)
 {
 }
 
@@ -29,6 +29,6 @@ public static class Bankherkenning
         var regel = stand.Boekingsregels
             .OrderBy(r => r.Volgorde).ThenBy(r => r.Id)
             .FirstOrDefault(r => r.Rekening.IsActief && r.Past(mutatie));
-        return regel is null ? null : new Herkenning(regel.Rekening, regel.Omschrijving, regel.Naam);
+        return regel is null ? null : new Herkenning(regel.Rekening, regel.Omschrijving, regel.Naam, regel.BtwPercentage);
     }
 }

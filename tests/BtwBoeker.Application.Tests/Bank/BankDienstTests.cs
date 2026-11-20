@@ -157,6 +157,31 @@ public sealed class BankDienstTests : IAsyncDisposable
         Assert.Single(_data.Boekingsregels);
     }
 
+    /// <summary>Besluit 50: een boekingsregel met een tarief maakt een concept met grondslag, btw en bank.</summary>
+    [Fact]
+    public async Task Een_regel_met_btw_maakt_een_concept_met_voorbelasting()
+    {
+        var voorbelasting = _data.Rekening(1520, "Voorbelasting", RekeningSoort.Balans, null, RekeningRol.Voorbelasting);
+        await _bank.BewaarRegelAsync(Adm, new BoekingsregelInvoer(null, "Energie", _data.Energie.Id, new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true, BtwPercentage: 21));
+
+        await ImporteerAsync(Bestand(Energie));
+
+        var post = _data.Posten.Single(p => p.Id == _data.Bankmutaties.Single().PostId);
+        Assert.Equal(-4500, post.Regels.Single(r => r.Rekening == _data.Bank).Saldo);
+        Assert.Equal(3719, post.Regels.Single(r => r.Rekening == _data.Energie).Saldo);
+        Assert.Equal(781, post.Regels.Single(r => r.Rekening == voorbelasting).Saldo);
+        Assert.Equal(new Domain.Financien.Btw.BtwCode(Domain.Financien.Btw.BtwSoort.Voorbelasting, 21), post.Regels.Single(r => r.Rekening == _data.Energie).Btw);
+    }
+
+    [Fact]
+    public async Task Een_regel_met_btw_kan_niet_zonder_btw_rekening()
+    {
+        var fout = await Assert.ThrowsAsync<InvalidOperationException>(() => _bank.BewaarRegelAsync(Adm,
+            new BoekingsregelInvoer(null, "Energie", _data.Energie.Id, new BoekingsregelVoorwaarden(NaamBevat: "energie"), null, true, BtwPercentage: 21)));
+
+        Assert.Contains("Voorbelasting", fout.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Opnieuw_inlezen_vult_batchkenmerk_en_retourreden_aan()
     {

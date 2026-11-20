@@ -188,5 +188,6 @@ public sealed class MigratieTests : IDisposable
 
         Assert.True(await KolomBestaatAsync(nieuw, "Journaalregels", "BtwSoort"));
         Assert.True(await KolomBestaatAsync(nieuw, "Journaalregels", "BtwPercentage"));
+        Assert.True(await KolomBestaatAsync(nieuw, "Boekingsregels", "BtwPercentage")); // besluit 50, migratie BtwOpBoekingsregel
     }
 }

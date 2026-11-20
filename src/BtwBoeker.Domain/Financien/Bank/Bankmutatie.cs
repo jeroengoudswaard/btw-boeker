@@ -128,20 +128,37 @@ public sealed class Bankmutatie
         }
     }
 
-    /// <summary>Een conceptpost met de vaste bankregel en één tegenregel.</summary>
-    public Journaalpost MaakPost(Grootboekrekening tegenrekening, string? omschrijving)
+    /// <summary>
+    /// Een conceptpost met de vaste bankregel en één tegenregel. Met een btw-code (besluit 50) is het bankbedrag inclusief
+    /// btw: de tegenregel krijgt de grondslag en direct erna komt het btw-bedrag op <paramref name="btwrekening"/>.
+    /// </summary>
+    public Journaalpost MaakPost(Grootboekrekening tegenrekening, string? omschrijving, Btw.BtwCode? btw = null, Grootboekrekening? btwrekening = null)
     {
         ArgumentNullException.ThrowIfNull(tegenrekening);
         var tekst = string.IsNullOrWhiteSpace(omschrijving) ? Standaardomschrijving : omschrijving.Trim();
         var post = new Journaalpost(Administratie, Dagboek, Boekdatum, tekst);
         var bank = Dagboek.Rekening!;
-        post.Wijzig(Dagboek, Boekdatum, tekst,
-        [
-            new RegelInvoer(bank, null, IsBij ? Bedrag : Bedrag.Nul, IsBij ? Bedrag.Nul : Bedrag),
-            new RegelInvoer(tegenrekening, null, IsBij ? Bedrag.Nul : Bedrag, IsBij ? Bedrag : Bedrag.Nul),
-        ]);
+        var regels = new List<RegelInvoer> { Kant(bank, Bedrag, bankzijde: true, null) };
+        if (btw is { HeeftBtw: true, Percentage: > 0 } code)
+        {
+            ArgumentNullException.ThrowIfNull(btwrekening);
+            var bedragen = Btw.BtwBerekening.Bereken(Bedrag, code.Percentage, bedragInclusiefBtw: true);
+            regels.Add(Kant(tegenrekening, bedragen.Grondslag, bankzijde: false, code));
+            regels.Add(Kant(btwrekening, bedragen.Btw, bankzijde: false, code));
+        }
+        else
+        {
+            regels.Add(Kant(tegenrekening, Bedrag, bankzijde: false, btw is { HeeftBtw: true } nul ? nul : null));
+        }
+
+        post.Wijzig(Dagboek, Boekdatum, tekst, regels);
         return post;
     }
+
+    private RegelInvoer Kant(Grootboekrekening rekening, Bedrag bedrag, bool bankzijde, Btw.BtwCode? code) =>
+        IsBij == bankzijde
+            ? new RegelInvoer(rekening, null, bedrag, Bedrag.Nul, code)
+            : new RegelInvoer(rekening, null, Bedrag.Nul, bedrag, code);
 
     /// <summary>De bankregel staat vast: de regels op de bankrekening moeten samen het bedrag van de transactie zijn.</summary>
     /// <returns>Een foutmelding, of <c>null</c> als het klopt.</returns>
