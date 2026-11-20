@@ -55,6 +55,16 @@ public sealed class GelijkAanParameterConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
 }
 
+/// <summary>Besluit 49: een rekeningrol als gewone tekst in de rolkeuze.</summary>
+public sealed class RekeningRolNaarTekstConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is RekeningRol rol ? ViewModels.Boekhouding.RekeningRolTekst.Naam(rol) : string.Empty;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 /// <summary>
 /// Een keuzerondje voor een enum: aan als de waarde gelijk is aan de parameter; aanzetten kiest de parameter (besluit 42).
 /// </summary>

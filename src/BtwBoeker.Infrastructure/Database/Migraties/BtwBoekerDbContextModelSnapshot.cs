@@ -178,6 +178,9 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                     b.Property<long?>("BedragVan")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("BtwPercentage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsActief")
                         .HasColumnType("INTEGER");
 
@@ -499,6 +502,16 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("BtwPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("BtwSoort")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.Property<long>("Credit")
                         .HasColumnType("INTEGER");

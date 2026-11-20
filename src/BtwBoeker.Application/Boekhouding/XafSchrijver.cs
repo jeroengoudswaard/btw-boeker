@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using BtwBoeker.Domain.Financien;
 using BtwBoeker.Domain.Financien.Boekhouding;
+using BtwBoeker.Domain.Financien.Btw;
 using BtwBoeker.Domain.Financien.Relaties;
 
 namespace BtwBoeker.Application.Boekhouding;
@@ -47,6 +48,7 @@ public static class XafSchrijver
             E("taxRegIdent", string.Empty),
             Relaties(stand.Relaties),
             Grootboek(stand.Rekeningen),
+            Btwcodes(stand.Rekeningen, transacties),
             Perioden(invoer.Jaar),
             Openingsbalans(invoer.Jaar, opening),
             Transacties(stand.Dagboeken, transacties));
@@ -199,7 +201,59 @@ public static class XafSchrijver
                 E("effDate", Datum(post.Datum)),
                 E("desc", r.Omschrijving ?? post.Omschrijving),
                 E("amnt", Bedrag(r.Debet.Centen > 0 ? r.Debet.Centen : r.Credit.Centen)),
-                E("amntTp", r.Debet.Centen > 0 ? "D" : "C"))));
+                E("amntTp", r.Debet.Centen > 0 ? "D" : "C"),
+                Btw(r))));
+
+    // ---- Btw (besluit 49, keuze 2A) ---------------------------------------------------------
+
+    /// <summary>De btw-codes die in het jaar zijn gebruikt, met de btw-rekeningen; <c>null</c> zonder btw.</summary>
+    private static XElement? Btwcodes(IReadOnlyList<Grootboekrekening> rekeningen, IEnumerable<Journaalpost> posten)
+    {
+        var codes = posten.SelectMany(p => p.Regels).Where(r => r.Btw.HeeftBtw && !r.IsBtwBedrag).Select(r => r.Btw)
+            .Distinct().OrderBy(c => c.Soort).ThenByDescending(c => c.Percentage).ToList();
+        if (codes.Count == 0)
+        {
+            return null;
+        }
+
+        var teBetalen = rekeningen.FirstOrDefault(r => r.Rol == RekeningRol.TeBetalenBtw);
+        var voorbelasting = rekeningen.FirstOrDefault(r => r.Rol == RekeningRol.Voorbelasting);
+        return new XElement(Ns + "vatCodes", codes.Select(c => new XElement(Ns + "vatCode",
+            E("vatID", BtwId(c)),
+            E("vatDesc", Btwomschrijving(c)),
+            c.Soort != BtwSoort.Voorbelasting && teBetalen is not null ? E("vatToPayAccID", Nummer(teBetalen)) : null,
+            c.Soort == BtwSoort.Voorbelasting && voorbelasting is not null ? E("vatToClaimAccID", Nummer(voorbelasting)) : null)));
+    }
+
+    /// <summary>Het <c>vat</c>-element op een grondslagregel; het btw-bedrag zelf (op de btw-rekening) krijgt er geen.</summary>
+    private static XElement? Btw(Journaalregel regel)
+    {
+        if (!regel.Btw.HeeftBtw || regel.IsBtwBedrag)
+        {
+            return null;
+        }
+
+        var grondslag = regel.Debet.Centen > 0 ? regel.Debet : regel.Credit;
+        return new XElement(Ns + "vat",
+            E("vatID", BtwId(regel.Btw)),
+            E("vatPerc", regel.Btw.Percentage.ToString(CultureInfo.InvariantCulture)),
+            E("vatAmnt", Bedrag(BtwBerekening.Bereken(grondslag, regel.Btw.Percentage, bedragInclusiefBtw: false).Btw.Centen)),
+            E("vatAmntTp", regel.Debet.Centen > 0 ? "D" : "C"));
+    }
+
+    private static string BtwId(BtwCode code) => code.Soort switch
+    {
+        BtwSoort.Omzet => "O",
+        BtwSoort.Voorbelasting => "V",
+        _ => "P",
+    } + code.Percentage.ToString(CultureInfo.InvariantCulture);
+
+    private static string Btwomschrijving(BtwCode code) => code.Soort switch
+    {
+        BtwSoort.Omzet => "Omzet",
+        BtwSoort.Voorbelasting => "Voorbelasting",
+        _ => "Privégebruik",
+    } + " " + code.Percentage.ToString(CultureInfo.InvariantCulture) + " %";
 
     // ---- Hulpjes ----------------------------------------------------------------------------
 

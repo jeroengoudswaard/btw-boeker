@@ -56,8 +56,18 @@ public enum Voorwaarde
 }
 
 /// <summary>Eén boekingsregel in het subtabblad Boekingsregels; een nieuwe regel heeft nog geen Id.</summary>
+/// <summary>Besluit 50: het btw-tarief van een boekingsregel; het bankbedrag is altijd inclusief btw.</summary>
+public sealed record Btwtarief(string Tekst, int? Percentage)
+{
+    public override string ToString() => Tekst;
+}
+
 public sealed partial class BoekingsregelRegel : ObservableObject
 {
+    /// <summary>De keuzes voor <see cref="GekozenBtwtarief"/>.</summary>
+    public static IReadOnlyList<Btwtarief> Btwtarieven { get; } =
+        [new("Geen btw", null), new("21 %", 21), new("9 %", 9), new("0 %", 0)];
+
     private static readonly string[] Afgeleid =
     [
         nameof(Wanneer), nameof(Waarheen), nameof(ToeTeVoegenVoorwaarden), nameof(IsTegenIbanZichtbaar), nameof(IsNaamBevatZichtbaar),
@@ -84,6 +94,7 @@ public sealed partial class BoekingsregelRegel : ObservableObject
         GekozenRekening = rekening;
         Omschrijving = regel?.Omschrijving;
         IsActief = regel?.IsActief ?? true;
+        GekozenBtwtarief = Btwtarieven.FirstOrDefault(t => t.Percentage == regel?.BtwPercentage) ?? Btwtarieven[0];
         _origineel = regel is null ? string.Empty : Momentopname();
     }
 
@@ -143,6 +154,10 @@ public sealed partial class BoekingsregelRegel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsGewijzigd))]
     public partial bool IsActief { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGewijzigd), nameof(Fout), nameof(Waarheen))]
+    public partial Btwtarief GekozenBtwtarief { get; set; } = new("Geen btw", null);
+
     public bool IsGewijzigd => IsNieuw || !string.Equals(Momentopname(), _origineel, StringComparison.Ordinal);
 
     public string? Fout =>
@@ -151,7 +166,25 @@ public sealed partial class BoekingsregelRegel : ObservableObject
         : Voorwaarden.IsLeeg ? "Geef minstens één voorwaarde."
         : Voorwaarden is { BedragVan: { } van, BedragTot: { } tot } && van > tot ? "Het bedrag 'van' is groter dan 'tot'."
         : !string.IsNullOrWhiteSpace(TegenIban) && !Iban.Maak(TegenIban).ControlegetalGeldig ? "Het tegen-IBAN klopt niet."
+        : GekozenBtwtarief.Percentage is > 0 && OntbrekendeBtwrol is { } rol ? $"Wijs eerst een rekening {rol} aan in het rekeningschema."
         : null;
+
+    /// <summary>Besluit 50: de rol van de btw-rekening die voor dit tarief nog ontbreekt, of <c>null</c>.</summary>
+    private string? OntbrekendeBtwrol
+    {
+        get
+        {
+            if (GekozenRekening is null)
+            {
+                return null;
+            }
+
+            var soort = Domain.Financien.Btw.BtwRegels.SoortVoor(GekozenRekening);
+            return Domain.Financien.Btw.BtwRegels.Btwrekening(Rekeningen, soort) is null
+                ? RekeningRolTekst.Naam(Domain.Financien.Btw.BtwRegels.RolVoor(soort))
+                : null;
+        }
+    }
 
     // ---- Lijst en detail (besluit 38) ------------------------------------------------------------
 
@@ -204,7 +237,8 @@ public sealed partial class BoekingsregelRegel : ObservableObject
     }
 
     /// <summary>In de lijst: de rekening waar de transactie heen gaat.</summary>
-    public string Waarheen => GekozenRekening is { } rekening ? $"→ {rekening}" : "→ nog geen rekening";
+    public string Waarheen => (GekozenRekening is { } rekening ? $"→ {rekening}" : "→ nog geen rekening")
+        + (GekozenBtwtarief.Percentage is { } percentage ? $" · {percentage} % btw" : string.Empty);
 
     public bool IsTegenIbanZichtbaar => !string.IsNullOrWhiteSpace(TegenIban) || _toegevoegd.Contains(Voorwaarde.TegenIban);
 
@@ -264,7 +298,7 @@ public sealed partial class BoekingsregelRegel : ObservableObject
     internal BoekingsregelVoorwaarden Voorwaarden => new(
         Leeg(TegenIban), Leeg(NaamBevat), Leeg(OmschrijvingBevat), Richting, Lees(BedragVanTekst), Lees(BedragTotTekst), Leeg(Transactiecode));
 
-    internal BoekingsregelInvoer Invoer => new(Id, Naam, GekozenRekening!.Id, Voorwaarden, Leeg(Omschrijving), IsActief);
+    internal BoekingsregelInvoer Invoer => new(Id, Naam, GekozenRekening!.Id, Voorwaarden, Leeg(Omschrijving), IsActief, GekozenBtwtarief.Percentage);
 
     private static string? Leeg(string? tekst) => string.IsNullOrWhiteSpace(tekst) ? null : tekst.Trim();
 
@@ -273,5 +307,5 @@ public sealed partial class BoekingsregelRegel : ObservableObject
     private static Bedrag? Lees(string tekst) => !string.IsNullOrWhiteSpace(tekst) && Bedrag.TryParse(tekst, out var b) ? b : null;
 
     private string Momentopname() => string.Join('|', Naam, TegenIban, NaamBevat, OmschrijvingBevat, Richting, BedragVanTekst, BedragTotTekst,
-        Transactiecode, GekozenRekening?.Id, Omschrijving, IsActief);
+        Transactiecode, GekozenRekening?.Id, Omschrijving, IsActief, GekozenBtwtarief.Percentage);
 }

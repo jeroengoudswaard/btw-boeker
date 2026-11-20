@@ -39,6 +39,42 @@ public class XafSchrijverTests
         Assert.Equal("BTW-Boeker voorbeeld", Tekst(Lees(resultaat).Element(X + "company")!, "companyName"));
     }
 
+    /// <summary>
+    /// Besluit 49 (keuze 2A): de btw per regel gaat mee in de auditfile, als <c>vatCodes</c> bij het bedrijf en een
+    /// <c>vat</c>-element op de grondslagregel; het bestand blijft geldig volgens het schema.
+    /// </summary>
+    [Fact]
+    public void De_btw_per_regel_gaat_mee_in_de_auditfile()
+    {
+        var data = new BoekhoudingTestdata();
+        var voorbelasting = data.Rekening(1520, "Voorbelasting", RekeningSoort.Balans, null, RekeningRol.Voorbelasting);
+        data.Rekening(1530, "Te betalen btw", RekeningSoort.Balans, null, RekeningRol.TeBetalenBtw);
+        var code = new Domain.Financien.Btw.BtwCode(Domain.Financien.Btw.BtwSoort.Voorbelasting, 21);
+        var post = new Journaalpost(Domain.Administraties.AdministratieSoort.Standaard, data.Memoriaal, new DateOnly(2026, 11, 2), "Energie november");
+        post.Wijzig(data.Memoriaal, post.Datum, post.Omschrijving,
+        [
+            new RegelInvoer(data.Energie, null, new Bedrag(865), Bedrag.Nul, code),
+            new RegelInvoer(voorbelasting, null, new Bedrag(182), Bedrag.Nul, code),
+            new RegelInvoer(data.Bank, null, Bedrag.Nul, new Bedrag(1047)),
+        ]);
+        post.Boek(1, new DateTime(2026, 11, 2, 12, 0, 0, DateTimeKind.Utc));
+        data.Posten.Add(post);
+
+        var resultaat = Schrijf(data);
+
+        Assert.Empty(XafSchrijver.Valideer(resultaat.Inhoud));
+        var btwcode = Assert.Single(Lees(resultaat).Descendants(X + "vatCode"));
+        Assert.Equal("V21", Tekst(btwcode, "vatID"));
+        Assert.Equal("1520", Tekst(btwcode, "vatToClaimAccID"));
+        var regels = Lees(resultaat).Descendants(X + "trLine").ToList();
+        var vat = Assert.Single(regels.Single(r => Tekst(r, "accID") == "4115").Elements(X + "vat"));
+        Assert.Equal("V21", Tekst(vat, "vatID"));
+        Assert.Equal("21", Tekst(vat, "vatPerc"));
+        Assert.Equal("1.82", Tekst(vat, "vatAmnt"));
+        Assert.Equal("D", Tekst(vat, "vatAmntTp"));
+        Assert.Empty(regels.Single(r => Tekst(r, "accID") == "1520").Elements(X + "vat")); // het btw-bedrag zelf telt niet dubbel
+    }
+
     [Fact]
     public void Alleen_geboekte_posten_van_het_boekjaar_met_kloppende_totalen()
     {

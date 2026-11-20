@@ -172,6 +172,11 @@
                                     </TextBlock>
                                     <TextBlock Text="{Binding Boekmelding}" Style="{StaticResource Foutmelding}" Margin="0,4,0,0" AutomationProperties.AutomationId="PostBoekmelding"
                                                Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                    <!-- Besluit 50: zonder btw-rekening één knop naar wat eerst moet (besluit 40). -->
+                                    <Button Content="Naar het rekeningschema" Style="{StaticResource Linkknop}" HorizontalAlignment="Left"
+                                            Command="{Binding DataContext.NaarRekeningschemaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Visibility="{Binding OntbrekendeBtwrekening, Converter={StaticResource NietNullNaarZichtbaar}}"
+                                            AutomationProperties.AutomationId="PostNaarRekeningschema" />
 
                                     <!-- ===== Bijlagen: één knop, plus slepen ===== -->
                                     <tg:Groepspaneel Margin="0,16,0,0" AllowDrop="True" Background="Transparent" DragOver="Bijlagen_DragOver" Drop="Postbijlagen_Drop"
@@ -246,6 +251,8 @@
                                                     <TextBlock Text="{Binding GekozenRekening}" TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Text="{Binding Omschrijving}" Style="{StaticResource Toelichting}" TextTrimming="CharacterEllipsis"
                                                                Visibility="{Binding Omschrijving, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                                    <TextBlock Text="{Binding Onderregel}" Style="{StaticResource Toelichting}" TextWrapping="Wrap"
+                                                               Visibility="{Binding Onderregel, Converter={StaticResource NietNullNaarZichtbaar}}" />
                                                 </StackPanel>
                                                 <TextBlock Grid.Column="1" Text="{Binding Debettekst}" TextAlignment="Right" />
                                                 <TextBlock Grid.Column="2" Text="{Binding Credittekst}" TextAlignment="Right" />
@@ -255,7 +262,7 @@
                                 </ItemsControl>
 
                                 <DataGrid ItemsSource="{Binding Regels}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
-                                          CanUserSortColumns="False" HeadersVisibility="Column"
+                                          CanUserSortColumns="False" HeadersVisibility="Column" RowDetailsVisibilityMode="Visible"
                                           Visibility="{Binding IsBewerkbaar, Converter={StaticResource BoolNaarZichtbaar}}"
                                           AutomationProperties.Name="Boekingsregels" AutomationProperties.AutomationId="PostRegels">
                                     <DataGrid.Columns>
@@ -289,6 +296,14 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Btw" Width="Auto">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                                    <ComboBox ItemsSource="{Binding Btwkeuzes}" SelectedItem="{Binding GekozenBtw, UpdateSourceTrigger=PropertyChanged}" MinWidth="120"
+                                                              AutomationProperties.Name="Btw" ToolTip="Het tarief, en of het bedrag inclusief of exclusief btw is" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
                                         <DataGridTemplateColumn Width="Auto">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
@@ -300,6 +315,24 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
+                                    <!-- Besluit 50: grondslag en btw klein onder de regel, met btw aanpassen… en een ⚠ bij een afwijking. -->
+                                    <DataGrid.RowDetailsTemplate>
+                                        <DataTemplate DataType="{x:Type vm:PostRegelEditor}">
+                                            <StackPanel Margin="8,0,8,4" Visibility="{Binding Onderregel, Converter={StaticResource NietNullNaarZichtbaar}}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Onderregel}" Style="{StaticResource Toelichting}" VerticalAlignment="Center" />
+                                                    <Button Content="btw aanpassen…" Style="{StaticResource Linkknop}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                            Command="{Binding BtwAanpassenCommand}" ToolTip="Het btw-bedrag van de factuur overnemen"
+                                                            Visibility="{Binding IsBtwAanpassen, Converter={StaticResource OnwaarNaarZichtbaar}}" />
+                                                    <TextBox Text="{Binding Btwtekst, UpdateSourceTrigger=PropertyChanged}" Width="80" Margin="8,0,0,0" TextAlignment="Right"
+                                                             AutomationProperties.Name="Btw-bedrag"
+                                                             Visibility="{Binding IsBtwAanpassen, Converter={StaticResource BoolNaarZichtbaar}}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Btwwaarschuwing}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                                           Visibility="{Binding Btwwaarschuwing, Converter={StaticResource NietNullNaarZichtbaar}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGrid.RowDetailsTemplate>
                                 </DataGrid>
                             </DockPanel>
                         </g:Detailpaneel>
@@ -598,6 +631,11 @@
                                     <Label Content="{DynamicResource T.Label.Rekening}" Target="{Binding ElementName=RegelRekening}" Padding="0,12,0,4" />
                                     <ComboBox x:Name="RegelRekening" ItemsSource="{Binding Rekeningen}" SelectedItem="{Binding GekozenRekening, UpdateSourceTrigger=PropertyChanged}"
                                               IsTextSearchEnabled="True" AutomationProperties.AutomationId="RegelRekening" />
+                                    <!-- Besluit 50: het tarief; het bankbedrag is inclusief btw. -->
+                                    <Label Content="Bt_w" Target="{Binding ElementName=RegelBtw}" Padding="0,12,0,4" />
+                                    <ComboBox x:Name="RegelBtw" Width="160" HorizontalAlignment="Left" ItemsSource="{x:Static vm:BoekingsregelRegel.Btwtarieven}"
+                                              SelectedItem="{Binding GekozenBtwtarief, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.AutomationId="RegelBtw"
+                                              ToolTip="Het bankbedrag is inclusief btw; de app splitst het in grondslag en btw" />
                                     <Label Content="Omschrijving van de _post (leeg = van de bank)" Target="{Binding ElementName=RegelOmschrijving}" Padding="0,12,0,4" />
                                     <TextBox x:Name="RegelOmschrijving" Text="{Binding Omschrijving, UpdateSourceTrigger=PropertyChanged}" />
                                     <CheckBox Content="Ac_tief" ContentTemplate="{StaticResource Toegangstekst}" IsChecked="{Binding IsActief}" Margin="0,12,0,0" />
@@ -805,12 +843,18 @@
                                     <Expander Header="Geavanceerd" Margin="0,16,0,0">
                                         <StackPanel>
                                             <Label Content="_Rol" Target="{Binding ElementName=RekeningRol}" Padding="0,8,0,4" />
-                                            <ComboBox x:Name="RekeningRol" Width="160" HorizontalAlignment="Left"
+                                            <ComboBox x:Name="RekeningRol" Width="240" HorizontalAlignment="Left"
                                                       ItemsSource="{Binding DataContext.Rollen, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                       SelectedItem="{Binding Rol, UpdateSourceTrigger=PropertyChanged}"
-                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Kruisposten: tussenrekening voor overboekingen. Kas: rekening van het kasboek." />
+                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Tussenrekening overboekingen: voor overboekingen tussen eigen rekeningen. Kas: rekening van het kasboek. Te betalen btw en Voorbelasting: de btw-rekeningen. Debiteuren en Crediteuren: wat klanten u en u leveranciers nog moet betalen. Elke rol hoort bij één rekening.">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource Rolnaam}}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
                                             <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,4,0,0"
-                                                       Text="Alleen nodig voor de reserve, de tussenrekening voor overboekingen en de kas." />
+                                                       Text="Alleen nodig voor de reserve, de tussenrekening voor overboekingen, de kas, de btw en de openstaande bedragen van klanten en leveranciers." />
                                         </StackPanel>
                                     </Expander>
                                     <TextBlock Margin="0,16,0,0">

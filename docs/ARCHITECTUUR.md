@@ -250,3 +250,20 @@ CAMT.053 (.001.02/.001.08) ──► Camt053Lezer (pure functie) ──► CamtB
 - De naam wordt bevestigd met `BevestigNaamCommand`, aangeroepen bij `LostFocus` (code-behind) en bij Enter (KeyBinding). De drempel werkt hetzelfde (`BevestigDrempelCommand`, in `BoekhoudingViewModel.Drempel.cs`) en wordt bewaard via `IDatabaseSessie.Administraties`.
 - Thema en weergave op Instellingen binden aan `ShellViewModel.GekozenThema` en `GekozenWeergave`, met de `KeuzeConverter` (ConvertBack geeft de parameter als het rondje aan gaat). Instellen loopt via dezelfde `KiesThema`/`KiesWeergave` als het menu Beeld, dus beide lopen gelijk. Een `Command` op een keuzerondje is vermeden, omdat UI Automation en het toetsenbord die niet aanroepen.
 - **Bewaakt door:** `InstellingenViewModelTests`, `ShellViewModelTests` (sluiten, verlaten, keuzerondjes), `BijlagenViewModelTests` (drempel), `SchilTests.Instellingen_bewaart_direct_en_de_drempel_staat_bij_het_filter` en de UI-test.
+
+## Btw per regel (fase B1; besluit 49)
+
+- `Domain/Financien/Btw/BtwCode`: soort (`Geen`, `Omzet`, `Voorbelasting`, `Privegebruik`) en tarief (21, 9 of 0). `default` is `BtwCode.Geen`.
+- `Journaalregel.Btw` met `IsBtwBedrag`: een regel op een rekening met de rol `TeBetalenBtw` of `Voorbelasting` is het btw-bedrag, elke andere regel met een code de grondslag. Er is geen koppeling tussen de twee regels nodig; de rapporten tellen per soort en tarief.
+- Opslag in twee kolommen van `Journaalregels` (`BtwSoort`, `BtwPercentage`, standaard 0) via private eigenschappen; migratie `BtwPerRegel` voegt alleen kolommen toe.
+- `RegelInvoer` en `RegelInvoerId` hebben een optionele btw-code, zodat bestaande aanroepen ongewijzigd blijven.
+- `RekeningRol` kreeg `TeBetalenBtw`, `Voorbelasting`, `Debiteuren` en `Crediteuren`; zoals de andere rollen verspringt een rol naar de laatst gekozen rekening. `RekeningRolTekst` geeft de namen voor de app.
+- XAF: `vatCodes` (`O21`, `V21`, `P21` enzovoort, met de btw-rekeningen) en een `vat`-element op elke grondslagregel; het btw-bedrag wordt per regel berekend met `BtwBerekening`.
+
+## Btw invoeren (fase B2; besluit 50)
+
+- `BtwRegels` (Domain): `SoortVoor(rekening)` (baten is omzet, lasten en balans is voorbelasting), `RolVoor(soort)` en `Btwrekening(rekeningen, soort)`.
+- Posteditor: `PostRegelEditor` heeft `Btwkeuzes`, `GekozenBtw` (`BtwKeuze`: code en incl./excl.), `Btwtekst` (aangepast btw-bedrag) en rekent `Grondslag`, `BtwBedrag`, `Onderregel` en `Btwwaarschuwing` uit. `Debet` en `Credit` zijn het totaal inclusief btw, zodat het evenwicht klopt. `NaarInvoer()` maakt de grondslagregel en direct erna de btw-regel; bij 0 % of een btw-bedrag van nul komt er geen btw-regel.
+- Laden: `PostEditor.LaadRegels` voegt een grondslagregel en de direct volgende btw-regel met dezelfde code samen. Incl. of excl. volgt uit wat precies uitkomt; anders incl. met een aangepast btw-bedrag.
+- Een ontbrekende btw-rekening is een fout van de regel ("Wijs eerst een rekening … aan") met `PostEditor.OntbrekendeBtwrekening` en de knop *Naar het rekeningschema* (`BoekhoudingViewModel.NaarRekeningschemaCommand`).
+- Bank: `Boekingsregel.BtwPercentage` (21, 9, 0 of leeg; migratie `BtwOpBoekingsregel`). `Bankmutatie.MaakPost` splitst het bankbedrag (incl. btw) in grondslag en btw-regel. `BankDienst` weigert een regel met tarief zolang de btw-rekening ontbreekt; is de rol later weggehaald, dan maakt de herkenning een post zonder btw.

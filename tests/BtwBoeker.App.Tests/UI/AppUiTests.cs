@@ -336,6 +336,18 @@ public sealed class AppUiTests : IDisposable
         Zoek(venster, "PostEditor");
         Zoek(venster, "PostOmschrijving");
         Bewaar(venster, "11-boekhouding-nieuwe-post");
+
+        // Besluit 50: een tarief kiezen geeft de onderregel; zonder btw-rekening een knop naar het rekeningschema.
+        var regels = Zoek(venster, "PostRegels");
+        Retry.WhileNull(() => regels.FindFirstDescendant(c => c.ByName("Btw").And(c.ByControlType(FlaUI.Core.Definitions.ControlType.ComboBox))), Wachttijd)
+            .Result!.AsComboBox().Select("21 % incl.");
+        regels.FindFirstDescendant(c => c.ByName("Debet").And(c.ByControlType(FlaUI.Core.Definitions.ControlType.Edit)))!.AsTextBox().Text = "10,47";
+        Assert.True(Retry.WhileNull(() => regels.FindFirstDescendant(c => c.ByName("grondslag € 8,65 · btw € 1,82 → (nog geen btw-rekening)")), Wachttijd).Result is not null,
+            "De onderregel met grondslag en btw verscheen niet. " + Diagnose(venster));
+        Zoek(venster, "PostNaarRekeningschema");
+        // Weer leeg, zodat afsluiten niet vraagt om de proefpost op te slaan.
+        regels.FindFirstDescendant(c => c.ByName("Debet").And(c.ByControlType(FlaUI.Core.Definitions.ControlType.Edit)))!.AsTextBox().Text = string.Empty;
+        regels.FindFirstDescendant(c => c.ByName("Btw").And(c.ByControlType(FlaUI.Core.Definitions.ControlType.ComboBox)))!.AsComboBox().Select("Geen btw");
         Kies(venster, "Nav_Boekhouding.Bank");
         Zoek(venster, "BankInlezen");
         Bewaar(venster, "13-boekhouding-bank");

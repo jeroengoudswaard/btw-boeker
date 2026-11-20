@@ -32,6 +32,18 @@ public enum RekeningRol
 
     /// <summary>De kasrekening van het kasboek.</summary>
     Kas = 3,
+
+    /// <summary>De af te dragen btw over de omzet en het privégebruik (besluit 46).</summary>
+    TeBetalenBtw = 4,
+
+    /// <summary>De btw op kosten die u terugvraagt (besluit 46).</summary>
+    Voorbelasting = 5,
+
+    /// <summary>Openstaande facturen aan klanten (factuurstelsel, besluit 45).</summary>
+    Debiteuren = 6,
+
+    /// <summary>Openstaande facturen van leveranciers (factuurstelsel, besluit 45).</summary>
+    Crediteuren = 7,
 }
 
 /// <summary>Een groep rekeningen, zoals "Huisvesting"; bepaalt de indeling van balans en W&amp;V.</summary>

@@ -70,7 +70,7 @@ public interface IBoekhoudingRepository
         CancellationToken annulering = default);
 }
 
-public sealed record RegelInvoerId(int RekeningId, string? Omschrijving, Bedrag Debet, Bedrag Credit);
+public sealed record RegelInvoerId(int RekeningId, string? Omschrijving, Bedrag Debet, Bedrag Credit, Domain.Financien.Btw.BtwCode? Btw = null);
 
 public sealed record PostInvoer(Guid? Id, int DagboekId, DateOnly Datum, string Omschrijving, IReadOnlyList<RegelInvoerId> Regels);
 

@@ -40,13 +40,13 @@ public sealed class Boekingsregel
     }
 
     public Boekingsregel(AdministratieSoort administratie, string naam, Grootboekrekening rekening, BoekingsregelVoorwaarden voorwaarden,
-        string? omschrijving = null, int volgorde = 0)
+        string? omschrijving = null, int volgorde = 0, int? btwPercentage = null)
     {
         Naam = null!;
         Rekening = null!;
         Administratie = administratie;
         Volgorde = volgorde;
-        Wijzig(naam, rekening, voorwaarden, omschrijving);
+        Wijzig(naam, rekening, voorwaarden, omschrijving, btwPercentage);
         IsActief = true;
     }
 
@@ -68,13 +68,24 @@ public sealed class Boekingsregel
 
     public bool IsActief { get; private set; }
 
+    /// <summary>
+    /// Besluit 50: het btw-tarief (21, 9 of 0) van wat deze regel boekt; <c>null</c> is geen btw. Het bankbedrag is inclusief
+    /// btw; de soort (omzet of voorbelasting) volgt uit de kant van de rekening.
+    /// </summary>
+    public int? BtwPercentage { get; private set; }
+
     public BoekingsregelVoorwaarden Voorwaarden =>
         new(TegenIban, NaamBevat, OmschrijvingBevat, Richting, BedragVan, BedragTot, Transactiecode);
 
     /// <exception cref="ArgumentException">Geen voorwaarde, of bedrag van is groter dan tot.</exception>
-    public void Wijzig(string naam, Grootboekrekening rekening, BoekingsregelVoorwaarden voorwaarden, string? omschrijving)
+    public void Wijzig(string naam, Grootboekrekening rekening, BoekingsregelVoorwaarden voorwaarden, string? omschrijving, int? btwPercentage = null)
     {
         ArgumentNullException.ThrowIfNull(rekening);
+        if (btwPercentage is { } percentage and not (21 or 9 or 0))
+        {
+            throw new ArgumentOutOfRangeException(nameof(btwPercentage), percentage, "Het btw-tarief is 21, 9 of 0 procent.");
+        }
+
         ArgumentNullException.ThrowIfNull(voorwaarden);
         if (voorwaarden.IsLeeg)
         {
@@ -96,6 +107,7 @@ public sealed class Boekingsregel
         BedragTot = voorwaarden.BedragTot;
         Transactiecode = Leeg(voorwaarden.Transactiecode)?.ToUpperInvariant();
         Omschrijving = Leeg(omschrijving);
+        BtwPercentage = btwPercentage;
     }
 
     public void ZetVolgorde(int volgorde) => Volgorde = volgorde;

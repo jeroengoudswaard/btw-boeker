@@ -77,6 +77,10 @@ internal static class BoekhoudingConfiguratie
             b.Property(x => x.Debet).HasConversion(v => v.Centen, c => new Bedrag(c));
             b.Property(x => x.Credit).HasConversion(v => v.Centen, c => new Bedrag(c));
             b.Ignore(x => x.Saldo);
+            b.Ignore(x => x.Btw);
+            b.Ignore(x => x.IsBtwBedrag);
+            b.Property<Domain.Financien.Btw.BtwSoort>("BtwSoort").HasDefaultValue(Domain.Financien.Btw.BtwSoort.Geen);
+            b.Property<int>("BtwPercentage").HasDefaultValue(0);
         });
 
         ConfigureerBank(modelBuilder);
