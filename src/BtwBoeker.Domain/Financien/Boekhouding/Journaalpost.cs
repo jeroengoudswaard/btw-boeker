@@ -1,5 +1,6 @@
 using System.Globalization;
 using BtwBoeker.Domain.Administraties;
+using BtwBoeker.Domain.Financien.Btw;
 
 namespace BtwBoeker.Domain.Financien.Boekhouding;
 
@@ -20,8 +21,8 @@ public enum PostSoort
     Tegenboeking = 4,
 }
 
-/// <summary>Invoer voor één regel: óf debet óf credit, groter dan nul.</summary>
-public sealed record RegelInvoer(Grootboekrekening Rekening, string? Omschrijving, Bedrag Debet, Bedrag Credit)
+/// <summary>Invoer voor één regel: óf debet óf credit, groter dan nul; zonder btw-code is het "geen btw" (besluit 49).</summary>
+public sealed record RegelInvoer(Grootboekrekening Rekening, string? Omschrijving, Bedrag Debet, Bedrag Credit, BtwCode? Btw = null)
 {
     public void Valideer()
     {
@@ -120,7 +121,7 @@ public sealed class Journaalpost
         Jaar = datum.Year;
         Omschrijving = SchoonOmschrijving(omschrijving);
         _regels.Clear();
-        _regels.AddRange(lijst.Select(r => new Journaalregel(r.Rekening, r.Omschrijving, r.Debet, r.Credit)));
+        _regels.AddRange(lijst.Select(r => new Journaalregel(r.Rekening, r.Omschrijving, r.Debet, r.Credit, r.Btw ?? BtwCode.Geen)));
     }
 
     /// <summary>Redenen waarom de post (nog) niet kan worden geboekt; leeg als alles klopt.</summary>
@@ -152,6 +153,11 @@ public sealed class Journaalpost
             {
                 fouten.Add($"Rekening {rekening} is inactief.");
             }
+        }
+
+        foreach (var regel in _regels.Where(r => r.IsBtwBedrag && !r.Btw.HeeftBtw))
+        {
+            fouten.Add($"De regel op btw-rekening {regel.Rekening} heeft geen btw-code (soort en tarief).");
         }
 
         if (Dagboek.Rekening is { } dagboekrekening && !_regels.Exists(r => ReferenceEquals(r.Rekening, dagboekrekening) || (r.Rekening.Id != 0 && r.Rekening.Id == dagboekrekening.Id)))
@@ -194,7 +200,7 @@ public sealed class Journaalpost
         {
             TegenboekingVan = Id,
         };
-        tegen.Wijzig(Dagboek, datum, tegen.Omschrijving, _regels.Select(r => new RegelInvoer(r.Rekening, r.Omschrijving, r.Credit, r.Debet)));
+        tegen.Wijzig(Dagboek, datum, tegen.Omschrijving, _regels.Select(r => new RegelInvoer(r.Rekening, r.Omschrijving, r.Credit, r.Debet, r.Btw)));
         return tegen;
     }
 
@@ -212,12 +218,14 @@ public sealed class Journaalregel
         Rekening = null!;
     }
 
-    internal Journaalregel(Grootboekrekening rekening, string? omschrijving, Bedrag debet, Bedrag credit)
+    internal Journaalregel(Grootboekrekening rekening, string? omschrijving, Bedrag debet, Bedrag credit, BtwCode btw)
     {
         Rekening = rekening;
         Omschrijving = string.IsNullOrWhiteSpace(omschrijving) ? null : omschrijving.Trim();
         Debet = debet;
         Credit = credit;
+        BtwSoort = btw.Soort;
+        BtwPercentage = btw.Percentage;
     }
 
     public int Id { get; private set; }
@@ -228,4 +236,15 @@ public sealed class Journaalregel
 
     /// <summary>Debet positief, credit negatief.</summary>
     public long Saldo => Debet.Centen - Credit.Centen;
+
+    /// <summary>Besluit 49: de btw-code; op een btw-rekening is dit het btw-bedrag, elders de grondslag.</summary>
+    public BtwCode Btw => BtwSoort == BtwSoort.Geen ? BtwCode.Geen : new BtwCode(BtwSoort, BtwPercentage);
+
+    /// <summary>Een regel op een rekening met de rol <i>Te betalen btw</i> of <i>Voorbelasting</i>: het btw-bedrag zelf.</summary>
+    public bool IsBtwBedrag => Rekening.Rol is RekeningRol.TeBetalenBtw or RekeningRol.Voorbelasting;
+
+    // Opslag van de btw-code in twee kolommen (migratie BtwPerRegel); alleen via de constructor te zetten.
+    private BtwSoort BtwSoort { get; set; }
+
+    private int BtwPercentage { get; set; }
 }

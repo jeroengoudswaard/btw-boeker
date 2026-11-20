@@ -90,6 +90,22 @@ public sealed class BoekhoudingOpslagTests : IAsyncLifetime, IDisposable
         Assert.Equal(0, Grootboek.Saldo(stand, stand.Rekeningen.Single(r => r.Nummer == 4115), 2026));
     }
 
+    /// <summary>Besluit 49 (B1): de btw-code per regel wordt bewaard in de versleutelde database en weer gelezen.</summary>
+    [Fact]
+    public async Task De_btw_code_per_regel_wordt_opgeslagen()
+    {
+        await ImporteerAsync();
+        var stand = await _dienst.LaadAsync(Adm);
+        var code = new Domain.Financien.Btw.BtwCode(Domain.Financien.Btw.BtwSoort.Voorbelasting, 9);
+        var invoer = Invoer(stand, 10900);
+        var id = await _dienst.BewaarConceptAsync(Adm, invoer with { Regels = [invoer.Regels[0] with { Btw = code }, invoer.Regels[1]] });
+
+        stand = await _dienst.LaadAsync(Adm);
+        var post = stand.Posten.Single(p => p.Id == id);
+        Assert.Equal(code, post.Regels.Single(r => r.Rekening.Nummer == 4115).Btw);
+        Assert.Equal(Domain.Financien.Btw.BtwCode.Geen, post.Regels.Single(r => r.Rekening.Nummer == 1100).Btw);
+    }
+
     [Fact]
     public async Task Jaarafsluiting_en_heropenen_worden_opgeslagen()
     {

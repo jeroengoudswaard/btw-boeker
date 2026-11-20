@@ -51,7 +51,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 
 ## Waar staat wat
 
-- `docs/BESLUITEN.md`: alle besluiten (nu t/m 43). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
+- `docs/BESLUITEN.md`: alle besluiten (nu t/m 49). Zoek vóór een ontwerp de besluiten over het onderwerp op; nieuwe besluiten daar toevoegen.
 - `docs/HISTORIE.md`: wat per versie en per stap is gebouwd, getest en uitgebracht, en de planning bij de start.
 - `docs/UX-REVIEW.md`: UX-review ronde 1 en de volgorde van ronde 2.
 - `docs/ARCHITECTUUR.md`, `docs/PUBLICEREN.md`, `README.md` (bouwen, testen, snelheidsmeting), `CHANGELOG.md`.
@@ -70,7 +70,7 @@ Elk featurevoorstel en elk stuk code wordt beoordeeld door deze rollen. Toon hun
 ## Huidige stand (bijwerken na elke sessie)
 
 - **Uitgebracht:** v0.22.0, UX-review ronde 2 stappen 3 t/m 6: lijst en detail, acties volgens status, gewone taal en direct bewaren (2026-11-19, na het zetten van de tag `v0.22.0`).
-- **Klaar, nog niet uitgebracht:** niets; alles staat in `main` en in v0.22.0.
-- **Volgende:** de hulp per onderdeel (besluit 36), de XAF-import (stap 2b, besluit 25, stash op branch `xaf-import`; de besluiten daar krijgen de volgende vrije nummers), met de gemengde betaalrekening (besluit 39) en de btw-integratie (planning stap 3).
+- **Klaar, nog niet uitgebracht:** btw fase B1, het datamodel (besluiten 44–49), branch `btw`; tests zonder UI 603/603 en UI 12/12. De plannen voor btw (B1–B4) en facturen met sjablonen (F1–F5) staan in besluit 44.
+- **Volgende:** btw fase B2 (invoer in de posteditor en de boekingsregels), B3 (maandaangifte) en B4 (btw op facturen herkennen); daarna facturen met sjablonen (F1–F5). Verder de hulp per onderdeel (besluit 36), de XAF-import (stap 2b, besluit 25, stash op branch `xaf-import`; de besluiten daar krijgen de volgende vrije nummers), met de gemengde betaalrekening (besluit 39) en de btw-integratie (planning stap 3).
 - **Nagaan:** de app sloot één keer in Eenvoudig niet binnen de tijd af na het rondkijken, en op 2026-11-18 één keer na `Tellers_en_bankkeuze_volgen_het_regels_toepassen` (de twee volgende UI-tests faalden daardoor mee; los groen); snelheidsmeting en schermafbeeldingen faalden één keer samen in één run.
 - **Later:** Linux via Blazor Server lokaal (besluit 29), eerst een ontwerp.

@@ -172,4 +172,21 @@ public sealed class MigratieTests : IDisposable
         Assert.Equal(2026, jaar.Jaar);
         Assert.True(jaar.IsOpen);
     }
+
+    /// <summary>Besluit 49 (B1): de migratie <i>BtwPerRegel</i> voegt alleen kolommen toe; bestaande regels krijgen "geen btw".</summary>
+    [Fact]
+    public async Task Btw_per_regel_voegt_alleen_kolommen_toe()
+    {
+        await using (var oud = Context())
+        {
+            await oud.GetService<IMigrator>().MigrateAsync("20261111183122_VerwijderAccentkleur");
+            Assert.False(await KolomBestaatAsync(oud, "Journaalregels", "BtwSoort"));
+        }
+
+        await using var nieuw = Context();
+        await nieuw.Database.MigrateAsync();
+
+        Assert.True(await KolomBestaatAsync(nieuw, "Journaalregels", "BtwSoort"));
+        Assert.True(await KolomBestaatAsync(nieuw, "Journaalregels", "BtwPercentage"));
+    }
 }

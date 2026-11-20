@@ -31,7 +31,7 @@ public sealed partial class InrichtRekeningRegel : ObservableObject
     public string Rubriek => Bron.Rubriek ?? string.Empty;
     public bool IsBalans => Bron.Soort == RekeningSoort.Balans;
     public string Soorttekst => IsBalans ? "Balans" : "Resultaat";
-    public string Roltekst => Bron.Rol == RekeningRol.Geen ? string.Empty : Bron.Rol.ToString();
+    public string Roltekst => Bron.Rol == RekeningRol.Geen ? string.Empty : RekeningRolTekst.Naam(Bron.Rol);
 
     /// <summary>De reserverekening is nodig voor de jaarafsluiting en kan niet uit.</summary>
     public bool IsVerplicht => Bron.Rol == RekeningRol.Reserve;

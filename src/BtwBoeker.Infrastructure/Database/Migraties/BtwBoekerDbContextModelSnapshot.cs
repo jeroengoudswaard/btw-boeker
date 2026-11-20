@@ -500,6 +500,16 @@ namespace BtwBoeker.Infrastructure.Database.Migraties
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BtwPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("BtwSoort")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
                     b.Property<long>("Credit")
                         .HasColumnType("INTEGER");
 

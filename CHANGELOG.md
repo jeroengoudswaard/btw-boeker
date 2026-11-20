@@ -4,6 +4,14 @@ De opmaak volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/) en de v
 
 ## [Onuitgebracht]
 
+### Toegevoegd
+- **Btw in de boekhouding, fase 1: het datamodel** (besluiten 44–49).
+  - Elke boekingsregel kan een btw-code hebben: omzet, voorbelasting of privégebruik, tegen 21, 9 of 0 %. Bestaande boekingen krijgen "geen btw"; er verandert niets aan.
+  - Nieuwe rollen in het rekeningschema: *Te betalen btw*, *Voorbelasting*, *Debiteuren* en *Crediteuren*. De rolkeuze toont nu gewone namen.
+  - Een regel op een btw-rekening zonder btw-code kan niet worden geboekt; een tegenboeking neemt de codes over.
+  - De auditfile (XAF) bevat de btw per regel.
+  - De invoer van btw in het journaal volgt in de volgende fase.
+
 ## [0.22.0] - 2026-11-19: Lijst en detail, acties volgens status, gewone taal en direct bewaren
 
 ### Gewijzigd

@@ -805,12 +805,18 @@
                                     <Expander Header="Geavanceerd" Margin="0,16,0,0">
                                         <StackPanel>
                                             <Label Content="_Rol" Target="{Binding ElementName=RekeningRol}" Padding="0,8,0,4" />
-                                            <ComboBox x:Name="RekeningRol" Width="160" HorizontalAlignment="Left"
+                                            <ComboBox x:Name="RekeningRol" Width="240" HorizontalAlignment="Left"
                                                       ItemsSource="{Binding DataContext.Rollen, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                       SelectedItem="{Binding Rol, UpdateSourceTrigger=PropertyChanged}"
-                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Kruisposten: tussenrekening voor overboekingen. Kas: rekening van het kasboek." />
+                                                      ToolTip="Reserve: hierheen gaat het resultaat bij de jaarafsluiting. Tussenrekening overboekingen: voor overboekingen tussen eigen rekeningen. Kas: rekening van het kasboek. Te betalen btw en Voorbelasting: de btw-rekeningen. Debiteuren en Crediteuren: wat klanten u en u leveranciers nog moet betalen. Elke rol hoort bij één rekening.">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource Rolnaam}}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
                                             <TextBlock Style="{StaticResource Toelichting}" TextWrapping="Wrap" Margin="0,4,0,0"
-                                                       Text="Alleen nodig voor de reserve, de tussenrekening voor overboekingen en de kas." />
+                                                       Text="Alleen nodig voor de reserve, de tussenrekening voor overboekingen, de kas, de btw en de openstaande bedragen van klanten en leveranciers." />
                                         </StackPanel>
                                     </Expander>
                                     <TextBlock Margin="0,16,0,0">

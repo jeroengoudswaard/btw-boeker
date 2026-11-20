@@ -163,6 +163,34 @@ public sealed class BoekhoudingDienstTests : IAsyncDisposable
         Assert.Equal(RekeningRol.Reserve, _data.Rekeningen.Single(r => r.Nummer == 650).Rol);
     }
 
+    /// <summary>Besluiten 46 en 49: de rollen voor btw, debiteuren en crediteuren komen elk één keer voor, net als de reserve.</summary>
+    [Theory]
+    [InlineData(RekeningRol.TeBetalenBtw)]
+    [InlineData(RekeningRol.Voorbelasting)]
+    [InlineData(RekeningRol.Debiteuren)]
+    [InlineData(RekeningRol.Crediteuren)]
+    public async Task Rollen_voor_btw_debiteuren_en_crediteuren_komen_een_keer_voor(RekeningRol rol)
+    {
+        await _dienst.BewaarRekeningAsync(Adm, new RekeningInvoer(null, 1500, "Eerste", null, RekeningSoort.Balans, rol, true));
+        await _dienst.BewaarRekeningAsync(Adm, new RekeningInvoer(null, 1501, "Tweede", null, RekeningSoort.Balans, rol, true));
+
+        Assert.Equal(RekeningRol.Geen, _data.Rekeningen.Single(r => r.Nummer == 1500).Rol);
+        Assert.Equal(rol, _data.Rekeningen.Single(r => r.Nummer == 1501).Rol);
+    }
+
+    /// <summary>Besluit 49 (B1): een post via de dienst bewaart de btw-code per regel.</summary>
+    [Fact]
+    public async Task Een_concept_bewaart_de_btw_code_per_regel()
+    {
+        var code = new Domain.Financien.Btw.BtwCode(Domain.Financien.Btw.BtwSoort.Voorbelasting, 21);
+        var id = await _dienst.BewaarConceptAsync(Adm, new PostInvoer(null, _data.Memoriaal.Id, new DateOnly(2026, 5, 1), "Energie mei",
+            [new RegelInvoerId(_data.Energie.Id, null, new Bedrag(10000), Bedrag.Nul, code), new RegelInvoerId(_data.Bank.Id, null, Bedrag.Nul, new Bedrag(10000))]));
+
+        var post = _data.Posten.Single(p => p.Id == id);
+        Assert.Equal(code, post.Regels.Single(r => r.Rekening == _data.Energie).Btw);
+        Assert.Equal(Domain.Financien.Btw.BtwCode.Geen, post.Regels.Single(r => r.Rekening == _data.Bank).Btw);
+    }
+
     [Fact]
     public async Task Soort_wijzigen_kan_niet_als_er_boekingen_zijn()
     {

@@ -399,7 +399,7 @@ public sealed class BoekhoudingDienst(IDatabaseSessie sessie, TimeProvider tijd)
         var dagboek = stand.Dagboeken.SingleOrDefault(d => d.Id == invoer.DagboekId) ?? throw new InvalidOperationException("Het dagboek bestaat niet.");
         var regels = invoer.Regels.Select(r => new RegelInvoer(
             stand.Rekeningen.SingleOrDefault(g => g.Id == r.RekeningId) ?? throw new InvalidOperationException("Een rekening bestaat niet."),
-            r.Omschrijving, r.Debet, r.Credit)).ToList();
+            r.Omschrijving, r.Debet, r.Credit, r.Btw)).ToList();
 
         if (invoer.Id is { } id)
         {
